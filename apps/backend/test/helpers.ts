@@ -69,3 +69,11 @@ export async function registerVerifiedUser(
 export function auth(token: string) {
   return { Authorization: `Bearer ${token}` };
 }
+
+/** Bind the app to a random free port (required for Socket.IO tests) and return it. */
+export async function listen(app: INestApplication): Promise<number> {
+  await app.listen(0);
+  const address = app.getHttpServer().address();
+  if (address && typeof address === 'object') return address.port;
+  throw new Error('Could not determine listening port');
+}
