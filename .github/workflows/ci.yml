@@ -56,5 +56,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Test
+      - name: Unit tests
         run: npm run test --if-present
+
+      - name: E2E tests
+        run: npm run test:e2e -w @edubridge/backend
