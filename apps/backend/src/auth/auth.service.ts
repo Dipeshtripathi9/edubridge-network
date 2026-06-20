@@ -48,19 +48,27 @@ export class AuthService {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) throw new BadRequestException('Email already registered');
 
+    // When email delivery isn't available (local/dev), activate immediately so
+    // the signup→login flow works without an unreachable verification link.
+    const autoVerify = this.config.get<boolean>('auth.autoVerifyEmail') === true;
+
     const passwordHash = await this.tokens.hashPassword(dto.password);
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
         passwordHash,
         authProvider: AuthProvider.EMAIL,
-        status: 'PENDING_VERIFICATION',
+        status: autoVerify ? 'ACTIVE' : 'PENDING_VERIFICATION',
+        emailVerifiedAt: autoVerify ? new Date() : null,
         profile: { create: { fullName: dto.fullName } },
       },
     });
 
+    if (autoVerify) {
+      return { user: this.sanitize(user), autoVerified: true, message: 'Account ready' };
+    }
     await this.issueEmailVerification(user.id, user.email!);
-    return { user: this.sanitize(user), message: 'Verification email sent' };
+    return { user: this.sanitize(user), autoVerified: false, message: 'Verification email sent' };
   }
 
   private async issueEmailVerification(userId: string, email: string) {
