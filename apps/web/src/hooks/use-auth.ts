@@ -26,7 +26,7 @@ export function useLogin() {
 export function useSignup() {
   return useMutation({
     mutationFn: (input: { email: string; password: string; fullName: string }) =>
-      api.post<{ user: AuthUser }>('/auth/signup', input, { auth: false }),
+      api.post<{ user: AuthUser; autoVerified: boolean }>('/auth/signup', input, { auth: false }),
   });
 }
 

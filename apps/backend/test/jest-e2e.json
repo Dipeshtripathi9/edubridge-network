@@ -12,6 +12,7 @@
   "testTimeout": 30000,
   "maxWorkers": 1,
   "forceExit": true,
+  "setupFiles": ["<rootDir>/test/jest-setup.ts"],
   "coverageDirectory": "<rootDir>/coverage",
   "coverageReporters": ["text-summary", "lcov"],
   "collectCoverageFrom": [

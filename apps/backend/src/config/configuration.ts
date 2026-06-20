@@ -61,4 +61,10 @@ export default () => ({
     maxFailedLogins: 5,
     lockDurationMs: 15 * 60 * 1000, // 15 min
   },
+
+  auth: {
+    // When true, new email signups are activated immediately (no verification
+    // link needed). Intended for local/dev where SMTP isn't deliverable.
+    autoVerifyEmail: process.env.AUTO_VERIFY_EMAIL === 'true',
+  },
 });

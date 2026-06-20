@@ -8,10 +8,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useSignup } from '@/hooks/use-auth';
+import { api } from '@/lib/api';
+import { useAuthStore, type AuthUser } from '@/stores/auth.store';
+
+interface AuthResult {
+  tokens: { accessToken: string; refreshToken: string };
+  user: AuthUser;
+}
 
 export default function SignupPage() {
   const signup = useSignup();
   const router = useRouter();
+  const setSession = useAuthStore((s) => s.setSession);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +29,23 @@ export default function SignupPage() {
     signup.mutate(
       { fullName, email, password },
       {
-        onSuccess: () => {
+        onSuccess: async (res) => {
+          // If the account is active immediately, log in and go to onboarding.
+          if (res.autoVerified) {
+            try {
+              const result = await api.post<AuthResult>(
+                '/auth/login',
+                { email, password },
+                { auth: false },
+              );
+              setSession(result.tokens.accessToken, result.tokens.refreshToken, result.user);
+              toast.success('Welcome to EduBridge!');
+              router.push('/onboarding');
+              return;
+            } catch {
+              /* fall through to the verify-then-login path */
+            }
+          }
           toast.success('Account created! Check your email to verify, then log in.');
           router.push('/login');
         },
