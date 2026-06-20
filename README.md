@@ -1,6 +1,7 @@
 # EduBridge Network
 
 [![CI](https://github.com/Dipeshtripathi9/edubridge-network/actions/workflows/ci.yml/badge.svg)](https://github.com/Dipeshtripathi9/edubridge-network/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Dipeshtripathi9/edubridge-network/graph/badge.svg)](https://codecov.io/gh/Dipeshtripathi9/edubridge-network)
 
 > **Your Future, Our Network** — a platform for students who are **already in college**: connect with communities, transfer to better colleges, find scholarships & internships, read genuine reviews, share resources, and build reputation.
 

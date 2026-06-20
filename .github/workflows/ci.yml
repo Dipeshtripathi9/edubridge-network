@@ -61,3 +61,20 @@ jobs:
 
       - name: E2E tests
         run: npm run test:e2e -w @edubridge/backend
+
+      # Coverage is reporting only — never gate the build on it (instrumentation
+      # slows the suite and can flake). Best-effort + non-blocking upload.
+      - name: Coverage report
+        if: always()
+        continue-on-error: true
+        run: npm run test:cov -w @edubridge/backend
+
+      - name: Upload coverage to Codecov
+        if: always()
+        continue-on-error: true
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: apps/backend/coverage/lcov.info
+          flags: backend
+          fail_ci_if_error: false

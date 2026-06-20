@@ -1,15 +1,23 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
+  "rootDir": "..",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
-    "^@/(.*)$": "<rootDir>/../src/$1"
+    "^@/(.*)$": "<rootDir>/src/$1"
   },
   "testTimeout": 30000,
   "maxWorkers": 1,
-  "forceExit": true
+  "forceExit": true,
+  "coverageDirectory": "<rootDir>/coverage",
+  "coverageReporters": ["text-summary", "lcov"],
+  "collectCoverageFrom": [
+    "src/**/*.ts",
+    "!src/**/*.module.ts",
+    "!src/**/dto/**",
+    "!src/main.ts"
+  ]
 }
