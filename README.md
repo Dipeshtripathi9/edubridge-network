@@ -1,5 +1,7 @@
 # EduBridge Network
 
+[![CI](https://github.com/Dipeshtripathi9/edubridge-network/actions/workflows/ci.yml/badge.svg)](https://github.com/Dipeshtripathi9/edubridge-network/actions/workflows/ci.yml)
+
 > **Your Future, Our Network** — a platform for students who are **already in college**: connect with communities, transfer to better colleges, find scholarships & internships, read genuine reviews, share resources, and build reputation.
 
 Built as a production-grade, horizontally scalable SaaS designed for **200,000+ users** and **5,000 concurrent** with a **sub-300ms** API target.
