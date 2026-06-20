@@ -207,7 +207,7 @@ export class AuthService {
   async googleAuth(dto: GoogleAuthDto, meta: RequestMeta) {
     const profile = await this.google.verifyIdToken(dto.idToken);
 
-    let account = await this.prisma.oAuthAccount.findUnique({
+    const account = await this.prisma.oAuthAccount.findUnique({
       where: { provider_providerUserId: { provider: 'GOOGLE', providerUserId: profile.providerUserId } },
       include: { user: true },
     });

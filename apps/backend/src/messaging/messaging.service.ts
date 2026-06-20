@@ -68,7 +68,7 @@ export class MessagingService {
     const existing = await this.prisma.chat.findFirst({
       where: { type: 'COMMUNITY', communityId },
     });
-    let chat =
+    const chat =
       existing ??
       (await this.prisma.chat.create({
         data: { type: 'COMMUNITY', communityId },

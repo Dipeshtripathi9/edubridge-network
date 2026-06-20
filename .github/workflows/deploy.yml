@@ -1,20 +1,19 @@
 name: Deploy
 
+# Manual-only until a container registry + AWS credentials are configured as
+# repo secrets (ECR_REGISTRY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY).
+# (Note: the `secrets` context is not allowed in a job-level `if`, so we gate
+# this workflow by making it dispatch-only rather than running on every push.)
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
-
-# NOTE: This is a deployment skeleton. Fill in registry + AWS credentials
-# (store as GitHub secrets) before enabling in production.
-env:
-  AWS_REGION: ap-south-1
-  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }} # e.g. 123456789.dkr.ecr.ap-south-1.amazonaws.com
 
 jobs:
   build-push:
     runs-on: ubuntu-latest
-    if: ${{ secrets.ECR_REGISTRY != '' }}
+    # `secrets` context is only available inside a job, not at workflow level.
+    env:
+      AWS_REGION: ap-south-1
+      ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }} # e.g. 123456789.dkr.ecr.ap-south-1.amazonaws.com
     steps:
       - uses: actions/checkout@v4
 
