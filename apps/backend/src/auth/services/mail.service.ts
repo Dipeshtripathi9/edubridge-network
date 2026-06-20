@@ -27,12 +27,18 @@ export class MailService {
       this.logger.warn(`[DEV MAIL] to=${to} subject="${subject}"\n${html}`);
       return;
     }
-    await this.transporter.sendMail({
-      from: this.config.get<string>('smtp.from'),
-      to,
-      subject,
-      html,
-    });
+    // Email delivery is best-effort: a transient SMTP failure must not break the
+    // calling flow (e.g. signup). In production a queue/worker would retry.
+    try {
+      await this.transporter.sendMail({
+        from: this.config.get<string>('smtp.from'),
+        to,
+        subject,
+        html,
+      });
+    } catch (err) {
+      this.logger.error(`Failed to send "${subject}" to ${to}: ${(err as Error).message}`);
+    }
   }
 
   async sendVerificationEmail(to: string, token: string): Promise<void> {
