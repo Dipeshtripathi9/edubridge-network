@@ -8,7 +8,8 @@ function waitFor<T = unknown>(
   socket: Socket,
   event: string,
   predicate: (p: T) => boolean = () => true,
-  ms = 5000,
+  // Generous so coverage instrumentation (which slows execution) doesn't flake.
+  ms = 12000,
 ): Promise<T | null> {
   return new Promise((resolve) => {
     const timer = setTimeout(() => {
@@ -140,8 +141,8 @@ describe('Messaging / Socket.IO (e2e)', () => {
     // so the client observes a server-initiated disconnect (or connect_error).
     const bad = connect('not-a-real-token');
     const kicked = await Promise.race([
-      waitFor(bad, 'disconnect', () => true, 6000),
-      waitFor(bad, 'connect_error', () => true, 6000),
+      waitFor(bad, 'disconnect', () => true, 12000),
+      waitFor(bad, 'connect_error', () => true, 12000),
     ]);
     expect(kicked).not.toBeNull();
     expect(bad.connected).toBe(false);
