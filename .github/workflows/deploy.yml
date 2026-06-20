@@ -1,0 +1,42 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# NOTE: This is a deployment skeleton. Fill in registry + AWS credentials
+# (store as GitHub secrets) before enabling in production.
+env:
+  AWS_REGION: ap-south-1
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }} # e.g. 123456789.dkr.ecr.ap-south-1.amazonaws.com
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.ECR_REGISTRY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push backend image
+        run: |
+          docker build -t $ECR_REGISTRY/edubridge-backend:${{ github.sha }} -f apps/backend/Dockerfile .
+          docker push $ECR_REGISTRY/edubridge-backend:${{ github.sha }}
+
+      - name: Build & push web image
+        run: |
+          docker build -t $ECR_REGISTRY/edubridge-web:${{ github.sha }} -f apps/web/Dockerfile .
+          docker push $ECR_REGISTRY/edubridge-web:${{ github.sha }}
+
+      # - name: Deploy to ECS / EKS
+      #   run: aws ecs update-service --cluster edubridge --service backend --force-new-deployment

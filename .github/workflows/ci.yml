@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: edubridge
+          POSTGRES_PASSWORD: edubridge
+          POSTGRES_DB: edubridge_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U edubridge"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://edubridge:edubridge@localhost:5432/edubridge_test?schema=public
+      REDIS_URL: redis://localhost:6379
+      JWT_ACCESS_SECRET: ci-access-secret-min-32-chars-aaaaaaaa
+      JWT_REFRESH_SECRET: ci-refresh-secret-min-32-chars-bbbbbbb
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Generate Prisma client
+        run: npm run db:generate -w @edubridge/backend
+
+      - name: Run migrations
+        run: npm run db:migrate:deploy -w @edubridge/backend || npx prisma db push --schema apps/backend/prisma/schema.prisma
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm run test --if-present

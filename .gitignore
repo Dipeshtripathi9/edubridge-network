@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.turbo/
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Testing
+coverage/
+.nyc_output/
+
+# Prisma
+prisma/*.db
+
+# Misc
+*.pem
+.cache/
+tmp/

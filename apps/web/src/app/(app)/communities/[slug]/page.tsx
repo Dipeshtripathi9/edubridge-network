@@ -1,0 +1,90 @@
+'use client';
+
+import { use } from 'react';
+import { Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Composer } from '@/components/composer';
+import { PostCard } from '@/components/post-card';
+import { useCommunity, useJoinCommunity } from '@/hooks/use-communities';
+import { useFeed } from '@/hooks/use-posts';
+
+export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+  const { data: community, isLoading } = useCommunity(slug);
+  const join = useJoinCommunity(slug);
+  const { data, isLoading: feedLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useFeed(slug);
+  const posts = data?.pages.flatMap((p) => p.data) ?? [];
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-4">
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
+  if (!community) {
+    return <p className="py-16 text-center text-muted-foreground">Community not found.</p>;
+  }
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div className="overflow-hidden rounded-lg border border-border">
+        <div className="h-28 bg-gradient-to-r from-primary/30 to-accent" />
+        <div className="flex items-center justify-between p-5">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold">{community.name}</h1>
+              <Badge variant="secondary">
+                {community.type === 'COLLEGE' ? 'College' : community.topic ?? 'Topic'}
+              </Badge>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">{community.description}</p>
+            <span className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+              <Users className="h-3.5 w-3.5" />
+              {community.memberCount.toLocaleString()} members · {community.postCount} posts
+            </span>
+          </div>
+          <Button
+            variant={community.isMember ? 'outline' : 'default'}
+            disabled={join.isPending}
+            onClick={() => join.mutate(!community.isMember)}
+          >
+            {community.isMember ? 'Joined' : 'Join'}
+          </Button>
+        </div>
+      </div>
+
+      <Composer slug={slug} />
+
+      {feedLoading ? (
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-40 w-full" />
+          ))}
+        </div>
+      ) : posts.length === 0 ? (
+        <p className="py-12 text-center text-muted-foreground">
+          No posts yet. Be the first to share something!
+        </p>
+      ) : (
+        <div className="space-y-4">
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} slug={slug} />
+          ))}
+          {hasNextPage && (
+            <div className="flex justify-center">
+              <Button variant="outline" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+                {isFetchingNextPage ? 'Loading…' : 'Load more'}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

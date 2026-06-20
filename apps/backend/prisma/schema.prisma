@@ -1,0 +1,1054 @@
+// ============================================================
+// EduBridge Network — Prisma Schema
+// PostgreSQL. Designed for 200,000+ users.
+// All tables, PKs, FKs, indexes, composite indexes, enums.
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserRole {
+  STUDENT
+  MODERATOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  PENDING_VERIFICATION
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  PHONE
+}
+
+enum CollegeVerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum CommunityType {
+  COLLEGE
+  TOPIC
+}
+
+enum CommunityRole {
+  MEMBER
+  MODERATOR
+  ADMIN
+}
+
+enum CommunityVisibility {
+  PUBLIC
+  PRIVATE
+  RESTRICTED
+}
+
+enum PostType {
+  TEXT
+  POLL
+  RESOURCE
+  LINK
+}
+
+enum PostStatus {
+  PUBLISHED
+  HIDDEN
+  REMOVED
+  PENDING_REVIEW
+}
+
+enum ReactionType {
+  LIKE
+  POST
+  COMMENT
+}
+
+enum OpportunityType {
+  INTERNSHIP
+  SCHOLARSHIP
+  COMPETITION
+  FELLOWSHIP
+  RESEARCH
+}
+
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  IN_PROGRESS
+  ACCEPTED
+  REJECTED
+}
+
+enum ReviewCategory {
+  PLACEMENT
+  HOSTEL
+  FACULTY
+  CAMPUS_LIFE
+}
+
+enum ResourceType {
+  NOTES
+  PDF
+  ROADMAP
+  PLACEMENT_REPORT
+  STUDY_MATERIAL
+}
+
+enum TransferStatus {
+  EXPLORING
+  ELIGIBLE
+  APPLIED
+  COMPLETED
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  MENTION
+  MESSAGE
+  FOLLOW
+  SCHOLARSHIP
+  INTERNSHIP_DEADLINE
+  TRANSFER_UPDATE
+  BADGE_EARNED
+  SYSTEM
+}
+
+enum ReputationAction {
+  POST_CREATED
+  COMMENT_CREATED
+  HELPFUL_ANSWER
+  REVIEW_CREATED
+  RESOURCE_UPLOADED
+  RECEIVED_LIKE
+}
+
+enum BadgeTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum ReportTargetType {
+  POST
+  COMMENT
+  USER
+  REVIEW
+  RESOURCE
+  MESSAGE
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+enum ChatType {
+  DIRECT
+  COMMUNITY
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+enum VerificationPurpose {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
+// ============================================================
+// IDENTITY & AUTH
+// ============================================================
+
+model User {
+  id           String       @id @default(cuid())
+  email        String?      @unique
+  phone        String?      @unique
+  passwordHash String?
+  authProvider AuthProvider @default(EMAIL)
+  role         UserRole     @default(STUDENT)
+  status       UserStatus   @default(PENDING_VERIFICATION)
+
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+
+  // Security / brute force protection
+  failedLoginCount Int       @default(0)
+  lockedUntil      DateTime?
+  lastLoginAt      DateTime?
+
+  // Reputation denormalized for fast leaderboard reads
+  reputationPoints Int @default(0)
+
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  profile            Profile?
+  sessions           Session[]
+  devices            Device[]
+  emailVerifications EmailVerification[]
+  otpVerifications   OtpVerification[]
+  oauthAccounts      OAuthAccount[]
+
+  communityMembers CommunityMember[]
+  posts            Post[]
+  comments         Comment[]
+  reactions        Reaction[]
+  bookmarks        Bookmark[]
+  pollVotes        PollVote[]
+
+  resources         Resource[]
+  resourceDownloads ResourceDownload[]
+  resourceRatings   ResourceRating[]
+  resourceBookmarks ResourceBookmark[]
+
+  opportunities Opportunity[] @relation("OpportunityCreator")
+  applications  Application[]
+
+  transfers   Transfer[]
+  reviews     Review[]
+  reviewVotes ReviewVote[]
+
+  reputationEvents       ReputationEvent[]
+  userBadges             UserBadge[]
+  notifications          Notification[]    @relation("NotificationRecipient")
+  triggeredNotifications Notification[]    @relation("NotificationActor")
+
+  chatParticipants ChatParticipant[]
+  messages         Message[]
+
+  reportsMade    Report[]   @relation("Reporter")
+  reportsAgainst Report[]   @relation("ReportedUser")
+  auditLogs      AuditLog[]
+
+  @@index([status])
+  @@index([role])
+  @@index([reputationPoints(sort: Desc)])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model Profile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fullName  String
+  username  String? @unique
+  avatarUrl String?
+  bio       String?
+
+  collegeId    String?
+  college      College?    @relation(fields: [collegeId], references: [id])
+  universityId String?
+  university   University? @relation(fields: [universityId], references: [id])
+
+  course String?
+  branch String?
+  year   Int?
+  cgpa   Float?
+  state  String?
+  city   String?
+
+  collegeVerification CollegeVerificationStatus @default(UNVERIFIED)
+
+  interests String[] // tags: Placement, DSA, AI, Startups...
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([collegeId])
+  @@index([universityId])
+  @@index([state, city])
+  @@map("profiles")
+}
+
+model OAuthAccount {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider       AuthProvider
+  providerUserId String
+  accessToken    String?
+  refreshToken   String?
+  createdAt      DateTime     @default(now())
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("oauth_accounts")
+}
+
+model Session {
+  id       String  @id @default(cuid())
+  userId   String
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId String?
+  device   Device? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
+  refreshTokenHash String
+  userAgent        String?
+  ipAddress        String?
+  rememberMe       Boolean @default(false)
+
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model Device {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String?
+  platform   String?
+  pushToken  String?
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  sessions Session[]
+
+  @@index([userId])
+  @@map("devices")
+}
+
+model EmailVerification {
+  id        String              @id @default(cuid())
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  purpose   VerificationPurpose @default(EMAIL_VERIFY)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("email_verifications")
+}
+
+model OtpVerification {
+  id        String    @id @default(cuid())
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone     String
+  codeHash  String
+  attempts  Int       @default(0)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([phone])
+  @@index([expiresAt])
+  @@map("otp_verifications")
+}
+
+// ============================================================
+// COLLEGE DATA LAYER (the moat)
+// ============================================================
+
+model University {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  shortName       String?
+  state           String?
+  city            String?
+  type            String? // Private, Central, State, Deemed
+  establishedYear Int?
+  website         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  colleges College[]
+  profiles Profile[]
+
+  @@index([state])
+  @@map("universities")
+}
+
+model College {
+  id           String      @id @default(cuid())
+  name         String
+  slug         String      @unique
+  universityId String?
+  university   University? @relation(fields: [universityId], references: [id])
+
+  state    String?
+  city     String?
+  type     String?
+  logoUrl  String?
+  website  String?
+  nirfRank Int?
+
+  // Aggregated metrics (denormalized for fast reads)
+  avgPlacementPackage Float?
+  reviewCount         Int    @default(0)
+  avgRating           Float  @default(0)
+
+  // Ingestion provenance
+  sourceSystem String? // JoSAA, CSAB, UPTAC, manual
+  externalId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profiles             Profile[]
+  communities          Community[]
+  reviews              Review[]
+  cutoffs              CollegeCutoff[]
+  transfersFrom        Transfer[]            @relation("TransferFromCollege")
+  transfersTo          Transfer[]            @relation("TransferToCollege")
+  transferRequirements TransferRequirement[]
+
+  @@index([state, city])
+  @@index([nirfRank])
+  @@index([avgRating(sort: Desc)])
+  @@index([sourceSystem, externalId])
+  @@map("colleges")
+}
+
+model CollegeCutoff {
+  id           String  @id @default(cuid())
+  collegeId    String
+  college      College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  year         Int
+  round        Int?
+  branch       String
+  category     String // GEN, OBC, SC, ST, EWS
+  quota        String? // AI, HS, OS
+  openingRank  Int?
+  closingRank  Int?
+  sourceSystem String? // JoSAA, CSAB, UPTAC
+
+  createdAt DateTime @default(now())
+
+  @@index([collegeId, year])
+  @@index([branch, category])
+  @@map("college_cutoffs")
+}
+
+// ============================================================
+// MODULE 1: COMMUNITIES
+// ============================================================
+
+model Community {
+  id          String              @id @default(cuid())
+  name        String
+  slug        String              @unique
+  description String?
+  type        CommunityType
+  visibility  CommunityVisibility @default(PUBLIC)
+  iconUrl     String?
+  bannerUrl   String?
+
+  collegeId String?
+  college   College? @relation(fields: [collegeId], references: [id])
+  topic     String? // for TOPIC communities: AI, DSA, Startups...
+
+  memberCount Int @default(0)
+  postCount   Int @default(0)
+
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members CommunityMember[]
+  posts   Post[]
+  chats   Chat[]
+
+  @@index([type])
+  @@index([collegeId])
+  @@index([memberCount(sort: Desc)])
+  @@map("communities")
+}
+
+model CommunityMember {
+  id          String        @id @default(cuid())
+  communityId String
+  community   Community     @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        CommunityRole @default(MEMBER)
+  joinedAt    DateTime      @default(now())
+
+  @@unique([communityId, userId])
+  @@index([userId])
+  @@index([communityId, role])
+  @@map("community_members")
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  type        PostType   @default(TEXT)
+  status      PostStatus @default(PUBLISHED)
+  title       String?
+  body        String
+  attachments String[] // S3 keys
+  linkUrl     String?
+  hashtags    String[]
+  mentions    String[] // userIds
+
+  likeCount    Int @default(0)
+  commentCount Int @default(0)
+  shareCount   Int @default(0)
+  saveCount    Int @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  comments  Comment[]
+  reactions Reaction[]
+  bookmarks Bookmark[]
+  poll      Poll?
+
+  @@index([communityId, createdAt(sort: Desc)])
+  @@index([authorId])
+  @@index([status])
+  @@index([hashtags])
+  @@map("posts")
+}
+
+model Comment {
+  id       String    @id @default(cuid())
+  postId   String
+  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId String
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parentId String?
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+
+  body      String
+  mentions  String[]
+  likeCount Int      @default(0)
+  isHelpful Boolean  @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  reactions Reaction[]
+
+  @@index([postId, createdAt])
+  @@index([authorId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model Reaction {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      ReactionType @default(LIKE)
+  postId    String?
+  post      Post?        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId String?
+  comment   Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+  @@index([postId])
+  @@index([commentId])
+  @@map("reactions")
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@map("bookmarks")
+}
+
+model Poll {
+  id        String       @id @default(cuid())
+  postId    String       @unique
+  post      Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  question  String
+  multiple  Boolean      @default(false)
+  expiresAt DateTime?
+  options   PollOption[]
+  votes     PollVote[]
+  createdAt DateTime     @default(now())
+
+  @@map("polls")
+}
+
+model PollOption {
+  id        String     @id @default(cuid())
+  pollId    String
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  text      String
+  voteCount Int        @default(0)
+  votes     PollVote[]
+
+  @@index([pollId])
+  @@map("poll_options")
+}
+
+model PollVote {
+  id           String     @id @default(cuid())
+  pollId       String
+  poll         Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollOptionId String
+  pollOption   PollOption @relation(fields: [pollOptionId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([pollId, userId, pollOptionId])
+  @@index([pollOptionId])
+  @@map("poll_votes")
+}
+
+// ============================================================
+// MODULE 2: TRANSFER HUB
+// ============================================================
+
+model Transfer {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fromCollegeId String?
+  fromCollege   College? @relation("TransferFromCollege", fields: [fromCollegeId], references: [id])
+  toCollegeId   String?
+  toCollege     College? @relation("TransferToCollege", fields: [toCollegeId], references: [id])
+
+  currentYear   Int?
+  cgpa          Float?
+  branch        String?
+  status        TransferStatus @default(EXPLORING)
+  story         String? // transfer story (optional, shareable)
+  isStoryPublic Boolean        @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([toCollegeId])
+  @@index([status])
+  @@map("transfers")
+}
+
+model TransferRequirement {
+  id             String    @id @default(cuid())
+  collegeId      String
+  college        College   @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  branch         String?
+  minCgpa        Float?
+  minYear        Int?
+  maxYear        Int?
+  creditTransfer Boolean   @default(false)
+  deadline       DateTime?
+  feeAmount      Float?
+  notes          String?
+  sourceSystem   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([collegeId])
+  @@map("transfer_requirements")
+}
+
+// ============================================================
+// MODULE 3: OPPORTUNITY HUB
+// ============================================================
+
+model Opportunity {
+  id           String          @id @default(cuid())
+  type         OpportunityType
+  title        String
+  organization String?
+  description  String
+  location     String?
+  isRemote     Boolean         @default(false)
+  applyUrl     String?
+  tags         String[]
+  eligibility  String?
+  stipend      String?
+  deadline     DateTime?
+
+  createdById  String?
+  createdBy    User?   @relation("OpportunityCreator", fields: [createdById], references: [id])
+  isActive     Boolean @default(true)
+  sourceSystem String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applications Application[]
+
+  @@index([type, deadline])
+  @@index([isActive])
+  @@index([tags])
+  @@map("opportunities")
+}
+
+model Application {
+  id            String            @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity       @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        ApplicationStatus @default(SAVED)
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([opportunityId, userId])
+  @@index([userId, status])
+  @@map("applications")
+}
+
+// ============================================================
+// MODULE 4: COLLEGE REVIEWS
+// ============================================================
+
+model Review {
+  id         String         @id @default(cuid())
+  collegeId  String
+  college    College        @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  authorId   String
+  author     User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category   ReviewCategory
+  rating     Int // 1-5
+  title      String?
+  body       String
+  isVerified Boolean        @default(false) // only verified college students
+  upvotes    Int            @default(0)
+  downvotes  Int            @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  votes ReviewVote[]
+
+  @@unique([collegeId, authorId, category])
+  @@index([collegeId, category])
+  @@index([upvotes(sort: Desc)])
+  @@map("reviews")
+}
+
+model ReviewVote {
+  id        String   @id @default(cuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  value     Int // 1 or -1
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, userId])
+  @@index([reviewId])
+  @@map("review_votes")
+}
+
+// ============================================================
+// MODULE 5: RESOURCE HUB
+// ============================================================
+
+model Resource {
+  id          String       @id @default(cuid())
+  uploaderId  String
+  uploader    User         @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  type        ResourceType
+  title       String
+  description String?
+  fileKey     String // S3 key
+  fileSize    Int?
+  mimeType    String?
+  tags        String[]
+  collegeTag  String?
+  courseTag   String?
+
+  downloadCount Int   @default(0)
+  avgRating     Float @default(0)
+  ratingCount   Int   @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  downloads ResourceDownload[]
+  ratings   ResourceRating[]
+  bookmarks ResourceBookmark[]
+
+  @@index([type])
+  @@index([tags])
+  @@index([avgRating(sort: Desc)])
+  @@map("resources")
+}
+
+model ResourceDownload {
+  id         String   @id @default(cuid())
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([resourceId])
+  @@index([userId])
+  @@map("resource_downloads")
+}
+
+model ResourceRating {
+  id         String   @id @default(cuid())
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  value      Int // 1-5
+  createdAt  DateTime @default(now())
+
+  @@unique([resourceId, userId])
+  @@index([resourceId])
+  @@map("resource_ratings")
+}
+
+model ResourceBookmark {
+  id         String   @id @default(cuid())
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([resourceId, userId])
+  @@index([userId])
+  @@map("resource_bookmarks")
+}
+
+// ============================================================
+// MODULE 6: MESSAGING
+// ============================================================
+
+model Chat {
+  id            String     @id @default(cuid())
+  type          ChatType
+  communityId   String?
+  community     Community? @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  title         String?
+  lastMessageAt DateTime?
+  createdAt     DateTime   @default(now())
+
+  participants ChatParticipant[]
+  messages     Message[]
+
+  @@index([communityId])
+  @@index([lastMessageAt(sort: Desc)])
+  @@map("chats")
+}
+
+model ChatParticipant {
+  id         String    @id @default(cuid())
+  chatId     String
+  chat       Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt DateTime?
+  joinedAt   DateTime  @default(now())
+
+  @@unique([chatId, userId])
+  @@index([userId])
+  @@map("chat_participants")
+}
+
+model Message {
+  id          String        @id @default(cuid())
+  chatId      String
+  chat        Chat          @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body        String
+  attachments String[]
+  status      MessageStatus @default(SENT)
+  createdAt   DateTime      @default(now())
+  deletedAt   DateTime?
+
+  @@index([chatId, createdAt(sort: Desc)])
+  @@index([senderId])
+  @@map("messages")
+}
+
+// ============================================================
+// MODULE 7: REPUTATION & BADGES
+// ============================================================
+
+model ReputationEvent {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    ReputationAction
+  points    Int
+  refType   String? // post, comment, review...
+  refId     String?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("reputation_events")
+}
+
+model Badge {
+  id          String    @id @default(cuid())
+  key         String    @unique // contributor, campus_expert...
+  name        String
+  description String?
+  tier        BadgeTier @default(BRONZE)
+  iconUrl     String?
+  threshold   Int? // points or count needed
+
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  awardedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@map("user_badges")
+}
+
+// ============================================================
+// MODULE 8: NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id          String           @id @default(cuid())
+  recipientId String
+  recipient   User             @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  actorId     String?
+  actor       User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  type        NotificationType
+  title       String
+  body        String?
+  data        Json? // refType, refId, deeplink
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  @@index([recipientId, isRead, createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+// ============================================================
+// ADMIN, MODERATION, AUDIT, RBAC
+// ============================================================
+
+model Report {
+  id             String           @id @default(cuid())
+  reporterId     String
+  reporter       User             @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetType     ReportTargetType
+  targetId       String
+  reportedUserId String?
+  reportedUser   User?            @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: SetNull)
+  reason         String
+  details        String?
+  status         ReportStatus     @default(OPEN)
+  resolvedById   String?
+  resolvedAt     DateTime?
+  createdAt      DateTime         @default(now())
+
+  @@index([status, createdAt])
+  @@index([targetType, targetId])
+  @@map("reports")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action    String // user.ban, community.delete...
+  entity    String?
+  entityId  String?
+  metadata  Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  permissions RolePermission[]
+  createdAt   DateTime         @default(now())
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  key         String           @unique // user.ban, post.remove...
+  description String?
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}

@@ -1,0 +1,36 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { createHash } from 'crypto';
+
+@Injectable()
+export class OtpService {
+  private readonly logger = new Logger(OtpService.name);
+
+  constructor(private readonly config: ConfigService) {}
+
+  generateCode(): string {
+    // 6-digit numeric OTP
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  hashCode(code: string): string {
+    return createHash('sha256').update(code).digest('hex');
+  }
+
+  async sendSms(phone: string, code: string): Promise<void> {
+    const sid = this.config.get<string>('twilio.accountSid');
+    if (!sid) {
+      // Dev fallback when Twilio is not configured.
+      this.logger.warn(`[DEV OTP] phone=${phone} code=${code}`);
+      return;
+    }
+    // Lazy-load twilio only when configured to avoid a hard dependency.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const twilio = require('twilio')(sid, this.config.get('twilio.authToken'));
+    await twilio.messages.create({
+      body: `Your EduBridge verification code is ${code}. It expires in 5 minutes.`,
+      from: this.config.get('twilio.phoneNumber'),
+      to: phone,
+    });
+  }
+}

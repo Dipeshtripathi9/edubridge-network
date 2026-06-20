@@ -1,0 +1,69 @@
+'use client';
+
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { api } from '@/lib/api';
+
+export interface Community {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  type: 'COLLEGE' | 'TOPIC';
+  topic?: string | null;
+  memberCount: number;
+  postCount: number;
+  iconUrl?: string | null;
+  bannerUrl?: string | null;
+  isMember?: boolean;
+}
+
+export function useCommunities(filters: { type?: string; topic?: string; q?: string } = {}) {
+  return useInfiniteQuery({
+    queryKey: ['communities', filters],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => {
+      const params = new URLSearchParams({ limit: '20' });
+      if (filters.type) params.set('type', filters.type);
+      if (filters.topic) params.set('topic', filters.topic);
+      if (filters.q) params.set('q', filters.q);
+      if (pageParam) params.set('cursor', pageParam);
+      return api.paginated<Community>(`/communities?${params.toString()}`);
+    },
+    getNextPageParam: (last) => (last.meta.hasMore ? last.meta.nextCursor ?? undefined : undefined),
+  });
+}
+
+export function useCommunity(slug: string) {
+  return useQuery({
+    queryKey: ['community', slug],
+    queryFn: () => api.get<Community>(`/communities/${slug}`),
+    enabled: !!slug,
+  });
+}
+
+export function useJoinCommunity(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (join: boolean) =>
+      join
+        ? api.post(`/communities/${slug}/join`)
+        : api.delete(`/communities/${slug}/leave`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['community', slug] });
+      qc.invalidateQueries({ queryKey: ['communities'] });
+    },
+  });
+}
+
+export function useCreateCommunity() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: Record<string, unknown>) => api.post<Community>('/communities', input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['communities'] }),
+  });
+}

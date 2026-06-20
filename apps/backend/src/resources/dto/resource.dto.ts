@@ -1,0 +1,108 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ResourceType } from '@prisma/client';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
+import { PaginationDto } from '../../common/dto/pagination.dto';
+
+export class UploadUrlDto {
+  @ApiProperty({ example: 'dsa-notes.pdf' })
+  @IsString()
+  @IsNotEmpty()
+  fileName!: string;
+
+  @ApiProperty({ example: 'application/pdf' })
+  @IsString()
+  @IsNotEmpty()
+  contentType!: string;
+}
+
+export class CreateResourceDto {
+  @ApiProperty({ enum: ResourceType })
+  @IsEnum(ResourceType)
+  type!: ResourceType;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(200)
+  title!: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  description?: string;
+
+  @ApiProperty({ description: 'S3 object key returned from /resources/upload-url' })
+  @IsString()
+  @IsNotEmpty()
+  fileKey!: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  fileSize?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  mimeType?: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  collegeTag?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  courseTag?: string;
+}
+
+export class ResourceQueryDto extends PaginationDto {
+  @ApiPropertyOptional({ enum: ResourceType })
+  @IsOptional()
+  @IsEnum(ResourceType)
+  type?: ResourceType;
+
+  @ApiPropertyOptional({ description: 'Search on title' })
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  tag?: string;
+
+  @ApiPropertyOptional({ enum: ['recent', 'top', 'downloads'], default: 'recent' })
+  @IsOptional()
+  @IsString()
+  sort?: 'recent' | 'top' | 'downloads';
+}
+
+export class RateResourceDto {
+  @ApiProperty({ minimum: 1, maximum: 5 })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  value!: number;
+}

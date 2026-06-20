@@ -1,0 +1,63 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
+import { buildPaginatedResult } from '../common/dto/pagination.dto';
+import { CollegeQueryDto } from './dto/college-query.dto';
+
+@Injectable()
+export class CollegesService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+  ) {}
+
+  async list(query: CollegeQueryDto) {
+    const where: Prisma.CollegeWhereInput = {
+      ...(query.q ? { name: { contains: query.q, mode: 'insensitive' } } : {}),
+      ...(query.state ? { state: { equals: query.state, mode: 'insensitive' } } : {}),
+    };
+
+    const orderBy: Prisma.CollegeOrderByWithRelationInput =
+      query.sort === 'rating'
+        ? { avgRating: 'desc' }
+        : query.sort === 'name'
+          ? { name: 'asc' }
+          : { nirfRank: 'asc' };
+
+    const cacheable = !query.q;
+    const cacheKey = `college:list:${JSON.stringify(query)}`;
+    const fetch = async () => {
+      const items = await this.prisma.college.findMany({
+        where,
+        orderBy,
+        skip: query.skip,
+        take: query.limit,
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          city: true,
+          state: true,
+          nirfRank: true,
+          avgRating: true,
+          reviewCount: true,
+          avgPlacementPackage: true,
+          logoUrl: true,
+        },
+      });
+      return buildPaginatedResult(items, query);
+    };
+
+    return cacheable ? this.redis.remember(cacheKey, 60, fetch) : fetch();
+  }
+
+  async getBySlug(slug: string) {
+    const college = await this.prisma.college.findUnique({
+      where: { slug },
+      include: { university: { select: { id: true, name: true } } },
+    });
+    if (!college) throw new NotFoundException('College not found');
+    return college;
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "edubridge-network",
+  "version": "0.1.0",
+  "private": true,
+  "description": "EduBridge Network — Your Future, Our Network. Platform for students already in college.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "db:generate": "npm run db:generate -w @edubridge/backend",
+    "db:migrate": "npm run db:migrate -w @edubridge/backend",
+    "db:seed": "npm run db:seed -w @edubridge/backend",
+    "db:studio": "npm run db:studio -w @edubridge/backend",
+    "docker:up": "docker compose -f infra/docker-compose.yml up -d",
+    "docker:down": "docker compose -f infra/docker-compose.yml down"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "turbo": "^2.1.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "npm@10.8.2"
+}
