@@ -85,7 +85,7 @@ export class CollegesService {
         }),
         community
           ? this.prisma.communityMember.count({
-              where: { communityId: community.id, role: { in: ['ADMIN', 'MODERATOR'] } },
+              where: { communityId: community.id, role: { not: 'MEMBER' } },
             })
           : Promise.resolve(0),
         community

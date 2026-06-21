@@ -551,6 +551,82 @@ async function main() {
   }
   console.log('✓ badges awarded');
 
+  // ---------- Enriched demo: college-community discussions, heads, stories ----------
+  const collegeCommunities = communities.slice(0, 5); // one per seeded college
+  const alreadyEnriched = await prisma.post.findFirst({
+    where: { communityId: collegeCommunities[0].id },
+  });
+  if (!alreadyEnriched) {
+    const samplePosts = [
+      { kind: 'PLACEMENT_EXPERIENCE', title: 'My SDE-1 offer journey', body: 'Cleared 5 rounds — DSA, system design, 2 tech + HR. Happy to share my prep sheet!' },
+      { kind: 'QUESTION', title: 'Best electives for ML?', body: 'Which 5th-sem electives actually helped you for ML/AI roles?' },
+      { kind: 'DISCUSSION', title: 'Fest season is here 🎉', body: 'Who is performing this year? Drop your picks and volunteer slots.' },
+    ] as const;
+
+    for (let i = 0; i < collegeCommunities.length; i++) {
+      const community = collegeCommunities[i];
+      const author = students[i % students.length];
+      const other = students[(i + 1) % students.length];
+      for (const u of [author, other]) {
+        await prisma.communityMember.upsert({
+          where: { communityId_userId: { communityId: community.id, userId: u.id } },
+          update: {},
+          create: { communityId: community.id, userId: u.id },
+        });
+      }
+      for (let p = 0; p < samplePosts.length; p++) {
+        const sp = samplePosts[(i + p) % samplePosts.length];
+        const newPost = await prisma.post.create({
+          data: {
+            communityId: community.id,
+            authorId: author.id,
+            type: 'TEXT',
+            kind: sp.kind,
+            title: sp.title,
+            body: sp.body,
+            isPinned: p === 0,
+            likeCount: 1,
+            commentCount: 1,
+          },
+        });
+        await prisma.reaction.create({ data: { userId: other.id, postId: newPost.id, type: 'LIKE' } });
+        await prisma.comment.create({ data: { postId: newPost.id, authorId: other.id, body: 'Really helpful, thanks for sharing!' } });
+      }
+      const mc = await prisma.communityMember.count({ where: { communityId: community.id } });
+      await prisma.community.update({
+        where: { id: community.id },
+        data: { postCount: samplePosts.length, memberCount: mc },
+      });
+    }
+
+    // Appoint community heads (named roles)
+    await prisma.communityMember.updateMany({
+      where: { communityId: collegeCommunities[0].id, userId: students[0].id },
+      data: { role: 'CAMPUS_LEAD' },
+    });
+    await prisma.communityMember.updateMany({
+      where: { communityId: collegeCommunities[2].id, userId: students[1].id },
+      data: { role: 'OPPORTUNITY_HEAD' },
+    });
+
+    // More public transfer stories (so college hubs show them)
+    await prisma.transfer.create({
+      data: { userId: students[0].id, fromCollegeId: colleges[1].id, toCollegeId: colleges[0].id, currentYear: 2, cgpa: 8.1, branch: 'Computer Science and Engineering', status: 'COMPLETED', story: 'Transferred into Bennett in 2nd year — credit transfer was smooth and the CSE peer group is strong.', isStoryPublic: true },
+    });
+    await prisma.transfer.create({
+      data: { userId: students[1].id, fromCollegeId: colleges[0].id, toCollegeId: colleges[3].id, currentYear: 2, cgpa: 8.7, branch: 'Computer Science and Engineering', status: 'COMPLETED', story: 'Moved to SRM for research opportunities. Apply early and keep your CGPA above 8.', isStoryPublic: true },
+    });
+
+    // FAQs for more colleges
+    await prisma.collegeFaq.createMany({
+      data: [
+        { collegeId: colleges[2].id, order: 1, question: 'Is the FFCS system hard to navigate?', answer: 'It takes a semester to get used to; seniors help a lot.', createdById: admin.id },
+        { collegeId: colleges[4].id, order: 1, question: 'How active is the placement cell?', answer: 'Very — pre-placement talks start in July, with strong core + IT recruiters.', createdById: admin.id },
+      ],
+    });
+  }
+  console.log('✓ enriched demo content');
+
   console.log('✅ Seed complete.');
   console.log('   Admin login: admin@edubridge.network / Admin@12345');
   console.log('   Student login: aarav@example.com / Student@123');
