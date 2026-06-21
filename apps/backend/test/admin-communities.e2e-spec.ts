@@ -58,6 +58,14 @@ describe('Admin community management (e2e)', () => {
     expect(byUser[monitor.userId]).toBe('MODERATOR');
   });
 
+  it('keeps memberCount in sync after appointments', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`${API}/communities/${slug}`)
+      .expect(200);
+    // admin (creator) + lead + monitor = 3
+    expect(res.body.data.memberCount).toBe(3);
+  });
+
   it('blocks a non-admin from appointing', async () => {
     await request(app.getHttpServer())
       .post(`${API}/communities/${slug}/appoint-head`)

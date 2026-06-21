@@ -44,6 +44,12 @@ export class CommunitiesService {
     if (slug) await this.redis.del(`community:slug:${slug}`);
   }
 
+  /** Recompute the denormalized member count from the source of truth. */
+  private async syncMemberCount(communityId: string) {
+    const count = await this.prisma.communityMember.count({ where: { communityId } });
+    await this.prisma.community.update({ where: { id: communityId }, data: { memberCount: count } });
+  }
+
   async createCommunity(userId: string, dto: CreateCommunityDto) {
     if (dto.type === CommunityType.COLLEGE && !dto.collegeId) {
       throw new BadRequestException('collegeId is required for COLLEGE communities');
@@ -311,6 +317,7 @@ export class CommunitiesService {
       update: {},
       create: { communityId: community.id, userId },
     });
+    await this.syncMemberCount(community.id);
 
     const pending = await this.prisma.communityHeadApplication.findFirst({
       where: { userId, communityId: community.id, status: 'PENDING' },
@@ -364,6 +371,7 @@ export class CommunitiesService {
         update: { role: appRow.requestedRole },
         create: { communityId: appRow.communityId, userId: appRow.userId, role: appRow.requestedRole },
       });
+      await this.syncMemberCount(appRow.communityId);
       await this.invalidate();
     }
     await this.notifications.create({
@@ -392,6 +400,7 @@ export class CommunitiesService {
       update: { role },
       create: { communityId: community.id, userId: user.id, role },
     });
+    await this.syncMemberCount(community.id);
     await this.invalidate(slug);
     await this.notifications.create({
       recipientId: user.id,
