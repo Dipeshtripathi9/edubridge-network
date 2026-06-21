@@ -29,6 +29,7 @@ import {
   useSetUserStatus,
   useVerifyCollege,
 } from '@/hooks/use-admin';
+import { useDecideVerification, useVerificationQueue } from '@/hooks/use-verification';
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
@@ -313,6 +314,55 @@ function BroadcastTab() {
   );
 }
 
+function VerificationTab() {
+  const { data, isLoading } = useVerificationQueue();
+  const decide = useDecideVerification();
+  const rows = data?.data ?? [];
+  if (isLoading) return <Skeleton className="h-40 w-full" />;
+  if (!rows.length) return <p className="py-12 text-center text-muted-foreground">No pending verifications 🎉</p>;
+  return (
+    <div className="space-y-3">
+      {rows.map((r) => (
+        <Card key={r.id}>
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{r.user.profile?.fullName ?? r.user.email}</span>
+                <Badge variant="secondary">{r.method.replace('_', ' ').toLowerCase()}</Badge>
+                {r.college && <span className="text-xs text-muted-foreground">{r.college.name}</span>}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {r.collegeEmail ? `email: ${r.collegeEmail}` : r.evidenceKey ? `doc: ${r.evidenceKey}` : ''}
+                {r.user.profile?.branch ? ` · ${r.user.profile.branch}` : ''}
+                {r.user.profile?.year ? ` · Year ${r.user.profile.year}` : ''}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() =>
+                  decide.mutate({ id: r.id, approve: false }, { onSuccess: () => toast.success('Rejected') })
+                }
+              >
+                Reject
+              </Button>
+              <Button
+                size="sm"
+                onClick={() =>
+                  decide.mutate({ id: r.id, approve: true }, { onSuccess: () => toast.success('Verified') })
+                }
+              >
+                Approve
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const role = useAuthStore((s) => s.user?.role);
@@ -344,6 +394,7 @@ export default function AdminPage() {
             <UsersIcon className="mr-1 h-4 w-4" /> Users
           </TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="verification">Verification</TabsTrigger>
           <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
@@ -354,6 +405,9 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="reports">
           <ReportsTab />
+        </TabsContent>
+        <TabsContent value="verification">
+          <VerificationTab />
         </TabsContent>
         <TabsContent value="broadcast">
           <BroadcastTab />

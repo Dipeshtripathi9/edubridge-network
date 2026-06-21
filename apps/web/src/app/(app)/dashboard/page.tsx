@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Award, TrendingUp } from 'lucide-react';
+import { Award, ShieldCheck, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CommunityCard } from '@/components/community-card';
@@ -22,6 +23,25 @@ export default function DashboardPage() {
         </h1>
         <p className="text-muted-foreground">Here&apos;s what&apos;s happening in your network.</p>
       </div>
+
+      {me?.profile && me.profile.collegeVerification !== 'VERIFIED' && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="h-6 w-6 text-primary" />
+              <div>
+                <p className="font-medium">Get verified</p>
+                <p className="text-sm text-muted-foreground">
+                  Verify your student status to post reviews and unlock perks.
+                </p>
+              </div>
+            </div>
+            <Button asChild size="sm">
+              <Link href="/verify">Verify now</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
