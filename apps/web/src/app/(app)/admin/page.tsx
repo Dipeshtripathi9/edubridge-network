@@ -36,6 +36,8 @@ import {
   useDecideHeadApp,
   useHeadAppQueue,
 } from '@/hooks/use-heads';
+import { useCreateCommunity } from '@/hooks/use-communities';
+import { useColleges } from '@/hooks/use-colleges';
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
@@ -373,16 +375,90 @@ function CommunitiesTab() {
   const { data, isLoading } = useHeadAppQueue();
   const decide = useDecideHeadApp();
   const appoint = useAppointHead();
+  const create = useCreateCommunity();
+  const { data: collegesData } = useColleges({ sort: 'name' });
+  const colleges = collegesData?.pages.flatMap((p) => p.data) ?? [];
   const [slug, setSlug] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<string>('CAMPUS_LEAD');
+  // Create-community form
+  const [cName, setCName] = useState('');
+  const [cType, setCType] = useState<'TOPIC' | 'COLLEGE'>('TOPIC');
+  const [cTopic, setCTopic] = useState('');
+  const [cCollegeId, setCCollegeId] = useState('');
   const apps = data?.data ?? [];
+
+  const submitCreate = () => {
+    if (!cName.trim()) {
+      toast.error('Enter a community name');
+      return;
+    }
+    const payload: Record<string, unknown> = { name: cName, type: cType };
+    if (cType === 'TOPIC') payload.topic = cTopic || cName;
+    else {
+      if (!cCollegeId) {
+        toast.error('Pick a college');
+        return;
+      }
+      payload.collegeId = cCollegeId;
+    }
+    create.mutate(payload, {
+      onSuccess: (community) => {
+        toast.success(`Created "${community.name}" — now appoint its head below`);
+        setSlug(community.slug); // prefill the appoint form
+        setCName('');
+        setCTopic('');
+        setCCollegeId('');
+      },
+      onError: (e) => toast.error((e as Error).message),
+    });
+  };
 
   return (
     <div className="space-y-6">
       <Card className="max-w-xl">
         <CardHeader>
-          <CardTitle className="text-base">Appoint a community head</CardTitle>
+          <CardTitle className="text-base">Create a community</CardTitle>
+          <p className="text-sm text-muted-foreground">Spin up a college or topic community.</p>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Input placeholder="Community name" value={cName} onChange={(e) => setCName(e.target.value)} />
+          <div className="flex gap-2">
+            {(['TOPIC', 'COLLEGE'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setCType(t)}
+                className={`flex-1 rounded-md border px-3 py-1.5 text-sm ${cType === t ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent'}`}
+              >
+                {t === 'TOPIC' ? 'Topic' : 'College'}
+              </button>
+            ))}
+          </div>
+          {cType === 'TOPIC' ? (
+            <Input placeholder="Topic (e.g. AI, DSA)" value={cTopic} onChange={(e) => setCTopic(e.target.value)} />
+          ) : (
+            <select
+              value={cCollegeId}
+              onChange={(e) => setCCollegeId(e.target.value)}
+              className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="">Select a college…</option>
+              {colleges.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          )}
+          <Button disabled={create.isPending} onClick={submitCreate}>
+            Create community
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="max-w-xl">
+        <CardHeader>
+          <CardTitle className="text-base">Appoint a community head / moderator</CardTitle>
           <p className="text-sm text-muted-foreground">Assign a verified student a leadership role.</p>
         </CardHeader>
         <CardContent className="space-y-2">
