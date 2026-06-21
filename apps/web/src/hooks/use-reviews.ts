@@ -69,6 +69,14 @@ export function useCreateReview(collegeId: string) {
   });
 }
 
+export function useVerifyReview(collegeId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<{ isVerified: boolean }>(`/reviews/${id}/verify`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['reviews', collegeId] }),
+  });
+}
+
 export function useVoteReview(collegeId: string) {
   const qc = useQueryClient();
   return useMutation({

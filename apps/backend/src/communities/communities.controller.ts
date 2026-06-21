@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CommunitiesService } from './communities.service';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { CommunityQueryDto } from './dto/query.dto';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { ModerateMemberDto, SetMemberRoleDto } from './dto/moderation.dto';
+import { CurrentUser, JwtUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('communities')
@@ -49,5 +50,27 @@ export class CommunitiesController {
   @ApiOperation({ summary: 'List community members' })
   members(@Param('slug') slug: string, @Query() query: CommunityQueryDto) {
     return this.communities.listMembers(slug, query);
+  }
+
+  @Patch(':slug/members/:userId/role')
+  @ApiOperation({ summary: 'Set a member role (community admin / global admin)' })
+  setRole(
+    @Param('slug') slug: string,
+    @Param('userId') userId: string,
+    @CurrentUser() actor: JwtUser,
+    @Body() dto: SetMemberRoleDto,
+  ) {
+    return this.communities.setMemberRole(slug, actor, userId, dto.role);
+  }
+
+  @Post(':slug/members/:userId/moderate')
+  @ApiOperation({ summary: 'Mute / unmute / ban / unban a member (community mod/admin)' })
+  moderate(
+    @Param('slug') slug: string,
+    @Param('userId') userId: string,
+    @CurrentUser() actor: JwtUser,
+    @Body() dto: ModerateMemberDto,
+  ) {
+    return this.communities.moderateMember(slug, actor, userId, dto.action, dto.minutes);
   }
 }

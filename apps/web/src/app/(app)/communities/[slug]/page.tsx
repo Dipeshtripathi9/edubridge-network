@@ -1,22 +1,32 @@
 'use client';
 
-import { use } from 'react';
-import { Users } from 'lucide-react';
+import { use, useState } from 'react';
+import { Settings, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Composer } from '@/components/composer';
 import { PostCard } from '@/components/post-card';
+import { MemberManager } from '@/components/member-manager';
 import { useCommunity, useJoinCommunity } from '@/hooks/use-communities';
 import { useFeed } from '@/hooks/use-posts';
+import { useAuthStore } from '@/stores/auth.store';
 
 export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { data: community, isLoading } = useCommunity(slug);
   const join = useJoinCommunity(slug);
+  const [showManage, setShowManage] = useState(false);
+  const globalRole = useAuthStore((s) => s.user?.role);
   const { data, isLoading: feedLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useFeed(slug);
   const posts = data?.pages.flatMap((p) => p.data) ?? [];
+  const canModerate =
+    community?.myRole === 'ADMIN' ||
+    community?.myRole === 'MODERATOR' ||
+    globalRole === 'ADMIN' ||
+    globalRole === 'SUPER_ADMIN' ||
+    globalRole === 'MODERATOR';
 
   if (isLoading) {
     return (
@@ -49,15 +59,24 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
               {community.memberCount.toLocaleString()} members · {community.postCount} posts
             </span>
           </div>
-          <Button
-            variant={community.isMember ? 'outline' : 'default'}
-            disabled={join.isPending}
-            onClick={() => join.mutate(!community.isMember)}
-          >
-            {community.isMember ? 'Joined' : 'Join'}
-          </Button>
+          <div className="flex gap-2">
+            {canModerate && (
+              <Button variant="outline" onClick={() => setShowManage((v) => !v)}>
+                <Settings className="h-4 w-4" /> Manage
+              </Button>
+            )}
+            <Button
+              variant={community.isMember ? 'outline' : 'default'}
+              disabled={join.isPending}
+              onClick={() => join.mutate(!community.isMember)}
+            >
+              {community.isMember ? 'Joined' : 'Join'}
+            </Button>
+          </div>
         </div>
       </div>
+
+      {canModerate && showManage && <MemberManager slug={slug} />}
 
       <Composer slug={slug} />
 
@@ -74,7 +93,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} slug={slug} />
+            <PostCard key={post.id} post={post} slug={slug} canModerate={canModerate} />
           ))}
           {hasNextPage && (
             <div className="flex justify-center">

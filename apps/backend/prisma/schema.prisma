@@ -529,6 +529,8 @@ model CommunityMember {
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   role        CommunityRole @default(MEMBER)
   joinedAt    DateTime      @default(now())
+  mutedUntil  DateTime?
+  bannedAt    DateTime?
 
   @@unique([communityId, userId])
   @@index([userId])

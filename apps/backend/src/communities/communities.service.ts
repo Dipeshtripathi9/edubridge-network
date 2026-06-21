@@ -111,13 +111,15 @@ export class CommunitiesService {
     });
 
     let isMember = false;
+    let myRole: string | null = null;
     if (userId) {
       const m = await this.prisma.communityMember.findUnique({
         where: { communityId_userId: { communityId: community.id, userId } },
       });
       isMember = !!m;
+      myRole = m?.role ?? null;
     }
-    return { ...community, isMember };
+    return { ...community, isMember, myRole };
   }
 
   async joinCommunity(userId: string, slug: string) {
@@ -191,5 +193,84 @@ export class CommunitiesService {
     if (!member || member.role === 'MEMBER') {
       throw new ForbiddenException('Moderator privileges required');
     }
+  }
+
+  /** Require global admin/mod OR a community ADMIN (level 'ADMIN') / mod (level 'MOD'). */
+  private async assertCommunityPrivilege(
+    communityId: string,
+    actor: { sub: string; role: string },
+    level: 'ADMIN' | 'MOD',
+  ) {
+    const globalOk =
+      actor.role === 'ADMIN' ||
+      actor.role === 'SUPER_ADMIN' ||
+      (level === 'MOD' && actor.role === 'MODERATOR');
+    if (globalOk) return;
+    const member = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId, userId: actor.sub } },
+    });
+    const ok =
+      level === 'ADMIN' ? member?.role === 'ADMIN' : !!member && member.role !== 'MEMBER';
+    if (!ok) throw new ForbiddenException('Insufficient community privileges');
+  }
+
+  private async resolveMember(slug: string, targetUserId: string) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    const member = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId: community.id, userId: targetUserId } },
+    });
+    if (!member) throw new NotFoundException('Member not found');
+    return { community, member };
+  }
+
+  async setMemberRole(
+    slug: string,
+    actor: { sub: string; role: string },
+    targetUserId: string,
+    role: 'MEMBER' | 'MODERATOR' | 'ADMIN',
+  ) {
+    const { community, member } = await this.resolveMember(slug, targetUserId);
+    await this.assertCommunityPrivilege(community.id, actor, 'ADMIN');
+    const updated = await this.prisma.communityMember.update({
+      where: { id: member.id },
+      data: { role },
+      select: { userId: true, role: true },
+    });
+    await this.invalidate(slug);
+    return updated;
+  }
+
+  async moderateMember(
+    slug: string,
+    actor: { sub: string; role: string },
+    targetUserId: string,
+    action: 'mute' | 'unmute' | 'ban' | 'unban',
+    minutes?: number,
+  ) {
+    if (targetUserId === actor.sub) {
+      throw new ForbiddenException('You cannot moderate yourself');
+    }
+    const { community, member } = await this.resolveMember(slug, targetUserId);
+    await this.assertCommunityPrivilege(community.id, actor, 'MOD');
+    if (member.role === 'ADMIN') {
+      throw new ForbiddenException('Cannot moderate a community admin');
+    }
+
+    const data =
+      action === 'mute'
+        ? { mutedUntil: new Date(Date.now() + (minutes ?? 60) * 60 * 1000) }
+        : action === 'unmute'
+          ? { mutedUntil: null }
+          : action === 'ban'
+            ? { bannedAt: new Date() }
+            : { bannedAt: null };
+
+    const updated = await this.prisma.communityMember.update({
+      where: { id: member.id },
+      data,
+      select: { userId: true, mutedUntil: true, bannedAt: true },
+    });
+    return updated;
   }
 }

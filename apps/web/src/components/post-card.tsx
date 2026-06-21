@@ -1,6 +1,6 @@
 'use client';
 
-import { Bookmark, Flag, Heart, MessageCircle, Share2 } from 'lucide-react';
+import { Bookmark, Flag, Heart, MessageCircle, Pin, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,16 +9,26 @@ import { Badge } from '@/components/ui/badge';
 import { cn, timeAgo } from '@/lib/utils';
 import {
   type Post,
+  usePinPost,
   useToggleBookmark,
   useToggleLike,
   useVotePoll,
 } from '@/hooks/use-posts';
 import { useCreateReport } from '@/hooks/use-admin';
 
-export function PostCard({ post, slug }: { post: Post; slug: string }) {
+export function PostCard({
+  post,
+  slug,
+  canModerate = false,
+}: {
+  post: Post;
+  slug: string;
+  canModerate?: boolean;
+}) {
   const like = useToggleLike(slug);
   const bookmark = useToggleBookmark(slug);
   const vote = useVotePoll(slug);
+  const pin = usePinPost(slug);
   const report = useCreateReport();
 
   const onReport = () => {
@@ -45,11 +55,18 @@ export function PostCard({ post, slug }: { post: Post; slug: string }) {
               <p className="text-sm font-medium">{post.author.profile?.fullName ?? 'Student'}</p>
               <p className="text-xs text-muted-foreground">{timeAgo(post.createdAt)} ago</p>
             </div>
-            {post.type !== 'TEXT' && (
-              <Badge variant="secondary" className="ml-auto capitalize">
-                {post.type.toLowerCase()}
-              </Badge>
-            )}
+            <div className="ml-auto flex items-center gap-1.5">
+              {post.isPinned && (
+                <span className="flex items-center gap-1 text-xs font-medium text-primary">
+                  <Pin className="h-3.5 w-3.5" /> Pinned
+                </span>
+              )}
+              {post.type !== 'TEXT' && (
+                <Badge variant="secondary" className="capitalize">
+                  {post.type.toLowerCase()}
+                </Badge>
+              )}
+            </div>
           </div>
 
           {post.title && <h3 className="mt-3 font-semibold">{post.title}</h3>}
@@ -113,8 +130,18 @@ export function PostCard({ post, slug }: { post: Post; slug: string }) {
               <Share2 className="h-4 w-4" />
               {post.shareCount}
             </span>
+            {canModerate && (
+              <button
+                className={cn('ml-auto flex items-center gap-1.5 hover:text-primary', post.isPinned && 'text-primary')}
+                onClick={() => pin.mutate(post.id)}
+                aria-label="Pin post"
+                title={post.isPinned ? 'Unpin' : 'Pin'}
+              >
+                <Pin className="h-4 w-4" />
+              </button>
+            )}
             <button
-              className="ml-auto flex items-center gap-1.5 hover:text-destructive"
+              className={cn('flex items-center gap-1.5 hover:text-destructive', !canModerate && 'ml-auto')}
               onClick={onReport}
               aria-label="Report post"
             >
