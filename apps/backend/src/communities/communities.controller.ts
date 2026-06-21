@@ -7,6 +7,7 @@ import {
   AppointHeadDto,
   ApplyHeadDto,
   ModerateMemberDto,
+  ResolveCommunityReportDto,
   SetMemberRoleDto,
 } from './dto/moderation.dto';
 import { UserRole } from '@prisma/client';
@@ -96,5 +97,35 @@ export class CommunitiesController {
   @ApiOperation({ summary: 'Appoint a community head by email (admin)' })
   appointHead(@Param('slug') slug: string, @Body() dto: AppointHeadDto) {
     return this.communities.appointHead(slug, dto.email, dto.role);
+  }
+
+  // ---- Head monitoring (community mod/admin or global admin) ----
+  @Get(':slug/activity')
+  @ApiOperation({ summary: 'Recent community activity (heads/mods)' })
+  activity(@Param('slug') slug: string, @CurrentUser() actor: JwtUser, @Query() query: CommunityQueryDto) {
+    return this.communities.getActivity(slug, actor, query);
+  }
+
+  @Get(':slug/reports')
+  @ApiOperation({ summary: 'Open reports for this community (heads/mods)' })
+  reports(@Param('slug') slug: string, @CurrentUser() actor: JwtUser, @Query() query: CommunityQueryDto) {
+    return this.communities.getReports(slug, actor, query);
+  }
+
+  @Post(':slug/reports/:reportId/resolve')
+  @ApiOperation({ summary: 'Resolve / dismiss a community report (heads/mods)' })
+  resolveReport(
+    @Param('slug') slug: string,
+    @Param('reportId') reportId: string,
+    @CurrentUser() actor: JwtUser,
+    @Body() dto: ResolveCommunityReportDto,
+  ) {
+    return this.communities.resolveReport(slug, actor, reportId, dto.status);
+  }
+
+  @Get(':slug/analytics')
+  @ApiOperation({ summary: 'Per-community analytics (heads/mods)' })
+  analytics(@Param('slug') slug: string, @CurrentUser() actor: JwtUser) {
+    return this.communities.getAnalytics(slug, actor);
   }
 }

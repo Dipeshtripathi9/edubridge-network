@@ -38,6 +38,12 @@ export class HeadDecisionDto {
   note?: string;
 }
 
+export class ResolveCommunityReportDto {
+  @ApiProperty({ enum: ['RESOLVED', 'DISMISSED'] })
+  @IsIn(['RESOLVED', 'DISMISSED'])
+  status!: 'RESOLVED' | 'DISMISSED';
+}
+
 export class ModerateMemberDto {
   @ApiProperty({ enum: ['mute', 'unmute', 'ban', 'unban'] })
   @IsIn(['mute', 'unmute', 'ban', 'unban'])
