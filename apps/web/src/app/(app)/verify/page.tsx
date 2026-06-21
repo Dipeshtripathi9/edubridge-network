@@ -132,13 +132,18 @@ export default function VerifyPage() {
 
             {method === 'COLLEGE_EMAIL' ? (
               <Input
+                key="college-email"
                 type="email"
                 placeholder="you@college.edu"
                 value={collegeEmail}
                 onChange={(e) => setCollegeEmail(e.target.value)}
               />
             ) : (
-              <Input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+              <Input
+                key="evidence-file"
+                type="file"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
             )}
 
             <Button onClick={onSubmit} disabled={submit.isPending}>
