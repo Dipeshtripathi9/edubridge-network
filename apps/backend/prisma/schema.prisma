@@ -53,6 +53,9 @@ enum CommunityRole {
   MEMBER
   MODERATOR
   ADMIN
+  CAMPUS_LEAD
+  OPPORTUNITY_HEAD
+  STUDENT_RELATIONS_HEAD
 }
 
 enum CommunityVisibility {
@@ -271,6 +274,7 @@ model User {
   auditLogs      AuditLog[]
 
   verificationRequests VerificationRequest[]
+  headApplications     CommunityHeadApplication[]
 
   @@index([status])
   @@index([role])
@@ -511,14 +515,36 @@ model Community {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members CommunityMember[]
-  posts   Post[]
-  chats   Chat[]
+  members          CommunityMember[]
+  posts            Post[]
+  chats            Chat[]
+  headApplications CommunityHeadApplication[]
 
   @@index([type])
   @@index([collegeId])
   @@index([memberCount(sort: Desc)])
   @@map("communities")
+}
+
+model CommunityHeadApplication {
+  id            String                    @id @default(cuid())
+  userId        String
+  user          User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  communityId   String
+  community     Community                 @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  requestedRole CommunityRole
+  status        VerificationRequestStatus @default(PENDING)
+  pitch         String?
+  note          String?
+  reviewedById  String?
+  reviewedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId])
+  @@map("community_head_applications")
 }
 
 model CommunityMember {

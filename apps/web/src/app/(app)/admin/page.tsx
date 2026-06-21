@@ -30,6 +30,12 @@ import {
   useVerifyCollege,
 } from '@/hooks/use-admin';
 import { useDecideVerification, useVerificationQueue } from '@/hooks/use-verification';
+import {
+  HEAD_ROLES,
+  useAppointHead,
+  useDecideHeadApp,
+  useHeadAppQueue,
+} from '@/hooks/use-heads';
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
@@ -363,6 +369,100 @@ function VerificationTab() {
   );
 }
 
+function CommunitiesTab() {
+  const { data, isLoading } = useHeadAppQueue();
+  const decide = useDecideHeadApp();
+  const appoint = useAppointHead();
+  const [slug, setSlug] = useState('');
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState<string>('CAMPUS_LEAD');
+  const apps = data?.data ?? [];
+
+  return (
+    <div className="space-y-6">
+      <Card className="max-w-xl">
+        <CardHeader>
+          <CardTitle className="text-base">Appoint a community head</CardTitle>
+          <p className="text-sm text-muted-foreground">Assign a verified student a leadership role.</p>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Input placeholder="Community slug (e.g. dsa)" value={slug} onChange={(e) => setSlug(e.target.value)} />
+          <Input placeholder="User email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
+          >
+            {HEAD_ROLES.map((r) => (
+              <option key={r.value} value={r.value}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+          <Button
+            disabled={!slug || !email || appoint.isPending}
+            onClick={() =>
+              appoint.mutate(
+                { slug, email, role },
+                {
+                  onSuccess: () => {
+                    toast.success('Head appointed');
+                    setEmail('');
+                  },
+                  onError: (e) => toast.error((e as Error).message),
+                },
+              )
+            }
+          >
+            Appoint
+          </Button>
+        </CardContent>
+      </Card>
+
+      <div>
+        <h3 className="mb-2 font-semibold">Head applications</h3>
+        {isLoading ? (
+          <Skeleton className="h-32 w-full" />
+        ) : apps.length === 0 ? (
+          <p className="py-8 text-center text-muted-foreground">No pending applications.</p>
+        ) : (
+          <div className="space-y-3">
+            {apps.map((a) => (
+              <Card key={a.id}>
+                <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+                  <div>
+                    <p className="font-medium">
+                      {a.user?.profile?.fullName ?? a.user?.email}{' '}
+                      <Badge variant="secondary">{a.requestedRole.replace(/_/g, ' ').toLowerCase()}</Badge>
+                    </p>
+                    <p className="text-xs text-muted-foreground">{a.community.name}</p>
+                    {a.pitch && <p className="mt-1 text-sm text-muted-foreground">{a.pitch}</p>}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => decide.mutate({ id: a.id, approve: false }, { onSuccess: () => toast.success('Rejected') })}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => decide.mutate({ id: a.id, approve: true }, { onSuccess: () => toast.success('Approved') })}
+                    >
+                      Approve
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const role = useAuthStore((s) => s.user?.role);
@@ -395,6 +495,7 @@ export default function AdminPage() {
           </TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="verification">Verification</TabsTrigger>
+          <TabsTrigger value="communities">Communities</TabsTrigger>
           <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
@@ -408,6 +509,9 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="verification">
           <VerificationTab />
+        </TabsContent>
+        <TabsContent value="communities">
+          <CommunitiesTab />
         </TabsContent>
         <TabsContent value="broadcast">
           <BroadcastTab />
