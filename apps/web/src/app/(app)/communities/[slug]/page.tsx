@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Composer } from '@/components/composer';
 import { PostCard } from '@/components/post-card';
-import { MemberManager } from '@/components/member-manager';
+import { CommunityMonitor } from '@/components/community-monitor';
 import { ApplyHead } from '@/components/apply-head';
 import { useCommunity, useJoinCommunity } from '@/hooks/use-communities';
 import { useFeed } from '@/hooks/use-posts';
@@ -79,7 +79,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         </div>
       </div>
 
-      {canModerate && showManage && <MemberManager slug={slug} />}
+      {canModerate && showManage && <CommunityMonitor slug={slug} />}
 
       {community.isMember &&
         community.myRole === 'MEMBER' &&

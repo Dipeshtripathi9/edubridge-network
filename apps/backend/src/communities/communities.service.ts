@@ -400,4 +400,104 @@ export class CommunitiesService {
     });
     return { userId: user.id, communityId: community.id, role };
   }
+
+  // ---------------- Head monitoring ----------------
+  private async resolveCommunityForMod(slug: string, actor: { sub: string; role: string }) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    await this.assertCommunityPrivilege(community.id, actor, 'MOD');
+    return community;
+  }
+
+  /** Recent posts in the community (incl. removed) for activity monitoring. */
+  async getActivity(slug: string, actor: { sub: string; role: string }, query: PaginationDto) {
+    const community = await this.resolveCommunityForMod(slug, actor);
+    const posts = await this.prisma.post.findMany({
+      where: { communityId: community.id },
+      orderBy: { createdAt: 'desc' },
+      skip: query.skip,
+      take: query.limit,
+      select: {
+        id: true,
+        body: true,
+        kind: true,
+        status: true,
+        isPinned: true,
+        likeCount: true,
+        commentCount: true,
+        createdAt: true,
+        author: { select: { id: true, profile: { select: { fullName: true } } } },
+      },
+    });
+    return buildPaginatedResult(posts, query);
+  }
+
+  async getReports(slug: string, actor: { sub: string; role: string }, query: PaginationDto) {
+    const community = await this.resolveCommunityForMod(slug, actor);
+    const items = await this.prisma.report.findMany({
+      where: { communityId: community.id, status: { in: ['OPEN', 'REVIEWING'] } },
+      orderBy: { createdAt: 'desc' },
+      skip: query.skip,
+      take: query.limit,
+      include: { reporter: { select: { id: true, profile: { select: { fullName: true } } } } },
+    });
+    return buildPaginatedResult(items, query);
+  }
+
+  async resolveReport(
+    slug: string,
+    actor: { sub: string; role: string },
+    reportId: string,
+    status: 'RESOLVED' | 'DISMISSED',
+  ) {
+    const community = await this.resolveCommunityForMod(slug, actor);
+    const report = await this.prisma.report.findUnique({ where: { id: reportId } });
+    if (!report || report.communityId !== community.id) {
+      throw new NotFoundException('Report not found in this community');
+    }
+    await this.prisma.report.update({
+      where: { id: reportId },
+      data: { status, resolvedById: actor.sub, resolvedAt: new Date() },
+    });
+    return { id: reportId, status };
+  }
+
+  async getAnalytics(slug: string, actor: { sub: string; role: string }) {
+    const community = await this.resolveCommunityForMod(slug, actor);
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const [posts, postsThisWeek, comments, openReports, topMembers] = await Promise.all([
+      this.prisma.post.count({ where: { communityId: community.id, deletedAt: null } }),
+      this.prisma.post.count({
+        where: { communityId: community.id, deletedAt: null, createdAt: { gte: weekAgo } },
+      }),
+      this.prisma.comment.count({
+        where: { deletedAt: null, post: { communityId: community.id } },
+      }),
+      this.prisma.report.count({ where: { communityId: community.id, status: 'OPEN' } }),
+      this.prisma.communityMember.findMany({
+        where: { communityId: community.id },
+        take: 200,
+        include: {
+          user: { select: { id: true, reputationPoints: true, profile: { select: { fullName: true } } } },
+        },
+      }),
+    ]);
+    const topContributors = topMembers
+      .sort((a, b) => b.user.reputationPoints - a.user.reputationPoints)
+      .slice(0, 5)
+      .map((m) => ({
+        id: m.user.id,
+        fullName: m.user.profile?.fullName ?? 'Student',
+        reputationPoints: m.user.reputationPoints,
+        role: m.role,
+      }));
+    return {
+      members: community.memberCount,
+      posts,
+      postsThisWeek,
+      comments,
+      openReports,
+      topContributors,
+    };
+  }
 }

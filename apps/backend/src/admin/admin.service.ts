@@ -25,7 +25,22 @@ export class AdminService {
   ) {}
 
   // ---------------- Reports (user-facing create + admin queue) ----------------
-  createReport(reporterId: string, dto: CreateReportDto) {
+  async createReport(reporterId: string, dto: CreateReportDto) {
+    // Resolve the owning community so heads can see reports for their community.
+    let communityId: string | undefined;
+    if (dto.targetType === 'POST') {
+      const post = await this.prisma.post.findUnique({
+        where: { id: dto.targetId },
+        select: { communityId: true },
+      });
+      communityId = post?.communityId;
+    } else if (dto.targetType === 'COMMENT') {
+      const comment = await this.prisma.comment.findUnique({
+        where: { id: dto.targetId },
+        select: { post: { select: { communityId: true } } },
+      });
+      communityId = comment?.post.communityId;
+    }
     return this.prisma.report.create({
       data: {
         reporterId,
@@ -34,6 +49,7 @@ export class AdminService {
         reportedUserId: dto.reportedUserId,
         reason: dto.reason,
         details: dto.details,
+        communityId,
       },
     });
   }
