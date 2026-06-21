@@ -37,12 +37,17 @@ export class PostsService {
     const community = await this.prisma.community.findUnique({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
 
+    const member = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId: community.id, userId } },
+    });
     // Members-only posting for non-public communities.
-    if (community.visibility !== 'PUBLIC') {
-      const member = await this.prisma.communityMember.findUnique({
-        where: { communityId_userId: { communityId: community.id, userId } },
-      });
-      if (!member) throw new ForbiddenException('Join the community to post');
+    if (community.visibility !== 'PUBLIC' && !member) {
+      throw new ForbiddenException('Join the community to post');
+    }
+    // Moderation: banned/muted members cannot post.
+    if (member?.bannedAt) throw new ForbiddenException('You are banned from this community');
+    if (member?.mutedUntil && member.mutedUntil > new Date()) {
+      throw new ForbiddenException('You are muted in this community');
     }
 
     const type = dto.poll ? PostType.POLL : dto.type ?? PostType.TEXT;

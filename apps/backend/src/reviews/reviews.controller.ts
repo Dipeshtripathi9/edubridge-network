@@ -1,9 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto, ReviewQueryDto, VoteReviewDto } from './dto/review.dto';
 import { CurrentUser, JwtUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
 
 @ApiTags('reviews')
 @ApiBearerAuth()
@@ -43,6 +45,13 @@ export class ReviewsController {
   @ApiOperation({ summary: 'Upvote / downvote a review' })
   vote(@Param('id') id: string, @CurrentUser('sub') userId: string, @Body() dto: VoteReviewDto) {
     return this.reviews.vote(id, userId, dto.value);
+  }
+
+  @Roles(UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Post('reviews/:id/verify')
+  @ApiOperation({ summary: 'Toggle a review verified flag (moderator/admin)' })
+  verify(@Param('id') id: string) {
+    return this.reviews.toggleVerified(id);
   }
 
   @Delete('reviews/:id')

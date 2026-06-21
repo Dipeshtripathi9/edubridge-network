@@ -173,6 +173,18 @@ export class ReviewsService {
     });
   }
 
+  /** Toggle the verified flag on a review (moderator/admin). */
+  async toggleVerified(id: string) {
+    const review = await this.prisma.review.findFirst({ where: { id, deletedAt: null } });
+    if (!review) throw new NotFoundException('Review not found');
+    const updated = await this.prisma.review.update({
+      where: { id },
+      data: { isVerified: !review.isVerified },
+      select: { id: true, isVerified: true },
+    });
+    return updated;
+  }
+
   async remove(id: string, userId: string, role: string) {
     const review = await this.prisma.review.findUnique({ where: { id } });
     if (!review || review.deletedAt) throw new NotFoundException('Review not found');

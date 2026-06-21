@@ -20,7 +20,20 @@ export interface Community {
   iconUrl?: string | null;
   bannerUrl?: string | null;
   isMember?: boolean;
+  myRole?: 'MEMBER' | 'MODERATOR' | 'ADMIN' | null;
   college?: { id: string; name: string; slug: string; logoUrl?: string | null } | null;
+}
+
+export interface CommunityMember {
+  id: string;
+  role: 'MEMBER' | 'MODERATOR' | 'ADMIN';
+  mutedUntil?: string | null;
+  bannedAt?: string | null;
+  user: {
+    id: string;
+    reputationPoints: number;
+    profile?: { fullName: string; username?: string | null; avatarUrl?: string | null } | null;
+  };
 }
 
 export function useCommunities(filters: { type?: string; topic?: string; q?: string } = {}) {
@@ -66,5 +79,31 @@ export function useCreateCommunity() {
   return useMutation({
     mutationFn: (input: Record<string, unknown>) => api.post<Community>('/communities', input),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['communities'] }),
+  });
+}
+
+export function useMembers(slug: string) {
+  return useQuery({
+    queryKey: ['members', slug],
+    queryFn: () => api.paginated<CommunityMember>(`/communities/${slug}/members?limit=50`),
+    enabled: !!slug,
+  });
+}
+
+export function useSetMemberRole(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
+      api.patch(`/communities/${slug}/members/${userId}/role`, { role }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['members', slug] }),
+  });
+}
+
+export function useModerateMember(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, action, minutes }: { userId: string; action: string; minutes?: number }) =>
+      api.post(`/communities/${slug}/members/${userId}/moderate`, { action, minutes }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['members', slug] }),
   });
 }

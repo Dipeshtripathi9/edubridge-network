@@ -12,11 +12,13 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Stars, StarInput } from '@/components/stars';
 import { cn, timeAgo } from '@/lib/utils';
+import { useAuthStore } from '@/stores/auth.store';
 import { useCollege } from '@/hooks/use-colleges';
 import {
   useCreateReview,
   useReviewSummary,
   useReviews,
+  useVerifyReview,
   useVoteReview,
   type Review,
 } from '@/hooks/use-reviews';
@@ -112,6 +114,10 @@ function WriteReview({ collegeId }: { collegeId: string }) {
 
 function ReviewItem({ review, collegeId }: { review: Review; collegeId: string }) {
   const vote = useVoteReview(collegeId);
+  const verify = useVerifyReview(collegeId);
+  const globalRole = useAuthStore((s) => s.user?.role);
+  const canModerate =
+    globalRole === 'ADMIN' || globalRole === 'SUPER_ADMIN' || globalRole === 'MODERATOR';
   return (
     <Card>
       <CardContent className="flex gap-4 p-5">
@@ -137,6 +143,14 @@ function ReviewItem({ review, collegeId }: { review: Review; collegeId: string }
               <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                 <BadgeCheck className="h-3.5 w-3.5" /> Verified student
               </span>
+            )}
+            {canModerate && (
+              <button
+                onClick={() => verify.mutate(review.id)}
+                className="ml-auto text-xs text-primary hover:underline"
+              >
+                {review.isVerified ? 'Unverify' : 'Verify'}
+              </button>
             )}
           </div>
           {review.title && <h4 className="mt-2 font-semibold">{review.title}</h4>}

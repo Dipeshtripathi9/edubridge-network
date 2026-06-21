@@ -17,6 +17,8 @@ export interface PollOption {
 export interface Post {
   id: string;
   type: 'TEXT' | 'POLL' | 'RESOURCE' | 'LINK';
+  kind?: string;
+  isPinned?: boolean;
   title?: string | null;
   body: string;
   hashtags: string[];
@@ -63,6 +65,14 @@ export function useToggleLike(slug: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (postId: string) => api.post<{ liked: boolean }>(`/posts/${postId}/like`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['feed', slug] }),
+  });
+}
+
+export function usePinPost(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (postId: string) => api.post<{ isPinned: boolean }>(`/posts/${postId}/pin`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['feed', slug] }),
   });
 }
