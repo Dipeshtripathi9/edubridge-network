@@ -7,8 +7,10 @@ import {
   ResourceQueryDto,
   UploadUrlDto,
 } from './dto/resource.dto';
+import { UserRole } from '@prisma/client';
 import { CurrentUser, JwtUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
 
 @ApiTags('resources')
 @ApiBearerAuth()
@@ -64,6 +66,13 @@ export class ResourcesController {
   @ApiOperation({ summary: 'Toggle bookmark on a resource' })
   bookmark(@Param('id') id: string, @CurrentUser('sub') userId: string) {
     return this.resources.toggleBookmark(id, userId);
+  }
+
+  @Roles(UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Post(':id/feature')
+  @ApiOperation({ summary: 'Feature / unfeature a resource (moderator/admin)' })
+  feature(@Param('id') id: string) {
+    return this.resources.toggleFeature(id);
   }
 
   @Delete(':id')

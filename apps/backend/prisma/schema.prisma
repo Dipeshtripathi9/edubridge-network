@@ -68,6 +68,15 @@ enum PostType {
   LINK
 }
 
+enum PostKind {
+  DISCUSSION
+  QUESTION
+  PLACEMENT_EXPERIENCE
+  INTERNSHIP_EXPERIENCE
+  RESOURCE_SHARE
+  POLL
+}
+
 enum PostStatus {
   PUBLISHED
   HIDDEN
@@ -408,6 +417,7 @@ model College {
   city     String?
   type     String?
   logoUrl  String?
+  coverUrl String?
   website  String?
   nirfRank Int?
 
@@ -430,6 +440,9 @@ model College {
   transfersFrom        Transfer[]            @relation("TransferFromCollege")
   transfersTo          Transfer[]            @relation("TransferToCollege")
   transferRequirements TransferRequirement[]
+  resources            Resource[]
+  opportunities        Opportunity[]
+  faqs                 CollegeFaq[]
 
   @@index([state, city])
   @@index([nirfRank])
@@ -516,7 +529,9 @@ model Post {
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   type        PostType   @default(TEXT)
+  kind        PostKind   @default(DISCUSSION)
   status      PostStatus @default(PUBLISHED)
+  isPinned    Boolean    @default(false)
   title       String?
   body        String
   attachments String[] // S3 keys
@@ -714,8 +729,10 @@ model Opportunity {
   deadline     DateTime?
 
   createdById  String?
-  createdBy    User?   @relation("OpportunityCreator", fields: [createdById], references: [id])
-  isActive     Boolean @default(true)
+  createdBy    User?    @relation("OpportunityCreator", fields: [createdById], references: [id])
+  collegeId    String?
+  college      College? @relation(fields: [collegeId], references: [id])
+  isActive     Boolean  @default(true)
   sourceSystem String?
 
   createdAt DateTime @default(now())
@@ -726,6 +743,7 @@ model Opportunity {
   @@index([type, deadline])
   @@index([isActive])
   @@index([tags])
+  @@index([collegeId])
   @@map("opportunities")
 }
 
@@ -806,6 +824,9 @@ model Resource {
   tags        String[]
   collegeTag  String?
   courseTag   String?
+  collegeId   String?
+  college     College?     @relation(fields: [collegeId], references: [id])
+  isFeatured  Boolean      @default(false)
 
   downloadCount Int   @default(0)
   avgRating     Float @default(0)
@@ -822,7 +843,24 @@ model Resource {
   @@index([type])
   @@index([tags])
   @@index([avgRating(sort: Desc)])
+  @@index([collegeId])
   @@map("resources")
+}
+
+model CollegeFaq {
+  id          String  @id @default(cuid())
+  collegeId   String
+  college     College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  question    String
+  answer      String
+  order       Int     @default(0)
+  createdById String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([collegeId, order])
+  @@map("college_faqs")
 }
 
 model ResourceDownload {

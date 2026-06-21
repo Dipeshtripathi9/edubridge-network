@@ -31,7 +31,9 @@ export interface Resource {
   };
 }
 
-export function useResources(filters: { type?: string; q?: string; sort?: string } = {}) {
+export function useResources(
+  filters: { type?: string; q?: string; sort?: string; collegeId?: string } = {},
+) {
   return useInfiniteQuery({
     queryKey: ['resources', filters],
     initialPageParam: undefined as string | undefined,
@@ -40,6 +42,7 @@ export function useResources(filters: { type?: string; q?: string; sort?: string
       if (filters.type) params.set('type', filters.type);
       if (filters.q) params.set('q', filters.q);
       if (filters.sort) params.set('sort', filters.sort);
+      if (filters.collegeId) params.set('collegeId', filters.collegeId);
       if (pageParam) params.set('cursor', pageParam);
       return api.paginated<Resource>(`/resources?${params.toString()}`);
     },
@@ -73,6 +76,7 @@ export function useUploadResource() {
       title: string;
       description?: string;
       tags?: string[];
+      collegeId?: string;
     }) => {
       const presign = await api.post<UploadUrlResult>('/resources/upload-url', {
         fileName: input.file.name,
@@ -93,6 +97,7 @@ export function useUploadResource() {
         fileSize: input.file.size,
         mimeType: input.file.type,
         tags: input.tags ?? [],
+        collegeId: input.collegeId,
       });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['resources'] }),

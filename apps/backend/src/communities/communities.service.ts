@@ -81,7 +81,7 @@ export class CommunitiesService {
         orderBy: { memberCount: 'desc' },
         skip: query.skip,
         take: query.limit,
-        include: { college: { select: { id: true, name: true, logoUrl: true } } },
+        include: { college: { select: { id: true, name: true, slug: true, logoUrl: true } } },
       });
       return buildPaginatedResult(items, query);
     };

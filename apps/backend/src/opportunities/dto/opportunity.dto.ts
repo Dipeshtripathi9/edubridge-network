@@ -69,6 +69,11 @@ export class CreateOpportunityDto {
   @IsOptional()
   @IsString()
   deadline?: string;
+
+  @ApiPropertyOptional({ description: 'Scope this opportunity to a college' })
+  @IsOptional()
+  @IsString()
+  collegeId?: string;
 }
 
 export class UpdateOpportunityDto {
@@ -113,6 +118,11 @@ export class OpportunityQueryDto extends PaginationDto {
   @IsOptional()
   @IsString()
   tag?: string;
+
+  @ApiPropertyOptional({ description: 'Only opportunities scoped to this college' })
+  @IsOptional()
+  @IsString()
+  collegeId?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

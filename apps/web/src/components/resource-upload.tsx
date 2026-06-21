@@ -18,7 +18,7 @@ const TYPES = [
   { value: 'STUDY_MATERIAL', label: 'Study Material' },
 ];
 
-export function ResourceUpload() {
+export function ResourceUpload({ collegeId }: { collegeId?: string } = {}) {
   const upload = useUploadResource();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState('NOTES');
@@ -42,6 +42,7 @@ export function ResourceUpload() {
           .split(',')
           .map((t) => t.trim())
           .filter(Boolean),
+        collegeId,
       },
       {
         onSuccess: () => {

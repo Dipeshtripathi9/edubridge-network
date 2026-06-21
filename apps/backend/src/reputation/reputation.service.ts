@@ -11,7 +11,7 @@ const POINTS: Record<ReputationAction, number> = {
   COMMENT_CREATED: 2,
   HELPFUL_ANSWER: 10,
   REVIEW_CREATED: 20,
-  RESOURCE_UPLOADED: 8,
+  RESOURCE_UPLOADED: 15,
   RECEIVED_LIKE: 1,
 };
 

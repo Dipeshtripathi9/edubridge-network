@@ -268,6 +268,7 @@ async function main() {
         stipend: '₹60,000/month',
         deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         createdById: admin.id,
+        collegeId: colleges[0].id,
         sourceSystem: 'manual',
       },
       {
@@ -410,6 +411,8 @@ async function main() {
           fileKey: `resources/seed-${slugify(r.title)}.pdf`,
           mimeType: 'application/pdf',
           tags: r.tags,
+          collegeId: colleges[studentSeeds[r.uploader].college].id,
+          isFeatured: r.uploader === 0,
           downloadCount: r.downloadCount,
           avgRating: r.avgRating,
           ratingCount: r.ratingCount,
@@ -418,6 +421,19 @@ async function main() {
     }
   }
   console.log('✓ resources');
+
+  // ---------- College FAQs (Bennett) ----------
+  const faqCount = await prisma.collegeFaq.count({ where: { collegeId: colleges[0].id } });
+  if (faqCount === 0) {
+    await prisma.collegeFaq.createMany({
+      data: [
+        { collegeId: colleges[0].id, order: 1, question: 'What is the attendance policy?', answer: 'A minimum of 75% attendance is required to sit for end-semester exams.', createdById: admin.id },
+        { collegeId: colleges[0].id, order: 2, question: 'How does campus placement eligibility work?', answer: 'Students with CGPA ≥ 6.5 and no active backlogs are eligible for placement drives.', createdById: admin.id },
+        { collegeId: colleges[0].id, order: 3, question: 'Are hostels mandatory for first-years?', answer: 'Hostel is mandatory for first-year students living beyond 50 km; others may opt for day-scholar.', createdById: admin.id },
+      ],
+    });
+  }
+  console.log('✓ college FAQs');
 
   // ---------- Direct chat with messages ----------
   const existingChat = await prisma.chat.findFirst({

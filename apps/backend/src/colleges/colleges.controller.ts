@@ -22,4 +22,11 @@ export class CollegesController {
   get(@Param('slug') slug: string) {
     return this.colleges.getBySlug(slug);
   }
+
+  @Public()
+  @Get(':slug/hub')
+  @ApiOperation({ summary: 'College Community Hub overview (header + counts)' })
+  hub(@Param('slug') slug: string) {
+    return this.colleges.getCommunityHub(slug);
+  }
 }

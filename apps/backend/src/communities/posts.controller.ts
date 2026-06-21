@@ -73,6 +73,12 @@ export class PostsController {
     return this.posts.sharePost(id);
   }
 
+  @Post('posts/:id/pin')
+  @ApiOperation({ summary: 'Pin / unpin a post (community moderator or admin)' })
+  pin(@Param('id') id: string, @CurrentUser() user: JwtUser) {
+    return this.posts.togglePin(id, user.sub, user.role);
+  }
+
   @Post('posts/:id/poll/vote')
   @ApiOperation({ summary: 'Vote on a poll' })
   vote(@Param('id') id: string, @CurrentUser('sub') userId: string, @Body() dto: VotePollDto) {

@@ -1,0 +1,314 @@
+'use client';
+
+import { use } from 'react';
+import Link from 'next/link';
+import {
+  ArrowRight,
+  BadgeCheck,
+  GraduationCap,
+  MapPin,
+  ShieldCheck,
+  Users,
+} from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar } from '@/components/ui/avatar';
+import { Stars } from '@/components/stars';
+import { Composer } from '@/components/composer';
+import { PostCard } from '@/components/post-card';
+import { OpportunityCard } from '@/components/opportunity-card';
+import { ResourceCard } from '@/components/resource-card';
+import { ResourceUpload } from '@/components/resource-upload';
+import { useCommunity, useJoinCommunity } from '@/hooks/use-communities';
+import { useFeed } from '@/hooks/use-posts';
+import { useReviews, useReviewSummary } from '@/hooks/use-reviews';
+import { useOpportunities } from '@/hooks/use-opportunities';
+import { useResources } from '@/hooks/use-resources';
+import {
+  useCollegeHub,
+  useCollegeTransferStories,
+  useFaqs,
+} from '@/hooks/use-college-hub';
+
+function Stat({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className="h-4 w-4 text-primary" />
+      <span className="font-semibold">{value.toLocaleString()}</span>
+      <span className="text-sm text-muted-foreground">{label}</span>
+    </div>
+  );
+}
+
+function Discussions({ slug }: { slug: string }) {
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeed(slug);
+  const posts = data?.pages.flatMap((p) => p.data) ?? [];
+  return (
+    <div className="space-y-4">
+      <Composer slug={slug} />
+      {isLoading ? (
+        <Skeleton className="h-40 w-full" />
+      ) : posts.length === 0 ? (
+        <p className="py-10 text-center text-muted-foreground">No discussions yet — start one!</p>
+      ) : (
+        posts.map((p) => <PostCard key={p.id} post={p} slug={slug} />)
+      )}
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button variant="outline" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+            {isFetchingNextPage ? 'Loading…' : 'Load more'}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Reviews({ collegeId, collegeSlug }: { collegeId: string; collegeSlug: string }) {
+  const { data: summary } = useReviewSummary(collegeId);
+  const { data, isLoading } = useReviews(collegeId, { sort: 'top' });
+  const reviews = data?.data ?? [];
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        {summary && (
+          <div className="flex items-center gap-2">
+            <Stars value={summary.overall.avgRating} />
+            <span className="font-semibold">{summary.overall.avgRating.toFixed(1)}</span>
+            <span className="text-sm text-muted-foreground">({summary.overall.count})</span>
+          </div>
+        )}
+        <Button asChild size="sm">
+          <Link href={`/reviews/${collegeSlug}`}>Write / view all reviews</Link>
+        </Button>
+      </div>
+      {summary && summary.categories.length > 0 && (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {summary.categories.map((c) => (
+            <Card key={c.category}>
+              <CardContent className="p-3 text-center">
+                <p className="text-xs capitalize text-muted-foreground">
+                  {c.category.replace('_', ' ').toLowerCase()}
+                </p>
+                <p className="text-lg font-bold">{c.avgRating.toFixed(1)}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+      {isLoading ? (
+        <Skeleton className="h-32 w-full" />
+      ) : reviews.length === 0 ? (
+        <p className="py-10 text-center text-muted-foreground">No reviews yet.</p>
+      ) : (
+        reviews.map((r) => (
+          <Card key={r.id}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Stars value={r.rating} />
+                <Badge variant="secondary" className="capitalize">
+                  {r.category.replace('_', ' ').toLowerCase()}
+                </Badge>
+                {r.isVerified && (
+                  <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                    <BadgeCheck className="h-3.5 w-3.5" /> Verified
+                  </span>
+                )}
+              </div>
+              {r.title && <p className="mt-1 font-medium">{r.title}</p>}
+              <p className="mt-1 text-sm text-muted-foreground">{r.body}</p>
+            </CardContent>
+          </Card>
+        ))
+      )}
+    </div>
+  );
+}
+
+function Opportunities({ collegeId }: { collegeId: string }) {
+  const { data, isLoading } = useOpportunities({ collegeId });
+  const items = data?.pages.flatMap((p) => p.data) ?? [];
+  if (isLoading) return <Skeleton className="h-40 w-full" />;
+  return items.length === 0 ? (
+    <p className="py-10 text-center text-muted-foreground">No opportunities yet.</p>
+  ) : (
+    <div className="grid gap-4 sm:grid-cols-2">
+      {items.map((o) => (
+        <OpportunityCard key={o.id} opportunity={o} />
+      ))}
+    </div>
+  );
+}
+
+function Transfers({ collegeId }: { collegeId: string }) {
+  const { data, isLoading } = useCollegeTransferStories(collegeId);
+  const stories = data?.data ?? [];
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="flex items-center justify-between p-4">
+          <p className="text-sm text-muted-foreground">
+            Considering transferring here? Check eligibility & requirements.
+          </p>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/transfer">
+              Transfer Hub <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+      {isLoading ? (
+        <Skeleton className="h-32 w-full" />
+      ) : stories.length === 0 ? (
+        <p className="py-10 text-center text-muted-foreground">No transfer stories for this college yet.</p>
+      ) : (
+        stories.map((s) => (
+          <Card key={s.id}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Avatar src={s.user.profile?.avatarUrl} name={s.user.profile?.fullName} />
+                <p className="text-sm font-medium">{s.user.profile?.fullName ?? 'Student'}</p>
+                <span className="text-xs text-muted-foreground">
+                  {s.fromCollege?.name ?? '—'} → {s.toCollege?.name ?? '—'}
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">{s.story}</p>
+            </CardContent>
+          </Card>
+        ))
+      )}
+    </div>
+  );
+}
+
+function Resources({ collegeId }: { collegeId: string }) {
+  const { data, isLoading } = useResources({ collegeId });
+  const items = data?.pages.flatMap((p) => p.data) ?? [];
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <ResourceUpload collegeId={collegeId} />
+      </div>
+      {isLoading ? (
+        <Skeleton className="h-40 w-full" />
+      ) : items.length === 0 ? (
+        <p className="py-10 text-center text-muted-foreground">No resources shared yet.</p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((r) => (
+            <ResourceCard key={r.id} resource={r} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Faqs({ collegeId }: { collegeId: string }) {
+  const { data, isLoading } = useFaqs(collegeId);
+  if (isLoading) return <Skeleton className="h-32 w-full" />;
+  if (!data?.length) return <p className="py-10 text-center text-muted-foreground">No FAQs yet.</p>;
+  return (
+    <div className="space-y-3">
+      {data.map((f) => (
+        <Card key={f.id}>
+          <CardContent className="p-4">
+            <p className="font-medium">{f.question}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{f.answer}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+export default function CollegeHubPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+  const { data: hub, isLoading } = useCollegeHub(slug);
+  const { data: community } = useCommunity(hub?.community?.slug ?? '');
+  const join = useJoinCommunity(hub?.community?.slug ?? '');
+
+  if (isLoading) return <Skeleton className="mx-auto h-72 max-w-5xl" />;
+  if (!hub) return <p className="py-16 text-center text-muted-foreground">College not found.</p>;
+
+  const c = hub.college;
+  const communitySlug = hub.community?.slug;
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-6">
+      {/* Header */}
+      <div className="overflow-hidden rounded-xl border border-border">
+        <div className="h-32 bg-gradient-to-r from-primary/40 via-primary/20 to-accent" />
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-end gap-4">
+            <span className="-mt-12 flex h-20 w-20 items-center justify-center rounded-xl border-4 border-background bg-primary/10 text-primary">
+              <GraduationCap className="h-9 w-9" />
+            </span>
+            <div>
+              <h1 className="text-2xl font-bold">{c.name}</h1>
+              <p className="text-sm text-muted-foreground">Connect • Share • Grow Together</p>
+              {(c.city || c.state) && (
+                <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5" />
+                  {[c.city, c.state].filter(Boolean).join(', ')}
+                </p>
+              )}
+            </div>
+          </div>
+          {communitySlug && (
+            <Button
+              variant={community?.isMember ? 'outline' : 'default'}
+              disabled={join.isPending}
+              onClick={() => join.mutate(!community?.isMember)}
+            >
+              {community?.isMember ? 'Joined' : 'Join Community'}
+            </Button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-border px-5 py-3">
+          <Stat icon={Users} label="Members" value={hub.counts.members} />
+          <Stat icon={BadgeCheck} label="Verified Students" value={hub.counts.verifiedStudents} />
+          <Stat icon={ShieldCheck} label="Verified Admins" value={hub.counts.verifiedAdmins} />
+        </div>
+      </div>
+
+      {/* Sections */}
+      <Tabs defaultValue="discussions">
+        <TabsList className="flex-wrap">
+          <TabsTrigger value="discussions">Discussions</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews ({hub.counts.reviews})</TabsTrigger>
+          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+          <TabsTrigger value="transfers">Transfers</TabsTrigger>
+          <TabsTrigger value="resources">Resources ({hub.counts.resources})</TabsTrigger>
+          <TabsTrigger value="faqs">FAQs ({hub.counts.faqs})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="discussions">
+          {communitySlug ? (
+            <Discussions slug={communitySlug} />
+          ) : (
+            <p className="py-10 text-center text-muted-foreground">No community for this college yet.</p>
+          )}
+        </TabsContent>
+        <TabsContent value="reviews">
+          <Reviews collegeId={c.id} collegeSlug={c.slug} />
+        </TabsContent>
+        <TabsContent value="opportunities">
+          <Opportunities collegeId={c.id} />
+        </TabsContent>
+        <TabsContent value="transfers">
+          <Transfers collegeId={c.id} />
+        </TabsContent>
+        <TabsContent value="resources">
+          <Resources collegeId={c.id} />
+        </TabsContent>
+        <TabsContent value="faqs">
+          <Faqs collegeId={c.id} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

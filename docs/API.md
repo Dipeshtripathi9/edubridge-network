@@ -51,9 +51,14 @@ Alternatives: `POST /auth/google` `{ idToken }` · `POST /auth/otp/request` `{ p
 - `GET /opportunities/:id` (public) · `POST /opportunities` · `PATCH /opportunities/:id` · `DELETE /opportunities/:id` (owner/admin)
 - `POST /opportunities/:id/application` `{ status, notes? }` (save/apply/track) · `GET /opportunities/applications/me` · `DELETE /opportunities/applications/:applicationId`
 
-### Colleges
+### Colleges & Community Hub
 - `GET /colleges` (filters: `q`, `state`, `sort=rank|rating|name`) (public)
 - `GET /colleges/:slug` (public)
+- `GET /colleges/:slug/hub` → **College Community Hub** overview: college + linked community + counts (members, verified students/admins, posts, reviews, resources, opportunities, faqs) (public)
+- **FAQs**: `GET /colleges/:collegeId/faqs` (public) · `POST /colleges/:collegeId/faqs` · `PATCH /faqs/:id` · `DELETE /faqs/:id` (admin)
+- College-scoping: `GET /opportunities?collegeId=` and `GET /resources?collegeId=` return that college's items; `GET /transfer/stories?toCollegeId=` for transfer stories.
+- Moderation: `POST /posts/:id/pin` (community mod/admin — pinned posts surface first) · `POST /resources/:id/feature` (mod/admin — featured first).
+- Posts accept a `kind` (DISCUSSION/QUESTION/PLACEMENT_EXPERIENCE/INTERNSHIP_EXPERIENCE/RESOURCE_SHARE/POLL).
 
 ### College Reviews
 - `POST /colleges/:collegeId/reviews` `{ category, rating, title?, body }` — **verified students only**

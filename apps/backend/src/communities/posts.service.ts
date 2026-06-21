@@ -53,6 +53,7 @@ export class PostsService {
           communityId: community.id,
           authorId: userId,
           type,
+          ...(dto.kind ? { kind: dto.kind } : {}),
           title: dto.title,
           body: dto.body,
           attachments: dto.attachments ?? [],
@@ -89,8 +90,10 @@ export class PostsService {
     const community = await this.prisma.community.findUnique({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
 
-    const orderBy: Prisma.PostOrderByWithRelationInput =
+    const sortBy: Prisma.PostOrderByWithRelationInput =
       query.sort === 'top' ? { likeCount: 'desc' } : { createdAt: 'desc' };
+    // Pinned posts surface first.
+    const orderBy: Prisma.PostOrderByWithRelationInput[] = [{ isPinned: 'desc' }, sortBy];
 
     const posts = await this.prisma.post.findMany({
       where: { communityId: community.id, status: 'PUBLISHED', deletedAt: null },
@@ -162,6 +165,29 @@ export class PostsService {
       }),
     ]);
     return { deleted: true };
+  }
+
+  /** Pin/unpin a post. Allowed for global admins/mods or the community's mods. */
+  async togglePin(postId: string, userId: string, role: string) {
+    const post = await this.prisma.post.findFirst({ where: { id: postId, deletedAt: null } });
+    if (!post) throw new NotFoundException('Post not found');
+
+    const isGlobalPrivileged =
+      role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'MODERATOR';
+    if (!isGlobalPrivileged) {
+      const member = await this.prisma.communityMember.findUnique({
+        where: { communityId_userId: { communityId: post.communityId, userId } },
+      });
+      if (!member || member.role === 'MEMBER') {
+        throw new ForbiddenException('Moderator privileges required to pin');
+      }
+    }
+    const updated = await this.prisma.post.update({
+      where: { id: postId },
+      data: { isPinned: !post.isPinned },
+      select: { id: true, isPinned: true },
+    });
+    return updated;
   }
 
   async toggleLike(postId: string, userId: string) {

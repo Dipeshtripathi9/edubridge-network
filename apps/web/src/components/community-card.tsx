@@ -9,12 +9,17 @@ import { type Community, useJoinCommunity } from '@/hooks/use-communities';
 
 export function CommunityCard({ community }: { community: Community }) {
   const join = useJoinCommunity(community.slug);
+  // College communities open the full College Community Hub.
+  const href =
+    community.type === 'COLLEGE' && community.college?.slug
+      ? `/colleges/${community.college.slug}`
+      : `/communities/${community.slug}`;
   return (
     <Card className="transition-shadow hover:shadow-md">
       <CardContent className="flex flex-col gap-3 p-5">
         <div className="flex items-start justify-between">
           <div>
-            <Link href={`/communities/${community.slug}`} className="font-semibold hover:underline">
+            <Link href={href} className="font-semibold hover:underline">
               {community.name}
             </Link>
             <Badge variant="secondary" className="ml-2">

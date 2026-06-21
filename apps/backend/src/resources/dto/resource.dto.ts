@@ -74,6 +74,11 @@ export class CreateResourceDto {
   @IsOptional()
   @IsString()
   courseTag?: string;
+
+  @ApiPropertyOptional({ description: 'Scope this resource to a college community' })
+  @IsOptional()
+  @IsString()
+  collegeId?: string;
 }
 
 export class ResourceQueryDto extends PaginationDto {
@@ -91,6 +96,11 @@ export class ResourceQueryDto extends PaginationDto {
   @IsOptional()
   @IsString()
   tag?: string;
+
+  @ApiPropertyOptional({ description: 'Only resources scoped to this college' })
+  @IsOptional()
+  @IsString()
+  collegeId?: string;
 
   @ApiPropertyOptional({ enum: ['recent', 'top', 'downloads'], default: 'recent' })
   @IsOptional()
