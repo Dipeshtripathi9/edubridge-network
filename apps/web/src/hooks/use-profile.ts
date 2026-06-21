@@ -21,6 +21,7 @@ export interface Me {
     state?: string | null;
     city?: string | null;
     interests: string[];
+    collegeVerification?: string;
     college?: { id: string; name: string } | null;
   } | null;
   userBadges?: { badge: { name: string; tier: string } }[];

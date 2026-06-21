@@ -189,6 +189,18 @@ enum VerificationPurpose {
   PASSWORD_RESET
 }
 
+enum VerificationMethod {
+  COLLEGE_EMAIL
+  ID_CARD
+  ADMISSION_PROOF
+}
+
+enum VerificationRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // ============================================================
 // IDENTITY & AUTH
 // ============================================================
@@ -257,6 +269,8 @@ model User {
   reportsMade    Report[]   @relation("Reporter")
   reportsAgainst Report[]   @relation("ReportedUser")
   auditLogs      AuditLog[]
+
+  verificationRequests VerificationRequest[]
 
   @@index([status])
   @@index([role])
@@ -443,6 +457,7 @@ model College {
   resources            Resource[]
   opportunities        Opportunity[]
   faqs                 CollegeFaq[]
+  verificationRequests VerificationRequest[]
 
   @@index([state, city])
   @@index([nirfRank])
@@ -845,6 +860,28 @@ model Resource {
   @@index([avgRating(sort: Desc)])
   @@index([collegeId])
   @@map("resources")
+}
+
+model VerificationRequest {
+  id           String                    @id @default(cuid())
+  userId       String
+  user         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collegeId    String?
+  college      College?                  @relation(fields: [collegeId], references: [id])
+  method       VerificationMethod
+  collegeEmail String?
+  evidenceKey  String? // S3 key for ID card / admission proof
+  status       VerificationRequestStatus @default(PENDING)
+  note         String?
+  reviewedById String?
+  reviewedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId])
+  @@map("verification_requests")
 }
 
 model CollegeFaq {
