@@ -8,8 +8,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Composer } from '@/components/composer';
 import { PostCard } from '@/components/post-card';
 import { MemberManager } from '@/components/member-manager';
+import { ApplyHead } from '@/components/apply-head';
 import { useCommunity, useJoinCommunity } from '@/hooks/use-communities';
 import { useFeed } from '@/hooks/use-posts';
+import { useMe } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth.store';
 
 export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -18,6 +20,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
   const join = useJoinCommunity(slug);
   const [showManage, setShowManage] = useState(false);
   const globalRole = useAuthStore((s) => s.user?.role);
+  const { data: me } = useMe();
   const { data, isLoading: feedLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useFeed(slug);
   const posts = data?.pages.flatMap((p) => p.data) ?? [];
@@ -77,6 +80,10 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
       </div>
 
       {canModerate && showManage && <MemberManager slug={slug} />}
+
+      {community.isMember &&
+        community.myRole === 'MEMBER' &&
+        me?.profile?.collegeVerification === 'VERIFIED' && <ApplyHead slug={slug} />}
 
       <Composer slug={slug} />
 

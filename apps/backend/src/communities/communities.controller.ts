@@ -3,9 +3,16 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CommunitiesService } from './communities.service';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { CommunityQueryDto } from './dto/query.dto';
-import { ModerateMemberDto, SetMemberRoleDto } from './dto/moderation.dto';
+import {
+  AppointHeadDto,
+  ApplyHeadDto,
+  ModerateMemberDto,
+  SetMemberRoleDto,
+} from './dto/moderation.dto';
+import { UserRole } from '@prisma/client';
 import { CurrentUser, JwtUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
 
 @ApiTags('communities')
 @ApiBearerAuth()
@@ -72,5 +79,22 @@ export class CommunitiesController {
     @Body() dto: ModerateMemberDto,
   ) {
     return this.communities.moderateMember(slug, actor, userId, dto.action, dto.minutes);
+  }
+
+  @Post(':slug/head-applications')
+  @ApiOperation({ summary: 'Apply to lead a community (verified students)' })
+  applyForHead(
+    @Param('slug') slug: string,
+    @CurrentUser('sub') userId: string,
+    @Body() dto: ApplyHeadDto,
+  ) {
+    return this.communities.applyForHead(userId, slug, dto.requestedRole, dto.pitch);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Post(':slug/appoint-head')
+  @ApiOperation({ summary: 'Appoint a community head by email (admin)' })
+  appointHead(@Param('slug') slug: string, @Body() dto: AppointHeadDto) {
+    return this.communities.appointHead(slug, dto.email, dto.role);
   }
 }

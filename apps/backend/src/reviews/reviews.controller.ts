@@ -47,9 +47,11 @@ export class ReviewsController {
     return this.reviews.vote(id, userId, dto.value);
   }
 
-  @Roles(UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  // Trust actions (review approval) are centralized to platform admins only —
+  // community heads/moderators can never approve/verify reviews.
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @Post('reviews/:id/verify')
-  @ApiOperation({ summary: 'Toggle a review verified flag (moderator/admin)' })
+  @ApiOperation({ summary: 'Toggle a review verified flag (platform admin only)' })
   verify(@Param('id') id: string) {
     return this.reviews.toggleVerified(id);
   }

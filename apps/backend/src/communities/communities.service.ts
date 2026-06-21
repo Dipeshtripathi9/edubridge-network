@@ -4,12 +4,23 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CommunityType, Prisma } from '@prisma/client';
+import { CommunityRole, CommunityType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
-import { buildPaginatedResult } from '../common/dto/pagination.dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { buildPaginatedResult, PaginationDto } from '../common/dto/pagination.dto';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { CommunityQueryDto } from './dto/query.dto';
+
+// Roles that act as a "head" of a community (full management privilege).
+const HEAD_ROLES: CommunityRole[] = [
+  'ADMIN',
+  'CAMPUS_LEAD',
+  'OPPORTUNITY_HEAD',
+  'STUDENT_RELATIONS_HEAD',
+];
+const isHead = (r?: CommunityRole | null) => !!r && HEAD_ROLES.includes(r);
+const isMod = (r?: CommunityRole | null) => !!r && (r === 'MODERATOR' || HEAD_ROLES.includes(r));
 
 function slugify(input: string): string {
   return input
@@ -25,6 +36,7 @@ export class CommunitiesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   private async invalidate(slug?: string) {
@@ -209,8 +221,7 @@ export class CommunitiesService {
     const member = await this.prisma.communityMember.findUnique({
       where: { communityId_userId: { communityId, userId: actor.sub } },
     });
-    const ok =
-      level === 'ADMIN' ? member?.role === 'ADMIN' : !!member && member.role !== 'MEMBER';
+    const ok = level === 'ADMIN' ? isHead(member?.role) : isMod(member?.role);
     if (!ok) throw new ForbiddenException('Insufficient community privileges');
   }
 
@@ -228,7 +239,7 @@ export class CommunitiesService {
     slug: string,
     actor: { sub: string; role: string },
     targetUserId: string,
-    role: 'MEMBER' | 'MODERATOR' | 'ADMIN',
+    role: CommunityRole,
   ) {
     const { community, member } = await this.resolveMember(slug, targetUserId);
     await this.assertCommunityPrivilege(community.id, actor, 'ADMIN');
@@ -272,5 +283,121 @@ export class CommunitiesService {
       select: { userId: true, mutedUntil: true, bannedAt: true },
     });
     return updated;
+  }
+
+  // ---------------- Community head applications ----------------
+  private static readonly APPLICABLE_ROLES: CommunityRole[] = [
+    'CAMPUS_LEAD',
+    'OPPORTUNITY_HEAD',
+    'STUDENT_RELATIONS_HEAD',
+    'MODERATOR',
+  ];
+
+  /** A verified student member applies to lead a community. */
+  async applyForHead(userId: string, slug: string, requestedRole: CommunityRole, pitch?: string) {
+    if (!CommunitiesService.APPLICABLE_ROLES.includes(requestedRole)) {
+      throw new BadRequestException('Invalid role to apply for');
+    }
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+
+    const profile = await this.prisma.profile.findUnique({ where: { userId } });
+    if (profile?.collegeVerification !== 'VERIFIED') {
+      throw new ForbiddenException('Only verified students can apply to lead a community');
+    }
+    // Ensure they're a member.
+    await this.prisma.communityMember.upsert({
+      where: { communityId_userId: { communityId: community.id, userId } },
+      update: {},
+      create: { communityId: community.id, userId },
+    });
+
+    const pending = await this.prisma.communityHeadApplication.findFirst({
+      where: { userId, communityId: community.id, status: 'PENDING' },
+    });
+    const data = { userId, communityId: community.id, requestedRole, pitch, status: 'PENDING' as const };
+    return pending
+      ? this.prisma.communityHeadApplication.update({ where: { id: pending.id }, data })
+      : this.prisma.communityHeadApplication.create({ data });
+  }
+
+  async myHeadApplications(userId: string) {
+    return this.prisma.communityHeadApplication.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: { community: { select: { id: true, name: true, slug: true } } },
+    });
+  }
+
+  async listHeadApplications(query: PaginationDto) {
+    const items = await this.prisma.communityHeadApplication.findMany({
+      where: { status: 'PENDING' },
+      orderBy: { createdAt: 'asc' },
+      skip: query.skip,
+      take: query.limit,
+      include: {
+        community: { select: { id: true, name: true, slug: true } },
+        user: { select: { id: true, email: true, profile: { select: { fullName: true } } } },
+      },
+    });
+    return buildPaginatedResult(items, query);
+  }
+
+  /** Admin approves a head application → assigns the requested community role. */
+  async decideHeadApplication(adminId: string, id: string, approve: boolean, note?: string) {
+    const appRow = await this.prisma.communityHeadApplication.findUnique({ where: { id } });
+    if (!appRow) throw new NotFoundException('Application not found');
+    if (appRow.status !== 'PENDING') throw new ForbiddenException('Already reviewed');
+
+    await this.prisma.communityHeadApplication.update({
+      where: { id },
+      data: {
+        status: approve ? 'APPROVED' : 'REJECTED',
+        note,
+        reviewedById: adminId,
+        reviewedAt: new Date(),
+      },
+    });
+    if (approve) {
+      await this.prisma.communityMember.upsert({
+        where: { communityId_userId: { communityId: appRow.communityId, userId: appRow.userId } },
+        update: { role: appRow.requestedRole },
+        create: { communityId: appRow.communityId, userId: appRow.userId, role: appRow.requestedRole },
+      });
+      await this.invalidate();
+    }
+    await this.notifications.create({
+      recipientId: appRow.userId,
+      type: 'SYSTEM',
+      title: approve
+        ? `You're now ${appRow.requestedRole.replace(/_/g, ' ').toLowerCase()} 🎉`
+        : 'Community head application declined',
+      body: approve ? 'You can now help lead your community.' : note ?? undefined,
+    });
+    return { id, status: approve ? 'APPROVED' : 'REJECTED' };
+  }
+
+  /** Admin directly appoints a head by email. */
+  async appointHead(slug: string, email: string, role: CommunityRole) {
+    if (!CommunitiesService.APPLICABLE_ROLES.includes(role) && role !== 'ADMIN') {
+      throw new BadRequestException('Invalid head role');
+    }
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new NotFoundException('No user with that email');
+
+    await this.prisma.communityMember.upsert({
+      where: { communityId_userId: { communityId: community.id, userId: user.id } },
+      update: { role },
+      create: { communityId: community.id, userId: user.id, role },
+    });
+    await this.invalidate(slug);
+    await this.notifications.create({
+      recipientId: user.id,
+      type: 'SYSTEM',
+      title: `You've been appointed ${role.replace(/_/g, ' ').toLowerCase()} of ${community.name}`,
+    });
+    return { userId: user.id, communityId: community.id, role };
   }
 }
