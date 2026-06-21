@@ -34,6 +34,7 @@ export class OpportunitiesService {
     const where: Prisma.OpportunityWhereInput = {
       isActive: true,
       ...(query.type ? { type: query.type } : {}),
+      ...(query.collegeId ? { collegeId: query.collegeId } : {}),
       ...(query.isRemote !== undefined ? { isRemote: query.isRemote } : {}),
       ...(query.tag ? { tags: { has: query.tag } } : {}),
       ...(query.q
@@ -81,6 +82,7 @@ export class OpportunitiesService {
         createdById: userId,
         sourceSystem: 'manual',
       },
+      // collegeId flows through from dto via the spread above
     });
     await this.invalidate();
     return opportunity;

@@ -45,6 +45,7 @@ export class ResourcesService {
         tags: dto.tags ?? [],
         collegeTag: dto.collegeTag,
         courseTag: dto.courseTag,
+        collegeId: dto.collegeId,
       },
       include: { uploader: UPLOADER_SELECT },
     });
@@ -59,15 +60,18 @@ export class ResourcesService {
     const where: Prisma.ResourceWhereInput = {
       deletedAt: null,
       ...(query.type ? { type: query.type } : {}),
+      ...(query.collegeId ? { collegeId: query.collegeId } : {}),
       ...(query.tag ? { tags: { has: query.tag } } : {}),
       ...(query.q ? { title: { contains: query.q, mode: 'insensitive' } } : {}),
     };
-    const orderBy: Prisma.ResourceOrderByWithRelationInput =
+    const sortBy: Prisma.ResourceOrderByWithRelationInput =
       query.sort === 'top'
         ? { avgRating: 'desc' }
         : query.sort === 'downloads'
           ? { downloadCount: 'desc' }
           : { createdAt: 'desc' };
+    // Featured resources surface first.
+    const orderBy: Prisma.ResourceOrderByWithRelationInput[] = [{ isFeatured: 'desc' }, sortBy];
 
     const items = await this.prisma.resource.findMany({
       where,
@@ -167,6 +171,18 @@ export class ResourcesService {
       include: { resource: { include: { uploader: UPLOADER_SELECT } } },
     });
     return bookmarks.map((b) => b.resource);
+  }
+
+  /** Feature/unfeature a resource (moderator/admin) so it surfaces first. */
+  async toggleFeature(id: string) {
+    const resource = await this.prisma.resource.findFirst({ where: { id, deletedAt: null } });
+    if (!resource) throw new NotFoundException('Resource not found');
+    const updated = await this.prisma.resource.update({
+      where: { id },
+      data: { isFeatured: !resource.isFeatured },
+      select: { id: true, isFeatured: true },
+    });
+    return updated;
   }
 
   async remove(id: string, userId: string, role: string) {

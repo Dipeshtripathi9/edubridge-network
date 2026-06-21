@@ -32,7 +32,7 @@ export interface Opportunity {
   score?: number;
 }
 
-export function useOpportunities(filters: { type?: string; q?: string } = {}) {
+export function useOpportunities(filters: { type?: string; q?: string; collegeId?: string } = {}) {
   return useInfiniteQuery({
     queryKey: ['opportunities', filters],
     initialPageParam: undefined as string | undefined,
@@ -40,6 +40,7 @@ export function useOpportunities(filters: { type?: string; q?: string } = {}) {
       const params = new URLSearchParams({ limit: '15' });
       if (filters.type) params.set('type', filters.type);
       if (filters.q) params.set('q', filters.q);
+      if (filters.collegeId) params.set('collegeId', filters.collegeId);
       if (pageParam) params.set('cursor', pageParam);
       return api.paginated<Opportunity>(`/opportunities?${params.toString()}`);
     },

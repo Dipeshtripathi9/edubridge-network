@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PostType } from '@prisma/client';
+import { PostKind, PostType } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -43,6 +43,11 @@ export class CreatePostDto {
   @IsOptional()
   @IsEnum(PostType)
   type?: PostType;
+
+  @ApiPropertyOptional({ enum: PostKind, default: PostKind.DISCUSSION })
+  @IsOptional()
+  @IsEnum(PostKind)
+  kind?: PostKind;
 
   @ApiPropertyOptional()
   @IsOptional()

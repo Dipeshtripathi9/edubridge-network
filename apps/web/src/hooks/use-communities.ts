@@ -20,6 +20,7 @@ export interface Community {
   iconUrl?: string | null;
   bannerUrl?: string | null;
   isMember?: boolean;
+  college?: { id: string; name: string; slug: string; logoUrl?: string | null } | null;
 }
 
 export function useCommunities(filters: { type?: string; topic?: string; q?: string } = {}) {
