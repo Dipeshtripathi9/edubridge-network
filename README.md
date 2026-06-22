@@ -87,18 +87,26 @@ npm run dev                 # turbo runs backend (:4000) + web (:3000)
 
 ## Status
 
-All product modules are implemented end-to-end (API + UI), on a shared production foundation (Prisma schema, Redis caching, Socket.IO gateway, RBAC, audit, Docker, CI, docs):
+All product modules are implemented end-to-end (API + UI), on a shared production foundation (Prisma schema, Redis caching, Socket.IO gateway, RBAC, audit, Docker, CI, docs). The suite covers **97 e2e + 8 unit tests**, gated in CI on every PR:
 
 - **Auth** — email / Google / phone-OTP, Argon2, JWT + rotating refresh, brute-force lockout, sessions/devices
-- **Communities** — posts, comments (threaded), likes, bookmarks, polls
+- **Communities** — organized into **sections**: Announcements · Resources · Opportunities · Discussion · Polls · Pools · Reviews
+  - **Announcements** — heads/admins only, pinnable, with likes/comments/share
+  - **Discussion & Polls** — open posts, threaded comments, likes, bookmarks, voting
+  - **Pools** — private, member-capped group chats (ride the realtime messaging layer)
+- **Governance** — two tiers with centralized trust:
+  - Platform **admins** verify students, approve/verify reviews, run all moderation
+  - Per-community **heads** (Campus Lead, Opportunity Head, Student Relations Head) + **moderators**, appointed by admins or via an application→approval flow
+  - Head **monitoring**: activity feed, community-scoped report queue, analytics
+  - Heads/mods can never verify students or approve/delete reviews — trust stays admin-only
 - **Transfer Hub** — eligibility engine, journeys, transfer stories (College Data layer)
-- **Opportunity Hub** — internships/scholarships/etc., applications, interest-based recommendations
+- **Opportunity Hub** — internships/scholarships/etc., applications, interest-based recommendations; community submissions go through a **submit → admin/head approval → publish** workflow
 - **College Reviews** — verified-student-only, categories, voting, rating aggregates
-- **Resource Hub** — uploads (S3 presigned), downloads, ratings, bookmarks
-- **Messaging** — real-time Socket.IO chat, presence, typing, read receipts
+- **Resource Hub** — uploads (S3 presigned), downloads, ratings, bookmarks, plus **like / comment / share**
+- **Messaging** — real-time Socket.IO chat (direct, community, group), presence, typing, read receipts
 - **Notifications** — real-time + persisted, wired into likes/comments/mentions/messages
 - **Reputation & Badges** — points from actions, threshold/activity badges, leaderboard
-- **Admin** — moderation (ban/suspend/verify), report queue, broadcast, analytics, audit log
+- **Admin** — create communities, appoint heads/moderators, moderation (ban/suspend/verify), report queue, broadcast, analytics, audit log
 - **Global Search** — Elasticsearch across all entities, with Postgres fallback
 
 Graceful dev fallbacks mean it runs without external creds: SMTP/Twilio/S3/Elasticsearch are optional locally.
