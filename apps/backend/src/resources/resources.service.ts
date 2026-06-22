@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { ReputationService } from '../reputation/reputation.service';
-import { buildPaginatedResult } from '../common/dto/pagination.dto';
+import { buildPaginatedResult, PaginationDto } from '../common/dto/pagination.dto';
 import {
   CreateResourceDto,
   RateResourceDto,
@@ -57,7 +57,7 @@ export class ResourcesService {
     return resource;
   }
 
-  async list(query: ResourceQueryDto) {
+  async list(query: ResourceQueryDto, userId?: string) {
     const where: Prisma.ResourceWhereInput = {
       deletedAt: null,
       ...(query.type ? { type: query.type } : {}),
@@ -82,7 +82,19 @@ export class ResourcesService {
       take: query.limit,
       include: { uploader: UPLOADER_SELECT },
     });
-    return buildPaginatedResult(items, query);
+    // Annotate which of these the current user has liked.
+    let likedIds = new Set<string>();
+    if (userId && items.length) {
+      const likes = await this.prisma.resourceLike.findMany({
+        where: { userId, resourceId: { in: items.map((i) => i.id) } },
+        select: { resourceId: true },
+      });
+      likedIds = new Set(likes.map((l) => l.resourceId));
+    }
+    return buildPaginatedResult(
+      items.map((i) => ({ ...i, likedByMe: likedIds.has(i.id) })),
+      query,
+    );
   }
 
   async getOne(id: string, userId?: string) {
@@ -92,18 +104,74 @@ export class ResourcesService {
         uploader: UPLOADER_SELECT,
         ratings: userId ? { where: { userId }, select: { value: true } } : false,
         bookmarks: userId ? { where: { userId }, select: { id: true } } : false,
+        likes: userId ? { where: { userId }, select: { id: true } } : false,
       },
     });
     if (!resource) throw new NotFoundException('Resource not found');
-    const { ratings, bookmarks, ...rest } = resource as typeof resource & {
+    const { ratings, bookmarks, likes, ...rest } = resource as typeof resource & {
       ratings?: { value: number }[];
       bookmarks?: unknown[];
+      likes?: unknown[];
     };
     return {
       ...rest,
       myRating: Array.isArray(ratings) && ratings.length ? ratings[0].value : 0,
       bookmarkedByMe: Array.isArray(bookmarks) && bookmarks.length > 0,
+      likedByMe: Array.isArray(likes) && likes.length > 0,
     };
+  }
+
+  /** Toggle a like on a resource. */
+  async toggleLike(id: string, userId: string) {
+    const existing = await this.prisma.resourceLike.findUnique({
+      where: { resourceId_userId: { resourceId: id, userId } },
+    });
+    if (existing) {
+      await this.prisma.$transaction([
+        this.prisma.resourceLike.delete({ where: { id: existing.id } }),
+        this.prisma.resource.update({ where: { id }, data: { likeCount: { decrement: 1 } } }),
+      ]);
+      return { liked: false };
+    }
+    await this.prisma.$transaction([
+      this.prisma.resourceLike.create({ data: { resourceId: id, userId } }),
+      this.prisma.resource.update({ where: { id }, data: { likeCount: { increment: 1 } } }),
+    ]);
+    return { liked: true };
+  }
+
+  async listComments(id: string, query: PaginationDto) {
+    const items = await this.prisma.resourceComment.findMany({
+      where: { resourceId: id },
+      orderBy: { createdAt: 'desc' },
+      skip: query.skip,
+      take: query.limit,
+      include: { user: UPLOADER_SELECT },
+    });
+    return buildPaginatedResult(items, query);
+  }
+
+  async addComment(id: string, userId: string, body: string) {
+    const resource = await this.prisma.resource.findFirst({ where: { id, deletedAt: null } });
+    if (!resource) throw new NotFoundException('Resource not found');
+    const [comment] = await this.prisma.$transaction([
+      this.prisma.resourceComment.create({
+        data: { resourceId: id, userId, body },
+        include: { user: UPLOADER_SELECT },
+      }),
+      this.prisma.resource.update({ where: { id }, data: { commentCount: { increment: 1 } } }),
+    ]);
+    return comment;
+  }
+
+  /** Bump the share counter (called when a user copies/shares the link). */
+  async share(id: string) {
+    const updated = await this.prisma.resource.update({
+      where: { id },
+      data: { shareCount: { increment: 1 } },
+      select: { shareCount: true },
+    });
+    return updated;
   }
 
   /** Record a download and return a (presigned) download URL. */
