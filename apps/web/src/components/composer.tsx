@@ -9,7 +9,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useCreatePost } from '@/hooks/use-posts';
 
-export function Composer({ slug }: { slug: string }) {
+export function Composer({
+  slug,
+  kind,
+  placeholder,
+}: {
+  slug: string;
+  kind?: string;
+  placeholder?: string;
+}) {
   const create = useCreatePost(slug);
   const [body, setBody] = useState('');
   const [pollMode, setPollMode] = useState(false);
@@ -19,6 +27,7 @@ export function Composer({ slug }: { slug: string }) {
     if (!body.trim()) return;
     const hashtags = Array.from(body.matchAll(/#(\w+)/g)).map((m) => m[1]);
     const payload: Record<string, unknown> = { body, hashtags };
+    if (kind) payload.kind = kind;
     if (pollMode) {
       const opts = options.map((o) => o.trim()).filter(Boolean);
       if (opts.length < 2) {
@@ -43,7 +52,7 @@ export function Composer({ slug }: { slug: string }) {
     <Card>
       <CardContent className="space-y-3 p-4">
         <Textarea
-          placeholder={pollMode ? 'Ask a question…' : "Share something with the community…"}
+          placeholder={pollMode ? 'Ask a question…' : placeholder ?? 'Share something with the community…'}
           value={body}
           onChange={(e) => setBody(e.target.value)}
         />

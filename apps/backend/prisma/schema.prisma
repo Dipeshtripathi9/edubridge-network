@@ -78,6 +78,7 @@ enum PostKind {
   INTERNSHIP_EXPERIENCE
   RESOURCE_SHARE
   POLL
+  ANNOUNCEMENT
 }
 
 enum PostStatus {
@@ -519,6 +520,8 @@ model Community {
   posts            Post[]
   chats            Chat[]
   headApplications CommunityHeadApplication[]
+  opportunities    Opportunity[]
+  resources        Resource[]
 
   @@index([type])
   @@index([collegeId])
@@ -771,12 +774,15 @@ model Opportunity {
   stipend      String?
   deadline     DateTime?
 
-  createdById  String?
-  createdBy    User?    @relation("OpportunityCreator", fields: [createdById], references: [id])
-  collegeId    String?
-  college      College? @relation(fields: [collegeId], references: [id])
-  isActive     Boolean  @default(true)
-  sourceSystem String?
+  createdById    String?
+  createdBy      User?                     @relation("OpportunityCreator", fields: [createdById], references: [id])
+  collegeId      String?
+  college        College?                  @relation(fields: [collegeId], references: [id])
+  communityId    String?
+  community      Community?                @relation(fields: [communityId], references: [id])
+  approvalStatus VerificationRequestStatus @default(APPROVED)
+  isActive       Boolean                   @default(true)
+  sourceSystem   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -787,6 +793,7 @@ model Opportunity {
   @@index([isActive])
   @@index([tags])
   @@index([collegeId])
+  @@index([communityId, approvalStatus])
   @@map("opportunities")
 }
 
@@ -869,6 +876,8 @@ model Resource {
   courseTag   String?
   collegeId   String?
   college     College?     @relation(fields: [collegeId], references: [id])
+  communityId String?
+  community   Community?   @relation(fields: [communityId], references: [id])
   isFeatured  Boolean      @default(false)
 
   downloadCount Int   @default(0)

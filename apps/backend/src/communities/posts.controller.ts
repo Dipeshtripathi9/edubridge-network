@@ -23,12 +23,8 @@ export class PostsController {
 
   @Post('communities/:slug/posts')
   @ApiOperation({ summary: 'Create a post in a community' })
-  create(
-    @CurrentUser('sub') userId: string,
-    @Param('slug') slug: string,
-    @Body() dto: CreatePostDto,
-  ) {
-    return this.posts.createPost(userId, slug, dto);
+  create(@CurrentUser() user: JwtUser, @Param('slug') slug: string, @Body() dto: CreatePostDto) {
+    return this.posts.createPost(user.sub, slug, dto, user.role);
   }
 
   @Public()

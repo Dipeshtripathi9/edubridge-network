@@ -5,12 +5,10 @@ import { Settings, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Composer } from '@/components/composer';
-import { PostCard } from '@/components/post-card';
 import { CommunityMonitor } from '@/components/community-monitor';
+import { CommunitySections } from '@/components/community-sections';
 import { ApplyHead } from '@/components/apply-head';
 import { useCommunity, useJoinCommunity } from '@/hooks/use-communities';
-import { useFeed } from '@/hooks/use-posts';
 import { useMe } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -21,9 +19,6 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
   const [showManage, setShowManage] = useState(false);
   const globalRole = useAuthStore((s) => s.user?.role);
   const { data: me } = useMe();
-  const { data, isLoading: feedLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useFeed(slug);
-  const posts = data?.pages.flatMap((p) => p.data) ?? [];
   const canModerate =
     community?.myRole === 'ADMIN' ||
     community?.myRole === 'MODERATOR' ||
@@ -85,32 +80,12 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         community.myRole === 'MEMBER' &&
         me?.profile?.collegeVerification === 'VERIFIED' && <ApplyHead slug={slug} />}
 
-      <Composer slug={slug} />
-
-      {feedLoading ? (
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-40 w-full" />
-          ))}
-        </div>
-      ) : posts.length === 0 ? (
-        <p className="py-12 text-center text-muted-foreground">
-          No posts yet. Be the first to share something!
-        </p>
-      ) : (
-        <div className="space-y-4">
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} slug={slug} canModerate={canModerate} />
-          ))}
-          {hasNextPage && (
-            <div className="flex justify-center">
-              <Button variant="outline" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-                {isFetchingNextPage ? 'Loading…' : 'Load more'}
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
+      <CommunitySections
+        slug={slug}
+        communityId={community.id}
+        canModerate={canModerate}
+        collegeSlug={community.college?.slug}
+      />
     </div>
   );
 }

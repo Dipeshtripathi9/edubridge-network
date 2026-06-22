@@ -30,4 +30,12 @@ export class FeedQueryDto extends PaginationDto {
   @IsOptional()
   @IsString()
   sort?: 'recent' | 'top';
+
+  @ApiPropertyOptional({
+    enum: ['ANNOUNCEMENTS', 'DISCUSSION', 'POLLS'],
+    description: 'Filter the feed to a community section',
+  })
+  @IsOptional()
+  @IsString()
+  section?: 'ANNOUNCEMENTS' | 'DISCUSSION' | 'POLLS';
 }
