@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
-import { CreateReviewDto, ReviewQueryDto } from './dto/review.dto';
+import { CreateCommunityReviewDto, CreateReviewDto, ReviewQueryDto } from './dto/review.dto';
 
 const REVIEW_AUTHOR_SELECT = {
   select: {
@@ -149,6 +149,82 @@ export class ReviewsService {
     };
   }
 
+  // ---------------- Community-manager reviews ----------------
+  /** Any member of a community can review its managers/leadership (one per person). */
+  async createCommunityReview(userId: string, slug: string, dto: CreateCommunityReviewDto) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    const member = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId: community.id, userId } },
+    });
+    if (!member) throw new ForbiddenException('Join the community to review its managers');
+
+    const existing = await this.prisma.review.findUnique({
+      where: {
+        communityId_authorId_category: {
+          communityId: community.id,
+          authorId: userId,
+          category: 'COMMUNITY_MANAGERS',
+        },
+      },
+    });
+    const review =
+      existing && !existing.deletedAt
+        ? await this.prisma.review.update({
+            where: { id: existing.id },
+            data: { rating: dto.rating, title: dto.title, body: dto.body },
+          })
+        : existing
+          ? await this.prisma.review.update({
+              where: { id: existing.id },
+              data: { rating: dto.rating, title: dto.title, body: dto.body, deletedAt: null },
+            })
+          : await this.prisma.review.create({
+              data: {
+                communityId: community.id,
+                authorId: userId,
+                category: 'COMMUNITY_MANAGERS',
+                rating: dto.rating,
+                title: dto.title,
+                body: dto.body,
+              },
+            });
+    return review;
+  }
+
+  async listCommunityReviews(slug: string, query: ReviewQueryDto, userId?: string) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    const orderBy: Prisma.ReviewOrderByWithRelationInput =
+      query.sort === 'recent' ? { createdAt: 'desc' } : { upvotes: 'desc' };
+    const reviews = await this.prisma.review.findMany({
+      where: { communityId: community.id, category: 'COMMUNITY_MANAGERS', deletedAt: null },
+      orderBy,
+      skip: query.skip,
+      take: query.limit,
+      include: {
+        author: REVIEW_AUTHOR_SELECT,
+        votes: userId ? { where: { userId }, select: { value: true } } : false,
+      },
+    });
+    const shaped = reviews.map((r) => {
+      const { votes, ...rest } = r as typeof r & { votes?: { value: number }[] };
+      return { ...rest, myVote: Array.isArray(votes) && votes.length ? votes[0].value : 0 };
+    });
+    return buildPaginatedResult(shaped, query);
+  }
+
+  async communitySummary(slug: string) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    const agg = await this.prisma.review.aggregate({
+      where: { communityId: community.id, category: 'COMMUNITY_MANAGERS', deletedAt: null },
+      _avg: { rating: true },
+      _count: true,
+    });
+    return { avgRating: agg._avg.rating ?? 0, count: agg._count };
+  }
+
   async vote(reviewId: string, userId: string, value: number) {
     const review = await this.prisma.review.findFirst({
       where: { id: reviewId, deletedAt: null },
@@ -193,7 +269,7 @@ export class ReviewsService {
       throw new ForbiddenException('Cannot delete this review');
     }
     await this.prisma.review.update({ where: { id }, data: { deletedAt: new Date() } });
-    await this.recomputeCollegeAggregates(review.collegeId);
+    if (review.collegeId) await this.recomputeCollegeAggregates(review.collegeId);
     return { deleted: true };
   }
 }

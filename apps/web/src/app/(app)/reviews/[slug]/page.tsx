@@ -28,6 +28,7 @@ const CATEGORIES = [
   { value: 'HOSTEL', label: 'Hostel' },
   { value: 'FACULTY', label: 'Faculty' },
   { value: 'CAMPUS_LIFE', label: 'Campus Life' },
+  { value: 'ROI', label: 'ROI / Value for money' },
 ];
 
 function WriteReview({ collegeId }: { collegeId: string }) {

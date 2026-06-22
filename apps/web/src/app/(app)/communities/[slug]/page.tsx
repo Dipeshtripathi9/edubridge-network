@@ -85,6 +85,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         communityId={community.id}
         canModerate={canModerate}
         collegeSlug={community.college?.slug}
+        isMember={community.isMember}
       />
     </div>
   );

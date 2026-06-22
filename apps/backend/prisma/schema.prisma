@@ -115,6 +115,8 @@ enum ReviewCategory {
   HOSTEL
   FACULTY
   CAMPUS_LIFE
+  ROI
+  COMMUNITY_MANAGERS
 }
 
 enum ResourceType {
@@ -527,6 +529,7 @@ model Community {
   opportunities    Opportunity[]
   resources        Resource[]
   pools            Pool[]
+  reviews          Review[]
 
   @@index([type])
   @@index([collegeId])
@@ -823,18 +826,20 @@ model Application {
 // ============================================================
 
 model Review {
-  id         String         @id @default(cuid())
-  collegeId  String
-  college    College        @relation(fields: [collegeId], references: [id], onDelete: Cascade)
-  authorId   String
-  author     User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  category   ReviewCategory
-  rating     Int // 1-5
-  title      String?
-  body       String
-  isVerified Boolean        @default(false) // only verified college students
-  upvotes    Int            @default(0)
-  downvotes  Int            @default(0)
+  id          String         @id @default(cuid())
+  collegeId   String?
+  college     College?       @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  communityId String?
+  community   Community?     @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category    ReviewCategory
+  rating      Int // 1-5
+  title       String?
+  body        String
+  isVerified  Boolean        @default(false) // only verified college students
+  upvotes     Int            @default(0)
+  downvotes   Int            @default(0)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -843,7 +848,9 @@ model Review {
   votes ReviewVote[]
 
   @@unique([collegeId, authorId, category])
+  @@unique([communityId, authorId, category])
   @@index([collegeId, category])
+  @@index([communityId, category])
   @@index([upvotes(sort: Desc)])
   @@map("reviews")
 }
