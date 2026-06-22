@@ -38,12 +38,13 @@ export interface Post {
   };
 }
 
-export function useFeed(slug: string) {
+export function useFeed(slug: string, section?: 'ANNOUNCEMENTS' | 'DISCUSSION' | 'POLLS') {
   return useInfiniteQuery({
-    queryKey: ['feed', slug],
+    queryKey: ['feed', slug, section ?? 'all'],
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) => {
       const params = new URLSearchParams({ limit: '15' });
+      if (section) params.set('section', section);
       if (pageParam) params.set('cursor', pageParam);
       return api.paginated<Post>(`/communities/${slug}/posts?${params.toString()}`);
     },

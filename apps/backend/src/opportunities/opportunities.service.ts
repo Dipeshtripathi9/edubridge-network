@@ -33,8 +33,10 @@ export class OpportunitiesService {
   async list(query: OpportunityQueryDto) {
     const where: Prisma.OpportunityWhereInput = {
       isActive: true,
+      approvalStatus: 'APPROVED', // only approved opportunities are public
       ...(query.type ? { type: query.type } : {}),
       ...(query.collegeId ? { collegeId: query.collegeId } : {}),
+      ...(query.communityId ? { communityId: query.communityId } : {}),
       ...(query.isRemote !== undefined ? { isRemote: query.isRemote } : {}),
       ...(query.tag ? { tags: { has: query.tag } } : {}),
       ...(query.q
@@ -73,19 +75,69 @@ export class OpportunitiesService {
     return { ...opportunity, myApplication: application };
   }
 
-  async create(userId: string, dto: CreateOpportunityDto) {
+  async create(actor: { sub: string; role: string }, dto: CreateOpportunityDto) {
+    // Platform admins publish immediately; everyone else needs approval when the
+    // opportunity is submitted to a community.
+    const isAdmin = actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN';
+    const needsApproval = !!dto.communityId && !isAdmin;
     const opportunity = await this.prisma.opportunity.create({
       data: {
         ...dto,
         tags: dto.tags ?? [],
         deadline: dto.deadline ? new Date(dto.deadline) : null,
-        createdById: userId,
+        createdById: actor.sub,
+        approvalStatus: needsApproval ? 'PENDING' : 'APPROVED',
         sourceSystem: 'manual',
       },
-      // collegeId flows through from dto via the spread above
     });
     await this.invalidate();
     return opportunity;
+  }
+
+  /** A platform admin, or a head/mod of the opportunity's community, may moderate it. */
+  private async assertCanModerate(
+    opportunity: { communityId: string | null },
+    actor: { sub: string; role: string },
+  ) {
+    if (actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN') return;
+    if (opportunity.communityId) {
+      const member = await this.prisma.communityMember.findUnique({
+        where: { communityId_userId: { communityId: opportunity.communityId, userId: actor.sub } },
+      });
+      if (member && member.role !== 'MEMBER') return;
+    }
+    throw new ForbiddenException('Not allowed to moderate this opportunity');
+  }
+
+  async listPending(actor: { sub: string; role: string }, communityId?: string) {
+    const isAdmin = actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN';
+    if (!isAdmin) {
+      if (!communityId) throw new ForbiddenException('Specify a community you manage');
+      const member = await this.prisma.communityMember.findUnique({
+        where: { communityId_userId: { communityId, userId: actor.sub } },
+      });
+      if (!member || member.role === 'MEMBER') {
+        throw new ForbiddenException('Not a manager of this community');
+      }
+    }
+    return this.prisma.opportunity.findMany({
+      where: { approvalStatus: 'PENDING', ...(communityId ? { communityId } : {}) },
+      orderBy: { createdAt: 'asc' },
+      include: { createdBy: { select: { id: true, profile: { select: { fullName: true } } } } },
+    });
+  }
+
+  async decide(actor: { sub: string; role: string }, id: string, approve: boolean) {
+    const opportunity = await this.prisma.opportunity.findUnique({ where: { id } });
+    if (!opportunity) throw new NotFoundException('Opportunity not found');
+    await this.assertCanModerate(opportunity, actor);
+    const updated = await this.prisma.opportunity.update({
+      where: { id },
+      data: { approvalStatus: approve ? 'APPROVED' : 'REJECTED', isActive: approve },
+      select: { id: true, approvalStatus: true },
+    });
+    await this.invalidate();
+    return updated;
   }
 
   async update(id: string, userId: string, role: string, dto: UpdateOpportunityDto) {

@@ -46,6 +46,7 @@ export class ResourcesService {
         collegeTag: dto.collegeTag,
         courseTag: dto.courseTag,
         collegeId: dto.collegeId,
+        communityId: dto.communityId,
       },
       include: { uploader: UPLOADER_SELECT },
     });
@@ -61,6 +62,7 @@ export class ResourcesService {
       deletedAt: null,
       ...(query.type ? { type: query.type } : {}),
       ...(query.collegeId ? { collegeId: query.collegeId } : {}),
+      ...(query.communityId ? { communityId: query.communityId } : {}),
       ...(query.tag ? { tags: { has: query.tag } } : {}),
       ...(query.q ? { title: { contains: query.q, mode: 'insensitive' } } : {}),
     };

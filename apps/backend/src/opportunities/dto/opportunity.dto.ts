@@ -74,6 +74,11 @@ export class CreateOpportunityDto {
   @IsOptional()
   @IsString()
   collegeId?: string;
+
+  @ApiPropertyOptional({ description: 'Submit this opportunity to a community (needs approval)' })
+  @IsOptional()
+  @IsString()
+  communityId?: string;
 }
 
 export class UpdateOpportunityDto {
@@ -123,6 +128,11 @@ export class OpportunityQueryDto extends PaginationDto {
   @IsOptional()
   @IsString()
   collegeId?: string;
+
+  @ApiPropertyOptional({ description: 'Only opportunities scoped to this community' })
+  @IsOptional()
+  @IsString()
+  communityId?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

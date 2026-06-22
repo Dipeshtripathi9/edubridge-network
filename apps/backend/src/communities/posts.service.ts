@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { PostType, Prisma } from '@prisma/client';
+import { PostKind, PostType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -33,7 +33,7 @@ export class PostsService {
     return profile?.fullName ?? 'Someone';
   }
 
-  async createPost(userId: string, slug: string, dto: CreatePostDto) {
+  async createPost(userId: string, slug: string, dto: CreatePostDto, role = 'STUDENT') {
     const community = await this.prisma.community.findUnique({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
 
@@ -48,6 +48,14 @@ export class PostsService {
     if (member?.bannedAt) throw new ForbiddenException('You are banned from this community');
     if (member?.mutedUntil && member.mutedUntil > new Date()) {
       throw new ForbiddenException('You are muted in this community');
+    }
+    // Announcements may only be posted by community heads/mods (or platform admins).
+    if (dto.kind === 'ANNOUNCEMENT') {
+      const isPrivileged =
+        role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'MODERATOR';
+      if (!isPrivileged && (!member || member.role === 'MEMBER')) {
+        throw new ForbiddenException('Only community heads can post announcements');
+      }
     }
 
     const type = dto.poll ? PostType.POLL : dto.type ?? PostType.TEXT;
@@ -100,8 +108,18 @@ export class PostsService {
     // Pinned posts surface first.
     const orderBy: Prisma.PostOrderByWithRelationInput[] = [{ isPinned: 'desc' }, sortBy];
 
+    // Section filters map the single feed into the community's tabs.
+    const sectionWhere: Prisma.PostWhereInput =
+      query.section === 'ANNOUNCEMENTS'
+        ? { kind: PostKind.ANNOUNCEMENT }
+        : query.section === 'POLLS'
+          ? { type: PostType.POLL }
+          : query.section === 'DISCUSSION'
+            ? { kind: { not: PostKind.ANNOUNCEMENT }, type: { not: PostType.POLL } }
+            : {};
+
     const posts = await this.prisma.post.findMany({
-      where: { communityId: community.id, status: 'PUBLISHED', deletedAt: null },
+      where: { communityId: community.id, status: 'PUBLISHED', deletedAt: null, ...sectionWhere },
       orderBy,
       take: query.limit,
       ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
