@@ -60,7 +60,7 @@ export default function OnboardingPage() {
           } else {
             toast.success('Profile ready!');
           }
-          router.push('/dashboard');
+          router.push('/home');
         },
         onError: (e) => toast.error((e as Error).message),
       },

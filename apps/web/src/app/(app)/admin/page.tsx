@@ -546,7 +546,7 @@ export default function AdminPage() {
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
 
   useEffect(() => {
-    if (hydrated && !isAdmin) router.replace('/dashboard');
+    if (hydrated && !isAdmin) router.replace('/home');
   }, [hydrated, isAdmin, router]);
 
   if (!hydrated || !isAdmin) return null;
