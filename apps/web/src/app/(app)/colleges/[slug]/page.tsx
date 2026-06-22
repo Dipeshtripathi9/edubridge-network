@@ -17,11 +17,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar } from '@/components/ui/avatar';
 import { Stars } from '@/components/stars';
+import { Megaphone } from 'lucide-react';
 import { Composer } from '@/components/composer';
 import { PostCard } from '@/components/post-card';
 import { OpportunityCard } from '@/components/opportunity-card';
 import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
+import { PoolsSection } from '@/components/pools-section';
 import { useCommunity, useJoinCommunity } from '@/hooks/use-communities';
 import { useFeed } from '@/hooks/use-posts';
 import { useReviews, useReviewSummary } from '@/hooks/use-reviews';
@@ -32,6 +34,7 @@ import {
   useCollegeTransferStories,
   useFaqs,
 } from '@/hooks/use-college-hub';
+import { useAuthStore } from '@/stores/auth.store';
 
 function Stat({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: number }) {
   return (
@@ -43,18 +46,45 @@ function Stat({ icon: Icon, label, value }: { icon: typeof Users; label: string;
   );
 }
 
-function Discussions({ slug }: { slug: string }) {
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeed(slug);
+function SectionFeed({
+  slug,
+  section,
+  canModerate,
+  empty,
+}: {
+  slug: string;
+  section: 'ANNOUNCEMENTS' | 'DISCUSSION' | 'POLLS';
+  canModerate: boolean;
+  empty: string;
+}) {
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeed(slug, section);
   const posts = data?.pages.flatMap((p) => p.data) ?? [];
+  const showComposer = section !== 'ANNOUNCEMENTS' || canModerate;
+  const placeholder =
+    section === 'ANNOUNCEMENTS'
+      ? 'Post an announcement…'
+      : section === 'POLLS'
+        ? 'Ask the community…'
+        : 'Start a discussion…';
   return (
     <div className="space-y-4">
-      <Composer slug={slug} />
+      {showComposer ? (
+        <Composer
+          slug={slug}
+          kind={section === 'ANNOUNCEMENTS' ? 'ANNOUNCEMENT' : undefined}
+          placeholder={placeholder}
+        />
+      ) : (
+        <p className="flex items-center gap-1 text-sm text-muted-foreground">
+          <Megaphone className="h-4 w-4" /> Only community heads can post announcements.
+        </p>
+      )}
       {isLoading ? (
         <Skeleton className="h-40 w-full" />
       ) : posts.length === 0 ? (
-        <p className="py-10 text-center text-muted-foreground">No discussions yet — start one!</p>
+        <p className="py-10 text-center text-muted-foreground">{empty}</p>
       ) : (
-        posts.map((p) => <PostCard key={p.id} post={p} slug={slug} />)
+        posts.map((p) => <PostCard key={p.id} post={p} slug={slug} canModerate={canModerate} />)
       )}
       {hasNextPage && (
         <div className="flex justify-center">
@@ -230,6 +260,13 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
   const { data: hub, isLoading } = useCollegeHub(slug);
   const { data: community } = useCommunity(hub?.community?.slug ?? '');
   const join = useJoinCommunity(hub?.community?.slug ?? '');
+  const globalRole = useAuthStore((s) => s.user?.role);
+  const canModerate =
+    community?.myRole === 'ADMIN' ||
+    community?.myRole === 'MODERATOR' ||
+    globalRole === 'ADMIN' ||
+    globalRole === 'SUPER_ADMIN' ||
+    globalRole === 'MODERATOR';
 
   if (isLoading) return <Skeleton className="mx-auto h-72 max-w-5xl" />;
   if (!hub) return <p className="py-16 text-center text-muted-foreground">College not found.</p>;
@@ -275,35 +312,63 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
         </div>
       </div>
 
-      {/* Sections */}
-      <Tabs defaultValue="discussions">
+      {/* Sections — same style as every community, plus college-only Transfers & FAQs */}
+      <Tabs defaultValue="announcements">
         <TabsList className="flex-wrap">
-          <TabsTrigger value="discussions">Discussions</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews ({hub.counts.reviews})</TabsTrigger>
-          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-          <TabsTrigger value="transfers">Transfers</TabsTrigger>
+          <TabsTrigger value="announcements">Announcements</TabsTrigger>
           <TabsTrigger value="resources">Resources ({hub.counts.resources})</TabsTrigger>
+          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+          <TabsTrigger value="discussion">Discussion</TabsTrigger>
+          <TabsTrigger value="polls">Polls</TabsTrigger>
+          <TabsTrigger value="pools">Pools</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews ({hub.counts.reviews})</TabsTrigger>
+          <TabsTrigger value="transfers">Transfers</TabsTrigger>
           <TabsTrigger value="faqs">FAQs ({hub.counts.faqs})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="discussions">
-          {communitySlug ? (
-            <Discussions slug={communitySlug} />
-          ) : (
-            <p className="py-10 text-center text-muted-foreground">No community for this college yet.</p>
-          )}
-        </TabsContent>
-        <TabsContent value="reviews">
-          <Reviews collegeId={c.id} collegeSlug={c.slug} />
+        {communitySlug ? (
+          <>
+            <TabsContent value="announcements">
+              <SectionFeed slug={communitySlug} section="ANNOUNCEMENTS" canModerate={canModerate} empty="No announcements yet." />
+            </TabsContent>
+            <TabsContent value="discussion">
+              <SectionFeed slug={communitySlug} section="DISCUSSION" canModerate={canModerate} empty="No discussions yet — start one!" />
+            </TabsContent>
+            <TabsContent value="polls">
+              <SectionFeed slug={communitySlug} section="POLLS" canModerate={canModerate} empty="No polls yet." />
+            </TabsContent>
+            <TabsContent value="pools">
+              <PoolsSection slug={communitySlug} />
+            </TabsContent>
+          </>
+        ) : (
+          <>
+            <TabsContent value="announcements">
+              <p className="py-10 text-center text-muted-foreground">No community for this college yet.</p>
+            </TabsContent>
+            <TabsContent value="discussion">
+              <p className="py-10 text-center text-muted-foreground">No community for this college yet.</p>
+            </TabsContent>
+            <TabsContent value="polls">
+              <p className="py-10 text-center text-muted-foreground">No community for this college yet.</p>
+            </TabsContent>
+            <TabsContent value="pools">
+              <p className="py-10 text-center text-muted-foreground">No community for this college yet.</p>
+            </TabsContent>
+          </>
+        )}
+
+        <TabsContent value="resources">
+          <Resources collegeId={c.id} />
         </TabsContent>
         <TabsContent value="opportunities">
           <Opportunities collegeId={c.id} />
         </TabsContent>
+        <TabsContent value="reviews">
+          <Reviews collegeId={c.id} collegeSlug={c.slug} />
+        </TabsContent>
         <TabsContent value="transfers">
           <Transfers collegeId={c.id} />
-        </TabsContent>
-        <TabsContent value="resources">
-          <Resources collegeId={c.id} />
         </TabsContent>
         <TabsContent value="faqs">
           <Faqs collegeId={c.id} />
