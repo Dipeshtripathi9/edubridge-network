@@ -5,7 +5,6 @@ import {
   ArrowRight,
   Award,
   BookOpen,
-  GraduationCap,
   LayoutGrid,
   Repeat,
   Sparkles,
@@ -18,7 +17,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Stars } from '@/components/stars';
 import { cn, timeAgo } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 import { useMe } from '@/hooks/use-profile';
@@ -26,7 +24,6 @@ import { useMyReputation, useLeaderboard } from '@/hooks/use-reputation';
 import { useMyApplications, useRecommendedOpportunities } from '@/hooks/use-opportunities';
 import { useMyJourneys } from '@/hooks/use-transfer';
 import { useCommunities } from '@/hooks/use-communities';
-import { useColleges } from '@/hooks/use-colleges';
 import { useNotifications } from '@/hooks/use-notifications';
 import { useMyPools } from '@/hooks/use-pools';
 
@@ -88,7 +85,6 @@ export default function HomePage() {
   const { data: apps } = useMyApplications();
   const { data: journeys } = useMyJourneys();
   const { data: communitiesData, isLoading: communitiesLoading } = useCommunities();
-  const { data: collegesData } = useColleges({ sort: 'rating' });
   const { data: recommended } = useRecommendedOpportunities();
   const { data: notifs } = useNotifications();
   const { data: myPools } = useMyPools();
@@ -97,7 +93,10 @@ export default function HomePage() {
   const applications = (apps ?? []).filter((a) => a.status !== 'SAVED');
   const savedOpps = (apps ?? []).filter((a) => a.status === 'SAVED');
   const joined = (communitiesData?.pages.flatMap((p) => p.data) ?? []).filter((c) => c.isMember);
-  const colleges = (collegesData?.pages.flatMap((p) => p.data) ?? []).slice(0, 4);
+  const recommendedCommunities = (communitiesData?.pages.flatMap((p) => p.data) ?? [])
+    .filter((c) => !c.isMember)
+    .sort((a, b) => b.memberCount - a.memberCount)
+    .slice(0, 4);
   const leaders = lb?.pages.flatMap((p) => p.data).slice(0, 5) ?? [];
   const opps = (recommended ?? []).slice(0, 3);
   const activity = notifs?.data.slice(0, 5) ?? [];
@@ -123,30 +122,31 @@ export default function HomePage() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main column */}
         <div className="space-y-6 lg:col-span-2">
-          {/* Recommended colleges */}
+          {/* Recommended communities */}
           <section>
-            <SectionHeader title="Recommended Colleges" href="/colleges" />
+            <SectionHeader title="Recommended Communities" href="/communities" />
             <div className="grid gap-3 sm:grid-cols-2">
-              {colleges.length === 0 ? (
+              {communitiesLoading ? (
                 <Skeleton className="h-24 w-full" />
+              ) : recommendedCommunities.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  You&apos;ve joined them all! <Link href="/communities" className="text-primary hover:underline">Browse →</Link>
+                </p>
               ) : (
-                colleges.map((c) => (
-                  <Link key={c.id} href={`/colleges/${c.slug}`}>
+                recommendedCommunities.map((c) => (
+                  <Link key={c.id} href={`/communities/${c.slug}`}>
                     <Card className="h-full transition-colors hover:border-primary/50">
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2">
-                          <GraduationCap className="h-4 w-4 text-primary" />
+                          <LayoutGrid className="h-4 w-4 text-primary" />
                           <p className="font-medium">{c.name}</p>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          {[c.city, c.state].filter(Boolean).join(', ') || '—'}
+                          {c.type === 'COLLEGE' ? 'College community' : c.topic ? `Topic · ${c.topic}` : 'Topic community'}
                         </p>
-                        <div className="mt-1 flex items-center gap-1">
-                          <Stars value={c.avgRating} />
-                          <span className="text-xs text-muted-foreground">
-                            {c.avgRating.toFixed(1)} ({c.reviewCount})
-                          </span>
-                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {c.memberCount.toLocaleString()} members
+                        </p>
                       </CardContent>
                     </Card>
                   </Link>
