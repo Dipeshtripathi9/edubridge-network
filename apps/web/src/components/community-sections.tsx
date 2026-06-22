@@ -16,6 +16,7 @@ import { PostCard } from '@/components/post-card';
 import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
 import { OpportunityCard } from '@/components/opportunity-card';
+import { PoolsSection } from '@/components/pools-section';
 import { useFeed } from '@/hooks/use-posts';
 import { useResources } from '@/hooks/use-resources';
 import {
@@ -215,6 +216,7 @@ export function CommunitySections({
         <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
         <TabsTrigger value="discussion">Discussion</TabsTrigger>
         <TabsTrigger value="polls">Polls</TabsTrigger>
+        <TabsTrigger value="pools">Pools</TabsTrigger>
         <TabsTrigger value="reviews">Reviews</TabsTrigger>
       </TabsList>
 
@@ -245,6 +247,10 @@ export function CommunitySections({
       <TabsContent value="polls" className="space-y-4">
         <Composer slug={slug} placeholder="Ask the community…" />
         <FeedSection slug={slug} section="POLLS" canModerate={canModerate} empty="No polls yet." />
+      </TabsContent>
+
+      <TabsContent value="pools">
+        <PoolsSection slug={slug} />
       </TabsContent>
 
       <TabsContent value="reviews">
