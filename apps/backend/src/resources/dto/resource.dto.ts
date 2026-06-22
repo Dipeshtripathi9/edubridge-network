@@ -126,3 +126,10 @@ export class RateResourceDto {
   @Max(5)
   value!: number;
 }
+
+export class ResourceCommentDto {
+  @ApiProperty()
+  @IsString()
+  @MaxLength(1000)
+  body!: string;
+}

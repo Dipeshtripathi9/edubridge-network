@@ -255,6 +255,8 @@ model User {
   resourceDownloads ResourceDownload[]
   resourceRatings   ResourceRating[]
   resourceBookmarks ResourceBookmark[]
+  resourceLikes     ResourceLike[]
+  resourceComments  ResourceComment[]
 
   opportunities Opportunity[] @relation("OpportunityCreator")
   applications  Application[]
@@ -886,6 +888,9 @@ model Resource {
   downloadCount Int   @default(0)
   avgRating     Float @default(0)
   ratingCount   Int   @default(0)
+  likeCount     Int   @default(0)
+  commentCount  Int   @default(0)
+  shareCount    Int   @default(0)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -894,12 +899,40 @@ model Resource {
   downloads ResourceDownload[]
   ratings   ResourceRating[]
   bookmarks ResourceBookmark[]
+  likes     ResourceLike[]
+  comments  ResourceComment[]
 
   @@index([type])
   @@index([tags])
   @@index([avgRating(sort: Desc)])
   @@index([collegeId])
   @@map("resources")
+}
+
+model ResourceLike {
+  id         String   @id @default(cuid())
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([resourceId, userId])
+  @@index([userId])
+  @@map("resource_likes")
+}
+
+model ResourceComment {
+  id         String   @id @default(cuid())
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([resourceId, createdAt])
+  @@map("resource_comments")
 }
 
 model VerificationRequest {

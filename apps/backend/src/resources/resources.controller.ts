@@ -4,10 +4,12 @@ import { ResourcesService } from './resources.service';
 import {
   CreateResourceDto,
   RateResourceDto,
+  ResourceCommentDto,
   ResourceQueryDto,
   UploadUrlDto,
 } from './dto/resource.dto';
 import { UserRole } from '@prisma/client';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { CurrentUser, JwtUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -33,8 +35,8 @@ export class ResourcesController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'List / search resources' })
-  list(@Query() query: ResourceQueryDto) {
-    return this.resources.list(query);
+  list(@Query() query: ResourceQueryDto, @CurrentUser('sub') userId?: string) {
+    return this.resources.list(query, userId);
   }
 
   @Get('bookmarks/me')
@@ -66,6 +68,36 @@ export class ResourcesController {
   @ApiOperation({ summary: 'Toggle bookmark on a resource' })
   bookmark(@Param('id') id: string, @CurrentUser('sub') userId: string) {
     return this.resources.toggleBookmark(id, userId);
+  }
+
+  @Post(':id/like')
+  @ApiOperation({ summary: 'Toggle like on a resource' })
+  like(@Param('id') id: string, @CurrentUser('sub') userId: string) {
+    return this.resources.toggleLike(id, userId);
+  }
+
+  @Public()
+  @Get(':id/comments')
+  @ApiOperation({ summary: 'List comments on a resource' })
+  comments(@Param('id') id: string, @Query() query: PaginationDto) {
+    return this.resources.listComments(id, query);
+  }
+
+  @Post(':id/comments')
+  @ApiOperation({ summary: 'Comment on a resource' })
+  addComment(
+    @Param('id') id: string,
+    @CurrentUser('sub') userId: string,
+    @Body() dto: ResourceCommentDto,
+  ) {
+    return this.resources.addComment(id, userId, dto.body);
+  }
+
+  @Public()
+  @Post(':id/share')
+  @ApiOperation({ summary: 'Increment the share counter' })
+  share(@Param('id') id: string) {
+    return this.resources.share(id);
   }
 
   @Roles(UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN)

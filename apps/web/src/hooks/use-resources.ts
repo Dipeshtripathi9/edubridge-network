@@ -24,10 +24,24 @@ export interface Resource {
   downloadCount: number;
   avgRating: number;
   ratingCount: number;
+  likeCount: number;
+  commentCount: number;
+  shareCount: number;
+  likedByMe?: boolean;
   createdAt: string;
   uploader: {
     id: string;
     profile?: { fullName: string; username?: string | null; avatarUrl?: string | null } | null;
+  };
+}
+
+export interface ResourceComment {
+  id: string;
+  body: string;
+  createdAt: string;
+  user: {
+    id: string;
+    profile?: { fullName: string; avatarUrl?: string | null } | null;
   };
 }
 
@@ -127,5 +141,40 @@ export function useToggleResourceBookmark() {
 export function useDownloadResource() {
   return useMutation({
     mutationFn: (id: string) => api.get<{ url: string; configured: boolean }>(`/resources/${id}/download`),
+  });
+}
+
+export function useToggleResourceLike() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<{ liked: boolean }>(`/resources/${id}/like`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['resources'] }),
+  });
+}
+
+export function useResourceComments(id: string | null) {
+  return useQuery({
+    queryKey: ['resource-comments', id],
+    queryFn: () => api.paginated<ResourceComment>(`/resources/${id}/comments?limit=50`),
+    enabled: !!id,
+  });
+}
+
+export function useAddResourceComment(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: string) => api.post<ResourceComment>(`/resources/${id}/comments`, { body }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['resource-comments', id] });
+      qc.invalidateQueries({ queryKey: ['resources'] });
+    },
+  });
+}
+
+export function useShareResource() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<{ shareCount: number }>(`/resources/${id}/share`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['resources'] }),
   });
 }
