@@ -180,6 +180,7 @@ enum ReportStatus {
 enum ChatType {
   DIRECT
   COMMUNITY
+  GROUP
 }
 
 enum MessageStatus {
@@ -269,6 +270,7 @@ model User {
 
   chatParticipants ChatParticipant[]
   messages         Message[]
+  poolMemberships  PoolMember[]
 
   reportsMade    Report[]   @relation("Reporter")
   reportsAgainst Report[]   @relation("ReportedUser")
@@ -522,6 +524,7 @@ model Community {
   headApplications CommunityHeadApplication[]
   opportunities    Opportunity[]
   resources        Resource[]
+  pools            Pool[]
 
   @@index([type])
   @@index([collegeId])
@@ -992,10 +995,41 @@ model Chat {
 
   participants ChatParticipant[]
   messages     Message[]
+  pool         Pool?
 
   @@index([communityId])
   @@index([lastMessageAt(sort: Desc)])
   @@map("chats")
+}
+
+model Pool {
+  id          String       @id @default(cuid())
+  communityId String
+  community   Community    @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  maxMembers  Int          @default(10)
+  createdById String
+  chatId      String       @unique
+  chat        Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  members     PoolMember[]
+
+  @@index([communityId, createdAt])
+  @@map("pools")
+}
+
+model PoolMember {
+  id       String   @id @default(cuid())
+  poolId   String
+  pool     Pool     @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt DateTime @default(now())
+
+  @@unique([poolId, userId])
+  @@index([userId])
+  @@map("pool_members")
 }
 
 model ChatParticipant {
