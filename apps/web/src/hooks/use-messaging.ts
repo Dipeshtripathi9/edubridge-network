@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { getSocket } from '@/lib/socket';
 
@@ -102,6 +102,21 @@ export function useChatSocket(chatId: string | null) {
 
 export async function openDirectChat(userId: string): Promise<{ id: string }> {
   return api.post<{ id: string }>('/chats/direct', { userId });
+}
+
+/**
+ * Reliable REST send (the endpoint also broadcasts over WS to other viewers).
+ * Used where we can't depend on the socket already being connected (e.g. pools).
+ */
+export function useSendMessage(chatId: string | null) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: string) => api.post<ChatMessage>(`/chats/${chatId}/messages`, { body }),
+    onSuccess: (msg) =>
+      qc.setQueryData<ChatMessage[]>(['messages', chatId], (old = []) =>
+        old.some((m) => m.id === msg.id) ? old : [...old, msg],
+      ),
+  });
 }
 
 /** Presence updates across the app (online/offline dots). */
