@@ -10,7 +10,6 @@ import {
   MessageSquare,
   Repeat,
   ShieldCheck,
-  Star,
   Target,
   BookOpen,
 } from 'lucide-react';
@@ -22,7 +21,6 @@ const NAV = [
   { href: '/communities', label: 'Communities', icon: LayoutGrid },
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
   { href: '/opportunities', label: 'Opportunities', icon: Target },
-  { href: '/reviews', label: 'Reviews', icon: Star },
   { href: '/resources', label: 'Resources', icon: BookOpen },
   { href: '/messages', label: 'Messages', icon: MessageSquare },
   { href: '/leaderboard', label: 'Leaderboard', icon: Award },
