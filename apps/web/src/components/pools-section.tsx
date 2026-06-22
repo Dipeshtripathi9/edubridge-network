@@ -12,7 +12,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useChatSocket, useMessages } from '@/hooks/use-messaging';
 import { Pool, useCreatePool, useJoinPool, useLeavePool, usePools } from '@/hooks/use-pools';
 
-function PoolChat({ pool, onBack }: { pool: Pool; onBack: () => void }) {
+export function PoolChat({ pool, onBack }: { pool: Pool; onBack: () => void }) {
   const myId = useAuthStore((s) => s.user?.id);
   const { data: messages, isLoading } = useMessages(pool.chatId);
   const { send } = useChatSocket(pool.chatId);

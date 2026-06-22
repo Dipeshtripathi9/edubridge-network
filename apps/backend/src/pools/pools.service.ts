@@ -72,6 +72,34 @@ export class PoolsService {
     }));
   }
 
+  /** Pools the user belongs to, across all communities (their "network"). */
+  async myPools(userId: string) {
+    const memberships = await this.prisma.poolMember.findMany({
+      where: { userId },
+      orderBy: { joinedAt: 'desc' },
+      include: {
+        pool: {
+          include: {
+            community: { select: { name: true, slug: true } },
+            _count: { select: { members: true } },
+          },
+        },
+      },
+    });
+    return memberships.map((m) => ({
+      id: m.pool.id,
+      title: m.pool.title,
+      description: m.pool.description,
+      maxMembers: m.pool.maxMembers,
+      chatId: m.pool.chatId,
+      createdById: m.pool.createdById,
+      memberCount: m.pool._count.members,
+      isFull: m.pool._count.members >= m.pool.maxMembers,
+      isMember: true,
+      community: m.pool.community,
+    }));
+  }
+
   async get(id: string, userId: string) {
     const pool = await this.prisma.pool.findUnique({
       where: { id },

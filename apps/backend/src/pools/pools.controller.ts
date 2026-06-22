@@ -26,6 +26,12 @@ export class PoolsController {
     return this.pools.create(userId, slug, dto);
   }
 
+  @Get('pools/me')
+  @ApiOperation({ summary: 'Pools I belong to (my network)' })
+  mine(@CurrentUser('sub') userId: string) {
+    return this.pools.myPools(userId);
+  }
+
   @Get('pools/:id')
   @ApiOperation({ summary: 'Pool detail (members, capacity, chat id)' })
   get(@Param('id') id: string, @CurrentUser('sub') userId: string) {

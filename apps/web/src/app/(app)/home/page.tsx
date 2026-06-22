@@ -12,6 +12,7 @@ import {
   Star,
   Target,
   Trophy,
+  Users,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ import { useMyJourneys } from '@/hooks/use-transfer';
 import { useCommunities } from '@/hooks/use-communities';
 import { useColleges } from '@/hooks/use-colleges';
 import { useNotifications } from '@/hooks/use-notifications';
+import { useMyPools } from '@/hooks/use-pools';
 
 function repStatus(points: number) {
   if (points >= 750) return 'Excellent';
@@ -89,6 +91,7 @@ export default function HomePage() {
   const { data: collegesData } = useColleges({ sort: 'rating' });
   const { data: recommended } = useRecommendedOpportunities();
   const { data: notifs } = useNotifications();
+  const { data: myPools } = useMyPools();
 
   const firstName = me?.profile?.fullName?.split(' ')[0];
   const applications = (apps ?? []).filter((a) => a.status !== 'SAVED');
@@ -206,6 +209,37 @@ export default function HomePage() {
                 ))
               )}
             </div>
+          </section>
+
+          {/* Network — pools the user belongs to */}
+          <section>
+            <SectionHeader title="Network" />
+            {(myPools?.length ?? 0) === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No pools yet. Join or create a private pool inside any community to chat with a small group.
+              </p>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {myPools!.map((p) => (
+                  <Link key={p.id} href={`/pools/${p.id}`}>
+                    <Card className="h-full transition-colors hover:border-primary/50">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium">{p.title}</p>
+                          <Badge variant="secondary">
+                            <Users className="mr-1 h-3 w-3" />
+                            {p.memberCount}/{p.maxMembers}
+                          </Badge>
+                        </div>
+                        {p.community && (
+                          <p className="text-xs text-muted-foreground">{p.community.name}</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
         </div>
 
