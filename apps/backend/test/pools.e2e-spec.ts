@@ -84,6 +84,17 @@ describe('Pools — private capped group chats (e2e)', () => {
       .expect(403);
   });
 
+  it('surfaces my pools in my network with community info', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`${API}/pools/me`)
+      .set(auth(creator.token))
+      .expect(200);
+    const mine = res.body.data.find((p: { id: string }) => p.id === poolId);
+    expect(mine).toBeTruthy();
+    expect(mine.community.slug).toBe(slug);
+    expect(mine.isMember).toBe(true);
+  });
+
   it('lists pools with capacity + membership flags', async () => {
     const res = await request(app.getHttpServer())
       .get(`${API}/communities/${slug}/pools`)
