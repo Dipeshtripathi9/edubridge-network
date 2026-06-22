@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Award,
   GraduationCap,
   Home,
   LayoutGrid,
@@ -17,13 +16,12 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 
 const NAV = [
-  { href: '/dashboard', label: 'Dashboard', icon: Home },
+  { href: '/home', label: 'Home', icon: Home },
   { href: '/communities', label: 'Communities', icon: LayoutGrid },
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
   { href: '/opportunities', label: 'Opportunities', icon: Target },
   { href: '/resources', label: 'Resources', icon: BookOpen },
   { href: '/messages', label: 'Messages', icon: MessageSquare },
-  { href: '/leaderboard', label: 'Leaderboard', icon: Award },
 ];
 
 export function Sidebar() {
@@ -33,7 +31,7 @@ export function Sidebar() {
   const nav = isAdmin ? [...NAV, { href: '/admin', label: 'Admin', icon: ShieldCheck }] : NAV;
   return (
     <aside className="hidden w-64 shrink-0 border-r border-border bg-card/40 md:flex md:flex-col">
-      <Link href="/dashboard" className="flex items-center gap-2 px-6 py-5">
+      <Link href="/home" className="flex items-center gap-2 px-6 py-5">
         <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <GraduationCap className="h-5 w-5" />
         </span>

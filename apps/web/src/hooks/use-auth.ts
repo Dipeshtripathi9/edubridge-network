@@ -18,7 +18,7 @@ export function useLogin() {
       api.post<AuthResult>('/auth/login', input, { auth: false }),
     onSuccess: (res) => {
       setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
-      router.push('/dashboard');
+      router.push('/home');
     },
   });
 }
@@ -38,7 +38,7 @@ export function useGoogleAuth() {
       api.post<AuthResult>('/auth/google', { idToken }, { auth: false }),
     onSuccess: (res) => {
       setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
-      router.push('/dashboard');
+      router.push('/home');
     },
   });
 }
