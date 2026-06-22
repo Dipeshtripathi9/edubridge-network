@@ -17,6 +17,7 @@ import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
 import { OpportunityCard } from '@/components/opportunity-card';
 import { PoolsSection } from '@/components/pools-section';
+import { CommunityReviews } from '@/components/community-reviews';
 import { useFeed } from '@/hooks/use-posts';
 import { useResources } from '@/hooks/use-resources';
 import {
@@ -202,11 +203,13 @@ export function CommunitySections({
   communityId,
   canModerate,
   collegeSlug,
+  isMember = false,
 }: {
   slug: string;
   communityId: string;
   canModerate: boolean;
   collegeSlug?: string | null;
+  isMember?: boolean;
 }) {
   return (
     <Tabs defaultValue="announcements">
@@ -253,21 +256,20 @@ export function CommunitySections({
         <PoolsSection slug={slug} />
       </TabsContent>
 
-      <TabsContent value="reviews">
-        {collegeSlug ? (
+      <TabsContent value="reviews" className="space-y-4">
+        {collegeSlug && (
           <Card>
             <CardContent className="flex items-center justify-between p-4">
-              <p className="text-sm text-muted-foreground">Verified students can review this college.</p>
-              <Button asChild size="sm">
-                <Link href={`/reviews/${collegeSlug}`}>Open reviews</Link>
+              <p className="text-sm text-muted-foreground">
+                Rate the college too — placement, faculty, ROI & more.
+              </p>
+              <Button asChild size="sm" variant="outline">
+                <Link href={`/reviews/${collegeSlug}`}>College reviews</Link>
               </Button>
             </CardContent>
           </Card>
-        ) : (
-          <p className="py-10 text-center text-muted-foreground">
-            Reviews are available on college communities.
-          </p>
         )}
+        <CommunityReviews slug={slug} canReview={isMember} />
       </TabsContent>
     </Tabs>
   );

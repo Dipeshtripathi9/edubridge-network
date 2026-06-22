@@ -69,6 +69,35 @@ export function useCreateReview(collegeId: string) {
   });
 }
 
+// ---------------- Community-manager reviews ----------------
+export function useCommunityReviews(slug: string) {
+  return useQuery({
+    queryKey: ['community-reviews', slug],
+    queryFn: () => api.paginated<Review>(`/communities/${slug}/reviews?limit=30`),
+    enabled: !!slug,
+  });
+}
+
+export function useCommunityReviewSummary(slug: string) {
+  return useQuery({
+    queryKey: ['community-reviews', 'summary', slug],
+    queryFn: () => api.get<{ avgRating: number; count: number }>(`/communities/${slug}/reviews/summary`),
+    enabled: !!slug,
+  });
+}
+
+export function useCreateCommunityReview(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { rating: number; title?: string; body: string }) =>
+      api.post(`/communities/${slug}/reviews`, input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['community-reviews', slug] });
+      qc.invalidateQueries({ queryKey: ['community-reviews', 'summary', slug] });
+    },
+  });
+}
+
 export function useVerifyReview(collegeId: string) {
   const qc = useQueryClient();
   return useMutation({

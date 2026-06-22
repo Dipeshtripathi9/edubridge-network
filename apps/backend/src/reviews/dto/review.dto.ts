@@ -28,6 +28,26 @@ export class CreateReviewDto {
   body!: string;
 }
 
+export class CreateCommunityReviewDto {
+  @ApiProperty({ minimum: 1, maximum: 5 })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  rating!: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  title?: string;
+
+  @ApiProperty()
+  @IsString()
+  @MaxLength(5000)
+  body!: string;
+}
+
 export class ReviewQueryDto extends PaginationDto {
   @ApiPropertyOptional({ enum: ReviewCategory })
   @IsOptional()
