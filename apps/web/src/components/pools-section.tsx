@@ -9,13 +9,16 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth.store';
-import { useChatSocket, useMessages } from '@/hooks/use-messaging';
+import { useChatSocket, useMessages, useSendMessage } from '@/hooks/use-messaging';
 import { Pool, useCreatePool, useJoinPool, useLeavePool, usePools } from '@/hooks/use-pools';
 
 export function PoolChat({ pool, onBack }: { pool: Pool; onBack: () => void }) {
   const myId = useAuthStore((s) => s.user?.id);
   const { data: messages, isLoading } = useMessages(pool.chatId);
-  const { send } = useChatSocket(pool.chatId);
+  // Socket drives live receive + typing; sending goes through REST (reliable
+  // even if the socket hasn't connected yet) and still broadcasts over WS.
+  useChatSocket(pool.chatId);
+  const sendMessage = useSendMessage(pool.chatId);
   const [text, setText] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -24,8 +27,9 @@ export function PoolChat({ pool, onBack }: { pool: Pool; onBack: () => void }) {
   }, [messages]);
 
   const onSend = () => {
-    if (!text.trim()) return;
-    send(text.trim());
+    const body = text.trim();
+    if (!body || sendMessage.isPending) return;
+    sendMessage.mutate(body, { onError: (e) => toast.error((e as Error).message) });
     setText('');
   };
 
