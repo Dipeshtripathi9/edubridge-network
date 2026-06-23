@@ -16,11 +16,11 @@ import { ThemeToggle } from '@/components/theme-toggle';
 const MODULES = [
   { icon: Star, title: 'College Reviews', desc: 'Genuine, verified reviews on placements, hostels & faculty.' },
   { icon: Compass, title: 'College Selection', desc: 'For new students — choose the right college with real insight from verified students.' },
-  { icon: LayoutGrid, title: 'Communities', desc: 'College & topic communities — posts, polls, discussions.' },
-  { icon: Target, title: 'Opportunities', desc: 'Internships, scholarships, fellowships & competitions.' },
-  { icon: BookOpen, title: 'Resource Hub', desc: 'Notes, roadmaps & placement reports from peers.' },
-  { icon: Repeat, title: 'Transfer Hub', desc: 'Find eligible colleges, requirements, deadlines & credit transfer.' },
-  { icon: Bell, title: 'Notifications', desc: 'Never miss a deadline, mention or message.' },
+  { icon: LayoutGrid, title: 'Communities', desc: 'College & topic communities — posts, polls, discussions.', href: '/signup' },
+  { icon: Target, title: 'Opportunities', desc: 'Internships, scholarships, fellowships & competitions.', href: '/signup' },
+  { icon: BookOpen, title: 'Resource Hub', desc: 'Notes, roadmaps & placement reports from peers.', href: '/signup' },
+  { icon: Repeat, title: 'Transfer Hub', desc: 'Find eligible colleges, requirements, deadlines & credit transfer.', href: '/signup' },
+  { icon: Bell, title: 'Notifications', desc: 'Never miss a deadline, mention or message.', href: '/signup' },
 ];
 
 export default function LandingPage() {
@@ -71,18 +71,27 @@ export default function LandingPage() {
         <section className="grid grid-cols-1 gap-4 pb-24 sm:grid-cols-2 lg:grid-cols-4">
           {MODULES.map((m) => {
             const Icon = m.icon;
-            return (
-              <Link
-                key={m.title}
-                href="/signup"
-                className="rounded-lg border border-border bg-card p-6 transition-shadow hover:border-primary/50 hover:shadow-md"
-              >
+            const inner = (
+              <>
                 <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
                 </span>
                 <h3 className="mt-4 font-semibold">{m.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{m.desc}</p>
+              </>
+            );
+            return m.href ? (
+              <Link
+                key={m.title}
+                href={m.href}
+                className="rounded-lg border border-border bg-card p-6 transition-shadow hover:border-primary/50 hover:shadow-md"
+              >
+                {inner}
               </Link>
+            ) : (
+              <div key={m.title} className="rounded-lg border border-border bg-card p-6">
+                {inner}
+              </div>
             );
           })}
         </section>
