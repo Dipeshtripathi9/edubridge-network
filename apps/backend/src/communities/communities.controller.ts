@@ -36,6 +36,12 @@ export class CommunitiesController {
     return this.communities.listCommunities(query, userId);
   }
 
+  @Get('managed')
+  @ApiOperation({ summary: 'Communities I manage (head/mod) — leadership dashboard' })
+  managed(@CurrentUser('sub') userId: string) {
+    return this.communities.myManagedCommunities(userId);
+  }
+
   @Public()
   @Get(':slug')
   @ApiOperation({ summary: 'Get a community by slug' })

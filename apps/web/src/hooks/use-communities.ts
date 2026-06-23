@@ -36,6 +36,18 @@ export interface CommunityMember {
   };
 }
 
+export interface ManagedCommunity {
+  role: string;
+  community: { id: string; name: string; slug: string; type: string; memberCount: number };
+}
+
+export function useManagedCommunities() {
+  return useQuery({
+    queryKey: ['communities', 'managed'],
+    queryFn: () => api.get<ManagedCommunity[]>('/communities/managed'),
+  });
+}
+
 export function useCommunities(filters: { type?: string; topic?: string; q?: string } = {}) {
   return useInfiniteQuery({
     queryKey: ['communities', filters],
