@@ -6,10 +6,12 @@ import { CommunityQueryDto } from './dto/query.dto';
 import {
   AppointHeadDto,
   ApplyHeadDto,
+  HelpRequestDto,
   ModerateMemberDto,
   ResolveCommunityReportDto,
   SetMemberRoleDto,
 } from './dto/moderation.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { UserRole } from '@prisma/client';
 import { CurrentUser, JwtUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
@@ -127,5 +129,32 @@ export class CommunitiesController {
   @ApiOperation({ summary: 'Per-community analytics (heads/mods)' })
   analytics(@Param('slug') slug: string, @CurrentUser() actor: JwtUser) {
     return this.communities.getAnalytics(slug, actor);
+  }
+
+  // ---- Help requests (startup communities) ----
+  @Post(':slug/help')
+  @ApiOperation({ summary: 'Raise a help request (members)' })
+  submitHelp(
+    @Param('slug') slug: string,
+    @CurrentUser('sub') userId: string,
+    @Body() dto: HelpRequestDto,
+  ) {
+    return this.communities.submitHelp(userId, slug, dto.body);
+  }
+
+  @Get(':slug/help')
+  @ApiOperation({ summary: 'List help requests for a community' })
+  listHelp(@Param('slug') slug: string, @Query() query: PaginationDto) {
+    return this.communities.listHelp(slug, query);
+  }
+
+  @Post(':slug/help/:id/resolve')
+  @ApiOperation({ summary: 'Resolve a help request (heads/mods)' })
+  resolveHelp(
+    @Param('slug') slug: string,
+    @Param('id') id: string,
+    @CurrentUser() actor: JwtUser,
+  ) {
+    return this.communities.resolveHelp(slug, actor, id);
   }
 }

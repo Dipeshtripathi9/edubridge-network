@@ -44,6 +44,13 @@ export class ResolveCommunityReportDto {
   status!: 'RESOLVED' | 'DISMISSED';
 }
 
+export class HelpRequestDto {
+  @ApiProperty()
+  @IsString()
+  @MaxLength(2000)
+  body!: string;
+}
+
 export class ModerateMemberDto {
   @ApiProperty({ enum: ['mute', 'unmute', 'ban', 'unban'] })
   @IsIn(['mute', 'unmute', 'ban', 'unban'])

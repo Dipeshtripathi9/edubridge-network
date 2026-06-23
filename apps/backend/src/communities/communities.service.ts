@@ -410,6 +410,44 @@ export class CommunitiesService {
     return { userId: user.id, communityId: community.id, role };
   }
 
+  // ---------------- Help requests (startup communities) ----------------
+  /** Any member can raise a help request; community managers see & resolve them. */
+  async submitHelp(userId: string, slug: string, body: string) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    const member = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId: community.id, userId } },
+    });
+    if (!member) throw new ForbiddenException('Join the community to ask for help');
+    return this.prisma.helpRequest.create({ data: { communityId: community.id, userId, body } });
+  }
+
+  async listHelp(slug: string, query: PaginationDto) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    const items = await this.prisma.helpRequest.findMany({
+      where: { communityId: community.id },
+      orderBy: [{ status: 'asc' }, { createdAt: 'desc' }], // OPEN before RESOLVED
+      skip: query.skip,
+      take: query.limit,
+      include: { user: { select: { id: true, profile: { select: { fullName: true } } } } },
+    });
+    return buildPaginatedResult(items, query);
+  }
+
+  async resolveHelp(slug: string, actor: { sub: string; role: string }, id: string) {
+    const community = await this.resolveCommunityForMod(slug, actor);
+    const help = await this.prisma.helpRequest.findUnique({ where: { id } });
+    if (!help || help.communityId !== community.id) {
+      throw new NotFoundException('Help request not found in this community');
+    }
+    await this.prisma.helpRequest.update({
+      where: { id },
+      data: { status: 'RESOLVED', resolvedById: actor.sub, resolvedAt: new Date() },
+    });
+    return { id, status: 'RESOLVED' };
+  }
+
   // ---------------- Head monitoring ----------------
   private async resolveCommunityForMod(slug: string, actor: { sub: string; role: string }) {
     const community = await this.prisma.community.findUnique({ where: { slug } });
