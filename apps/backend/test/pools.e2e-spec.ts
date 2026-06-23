@@ -106,6 +106,34 @@ describe('Pools — private capped group chats (e2e)', () => {
     expect(pool.isMember).toBe(true);
   });
 
+  it('lets a member like and share a pool', async () => {
+    const liked = await request(app.getHttpServer())
+      .post(`${API}/pools/${poolId}/like`)
+      .set(auth(creator.token))
+      .expect(201);
+    expect(liked.body.data.liked).toBe(true);
+
+    const shared = await request(app.getHttpServer())
+      .post(`${API}/pools/${poolId}/share`)
+      .set(auth(creator.token))
+      .expect(201);
+    expect(shared.body.data.shareCount).toBeGreaterThanOrEqual(1);
+
+    const detail = await request(app.getHttpServer())
+      .get(`${API}/pools/${poolId}`)
+      .set(auth(creator.token))
+      .expect(200);
+    expect(detail.body.data.likeCount).toBe(1);
+    expect(detail.body.data.likedByMe).toBe(true);
+
+    // un-like
+    const unliked = await request(app.getHttpServer())
+      .post(`${API}/pools/${poolId}/like`)
+      .set(auth(creator.token))
+      .expect(201);
+    expect(unliked.body.data.liked).toBe(false);
+  });
+
   it('lets a member leave, freeing a slot', async () => {
     await request(app.getHttpServer())
       .delete(`${API}/pools/${poolId}/leave`)

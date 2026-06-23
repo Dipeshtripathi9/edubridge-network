@@ -276,6 +276,7 @@ model User {
   chatParticipants ChatParticipant[]
   messages         Message[]
   poolMemberships  PoolMember[]
+  poolLikes        PoolLike[]
   helpRequests     HelpRequest[]
 
   reportsMade    Report[]   @relation("Reporter")
@@ -1055,11 +1056,27 @@ model Pool {
   createdById String
   chatId      String       @unique
   chat        Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  likeCount   Int          @default(0)
+  shareCount  Int          @default(0)
   createdAt   DateTime     @default(now())
   members     PoolMember[]
+  likes       PoolLike[]
 
   @@index([communityId, createdAt])
   @@map("pools")
+}
+
+model PoolLike {
+  id        String   @id @default(cuid())
+  poolId    String
+  pool      Pool     @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([poolId, userId])
+  @@index([userId])
+  @@map("pool_likes")
 }
 
 model PoolMember {

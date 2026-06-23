@@ -13,6 +13,9 @@ export interface Pool {
   memberCount: number;
   isMember: boolean;
   isFull: boolean;
+  likeCount?: number;
+  shareCount?: number;
+  likedByMe?: boolean;
   community?: { name: string; slug: string };
 }
 
@@ -61,5 +64,27 @@ export function useLeavePool(slug: string) {
   return useMutation({
     mutationFn: (poolId: string) => api.delete(`/pools/${poolId}/leave`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['pools'] }),
+  });
+}
+
+export function useLikePool() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (poolId: string) => api.post<{ liked: boolean }>(`/pools/${poolId}/like`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pool'] });
+      qc.invalidateQueries({ queryKey: ['pools'] });
+    },
+  });
+}
+
+export function useSharePool() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (poolId: string) => api.post<{ shareCount: number }>(`/pools/${poolId}/share`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pool'] });
+      qc.invalidateQueries({ queryKey: ['pools'] });
+    },
   });
 }

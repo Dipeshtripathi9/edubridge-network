@@ -57,6 +57,7 @@ export class PoolsService {
       include: {
         _count: { select: { members: true } },
         members: { where: { userId }, select: { id: true } },
+        likes: { where: { userId }, select: { id: true } },
       },
     });
     return pools.map((p) => ({
@@ -69,6 +70,9 @@ export class PoolsService {
       memberCount: p._count.members,
       isMember: p.members.length > 0,
       isFull: p._count.members >= p.maxMembers,
+      likeCount: p.likeCount,
+      shareCount: p.shareCount,
+      likedByMe: p.likes.length > 0,
     }));
   }
 
@@ -82,6 +86,7 @@ export class PoolsService {
           include: {
             community: { select: { name: true, slug: true } },
             _count: { select: { members: true } },
+            likes: { where: { userId }, select: { id: true } },
           },
         },
       },
@@ -96,6 +101,9 @@ export class PoolsService {
       memberCount: m.pool._count.members,
       isFull: m.pool._count.members >= m.pool.maxMembers,
       isMember: true,
+      likeCount: m.pool.likeCount,
+      shareCount: m.pool.shareCount,
+      likedByMe: m.pool.likes.length > 0,
       community: m.pool.community,
     }));
   }
@@ -108,6 +116,8 @@ export class PoolsService {
         members: {
           include: { user: { select: { id: true, profile: { select: { fullName: true } } } } },
         },
+        likes: { where: { userId }, select: { id: true } },
+        community: { select: { name: true, slug: true } },
       },
     });
     if (!pool) throw new NotFoundException('Pool not found');
@@ -122,12 +132,43 @@ export class PoolsService {
       memberCount: pool._count.members,
       isFull: pool._count.members >= pool.maxMembers,
       isMember,
+      likeCount: pool.likeCount,
+      shareCount: pool.shareCount,
+      likedByMe: pool.likes.length > 0,
+      community: pool.community,
       // The chat itself is only readable by members (chat participation guard).
       members: pool.members.map((m) => ({
         id: m.user.id,
         fullName: m.user.profile?.fullName ?? 'Student',
       })),
     };
+  }
+
+  async toggleLike(id: string, userId: string) {
+    const existing = await this.prisma.poolLike.findUnique({
+      where: { poolId_userId: { poolId: id, userId } },
+    });
+    if (existing) {
+      await this.prisma.$transaction([
+        this.prisma.poolLike.delete({ where: { id: existing.id } }),
+        this.prisma.pool.update({ where: { id }, data: { likeCount: { decrement: 1 } } }),
+      ]);
+      return { liked: false };
+    }
+    await this.prisma.$transaction([
+      this.prisma.poolLike.create({ data: { poolId: id, userId } }),
+      this.prisma.pool.update({ where: { id }, data: { likeCount: { increment: 1 } } }),
+    ]);
+    return { liked: true };
+  }
+
+  async share(id: string) {
+    const updated = await this.prisma.pool.update({
+      where: { id },
+      data: { shareCount: { increment: 1 } },
+      select: { shareCount: true },
+    });
+    return updated;
   }
 
   async join(id: string, userId: string) {
