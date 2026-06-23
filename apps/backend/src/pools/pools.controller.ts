@@ -44,6 +44,18 @@ export class PoolsController {
     return this.pools.join(id, userId);
   }
 
+  @Post('pools/:id/like')
+  @ApiOperation({ summary: 'Toggle like on a pool' })
+  like(@Param('id') id: string, @CurrentUser('sub') userId: string) {
+    return this.pools.toggleLike(id, userId);
+  }
+
+  @Post('pools/:id/share')
+  @ApiOperation({ summary: 'Increment the pool share counter' })
+  share(@Param('id') id: string) {
+    return this.pools.share(id);
+  }
+
   @Delete('pools/:id/leave')
   @ApiOperation({ summary: 'Leave a pool' })
   leave(@Param('id') id: string, @CurrentUser('sub') userId: string) {

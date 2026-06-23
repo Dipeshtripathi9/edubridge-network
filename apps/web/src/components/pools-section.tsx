@@ -1,24 +1,44 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Lock, Send, Users } from 'lucide-react';
+import { ArrowLeft, Heart, Lock, LogOut, Send, Share2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 import { useChatSocket, useMessages, useSendMessage } from '@/hooks/use-messaging';
-import { Pool, useCreatePool, useJoinPool, useLeavePool, usePools } from '@/hooks/use-pools';
+import {
+  Pool,
+  useCreatePool,
+  useJoinPool,
+  useLeavePool,
+  useLikePool,
+  usePools,
+  useSharePool,
+} from '@/hooks/use-pools';
 
-export function PoolChat({ pool, onBack }: { pool: Pool; onBack: () => void }) {
+export function PoolChat({
+  pool,
+  onBack,
+  communitySlug,
+}: {
+  pool: Pool;
+  onBack: () => void;
+  communitySlug?: string;
+}) {
   const myId = useAuthStore((s) => s.user?.id);
   const { data: messages, isLoading } = useMessages(pool.chatId);
   // Socket drives live receive + typing; sending goes through REST (reliable
   // even if the socket hasn't connected yet) and still broadcasts over WS.
   useChatSocket(pool.chatId);
   const sendMessage = useSendMessage(pool.chatId);
+  const like = useLikePool();
+  const share = useSharePool();
+  const leave = useLeavePool(communitySlug ?? pool.community?.slug ?? '');
   const [text, setText] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -33,6 +53,13 @@ export function PoolChat({ pool, onBack }: { pool: Pool; onBack: () => void }) {
     setText('');
   };
 
+  const onShare = () => {
+    const url = `${window.location.origin}/pools/${pool.id}`;
+    navigator.clipboard?.writeText(url).catch(() => {});
+    share.mutate(pool.id);
+    toast.success('Pool link copied');
+  };
+
   return (
     <Card>
       <CardContent className="flex h-[28rem] flex-col p-0">
@@ -40,12 +67,38 @@ export function PoolChat({ pool, onBack }: { pool: Pool; onBack: () => void }) {
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
+          <div className="flex-1">
             <p className="text-sm font-semibold">{pool.title}</p>
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
               <Lock className="h-3 w-3" /> Private · {pool.memberCount}/{pool.maxMembers}
             </p>
           </div>
+          <button
+            className={cn('flex items-center gap-1 px-1 text-sm text-muted-foreground hover:text-foreground', pool.likedByMe && 'text-rose-500')}
+            title="Like"
+            onClick={() => like.mutate(pool.id)}
+          >
+            <Heart className={cn('h-4 w-4', pool.likedByMe && 'fill-current')} /> {pool.likeCount ?? 0}
+          </button>
+          <button className="flex items-center gap-1 px-1 text-sm text-muted-foreground hover:text-foreground" title="Share" onClick={onShare}>
+            <Share2 className="h-4 w-4" /> {pool.shareCount ?? 0}
+          </button>
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Leave pool"
+            onClick={() =>
+              leave.mutate(pool.id, {
+                onSuccess: () => {
+                  toast.success('Left pool');
+                  onBack();
+                },
+                onError: (e) => toast.error((e as Error).message),
+              })
+            }
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
         <div className="flex-1 space-y-2 overflow-y-auto p-3">
           {isLoading ? (
@@ -97,7 +150,7 @@ export function PoolsSection({ slug }: { slug: string }) {
 
   const active = pools?.find((p) => p.id === openId);
   if (active && active.isMember) {
-    return <PoolChat pool={active} onBack={() => setOpenId(null)} />;
+    return <PoolChat pool={active} onBack={() => setOpenId(null)} communitySlug={slug} />;
   }
 
   return (
