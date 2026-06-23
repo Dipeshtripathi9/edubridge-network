@@ -383,7 +383,7 @@ function CommunitiesTab() {
   const [role, setRole] = useState<string>('CAMPUS_LEAD');
   // Create-community form
   const [cName, setCName] = useState('');
-  const [cType, setCType] = useState<'TOPIC' | 'COLLEGE'>('TOPIC');
+  const [cType, setCType] = useState<'TOPIC' | 'COLLEGE' | 'STARTUP'>('TOPIC');
   const [cTopic, setCTopic] = useState('');
   const [cCollegeId, setCCollegeId] = useState('');
   const apps = data?.data ?? [];
@@ -394,14 +394,16 @@ function CommunitiesTab() {
       return;
     }
     const payload: Record<string, unknown> = { name: cName, type: cType };
-    if (cType === 'TOPIC') payload.topic = cTopic || cName;
-    else {
+    if (cType === 'COLLEGE') {
       if (!cCollegeId) {
         toast.error('Pick a college');
         return;
       }
       payload.collegeId = cCollegeId;
+    } else if (cType === 'TOPIC') {
+      payload.topic = cTopic || cName;
     }
+    // STARTUP needs only a name
     create.mutate(payload, {
       onSuccess: (community) => {
         toast.success(`Created "${community.name}" — now appoint its head below`);
@@ -424,19 +426,19 @@ function CommunitiesTab() {
         <CardContent className="space-y-2">
           <Input placeholder="Community name" value={cName} onChange={(e) => setCName(e.target.value)} />
           <div className="flex gap-2">
-            {(['TOPIC', 'COLLEGE'] as const).map((t) => (
+            {(['TOPIC', 'COLLEGE', 'STARTUP'] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setCType(t)}
-                className={`flex-1 rounded-md border px-3 py-1.5 text-sm ${cType === t ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent'}`}
+                className={`flex-1 rounded-md border px-3 py-1.5 text-sm capitalize ${cType === t ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent'}`}
               >
-                {t === 'TOPIC' ? 'Topic' : 'College'}
+                {t.toLowerCase()}
               </button>
             ))}
           </div>
           {cType === 'TOPIC' ? (
             <Input placeholder="Topic (e.g. AI, DSA)" value={cTopic} onChange={(e) => setCTopic(e.target.value)} />
-          ) : (
+          ) : cType === 'STARTUP' ? null : (
             <select
               value={cCollegeId}
               onChange={(e) => setCCollegeId(e.target.value)}

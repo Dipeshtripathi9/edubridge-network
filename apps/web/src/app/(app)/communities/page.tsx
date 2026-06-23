@@ -47,8 +47,9 @@ export default function CommunitiesPage() {
       <Tabs defaultValue="all" onValueChange={(v) => setType(v === 'all' ? undefined : v)}>
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="COLLEGE">Colleges</TabsTrigger>
-          <TabsTrigger value="TOPIC">Topics</TabsTrigger>
+          <TabsTrigger value="COLLEGE">College/University</TabsTrigger>
+          <TabsTrigger value="TOPIC">Topic</TabsTrigger>
+          <TabsTrigger value="STARTUP">Startup</TabsTrigger>
         </TabsList>
       </Tabs>
 

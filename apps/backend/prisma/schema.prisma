@@ -47,6 +47,7 @@ enum CollegeVerificationStatus {
 enum CommunityType {
   COLLEGE
   TOPIC
+  STARTUP
 }
 
 enum CommunityRole {
