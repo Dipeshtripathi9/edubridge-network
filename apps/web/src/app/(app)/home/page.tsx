@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import {
   ArrowRight,
-  Award,
   BookOpen,
   LayoutGrid,
   Repeat,
@@ -13,18 +12,14 @@ import {
   Trophy,
   Users,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn, timeAgo } from '@/lib/utils';
-import { useAuthStore } from '@/stores/auth.store';
 import { useMe } from '@/hooks/use-profile';
-import { useMyReputation, useLeaderboard } from '@/hooks/use-reputation';
 import { useMyApplications, useRecommendedOpportunities } from '@/hooks/use-opportunities';
 import { useMyJourneys } from '@/hooks/use-transfer';
 import { useCommunities } from '@/hooks/use-communities';
-import { useNotifications } from '@/hooks/use-notifications';
 import { useMyPools } from '@/hooks/use-pools';
 
 function repStatus(points: number) {
@@ -78,15 +73,11 @@ function SectionHeader({ title, href }: { title: string; href?: string }) {
 }
 
 export default function HomePage() {
-  const myId = useAuthStore((s) => s.user?.id);
   const { data: me } = useMe();
-  const { data: rep } = useMyReputation();
-  const { data: lb } = useLeaderboard();
   const { data: apps } = useMyApplications();
   const { data: journeys } = useMyJourneys();
   const { data: communitiesData, isLoading: communitiesLoading } = useCommunities();
   const { data: recommended } = useRecommendedOpportunities();
-  const { data: notifs } = useNotifications();
   const { data: myPools } = useMyPools();
 
   const firstName = me?.profile?.fullName?.split(' ')[0];
@@ -97,10 +88,8 @@ export default function HomePage() {
     .filter((c) => !c.isMember)
     .sort((a, b) => b.memberCount - a.memberCount)
     .slice(0, 4);
-  const leaders = lb?.pages.flatMap((p) => p.data).slice(0, 5) ?? [];
   const opps = (recommended ?? []).slice(0, 3);
-  const activity = notifs?.data.slice(0, 5) ?? [];
-  const points = rep?.points ?? me?.reputationPoints ?? 0;
+  const points = me?.reputationPoints ?? 0;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -251,87 +240,6 @@ export default function HomePage() {
 
         {/* Right sidebar */}
         <div className="space-y-6">
-          {/* Reputation panel */}
-          <Card id="reputation" className="border-primary/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Award className="h-5 w-5 text-primary" /> Reputation
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-3xl font-bold">{points}</p>
-                <p className="text-sm text-muted-foreground">
-                  Status: <span className="font-medium text-foreground">{repStatus(points)}</span>
-                </p>
-              </div>
-              <div>
-                <p className="mb-1 text-xs font-medium text-muted-foreground">Your badges</p>
-                {(rep?.badges?.length ?? 0) === 0 ? (
-                  <p className="text-sm text-muted-foreground">No badges yet — keep contributing!</p>
-                ) : (
-                  <div className="flex flex-wrap gap-1.5">
-                    {rep!.badges.map((b) => (
-                      <Badge key={b.id} variant="secondary" title={b.description ?? ''}>
-                        🏆 {b.name}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <Button asChild variant="outline" size="sm" className="w-full">
-                <Link href="/profile">View full profile</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Leaderboard */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Leaderboard This Month</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1">
-              {leaders.length === 0 ? (
-                <Skeleton className="h-24 w-full" />
-              ) : (
-                leaders.map((u) => (
-                  <div
-                    key={u.id}
-                    className={cn(
-                      'flex items-center justify-between rounded-md px-2 py-1 text-sm',
-                      u.id === myId && 'bg-primary/10 font-medium',
-                    )}
-                  >
-                    <span>
-                      {u.rank}. {u.profile?.fullName ?? 'Student'}
-                      {u.id === myId && ' (You)'}
-                    </span>
-                    <span className="text-muted-foreground">{u.reputationPoints}</span>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Recent activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {activity.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No recent activity.</p>
-              ) : (
-                activity.map((n) => (
-                  <div key={n.id} className="text-sm">
-                    <p>{n.title}</p>
-                    <p className="text-xs text-muted-foreground">{timeAgo(n.createdAt)} ago</p>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
           {/* Reputation CTA */}
           <Card className="border-primary/30 bg-primary/5">
             <CardContent className="space-y-2 p-4">
