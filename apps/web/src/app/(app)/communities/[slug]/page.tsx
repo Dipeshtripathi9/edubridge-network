@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { CommunityMonitor } from '@/components/community-monitor';
 import { CommunitySections } from '@/components/community-sections';
 import { ApplyHead } from '@/components/apply-head';
-import { useCommunity, useJoinCommunity } from '@/hooks/use-communities';
+import { isCommunityManager, useCommunity, useJoinCommunity } from '@/hooks/use-communities';
 import { useMe } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -20,8 +20,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
   const globalRole = useAuthStore((s) => s.user?.role);
   const { data: me } = useMe();
   const canModerate =
-    community?.myRole === 'ADMIN' ||
-    community?.myRole === 'MODERATOR' ||
+    isCommunityManager(community?.myRole) ||
     globalRole === 'ADMIN' ||
     globalRole === 'SUPER_ADMIN' ||
     globalRole === 'MODERATOR';
