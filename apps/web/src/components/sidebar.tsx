@@ -6,11 +6,11 @@ import {
   GraduationCap,
   Home,
   LayoutGrid,
-  MessageSquare,
   Repeat,
   ShieldCheck,
   Target,
   BookOpen,
+  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -21,7 +21,7 @@ const NAV = [
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
   { href: '/opportunities', label: 'Opportunities', icon: Target },
   { href: '/resources', label: 'Resources', icon: BookOpen },
-  { href: '/messages', label: 'Messages', icon: MessageSquare },
+  { href: '/network', label: 'Network', icon: Users },
 ];
 
 export function Sidebar() {
