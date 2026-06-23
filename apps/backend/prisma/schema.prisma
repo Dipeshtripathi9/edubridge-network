@@ -276,6 +276,7 @@ model User {
   chatParticipants ChatParticipant[]
   messages         Message[]
   poolMemberships  PoolMember[]
+  helpRequests     HelpRequest[]
 
   reportsMade    Report[]   @relation("Reporter")
   reportsAgainst Report[]   @relation("ReportedUser")
@@ -531,6 +532,7 @@ model Community {
   resources        Resource[]
   pools            Pool[]
   reviews          Review[]
+  helpRequests     HelpRequest[]
 
   @@index([type])
   @@index([collegeId])
@@ -1071,6 +1073,22 @@ model PoolMember {
   @@unique([poolId, userId])
   @@index([userId])
   @@map("pool_members")
+}
+
+model HelpRequest {
+  id           String    @id @default(cuid())
+  communityId  String
+  community    Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body         String
+  status       String    @default("OPEN") // OPEN | RESOLVED
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([communityId, status, createdAt])
+  @@map("help_requests")
 }
 
 model ChatParticipant {
