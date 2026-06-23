@@ -62,7 +62,7 @@ export default function LeadershipPage() {
                       : 'Topic'}
                 </p>
                 <Button asChild size="sm" className="w-full">
-                  <Link href={`/communities/${m.community.slug}`}>
+                  <Link href={`/leadership/${m.community.slug}`}>
                     Manage <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>

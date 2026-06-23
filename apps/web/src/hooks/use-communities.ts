@@ -20,7 +20,7 @@ export interface Community {
   iconUrl?: string | null;
   bannerUrl?: string | null;
   isMember?: boolean;
-  myRole?: 'MEMBER' | 'MODERATOR' | 'ADMIN' | null;
+  myRole?: string | null;
   college?: { id: string; name: string; slug: string; logoUrl?: string | null } | null;
 }
 
