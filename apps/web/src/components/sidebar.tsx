@@ -18,10 +18,10 @@ import { useAuthStore } from '@/stores/auth.store';
 const NAV = [
   { href: '/home', label: 'Home', icon: Home },
   { href: '/communities', label: 'Communities', icon: LayoutGrid },
-  { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
   { href: '/opportunities', label: 'Opportunities', icon: Target },
   { href: '/resources', label: 'Resources', icon: BookOpen },
   { href: '/network', label: 'Network', icon: Users },
+  { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
 ];
 
 export function Sidebar() {
