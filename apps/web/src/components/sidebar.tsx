@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  Crown,
   GraduationCap,
   Home,
   LayoutGrid,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
+import { useManagedCommunities } from '@/hooks/use-communities';
 
 const NAV = [
   { href: '/home', label: 'Home', icon: Home },
@@ -28,7 +30,15 @@ export function Sidebar() {
   const pathname = usePathname();
   const role = useAuthStore((s) => s.user?.role);
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
-  const nav = isAdmin ? [...NAV, { href: '/admin', label: 'Admin', icon: ShieldCheck }] : NAV;
+  const { data: managed } = useManagedCommunities();
+  const nav = [
+    ...NAV,
+    // Leadership dashboard — only for users who hold a head/mod post.
+    ...((managed?.length ?? 0) > 0
+      ? [{ href: '/leadership', label: 'Leadership', icon: Crown }]
+      : []),
+    ...(isAdmin ? [{ href: '/admin', label: 'Admin', icon: ShieldCheck }] : []),
+  ];
   return (
     <aside className="hidden w-64 shrink-0 border-r border-border bg-card/40 md:flex md:flex-col">
       <Link href="/home" className="flex items-center gap-2 px-6 py-5">

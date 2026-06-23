@@ -73,4 +73,22 @@ describe('Admin community management (e2e)', () => {
       .send({ email: monitor.email, role: 'MODERATOR' })
       .expect(403);
   });
+
+  it('surfaces managed communities to post-holders only', async () => {
+    const leadView = await request(app.getHttpServer())
+      .get(`${API}/communities/managed`)
+      .set(auth(lead.token))
+      .expect(200);
+    const mine = leadView.body.data.find((m: { community: { slug: string } }) => m.community.slug === slug);
+    expect(mine).toBeTruthy();
+    expect(mine.role).toBe('CAMPUS_LEAD');
+
+    // a fresh user with no post sees an empty leadership dashboard
+    const plain = await registerVerifiedUser(app, { fullName: 'Plain' });
+    const plainView = await request(app.getHttpServer())
+      .get(`${API}/communities/managed`)
+      .set(auth(plain.token))
+      .expect(200);
+    expect(plainView.body.data.length).toBe(0);
+  });
 });

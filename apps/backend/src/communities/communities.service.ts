@@ -410,6 +410,26 @@ export class CommunitiesService {
     return { userId: user.id, communityId: community.id, role };
   }
 
+  /** Communities the user manages (holds a head/mod role in) — their leadership dashboard. */
+  async myManagedCommunities(userId: string) {
+    const memberships = await this.prisma.communityMember.findMany({
+      where: { userId, role: { not: 'MEMBER' } },
+      orderBy: { joinedAt: 'desc' },
+      include: {
+        community: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            type: true,
+            memberCount: true,
+          },
+        },
+      },
+    });
+    return memberships.map((m) => ({ role: m.role, community: m.community }));
+  }
+
   // ---------------- Help requests (startup communities) ----------------
   /** Any member can raise a help request; community managers see & resolve them. */
   async submitHelp(userId: string, slug: string, body: string) {
