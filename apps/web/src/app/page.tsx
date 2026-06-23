@@ -1,11 +1,10 @@
 import Link from 'next/link';
 import {
   ArrowRight,
-  Award,
   BookOpen,
+  Compass,
   GraduationCap,
   LayoutGrid,
-  MessageSquare,
   Repeat,
   Star,
   Target,
@@ -15,13 +14,12 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 const MODULES = [
-  { icon: LayoutGrid, title: 'Communities', desc: 'College & topic communities — posts, polls, discussions.' },
-  { icon: Repeat, title: 'Transfer Hub', desc: 'Find eligible colleges, requirements, deadlines & credit transfer.' },
-  { icon: Target, title: 'Opportunities', desc: 'Internships, scholarships, fellowships & competitions.' },
   { icon: Star, title: 'College Reviews', desc: 'Genuine, verified reviews on placements, hostels & faculty.' },
+  { icon: Compass, title: 'College Selection', desc: 'For new students — choose the right college with real insight from verified students.' },
+  { icon: LayoutGrid, title: 'Communities', desc: 'College & topic communities — posts, polls, discussions.' },
+  { icon: Target, title: 'Opportunities', desc: 'Internships, scholarships, fellowships & competitions.' },
   { icon: BookOpen, title: 'Resource Hub', desc: 'Notes, roadmaps & placement reports from peers.' },
-  { icon: MessageSquare, title: 'Messaging', desc: 'Real-time chat with peers and communities.' },
-  { icon: Award, title: 'Reputation', desc: 'Earn points & badges. Become a campus leader.' },
+  { icon: Repeat, title: 'Transfer Hub', desc: 'Find eligible colleges, requirements, deadlines & credit transfer.' },
   { icon: Bell, title: 'Notifications', desc: 'Never miss a deadline, mention or message.' },
 ];
 
