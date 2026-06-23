@@ -6,7 +6,6 @@ import {
   BookOpen,
   LayoutGrid,
   Repeat,
-  Sparkles,
   Star,
   Target,
   Trophy,
@@ -108,9 +107,9 @@ export default function HomePage() {
         <StatCard icon={Trophy} label="Reputation" value={points} hint={repStatus(points)} href="#reputation" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6">
         {/* Main column */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="space-y-6">
           {/* Recommended communities */}
           <section>
             <SectionHeader title="Recommended Communities" href="/communities" />
@@ -236,26 +235,6 @@ export default function HomePage() {
               </div>
             )}
           </section>
-        </div>
-
-        {/* Right sidebar */}
-        <div className="space-y-6">
-          {/* Reputation CTA */}
-          <Card className="border-primary/30 bg-primary/5">
-            <CardContent className="space-y-2 p-4">
-              <p className="flex items-center gap-1 font-medium">
-                <Sparkles className="h-4 w-4 text-primary" /> Level up your reputation!
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Help more students, share knowledge, and earn exclusive badges.
-              </p>
-              <Button asChild size="sm">
-                <Link href="/opportunities">
-                  Explore Opportunities <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
