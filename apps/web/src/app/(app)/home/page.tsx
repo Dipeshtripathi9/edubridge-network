@@ -5,28 +5,17 @@ import {
   ArrowRight,
   BookOpen,
   LayoutGrid,
-  Repeat,
   Star,
   Target,
-  Trophy,
   Users,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMe } from '@/hooks/use-profile';
 import { useMyApplications, useRecommendedOpportunities } from '@/hooks/use-opportunities';
-import { useMyJourneys } from '@/hooks/use-transfer';
 import { useCommunities } from '@/hooks/use-communities';
 import { useMyPools } from '@/hooks/use-pools';
-
-function repStatus(points: number) {
-  if (points >= 750) return 'Excellent';
-  if (points >= 400) return 'Great';
-  if (points >= 150) return 'Rising';
-  return 'Newcomer';
-}
 
 function StatCard({
   icon: Icon,
@@ -74,7 +63,6 @@ function SectionHeader({ title, href }: { title: string; href?: string }) {
 export default function HomePage() {
   const { data: me } = useMe();
   const { data: apps } = useMyApplications();
-  const { data: journeys } = useMyJourneys();
   const { data: communitiesData, isLoading: communitiesLoading } = useCommunities();
   const { data: recommended } = useRecommendedOpportunities();
   const { data: myPools } = useMyPools();
@@ -88,7 +76,6 @@ export default function HomePage() {
     .sort((a, b) => b.memberCount - a.memberCount)
     .slice(0, 4);
   const opps = (recommended ?? []).slice(0, 3);
-  const points = me?.reputationPoints ?? 0;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -99,12 +86,10 @@ export default function HomePage() {
       </div>
 
       {/* Quick stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatCard icon={LayoutGrid} label="Communities" value={joined.length} hint="Active communities" href="/communities" />
         <StatCard icon={Target} label="Applications" value={applications.length} hint="Active applications" href="/opportunities" />
         <StatCard icon={BookOpen} label="Saved Opportunities" value={savedOpps.length} hint="Saved for later" href="/opportunities" />
-        <StatCard icon={Repeat} label="Transfer Requests" value={journeys?.length ?? 0} hint="In progress" href="/transfer" />
-        <StatCard icon={Trophy} label="Reputation" value={points} hint={repStatus(points)} href="#reputation" />
       </div>
 
       <div className="grid gap-6">
