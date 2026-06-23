@@ -20,8 +20,8 @@ const NAV = [
   { href: '/communities', label: 'Communities', icon: LayoutGrid },
   { href: '/opportunities', label: 'Opportunities', icon: Target },
   { href: '/resources', label: 'Resources', icon: BookOpen },
-  { href: '/network', label: 'Network', icon: Users },
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
+  { href: '/network', label: 'Network', icon: Users },
 ];
 
 export function Sidebar() {
