@@ -9,7 +9,16 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMembers, useModerateMember, useSetMemberRole } from '@/hooks/use-communities';
 
-const ROLE_NEXT: Record<string, string> = { MEMBER: 'MODERATOR', MODERATOR: 'ADMIN', ADMIN: 'MEMBER' };
+const ROLES = [
+  'MEMBER',
+  'MODERATOR',
+  'CAMPUS_LEAD',
+  'OPPORTUNITY_HEAD',
+  'STUDENT_RELATIONS_HEAD',
+  'ADMIN',
+] as const;
+
+const roleLabel = (r: string) => r.replace(/_/g, ' ').toLowerCase();
 
 export function MemberManager({ slug }: { slug: string }) {
   const { data, isLoading } = useMembers(slug);
@@ -35,25 +44,34 @@ export function MemberManager({ slug }: { slug: string }) {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{m.user.profile?.fullName ?? 'Student'}</p>
                 <div className="flex items-center gap-1.5">
-                  <Badge variant={m.role === 'MEMBER' ? 'secondary' : 'default'}>{m.role}</Badge>
+                  <Badge variant={m.role === 'MEMBER' ? 'secondary' : 'default'} className="capitalize">
+                    {roleLabel(m.role)}
+                  </Badge>
                   {m.bannedAt && <span className="text-xs text-destructive">banned</span>}
                   {muted && <span className="text-xs text-amber-600">muted</span>}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  title="Cycle role"
-                  onClick={() =>
+              <div className="flex flex-wrap items-center gap-1">
+                <select
+                  value={m.role}
+                  title="Set role"
+                  className="h-9 rounded-md border border-input bg-background px-2 text-sm capitalize"
+                  onChange={(e) =>
                     setRole.mutate(
-                      { userId: m.user.id, role: ROLE_NEXT[m.role] },
-                      { onSuccess: () => toast.success(`Role → ${ROLE_NEXT[m.role]}`), onError: (e) => toast.error((e as Error).message) },
+                      { userId: m.user.id, role: e.target.value },
+                      {
+                        onSuccess: () => toast.success(`Role → ${roleLabel(e.target.value)}`),
+                        onError: (err) => toast.error((err as Error).message),
+                      },
                     )
                   }
                 >
-                  Make {ROLE_NEXT[m.role].toLowerCase()}
-                </Button>
+                  {ROLES.map((r) => (
+                    <option key={r} value={r} className="capitalize">
+                      {roleLabel(r)}
+                    </option>
+                  ))}
+                </select>
                 <Button
                   size="sm"
                   variant="outline"

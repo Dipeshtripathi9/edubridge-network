@@ -26,7 +26,7 @@ export interface Community {
 
 export interface CommunityMember {
   id: string;
-  role: 'MEMBER' | 'MODERATOR' | 'ADMIN';
+  role: string;
   mutedUntil?: string | null;
   bannedAt?: string | null;
   user: {
