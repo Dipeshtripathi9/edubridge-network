@@ -72,16 +72,17 @@ export default function LandingPage() {
           {MODULES.map((m) => {
             const Icon = m.icon;
             return (
-              <div
+              <Link
                 key={m.title}
-                className="rounded-lg border border-border bg-card p-6 transition-shadow hover:shadow-md"
+                href="/signup"
+                className="rounded-lg border border-border bg-card p-6 transition-shadow hover:border-primary/50 hover:shadow-md"
               >
                 <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
                 </span>
                 <h3 className="mt-4 font-semibold">{m.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{m.desc}</p>
-              </div>
+              </Link>
             );
           })}
         </section>
