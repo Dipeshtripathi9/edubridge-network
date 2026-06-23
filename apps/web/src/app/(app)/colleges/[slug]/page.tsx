@@ -25,7 +25,7 @@ import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
 import { PoolsSection } from '@/components/pools-section';
 import { CommunityReviews } from '@/components/community-reviews';
-import { useCommunity, useJoinCommunity } from '@/hooks/use-communities';
+import { isCommunityManager, useCommunity, useJoinCommunity } from '@/hooks/use-communities';
 import { useFeed } from '@/hooks/use-posts';
 import { useReviews, useReviewSummary } from '@/hooks/use-reviews';
 import { useOpportunities } from '@/hooks/use-opportunities';
@@ -263,8 +263,7 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
   const join = useJoinCommunity(hub?.community?.slug ?? '');
   const globalRole = useAuthStore((s) => s.user?.role);
   const canModerate =
-    community?.myRole === 'ADMIN' ||
-    community?.myRole === 'MODERATOR' ||
+    isCommunityManager(community?.myRole) ||
     globalRole === 'ADMIN' ||
     globalRole === 'SUPER_ADMIN' ||
     globalRole === 'MODERATOR';

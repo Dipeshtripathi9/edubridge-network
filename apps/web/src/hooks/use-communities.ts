@@ -36,6 +36,18 @@ export interface CommunityMember {
   };
 }
 
+// Per-community roles that can moderate/manage (mirrors the backend's isMod).
+export const COMMUNITY_MANAGER_ROLES = [
+  'ADMIN',
+  'MODERATOR',
+  'CAMPUS_LEAD',
+  'OPPORTUNITY_HEAD',
+  'STUDENT_RELATIONS_HEAD',
+];
+
+export const isCommunityManager = (role?: string | null) =>
+  !!role && COMMUNITY_MANAGER_ROLES.includes(role);
+
 export interface ManagedCommunity {
   role: string;
   community: { id: string; name: string; slug: string; type: string; memberCount: number };
