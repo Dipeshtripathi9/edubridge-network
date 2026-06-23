@@ -23,7 +23,11 @@ export function CommunityCard({ community }: { community: Community }) {
               {community.name}
             </Link>
             <Badge variant="secondary" className="ml-2">
-              {community.type === 'COLLEGE' ? 'College' : community.topic ?? 'Topic'}
+              {community.type === 'COLLEGE'
+                ? 'College'
+                : community.type === 'STARTUP'
+                  ? 'Startup'
+                  : community.topic ?? 'Topic'}
             </Badge>
           </div>
         </div>

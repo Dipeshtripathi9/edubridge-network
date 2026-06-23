@@ -142,7 +142,13 @@ export default function HomePage() {
                           <p className="font-medium">{c.name}</p>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          {c.type === 'COLLEGE' ? 'College community' : c.topic ? `Topic · ${c.topic}` : 'Topic community'}
+                          {c.type === 'COLLEGE'
+                            ? 'College community'
+                            : c.type === 'STARTUP'
+                              ? 'Startup community'
+                              : c.topic
+                                ? `Topic · ${c.topic}`
+                                : 'Topic community'}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {c.memberCount.toLocaleString()} members

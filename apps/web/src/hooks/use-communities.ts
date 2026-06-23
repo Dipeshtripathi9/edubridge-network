@@ -13,7 +13,7 @@ export interface Community {
   name: string;
   slug: string;
   description?: string | null;
-  type: 'COLLEGE' | 'TOPIC';
+  type: 'COLLEGE' | 'TOPIC' | 'STARTUP';
   topic?: string | null;
   memberCount: number;
   postCount: number;
