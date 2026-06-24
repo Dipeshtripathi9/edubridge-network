@@ -94,12 +94,12 @@ export default function TransferHubPage() {
           <Repeat className="h-6 w-6 text-primary" />
           Transfer Hub
         </h1>
-        <p className="text-muted-foreground">
+        <div className="text-muted-foreground">
           Discover colleges you can transfer to, track your journey, and learn from others.
           <Badge variant="secondary" className="ml-2">
             <BookOpenText className="mr-1 h-3 w-3" /> Powered by the College Data layer
           </Badge>
-        </p>
+        </div>
       </div>
 
       <Tabs defaultValue="find">

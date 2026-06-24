@@ -91,10 +91,10 @@ export default function ManageCommunityPage({ params }: { params: Promise<{ slug
           <h1 className="flex items-center gap-2 text-2xl font-bold">
             <ShieldCheck className="h-6 w-6 text-primary" /> {community.name}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Managing as{' '}
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            Managing as
             <Badge className="capitalize">{roleLabel(community.myRole ?? 'manager')}</Badge>
-          </p>
+          </div>
         </div>
         <Button asChild variant="outline" size="sm">
           <Link href={`/communities/${slug}`}>Open community</Link>
