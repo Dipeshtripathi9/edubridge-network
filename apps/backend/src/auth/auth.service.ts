@@ -81,7 +81,8 @@ export class AuthService {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       },
     });
-    await this.mail.sendVerificationEmail(email, token);
+    // Fire-and-forget — never block signup on the SMTP send (it can hang/fail).
+    void this.mail.sendVerificationEmail(email, token).catch(() => undefined);
   }
 
   async verifyEmail(dto: VerifyEmailDto) {

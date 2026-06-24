@@ -43,18 +43,11 @@ export class CommunitiesController {
     return this.communities.myManagedCommunities(userId);
   }
 
-  @Public()
-  @Get('hiring')
-  @ApiOperation({ summary: 'Whether manager-position applications are open' })
-  async hiringStatus() {
-    return { open: await this.communities.getHiringOpen() };
-  }
-
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  @Post('hiring')
-  @ApiOperation({ summary: 'Open/close manager-position applications (admin)' })
-  setHiring(@Body() dto: HiringDto) {
-    return this.communities.setHiringOpen(dto.open);
+  @Patch(':slug/hiring')
+  @ApiOperation({ summary: 'Open/close hiring for a community with a requirement note (admin)' })
+  setHiring(@Param('slug') slug: string, @Body() dto: HiringDto) {
+    return this.communities.setCommunityHiring(slug, dto.open, dto.note);
   }
 
   @Public()

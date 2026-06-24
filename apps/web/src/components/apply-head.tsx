@@ -7,12 +7,19 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { HEAD_ROLES, useApplyHead, useHiringStatus, useMyHeadApplications } from '@/hooks/use-heads';
+import { HEAD_ROLES, useApplyHead, useMyHeadApplications } from '@/hooks/use-heads';
 
-export function ApplyHead({ slug }: { slug: string }) {
+export function ApplyHead({
+  slug,
+  hiringOpen = false,
+  hiringNote,
+}: {
+  slug: string;
+  hiringOpen?: boolean;
+  hiringNote?: string | null;
+}) {
   const apply = useApplyHead(slug);
   const { data: mine } = useMyHeadApplications();
-  const { data: hiring } = useHiringStatus();
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<string>('CAMPUS_LEAD');
   const [pitch, setPitch] = useState('');
@@ -20,7 +27,7 @@ export function ApplyHead({ slug }: { slug: string }) {
   const pending = mine?.find((a) => a.community.slug === slug && a.status === 'PENDING');
 
   // Hiring closed (and no pending app of mine) → nothing to show.
-  if (!hiring?.open && !pending) return null;
+  if (!hiringOpen && !pending) return null;
 
   if (pending) {
     return (
@@ -34,9 +41,17 @@ export function ApplyHead({ slug }: { slug: string }) {
 
   if (!open) {
     return (
-      <Button variant="outline" onClick={() => setOpen(true)}>
-        <Crown className="h-4 w-4" /> Apply to lead this community
-      </Button>
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="flex flex-wrap items-center justify-between gap-2 p-4">
+          <div>
+            <p className="text-sm font-medium">This community is hiring managers 🎉</p>
+            {hiringNote && <p className="text-sm text-muted-foreground">{hiringNote}</p>}
+          </div>
+          <Button variant="outline" onClick={() => setOpen(true)}>
+            <Crown className="h-4 w-4" /> Apply to lead
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 

@@ -29,12 +29,12 @@ describe('Community heads & governance (e2e)', () => {
       data: { name: `Heads Topic ${stamp}`, slug, type: 'TOPIC', topic: 'Heads', memberCount: 0 },
     });
 
-    // Hiring is closed by default — admin opens it so students can apply.
+    // Hiring is per-community & closed by default — admin opens it for this one.
     await request(app.getHttpServer())
-      .post(`${API}/communities/hiring`)
+      .patch(`${API}/communities/${slug}/hiring`)
       .set(auth(admin.token))
-      .send({ open: true })
-      .expect(201);
+      .send({ open: true, note: 'Looking for a Campus Lead' })
+      .expect(200);
   });
   afterAll(async () => {
     await app?.close();
@@ -137,22 +137,22 @@ describe('Community heads & governance (e2e)', () => {
       .expect(201);
   });
 
-  it('admin can close hiring, which blocks new applications', async () => {
+  it('admin can close per-community hiring, which blocks new applications', async () => {
     const fresh = await registerVerifiedUser(app, { fullName: 'Late Applicant' });
     await prisma.profile.update({
       where: { userId: fresh.userId },
       data: { collegeVerification: 'VERIFIED' },
     });
 
-    // close hiring (admin only)
+    // close hiring for this community (admin only)
     await request(app.getHttpServer())
-      .post(`${API}/communities/hiring`)
+      .patch(`${API}/communities/${slug}/hiring`)
       .set(auth(admin.token))
       .send({ open: false })
-      .expect(201);
+      .expect(200);
     // a non-admin cannot toggle hiring
     await request(app.getHttpServer())
-      .post(`${API}/communities/hiring`)
+      .patch(`${API}/communities/${slug}/hiring`)
       .set(auth(fresh.token))
       .send({ open: true })
       .expect(403);
@@ -162,12 +162,5 @@ describe('Community heads & governance (e2e)', () => {
       .set(auth(fresh.token))
       .send({ requestedRole: 'MODERATOR' })
       .expect(403);
-
-    // reopen for other suites
-    await request(app.getHttpServer())
-      .post(`${API}/communities/hiring`)
-      .set(auth(admin.token))
-      .send({ open: true })
-      .expect(201);
   });
 });

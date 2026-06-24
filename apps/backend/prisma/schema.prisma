@@ -522,6 +522,10 @@ model Community {
   memberCount Int @default(0)
   postCount   Int @default(0)
 
+  // Per-community hiring for head/manager posts (admin-controlled)
+  hiringOpen Boolean @default(false)
+  hiringNote String?
+
   createdById String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

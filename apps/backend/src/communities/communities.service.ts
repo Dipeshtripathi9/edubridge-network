@@ -326,34 +326,29 @@ export class CommunitiesService {
   ];
 
   /** A verified student member applies to lead a community. */
-  // ---------------- Hiring (head/manager applications) toggle ----------------
-  private static readonly HIRING_KEY = 'HEAD_APPLICATIONS_OPEN';
-
-  async getHiringOpen(): Promise<boolean> {
-    const s = await this.prisma.setting.findUnique({
-      where: { key: CommunitiesService.HIRING_KEY },
+  // ---------------- Hiring (per-community head/manager applications) ----------------
+  /** Admin opens/closes hiring for a specific community, with an optional requirement note. */
+  async setCommunityHiring(slug: string, open: boolean, note?: string | null) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    const updated = await this.prisma.community.update({
+      where: { id: community.id },
+      data: { hiringOpen: open, hiringNote: note ?? null },
+      select: { slug: true, hiringOpen: true, hiringNote: true },
     });
-    return s ? s.value === 'true' : false; // closed by default until admin opens it
-  }
-
-  async setHiringOpen(open: boolean) {
-    await this.prisma.setting.upsert({
-      where: { key: CommunitiesService.HIRING_KEY },
-      update: { value: String(open) },
-      create: { key: CommunitiesService.HIRING_KEY, value: String(open) },
-    });
-    return { open };
+    await this.invalidate(slug);
+    return updated;
   }
 
   async applyForHead(userId: string, slug: string, requestedRole: CommunityRole, pitch?: string) {
-    if (!(await this.getHiringOpen())) {
-      throw new ForbiddenException('Applications for manager positions are currently closed');
-    }
     if (!CommunitiesService.APPLICABLE_ROLES.includes(requestedRole)) {
       throw new BadRequestException('Invalid role to apply for');
     }
     const community = await this.prisma.community.findUnique({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
+    if (!community.hiringOpen) {
+      throw new ForbiddenException('This community is not hiring managers right now');
+    }
 
     const profile = await this.prisma.profile.findUnique({ where: { userId } });
     if (profile?.collegeVerification !== 'VERIFIED') {
