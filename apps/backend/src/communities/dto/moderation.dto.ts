@@ -17,6 +17,12 @@ export class HiringDto {
   @ApiProperty()
   @IsBoolean()
   open!: boolean;
+
+  @ApiPropertyOptional({ description: 'Requirement / what you are hiring for' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  note?: string;
 }
 
 export class SetMemberRoleDto {

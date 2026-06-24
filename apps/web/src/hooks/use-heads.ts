@@ -20,18 +20,15 @@ export interface HeadApplication {
   user?: { id: string; email: string | null; profile?: { fullName: string } | null };
 }
 
-export function useHiringStatus() {
-  return useQuery({
-    queryKey: ['hiring'],
-    queryFn: () => api.get<{ open: boolean }>('/communities/hiring'),
-  });
-}
-
-export function useSetHiring() {
+export function useSetCommunityHiring() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (open: boolean) => api.post<{ open: boolean }>('/communities/hiring', { open }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['hiring'] }),
+    mutationFn: (input: { slug: string; open: boolean; note?: string }) =>
+      api.patch(`/communities/${input.slug}/hiring`, { open: input.open, note: input.note }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['communities'] });
+      qc.invalidateQueries({ queryKey: ['community'] });
+    },
   });
 }
 

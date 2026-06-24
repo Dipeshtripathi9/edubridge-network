@@ -15,6 +15,8 @@ export interface Community {
   description?: string | null;
   type: 'COLLEGE' | 'TOPIC' | 'STARTUP';
   topic?: string | null;
+  hiringOpen?: boolean;
+  hiringNote?: string | null;
   memberCount: number;
   postCount: number;
   iconUrl?: string | null;

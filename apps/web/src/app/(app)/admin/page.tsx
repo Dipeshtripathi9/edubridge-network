@@ -35,8 +35,7 @@ import {
   useAppointHead,
   useDecideHeadApp,
   useHeadAppQueue,
-  useHiringStatus,
-  useSetHiring,
+  useSetCommunityHiring,
 } from '@/hooks/use-heads';
 import Link from 'next/link';
 import { useCommunities, useCreateCommunity } from '@/hooks/use-communities';
@@ -378,10 +377,13 @@ function VerificationTab() {
 function AllCommunities() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommunities();
   const appoint = useAppointHead();
+  const setHiring = useSetCommunityHiring();
   const [q, setQ] = useState('');
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('CAMPUS_LEAD');
+  const [hiringSlug, setHiringSlug] = useState<string | null>(null);
+  const [note, setNote] = useState('');
   const all = data?.pages.flatMap((p) => p.data) ?? [];
   const term = q.trim().toLowerCase();
   const items = term ? all.filter((c) => c.name.toLowerCase().includes(term)) : all;
@@ -391,8 +393,14 @@ function AllCommunities() {
 
   const toggle = (slug: string) => {
     setOpenSlug((cur) => (cur === slug ? null : slug));
+    setHiringSlug(null);
     setEmail('');
     setRole('CAMPUS_LEAD');
+  };
+  const toggleHiring = (slug: string, currentNote?: string | null) => {
+    setHiringSlug((cur) => (cur === slug ? null : slug));
+    setOpenSlug(null);
+    setNote(currentNote ?? '');
   };
 
   return (
@@ -415,12 +423,22 @@ function AllCommunities() {
               <CardContent className="space-y-2 p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="text-sm font-medium">{c.name}</p>
+                    <p className="text-sm font-medium">
+                      {c.name}{' '}
+                      {c.hiringOpen && (
+                        <span className="ml-1 rounded bg-green-500/15 px-1.5 py-0.5 text-xs text-green-600">
+                          hiring
+                        </span>
+                      )}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {typeLabel(c.type)} · {c.memberCount.toLocaleString()} members
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" onClick={() => toggleHiring(c.slug, c.hiringNote)}>
+                      {hiringSlug === c.slug ? 'Cancel' : 'Hiring'}
+                    </Button>
                     <Button size="sm" variant="outline" onClick={() => toggle(c.slug)}>
                       {openSlug === c.slug ? 'Cancel' : 'Appoint here'}
                     </Button>
@@ -429,6 +447,61 @@ function AllCommunities() {
                     </Button>
                   </div>
                 </div>
+
+                {hiringSlug === c.slug && (
+                  <div className="space-y-2 rounded-md border border-border p-2">
+                    <p className="text-xs text-muted-foreground">
+                      Hiring is {c.hiringOpen ? 'OPEN' : 'CLOSED'}. Set the requirement and open/close
+                      applications for this community.
+                    </p>
+                    <Input
+                      placeholder="Requirement, e.g. Looking for an Opportunity Head (active, 2nd yr+)"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      className="h-9"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        disabled={setHiring.isPending}
+                        onClick={() =>
+                          setHiring.mutate(
+                            { slug: c.slug, open: true, note: note || undefined },
+                            {
+                              onSuccess: () => {
+                                toast.success(`Hiring opened for ${c.name}`);
+                                setHiringSlug(null);
+                              },
+                              onError: (e) => toast.error((e as Error).message),
+                            },
+                          )
+                        }
+                      >
+                        {c.hiringOpen ? 'Update & keep open' : 'Open hiring'}
+                      </Button>
+                      {c.hiringOpen && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={setHiring.isPending}
+                          onClick={() =>
+                            setHiring.mutate(
+                              { slug: c.slug, open: false },
+                              {
+                                onSuccess: () => {
+                                  toast.success(`Hiring closed for ${c.name}`);
+                                  setHiringSlug(null);
+                                },
+                              },
+                            )
+                          }
+                        >
+                          Close hiring
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {openSlug === c.slug && (
                   <div className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2">
@@ -526,8 +599,6 @@ function CommunitiesTab() {
   const { data, isLoading } = useHeadAppQueue();
   const decide = useDecideHeadApp();
   const appoint = useAppointHead();
-  const hiring = useHiringStatus();
-  const setHiring = useSetHiring();
   const create = useCreateCommunity();
   const { data: collegesData } = useColleges({ sort: 'name' });
   const colleges = collegesData?.pages.flatMap((p) => p.data) ?? [];
@@ -569,37 +640,8 @@ function CommunitiesTab() {
     });
   };
 
-  const hiringOpen = hiring.data?.open ?? false;
-
   return (
     <div className="space-y-6">
-      <Card className="max-w-xl border-primary/30 bg-primary/5">
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-          <div>
-            <p className="font-medium">Manager hiring</p>
-            <p className="text-sm text-muted-foreground">
-              Applications for community head/manager posts are{' '}
-              <span className={hiringOpen ? 'text-green-600' : 'text-destructive'}>
-                {hiringOpen ? 'OPEN' : 'CLOSED'}
-              </span>
-              .
-            </p>
-          </div>
-          <Button
-            variant={hiringOpen ? 'outline' : 'default'}
-            disabled={setHiring.isPending}
-            onClick={() =>
-              setHiring.mutate(!hiringOpen, {
-                onSuccess: (r) => toast.success(r.open ? 'Hiring opened' : 'Hiring closed'),
-                onError: (e) => toast.error((e as Error).message),
-              })
-            }
-          >
-            {hiringOpen ? 'Close hiring' : 'Open hiring'}
-          </Button>
-        </CardContent>
-      </Card>
-
       <Card className="max-w-xl">
         <CardHeader>
           <CardTitle className="text-base">Create a community</CardTitle>
