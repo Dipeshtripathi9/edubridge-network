@@ -112,8 +112,13 @@ export function useResolveReport() {
 
 export function useBroadcast() {
   return useMutation({
-    mutationFn: (input: { type: string; title: string; body?: string; link?: string }) =>
-      api.post<{ sent: number }>('/notifications/broadcast', input),
+    mutationFn: (input: {
+      type: string;
+      title: string;
+      body?: string;
+      link?: string;
+      communityId?: string;
+    }) => api.post<{ sent: number }>('/notifications/broadcast', input),
   });
 }
 

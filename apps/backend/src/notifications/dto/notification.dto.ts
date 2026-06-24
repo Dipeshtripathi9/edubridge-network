@@ -31,4 +31,9 @@ export class BroadcastDto {
   @IsOptional()
   @IsString()
   link?: string;
+
+  @ApiPropertyOptional({ description: 'Target a single community (members only). Omit = all users.' })
+  @IsOptional()
+  @IsString()
+  communityId?: string;
 }

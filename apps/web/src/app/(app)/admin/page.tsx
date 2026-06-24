@@ -286,17 +286,41 @@ function ReportsTab() {
 
 function BroadcastTab() {
   const broadcast = useBroadcast();
+  const { data: communitiesData } = useCommunities();
+  const communities = communitiesData?.pages.flatMap((p) => p.data) ?? [];
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [link, setLink] = useState('');
+  // 'all' = everyone; otherwise a community id.
+  const [target, setTarget] = useState<string>('all');
+
+  const targetName =
+    target === 'all' ? 'all users' : communities.find((c) => c.id === target)?.name ?? 'community';
 
   return (
     <Card className="max-w-xl">
       <CardHeader>
         <CardTitle className="text-base">Broadcast a notification</CardTitle>
-        <p className="text-sm text-muted-foreground">Sends to all active users (e.g. a new scholarship).</p>
+        <p className="text-sm text-muted-foreground">
+          Choose the audience: everyone, or members of a specific community.
+        </p>
       </CardHeader>
       <CardContent className="space-y-3">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">Send to</label>
+          <select
+            value={target}
+            onChange={(e) => setTarget(e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
+          >
+            <option value="all">All communities / all users</option>
+            {communities.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name} ({c.memberCount} members)
+              </option>
+            ))}
+          </select>
+        </div>
         <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
         <Textarea placeholder="Body (optional)" value={body} onChange={(e) => setBody(e.target.value)} />
         <Input placeholder="Deeplink, e.g. /opportunities (optional)" value={link} onChange={(e) => setLink(e.target.value)} />
@@ -304,7 +328,13 @@ function BroadcastTab() {
           disabled={!title.trim() || broadcast.isPending}
           onClick={() =>
             broadcast.mutate(
-              { type: 'SYSTEM', title, body: body || undefined, link: link || undefined },
+              {
+                type: 'SYSTEM',
+                title,
+                body: body || undefined,
+                link: link || undefined,
+                communityId: target === 'all' ? undefined : target,
+              },
               {
                 onSuccess: (r) => {
                   toast.success(`Sent to ${r.sent} users`);
@@ -318,7 +348,7 @@ function BroadcastTab() {
           }
         >
           <Megaphone className="h-4 w-4" />
-          Broadcast
+          Broadcast to {targetName}
         </Button>
       </CardContent>
     </Card>
