@@ -110,11 +110,21 @@ export class NotificationsService {
    * would run as a BullMQ job rather than inline.
    */
   async broadcast(dto: BroadcastDto) {
-    const users = await this.prisma.user.findMany({
-      where: { status: 'ACTIVE' },
-      select: { id: true },
-    });
-    const ids = users.map((u) => u.id);
+    let ids: string[];
+    if (dto.communityId) {
+      // Members of a single community.
+      const members = await this.prisma.communityMember.findMany({
+        where: { communityId: dto.communityId, user: { status: 'ACTIVE' } },
+        select: { userId: true },
+      });
+      ids = members.map((m) => m.userId);
+    } else {
+      const users = await this.prisma.user.findMany({
+        where: { status: 'ACTIVE' },
+        select: { id: true },
+      });
+      ids = users.map((u) => u.id);
+    }
     const BATCH = 1000;
     for (let i = 0; i < ids.length; i += BATCH) {
       const slice = ids.slice(i, i + BATCH);
