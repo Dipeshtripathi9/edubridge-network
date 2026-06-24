@@ -278,6 +278,7 @@ model User {
   poolMemberships  PoolMember[]
   poolLikes        PoolLike[]
   helpRequests     HelpRequest[]
+  complaints       Complaint[]
 
   reportsMade    Report[]   @relation("Reporter")
   reportsAgainst Report[]   @relation("ReportedUser")
@@ -534,6 +535,7 @@ model Community {
   pools            Pool[]
   reviews          Review[]
   helpRequests     HelpRequest[]
+  complaints       Complaint[]
 
   @@index([type])
   @@index([collegeId])
@@ -1283,4 +1285,20 @@ model Setting {
   updatedAt DateTime @updatedAt
 
   @@map("settings")
+}
+
+model Complaint {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  communityId  String?
+  community    Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
+  body         String
+  status       String     @default("OPEN") // OPEN | RESOLVED
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime   @default(now())
+
+  @@index([status, createdAt])
+  @@map("complaints")
 }

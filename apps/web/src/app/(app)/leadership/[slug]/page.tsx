@@ -1,17 +1,69 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import { toast } from 'sonner';
+import { ArrowLeft, LifeBuoy, ShieldCheck } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CommunityMonitor } from '@/components/community-monitor';
 import { isCommunityManager, useCommunity } from '@/hooks/use-communities';
+import { useSubmitComplaint } from '@/hooks/use-complaints';
 import { useAuthStore } from '@/stores/auth.store';
 
 const roleLabel = (r: string) => r.replace(/_/g, ' ').toLowerCase();
+
+function RaiseIssue({ communityId }: { communityId: string }) {
+  const submit = useSubmitComplaint();
+  const [open, setOpen] = useState(false);
+  const [body, setBody] = useState('');
+  if (!open) {
+    return (
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+        <LifeBuoy className="h-4 w-4" /> Raise an issue with admin
+      </Button>
+    );
+  }
+  return (
+    <Card>
+      <CardContent className="space-y-2 p-4">
+        <p className="text-sm font-medium">Report an issue directly to the platform admin</p>
+        <Textarea
+          placeholder="Describe the issue you're facing as a manager…"
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+        />
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            size="sm"
+            disabled={!body.trim() || submit.isPending}
+            onClick={() =>
+              submit.mutate(
+                { body: body.trim(), communityId },
+                {
+                  onSuccess: () => {
+                    toast.success('Sent to the platform admin');
+                    setOpen(false);
+                    setBody('');
+                  },
+                  onError: (e) => toast.error((e as Error).message),
+                },
+              )
+            }
+          >
+            Send to admin
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function ManageCommunityPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -48,6 +100,8 @@ export default function ManageCommunityPage({ params }: { params: Promise<{ slug
           <Link href={`/communities/${slug}`}>Open community</Link>
         </Button>
       </div>
+
+      {canManage && <RaiseIssue communityId={community.id} />}
 
       {canManage ? (
         <CommunityMonitor slug={slug} communityId={community.id} myRole={community.myRole} />
