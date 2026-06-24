@@ -1,0 +1,13 @@
+#!/bin/sh
+# Block direct commits to protected branches — work on a feature branch + PR.
+branch="$(git symbolic-ref --short HEAD 2>/dev/null)"
+case "$branch" in
+  main|master)
+    echo "✖ Direct commits to '$branch' are blocked."
+    echo "  Create a feature branch first, e.g.:"
+    echo "    git checkout -b feat/your-change"
+    echo "  (bypass once with: git commit --no-verify)"
+    exit 1
+    ;;
+esac
+exit 0
