@@ -73,7 +73,9 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         </div>
       </div>
 
-      {canModerate && showManage && <CommunityMonitor slug={slug} />}
+      {canModerate && showManage && (
+        <CommunityMonitor slug={slug} communityId={community.id} myRole={community.myRole} />
+      )}
 
       {community.isMember &&
         community.myRole === 'MEMBER' &&
