@@ -11,6 +11,11 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { buildPaginatedResult, PaginationDto } from '../common/dto/pagination.dto';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { CommunityQueryDto } from './dto/query.dto';
+import {
+  CommunityCapability,
+  isPlatformAdmin,
+  roleHasCapability,
+} from './community-permissions';
 
 // Roles that act as a "head" of a community (full management privilege).
 const HEAD_ROLES: CommunityRole[] = [
@@ -231,6 +236,23 @@ export class CommunitiesService {
     if (!ok) throw new ForbiddenException('Insufficient community privileges');
   }
 
+  /** Lock an action to the role whose job it is (Campus Lead/ADMIN are full). */
+  private async assertCapability(
+    communityId: string,
+    actor: { sub: string; role: string },
+    cap: CommunityCapability,
+  ) {
+    if (isPlatformAdmin(actor.role)) return;
+    // Platform moderators retain community moderation + viewing.
+    if (actor.role === 'MODERATOR' && (cap === 'MODERATE' || cap === 'VIEW')) return;
+    const member = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId, userId: actor.sub } },
+    });
+    if (!roleHasCapability(member?.role, cap)) {
+      throw new ForbiddenException('Your role cannot perform this action');
+    }
+  }
+
   private async resolveMember(slug: string, targetUserId: string) {
     const community = await this.prisma.community.findUnique({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
@@ -248,7 +270,7 @@ export class CommunitiesService {
     role: CommunityRole,
   ) {
     const { community, member } = await this.resolveMember(slug, targetUserId);
-    await this.assertCommunityPrivilege(community.id, actor, 'ADMIN');
+    await this.assertCapability(community.id, actor, 'MANAGE_MEMBERS');
     const updated = await this.prisma.communityMember.update({
       where: { id: member.id },
       data: { role },
@@ -269,7 +291,7 @@ export class CommunitiesService {
       throw new ForbiddenException('You cannot moderate yourself');
     }
     const { community, member } = await this.resolveMember(slug, targetUserId);
-    await this.assertCommunityPrivilege(community.id, actor, 'MOD');
+    await this.assertCapability(community.id, actor, 'MODERATE');
     if (member.role === 'ADMIN') {
       throw new ForbiddenException('Cannot moderate a community admin');
     }
@@ -456,7 +478,7 @@ export class CommunitiesService {
   }
 
   async resolveHelp(slug: string, actor: { sub: string; role: string }, id: string) {
-    const community = await this.resolveCommunityForMod(slug, actor);
+    const community = await this.resolveCommunityForCap(slug, actor, 'RESOLVE_HELP');
     const help = await this.prisma.helpRequest.findUnique({ where: { id } });
     if (!help || help.communityId !== community.id) {
       throw new NotFoundException('Help request not found in this community');
@@ -469,16 +491,20 @@ export class CommunitiesService {
   }
 
   // ---------------- Head monitoring ----------------
-  private async resolveCommunityForMod(slug: string, actor: { sub: string; role: string }) {
+  private async resolveCommunityForCap(
+    slug: string,
+    actor: { sub: string; role: string },
+    cap: CommunityCapability,
+  ) {
     const community = await this.prisma.community.findUnique({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
-    await this.assertCommunityPrivilege(community.id, actor, 'MOD');
+    await this.assertCapability(community.id, actor, cap);
     return community;
   }
 
   /** Recent posts in the community (incl. removed) for activity monitoring. */
   async getActivity(slug: string, actor: { sub: string; role: string }, query: PaginationDto) {
-    const community = await this.resolveCommunityForMod(slug, actor);
+    const community = await this.resolveCommunityForCap(slug, actor, 'VIEW');
     const posts = await this.prisma.post.findMany({
       where: { communityId: community.id },
       orderBy: { createdAt: 'desc' },
@@ -500,7 +526,7 @@ export class CommunitiesService {
   }
 
   async getReports(slug: string, actor: { sub: string; role: string }, query: PaginationDto) {
-    const community = await this.resolveCommunityForMod(slug, actor);
+    const community = await this.resolveCommunityForCap(slug, actor, 'VIEW');
     const items = await this.prisma.report.findMany({
       where: { communityId: community.id, status: { in: ['OPEN', 'REVIEWING'] } },
       orderBy: { createdAt: 'desc' },
@@ -517,7 +543,7 @@ export class CommunitiesService {
     reportId: string,
     status: 'RESOLVED' | 'DISMISSED',
   ) {
-    const community = await this.resolveCommunityForMod(slug, actor);
+    const community = await this.resolveCommunityForCap(slug, actor, 'MODERATE');
     const report = await this.prisma.report.findUnique({ where: { id: reportId } });
     if (!report || report.communityId !== community.id) {
       throw new NotFoundException('Report not found in this community');
@@ -530,7 +556,7 @@ export class CommunitiesService {
   }
 
   async getAnalytics(slug: string, actor: { sub: string; role: string }) {
-    const community = await this.resolveCommunityForMod(slug, actor);
+    const community = await this.resolveCommunityForCap(slug, actor, 'VIEW');
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const [posts, postsThisWeek, comments, openReports, topMembers] = await Promise.all([
       this.prisma.post.count({ where: { communityId: community.id, deletedAt: null } }),
