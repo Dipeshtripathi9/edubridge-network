@@ -375,15 +375,25 @@ function VerificationTab() {
   );
 }
 
-function AllCommunities({ onAppoint }: { onAppoint: (slug: string) => void }) {
+function AllCommunities() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommunities();
+  const appoint = useAppointHead();
   const [q, setQ] = useState('');
+  const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('CAMPUS_LEAD');
   const all = data?.pages.flatMap((p) => p.data) ?? [];
   const term = q.trim().toLowerCase();
   const items = term ? all.filter((c) => c.name.toLowerCase().includes(term)) : all;
 
   const typeLabel = (t: string) =>
     t === 'COLLEGE' ? 'College' : t === 'STARTUP' ? 'Startup' : 'Topic';
+
+  const toggle = (slug: string) => {
+    setOpenSlug((cur) => (cur === slug ? null : slug));
+    setEmail('');
+    setRole('CAMPUS_LEAD');
+  };
 
   return (
     <div>
@@ -402,21 +412,64 @@ function AllCommunities({ onAppoint }: { onAppoint: (slug: string) => void }) {
         <div className="space-y-2">
           {items.map((c) => (
             <Card key={c.id}>
-              <CardContent className="flex flex-wrap items-center justify-between gap-2 p-3">
-                <div>
-                  <p className="text-sm font-medium">{c.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {typeLabel(c.type)} · {c.memberCount.toLocaleString()} members
-                  </p>
+              <CardContent className="space-y-2 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-medium">{c.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {typeLabel(c.type)} · {c.memberCount.toLocaleString()} members
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => toggle(c.slug)}>
+                      {openSlug === c.slug ? 'Cancel' : 'Appoint here'}
+                    </Button>
+                    <Button asChild size="sm">
+                      <Link href={`/leadership/${c.slug}`}>Manage</Link>
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => onAppoint(c.slug)}>
-                    Appoint here
-                  </Button>
-                  <Button asChild size="sm">
-                    <Link href={`/leadership/${c.slug}`}>Manage</Link>
-                  </Button>
-                </div>
+
+                {openSlug === c.slug && (
+                  <div className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2">
+                    <Input
+                      placeholder="User email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-9 flex-1"
+                    />
+                    <select
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      {HEAD_ROLES.map((r) => (
+                        <option key={r.value} value={r.value}>
+                          {r.label}
+                        </option>
+                      ))}
+                    </select>
+                    <Button
+                      size="sm"
+                      disabled={!email.trim() || appoint.isPending}
+                      onClick={() =>
+                        appoint.mutate(
+                          { slug: c.slug, email: email.trim(), role },
+                          {
+                            onSuccess: () => {
+                              toast.success(`Appointed in ${c.name}`);
+                              setOpenSlug(null);
+                              setEmail('');
+                            },
+                            onError: (e) => toast.error((e as Error).message),
+                          },
+                        )
+                      }
+                    >
+                      Appoint
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -626,7 +679,7 @@ function CommunitiesTab() {
         </CardContent>
       </Card>
 
-      <AllCommunities onAppoint={(s) => setSlug(s)} />
+      <AllCommunities />
 
       <div>
         <h3 className="mb-2 font-semibold">Head applications</h3>
