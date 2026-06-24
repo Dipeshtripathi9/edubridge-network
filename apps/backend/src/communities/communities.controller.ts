@@ -7,6 +7,7 @@ import {
   AppointHeadDto,
   ApplyHeadDto,
   HelpRequestDto,
+  HiringDto,
   ModerateMemberDto,
   ResolveCommunityReportDto,
   SetMemberRoleDto,
@@ -40,6 +41,20 @@ export class CommunitiesController {
   @ApiOperation({ summary: 'Communities I manage (head/mod) — leadership dashboard' })
   managed(@CurrentUser('sub') userId: string) {
     return this.communities.myManagedCommunities(userId);
+  }
+
+  @Public()
+  @Get('hiring')
+  @ApiOperation({ summary: 'Whether manager-position applications are open' })
+  async hiringStatus() {
+    return { open: await this.communities.getHiringOpen() };
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Post('hiring')
+  @ApiOperation({ summary: 'Open/close manager-position applications (admin)' })
+  setHiring(@Body() dto: HiringDto) {
+    return this.communities.setHiringOpen(dto.open);
   }
 
   @Public()

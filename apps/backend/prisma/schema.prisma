@@ -1276,3 +1276,11 @@ model RolePermission {
   @@id([roleId, permissionId])
   @@map("role_permissions")
 }
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}

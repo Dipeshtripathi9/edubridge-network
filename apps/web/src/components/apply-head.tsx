@@ -7,16 +7,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { HEAD_ROLES, useApplyHead, useMyHeadApplications } from '@/hooks/use-heads';
+import { HEAD_ROLES, useApplyHead, useHiringStatus, useMyHeadApplications } from '@/hooks/use-heads';
 
 export function ApplyHead({ slug }: { slug: string }) {
   const apply = useApplyHead(slug);
   const { data: mine } = useMyHeadApplications();
+  const { data: hiring } = useHiringStatus();
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<string>('CAMPUS_LEAD');
   const [pitch, setPitch] = useState('');
 
   const pending = mine?.find((a) => a.community.slug === slug && a.status === 'PENDING');
+
+  // Hiring closed (and no pending app of mine) → nothing to show.
+  if (!hiring?.open && !pending) return null;
 
   if (pending) {
     return (

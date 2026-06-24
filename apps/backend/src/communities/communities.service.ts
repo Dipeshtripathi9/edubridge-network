@@ -326,7 +326,29 @@ export class CommunitiesService {
   ];
 
   /** A verified student member applies to lead a community. */
+  // ---------------- Hiring (head/manager applications) toggle ----------------
+  private static readonly HIRING_KEY = 'HEAD_APPLICATIONS_OPEN';
+
+  async getHiringOpen(): Promise<boolean> {
+    const s = await this.prisma.setting.findUnique({
+      where: { key: CommunitiesService.HIRING_KEY },
+    });
+    return s ? s.value === 'true' : false; // closed by default until admin opens it
+  }
+
+  async setHiringOpen(open: boolean) {
+    await this.prisma.setting.upsert({
+      where: { key: CommunitiesService.HIRING_KEY },
+      update: { value: String(open) },
+      create: { key: CommunitiesService.HIRING_KEY, value: String(open) },
+    });
+    return { open };
+  }
+
   async applyForHead(userId: string, slug: string, requestedRole: CommunityRole, pitch?: string) {
+    if (!(await this.getHiringOpen())) {
+      throw new ForbiddenException('Applications for manager positions are currently closed');
+    }
     if (!CommunitiesService.APPLICABLE_ROLES.includes(requestedRole)) {
       throw new BadRequestException('Invalid role to apply for');
     }

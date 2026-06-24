@@ -1,7 +1,23 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CommunityRole } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsEmail, IsEnum, IsIn, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
+
+export class HiringDto {
+  @ApiProperty()
+  @IsBoolean()
+  open!: boolean;
+}
 
 export class SetMemberRoleDto {
   @ApiProperty({ enum: CommunityRole })
