@@ -38,7 +38,8 @@ import {
   useHiringStatus,
   useSetHiring,
 } from '@/hooks/use-heads';
-import { useCreateCommunity } from '@/hooks/use-communities';
+import Link from 'next/link';
+import { useCommunities, useCreateCommunity } from '@/hooks/use-communities';
 import { useColleges } from '@/hooks/use-colleges';
 import { useComplaints, useResolveComplaint } from '@/hooks/use-complaints';
 
@@ -374,6 +375,64 @@ function VerificationTab() {
   );
 }
 
+function AllCommunities({ onAppoint }: { onAppoint: (slug: string) => void }) {
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommunities();
+  const [q, setQ] = useState('');
+  const all = data?.pages.flatMap((p) => p.data) ?? [];
+  const term = q.trim().toLowerCase();
+  const items = term ? all.filter((c) => c.name.toLowerCase().includes(term)) : all;
+
+  const typeLabel = (t: string) =>
+    t === 'COLLEGE' ? 'College' : t === 'STARTUP' ? 'Startup' : 'Topic';
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <h3 className="font-semibold">All communities ({all.length})</h3>
+        <Input
+          placeholder="Search…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="h-8 w-48"
+        />
+      </div>
+      {isLoading ? (
+        <Skeleton className="h-40 w-full" />
+      ) : (
+        <div className="space-y-2">
+          {items.map((c) => (
+            <Card key={c.id}>
+              <CardContent className="flex flex-wrap items-center justify-between gap-2 p-3">
+                <div>
+                  <p className="text-sm font-medium">{c.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {typeLabel(c.type)} · {c.memberCount.toLocaleString()} members
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => onAppoint(c.slug)}>
+                    Appoint here
+                  </Button>
+                  <Button asChild size="sm">
+                    <Link href={`/leadership/${c.slug}`}>Manage</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          {hasNextPage && (
+            <div className="flex justify-center">
+              <Button variant="outline" size="sm" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+                {isFetchingNextPage ? 'Loading…' : 'Load more'}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ComplaintsTab() {
   const { data, isLoading } = useComplaints();
   const resolve = useResolveComplaint();
@@ -566,6 +625,8 @@ function CommunitiesTab() {
           </Button>
         </CardContent>
       </Card>
+
+      <AllCommunities onAppoint={(s) => setSlug(s)} />
 
       <div>
         <h3 className="mb-2 font-semibold">Head applications</h3>
