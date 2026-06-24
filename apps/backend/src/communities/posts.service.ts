@@ -7,6 +7,7 @@ import { ReputationService } from '../reputation/reputation.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { FeedQueryDto } from './dto/query.dto';
+import { isPlatformAdmin, roleHasCapability } from './community-permissions';
 
 const POST_AUTHOR_SELECT = {
   select: {
@@ -24,6 +25,17 @@ export class PostsService {
     private readonly notifications: NotificationsService,
     private readonly reputation: ReputationService,
   ) {}
+
+  /** Moderation gate — Moderator / Campus Lead / community admin, or platform admin/mod. */
+  private async assertCanModerate(communityId: string, userId: string, role: string) {
+    if (isPlatformAdmin(role) || role === 'MODERATOR') return;
+    const member = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId, userId } },
+    });
+    if (!roleHasCapability(member?.role, 'MODERATE')) {
+      throw new ForbiddenException('Moderator privileges required');
+    }
+  }
 
   private async actorName(userId: string): Promise<string> {
     const profile = await this.prisma.profile.findUnique({
@@ -49,12 +61,10 @@ export class PostsService {
     if (member?.mutedUntil && member.mutedUntil > new Date()) {
       throw new ForbiddenException('You are muted in this community');
     }
-    // Announcements may only be posted by community heads/mods (or platform admins).
+    // Announcements: only the Campus Lead / community admin (or platform admin).
     if (dto.kind === 'ANNOUNCEMENT') {
-      const isPrivileged =
-        role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'MODERATOR';
-      if (!isPrivileged && (!member || member.role === 'MEMBER')) {
-        throw new ForbiddenException('Only community heads can post announcements');
+      if (!isPlatformAdmin(role) && !roleHasCapability(member?.role, 'ANNOUNCE')) {
+        throw new ForbiddenException('Only the Campus Lead can post announcements');
       }
     }
 
@@ -173,9 +183,9 @@ export class PostsService {
   async deletePost(id: string, userId: string, role: string) {
     const post = await this.prisma.post.findUnique({ where: { id } });
     if (!post || post.deletedAt) throw new NotFoundException('Post not found');
-    const isPrivileged = role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'MODERATOR';
-    if (post.authorId !== userId && !isPrivileged) {
-      throw new ForbiddenException('Cannot delete this post');
+    // Authors delete their own; otherwise it's a moderation action.
+    if (post.authorId !== userId) {
+      await this.assertCanModerate(post.communityId, userId, role);
     }
     await this.prisma.$transaction([
       this.prisma.post.update({
@@ -190,21 +200,11 @@ export class PostsService {
     return { deleted: true };
   }
 
-  /** Pin/unpin a post. Allowed for global admins/mods or the community's mods. */
+  /** Pin/unpin a post. Moderation action — Moderator / Campus Lead / admin. */
   async togglePin(postId: string, userId: string, role: string) {
     const post = await this.prisma.post.findFirst({ where: { id: postId, deletedAt: null } });
     if (!post) throw new NotFoundException('Post not found');
-
-    const isGlobalPrivileged =
-      role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'MODERATOR';
-    if (!isGlobalPrivileged) {
-      const member = await this.prisma.communityMember.findUnique({
-        where: { communityId_userId: { communityId: post.communityId, userId } },
-      });
-      if (!member || member.role === 'MEMBER') {
-        throw new ForbiddenException('Moderator privileges required to pin');
-      }
-    }
+    await this.assertCanModerate(post.communityId, userId, role);
     const updated = await this.prisma.post.update({
       where: { id: postId },
       data: { isPinned: !post.isPinned },

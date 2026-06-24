@@ -4,6 +4,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
 import {
+  CommunityCapability,
+  isPlatformAdmin,
+  roleHasCapability,
+} from '../communities/community-permissions';
+import {
   ApplicationDto,
   CreateOpportunityDto,
   OpportunityQueryDto,
@@ -94,31 +99,27 @@ export class OpportunitiesService {
     return opportunity;
   }
 
-  /** A platform admin, or a head/mod of the opportunity's community, may moderate it. */
-  private async assertCanModerate(
-    opportunity: { communityId: string | null },
+  /** Capability check against the actor's role in a community. */
+  private async assertCommunityCap(
+    communityId: string | null,
     actor: { sub: string; role: string },
+    cap: CommunityCapability,
   ) {
-    if (actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN') return;
-    if (opportunity.communityId) {
-      const member = await this.prisma.communityMember.findUnique({
-        where: { communityId_userId: { communityId: opportunity.communityId, userId: actor.sub } },
-      });
-      if (member && member.role !== 'MEMBER') return;
-    }
-    throw new ForbiddenException('Not allowed to moderate this opportunity');
-  }
-
-  async listPending(actor: { sub: string; role: string }, communityId?: string) {
-    const isAdmin = actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN';
-    if (!isAdmin) {
-      if (!communityId) throw new ForbiddenException('Specify a community you manage');
+    if (isPlatformAdmin(actor.role)) return;
+    if (communityId) {
       const member = await this.prisma.communityMember.findUnique({
         where: { communityId_userId: { communityId, userId: actor.sub } },
       });
-      if (!member || member.role === 'MEMBER') {
-        throw new ForbiddenException('Not a manager of this community');
-      }
+      if (roleHasCapability(member?.role, cap)) return;
+    }
+    throw new ForbiddenException('Your role cannot perform this action');
+  }
+
+  async listPending(actor: { sub: string; role: string }, communityId?: string) {
+    if (!isPlatformAdmin(actor.role)) {
+      if (!communityId) throw new ForbiddenException('Specify a community you manage');
+      // Any manager who can view the dashboard may see the pending queue.
+      await this.assertCommunityCap(communityId, actor, 'VIEW');
     }
     return this.prisma.opportunity.findMany({
       where: { approvalStatus: 'PENDING', ...(communityId ? { communityId } : {}) },
@@ -130,7 +131,8 @@ export class OpportunitiesService {
   async decide(actor: { sub: string; role: string }, id: string, approve: boolean) {
     const opportunity = await this.prisma.opportunity.findUnique({ where: { id } });
     if (!opportunity) throw new NotFoundException('Opportunity not found');
-    await this.assertCanModerate(opportunity, actor);
+    // Only the Opportunity Head (or Campus Lead / admin) may approve.
+    await this.assertCommunityCap(opportunity.communityId, actor, 'APPROVE_OPPORTUNITY');
     const updated = await this.prisma.opportunity.update({
       where: { id },
       data: { approvalStatus: approve ? 'APPROVED' : 'REJECTED', isActive: approve },
