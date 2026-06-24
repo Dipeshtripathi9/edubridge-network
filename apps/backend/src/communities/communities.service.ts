@@ -270,7 +270,11 @@ export class CommunitiesService {
     role: CommunityRole,
   ) {
     const { community, member } = await this.resolveMember(slug, targetUserId);
-    await this.assertCapability(community.id, actor, 'MANAGE_MEMBERS');
+    // Roles are managed by platform admins only — community managers cannot
+    // change anyone's role.
+    if (!isPlatformAdmin(actor.role)) {
+      throw new ForbiddenException('Only a platform admin can change member roles');
+    }
     const updated = await this.prisma.communityMember.update({
       where: { id: member.id },
       data: { role },
