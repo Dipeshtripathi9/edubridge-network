@@ -40,6 +40,7 @@ import {
 } from '@/hooks/use-heads';
 import { useCreateCommunity } from '@/hooks/use-communities';
 import { useColleges } from '@/hooks/use-colleges';
+import { useComplaints, useResolveComplaint } from '@/hooks/use-complaints';
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
@@ -373,6 +374,42 @@ function VerificationTab() {
   );
 }
 
+function ComplaintsTab() {
+  const { data, isLoading } = useComplaints();
+  const resolve = useResolveComplaint();
+  const items = data?.data ?? [];
+  if (isLoading) return <Skeleton className="h-40 w-full" />;
+  if (items.length === 0)
+    return <p className="py-10 text-center text-muted-foreground">No complaints.</p>;
+  return (
+    <div className="space-y-3">
+      {items.map((c) => (
+        <Card key={c.id} className={c.status === 'RESOLVED' ? 'opacity-60' : undefined}>
+          <CardContent className="flex flex-wrap items-start justify-between gap-3 p-4">
+            <div>
+              <p className="text-sm">{c.body}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {c.user?.profile?.fullName ?? c.user?.email ?? 'User'}
+                {c.community ? ` · ${c.community.name}` : ''}
+                {c.status === 'RESOLVED' ? ' · resolved' : ''}
+              </p>
+            </div>
+            {c.status === 'OPEN' && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => resolve.mutate(c.id, { onSuccess: () => toast.success('Resolved') })}
+              >
+                Mark resolved
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 function CommunitiesTab() {
   const { data, isLoading } = useHeadAppQueue();
   const decide = useDecideHeadApp();
@@ -607,6 +644,7 @@ export default function AdminPage() {
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="verification">Verification</TabsTrigger>
           <TabsTrigger value="communities">Communities</TabsTrigger>
+          <TabsTrigger value="complaints">Complaints</TabsTrigger>
           <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
@@ -623,6 +661,9 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="communities">
           <CommunitiesTab />
+        </TabsContent>
+        <TabsContent value="complaints">
+          <ComplaintsTab />
         </TabsContent>
         <TabsContent value="broadcast">
           <BroadcastTab />
