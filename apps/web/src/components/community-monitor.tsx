@@ -126,9 +126,10 @@ function Reports({ slug, active }: { slug: string; active: boolean }) {
         <Card key={r.id}>
           <CardContent className="flex flex-wrap items-center justify-between gap-3 p-3">
             <div>
-              <p className="text-sm">
-                <Badge variant="secondary">{r.targetType}</Badge> <span className="font-medium">{r.reason}</span>
-              </p>
+              <div className="flex items-center gap-1 text-sm">
+                <Badge variant="secondary">{r.targetType}</Badge>
+                <span className="font-medium">{r.reason}</span>
+              </div>
               {r.details && <p className="text-xs text-muted-foreground">{r.details}</p>}
               <p className="text-xs text-muted-foreground">by {r.reporter?.profile?.fullName ?? 'User'}</p>
             </div>

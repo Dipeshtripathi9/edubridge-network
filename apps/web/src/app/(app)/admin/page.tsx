@@ -765,10 +765,10 @@ function CommunitiesTab() {
               <Card key={a.id}>
                 <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
                   <div>
-                    <p className="font-medium">
-                      {a.user?.profile?.fullName ?? a.user?.email}{' '}
+                    <div className="flex items-center gap-2 font-medium">
+                      <span>{a.user?.profile?.fullName ?? a.user?.email}</span>
                       <Badge variant="secondary">{a.requestedRole.replace(/_/g, ' ').toLowerCase()}</Badge>
-                    </p>
+                    </div>
                     <p className="text-xs text-muted-foreground">{a.community.name}</p>
                     {a.pitch && <p className="mt-1 text-sm text-muted-foreground">{a.pitch}</p>}
                   </div>
