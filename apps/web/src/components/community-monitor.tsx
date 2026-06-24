@@ -14,6 +14,79 @@ import {
   useCommunityReports,
   useResolveCommunityReport,
 } from '@/hooks/use-community-monitor';
+import { useDecideOpportunity, usePendingOpportunities } from '@/hooks/use-opportunities';
+import { useHelpRequests, useResolveHelp } from '@/hooks/use-help';
+
+// Each manager role's primary responsibility + the tab it should land on.
+const ROLE_INFO: Record<string, { desc: string; tab: string }> = {
+  CAMPUS_LEAD: { desc: '👑 Campus Lead — overall community lead: members, content & oversight.', tab: 'members' },
+  OPPORTUNITY_HEAD: { desc: '💼 Opportunity Head — review & approve opportunity submissions.', tab: 'opportunities' },
+  STUDENT_RELATIONS_HEAD: { desc: '🤝 Student Relations Head — resolve help requests & student engagement.', tab: 'help' },
+  MODERATOR: { desc: '🛡 Moderator — handle reports, mutes/bans & content.', tab: 'reports' },
+  ADMIN: { desc: 'Community admin — full control of this community.', tab: 'members' },
+};
+
+function OpportunitiesQueue({ communityId, active }: { communityId: string; active: boolean }) {
+  const { data, isLoading } = usePendingOpportunities(communityId, active);
+  const decide = useDecideOpportunity(communityId);
+  const items = data ?? [];
+  if (isLoading) return <Skeleton className="h-32 w-full" />;
+  if (items.length === 0)
+    return <p className="py-8 text-center text-muted-foreground">No opportunities awaiting approval.</p>;
+  return (
+    <div className="space-y-2">
+      {items.map((o) => (
+        <Card key={o.id}>
+          <CardContent className="flex items-center justify-between gap-2 p-3">
+            <div>
+              <p className="text-sm font-medium">{o.title}</p>
+              <p className="text-xs text-muted-foreground">{o.type.toLowerCase()}</p>
+            </div>
+            <div className="flex gap-1">
+              <Button size="sm" variant="outline" onClick={() => decide.mutate({ id: o.id, approve: false }, { onSuccess: () => toast.success('Rejected') })}>
+                Reject
+              </Button>
+              <Button size="sm" onClick={() => decide.mutate({ id: o.id, approve: true }, { onSuccess: () => toast.success('Approved') })}>
+                Approve
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function HelpQueue({ slug, active }: { slug: string; active: boolean }) {
+  const { data, isLoading } = useHelpRequests(slug, active);
+  const resolve = useResolveHelp(slug);
+  const items = data?.data ?? [];
+  if (isLoading) return <Skeleton className="h-32 w-full" />;
+  if (items.length === 0)
+    return <p className="py-8 text-center text-muted-foreground">No help requests.</p>;
+  return (
+    <div className="space-y-2">
+      {items.map((h) => (
+        <Card key={h.id} className={h.status === 'RESOLVED' ? 'opacity-60' : undefined}>
+          <CardContent className="flex items-start justify-between gap-2 p-3">
+            <div>
+              <p className="text-sm">{h.body}</p>
+              <p className="text-xs text-muted-foreground">
+                {h.user?.profile?.fullName ?? 'Member'}
+                {h.status === 'RESOLVED' && ' · resolved'}
+              </p>
+            </div>
+            {h.status === 'OPEN' && (
+              <Button size="sm" variant="outline" onClick={() => resolve.mutate(h.id, { onSuccess: () => toast.success('Resolved') })}>
+                Resolve
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
 
 function Activity({ slug, active }: { slug: string; active: boolean }) {
   const { data, isLoading } = useCommunityActivity(slug, active);
@@ -113,25 +186,47 @@ function Analytics({ slug, active }: { slug: string; active: boolean }) {
   );
 }
 
-export function CommunityMonitor({ slug }: { slug: string }) {
+export function CommunityMonitor({
+  slug,
+  communityId,
+  myRole,
+}: {
+  slug: string;
+  communityId?: string;
+  myRole?: string | null;
+}) {
+  const info = (myRole && ROLE_INFO[myRole]) || ROLE_INFO.ADMIN;
   return (
     <Card>
-      <CardContent className="p-4">
-        <Tabs defaultValue="members">
+      <CardContent className="space-y-3 p-4">
+        <p className="rounded-md border border-primary/30 bg-primary/5 p-2 text-sm text-muted-foreground">
+          {info.desc}
+        </p>
+        <Tabs defaultValue={communityId ? info.tab : info.tab === 'opportunities' ? 'members' : info.tab}>
           <TabsList className="flex-wrap">
             <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
+            {communityId && <TabsTrigger value="opportunities">Opportunities</TabsTrigger>}
+            <TabsTrigger value="help">Help</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
           <TabsContent value="members">
             <MemberManager slug={slug} />
           </TabsContent>
-          <TabsContent value="activity">
-            <Activity slug={slug} active />
+          {communityId && (
+            <TabsContent value="opportunities">
+              <OpportunitiesQueue communityId={communityId} active />
+            </TabsContent>
+          )}
+          <TabsContent value="help">
+            <HelpQueue slug={slug} active />
           </TabsContent>
           <TabsContent value="reports">
             <Reports slug={slug} active />
+          </TabsContent>
+          <TabsContent value="activity">
+            <Activity slug={slug} active />
           </TabsContent>
           <TabsContent value="analytics">
             <Analytics slug={slug} active />

@@ -50,7 +50,7 @@ export default function ManageCommunityPage({ params }: { params: Promise<{ slug
       </div>
 
       {canManage ? (
-        <CommunityMonitor slug={slug} />
+        <CommunityMonitor slug={slug} communityId={community.id} myRole={community.myRole} />
       ) : (
         <Card>
           <CardContent className="p-8 text-center text-muted-foreground">
