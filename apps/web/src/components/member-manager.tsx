@@ -8,6 +8,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMembers, useModerateMember, useSetMemberRole } from '@/hooks/use-communities';
+import { useAuthStore } from '@/stores/auth.store';
 
 const ROLES = [
   'MEMBER',
@@ -25,6 +26,9 @@ export function MemberManager({ slug }: { slug: string }) {
   const setRole = useSetMemberRole(slug);
   const moderate = useModerateMember(slug);
   const members = data?.data ?? [];
+  // Only platform admins can change roles; managers manage but never reassign roles.
+  const globalRole = useAuthStore((s) => s.user?.role);
+  const canManageRoles = globalRole === 'ADMIN' || globalRole === 'SUPER_ADMIN';
 
   if (isLoading) return <Skeleton className="h-40 w-full" />;
 
@@ -52,26 +56,28 @@ export function MemberManager({ slug }: { slug: string }) {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-1">
-                <select
-                  value={m.role}
-                  title="Set role"
-                  className="h-9 rounded-md border border-input bg-background px-2 text-sm capitalize"
-                  onChange={(e) =>
-                    setRole.mutate(
-                      { userId: m.user.id, role: e.target.value },
-                      {
-                        onSuccess: () => toast.success(`Role → ${roleLabel(e.target.value)}`),
-                        onError: (err) => toast.error((err as Error).message),
-                      },
-                    )
-                  }
-                >
-                  {ROLES.map((r) => (
-                    <option key={r} value={r} className="capitalize">
-                      {roleLabel(r)}
-                    </option>
-                  ))}
-                </select>
+                {canManageRoles && (
+                  <select
+                    value={m.role}
+                    title="Set role (admin only)"
+                    className="h-9 rounded-md border border-input bg-background px-2 text-sm capitalize"
+                    onChange={(e) =>
+                      setRole.mutate(
+                        { userId: m.user.id, role: e.target.value },
+                        {
+                          onSuccess: () => toast.success(`Role → ${roleLabel(e.target.value)}`),
+                          onError: (err) => toast.error((err as Error).message),
+                        },
+                      )
+                    }
+                  >
+                    {ROLES.map((r) => (
+                      <option key={r} value={r} className="capitalize">
+                        {roleLabel(r)}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 <Button
                   size="sm"
                   variant="outline"

@@ -92,10 +92,17 @@ describe('Community admin tools (e2e)', () => {
     await post(target.token).expect(201);
   });
 
-  it('promotes a member role', async () => {
-    const res = await request(app.getHttpServer())
+  it('only a platform admin can change roles — community admin cannot', async () => {
+    // the community creator (community ADMIN) can no longer change roles
+    await request(app.getHttpServer())
       .patch(`${API}/communities/${slug}/members/${target.userId}/role`)
       .set(auth(owner.token))
+      .send({ role: 'MODERATOR' })
+      .expect(403);
+    // a platform admin can
+    const res = await request(app.getHttpServer())
+      .patch(`${API}/communities/${slug}/members/${target.userId}/role`)
+      .set(auth(gAdmin.token))
       .send({ role: 'MODERATOR' })
       .expect(200);
     expect(res.body.data.role).toBe('MODERATOR');
