@@ -28,6 +28,13 @@ describe('Community heads & governance (e2e)', () => {
     await prisma.community.create({
       data: { name: `Heads Topic ${stamp}`, slug, type: 'TOPIC', topic: 'Heads', memberCount: 0 },
     });
+
+    // Hiring is closed by default — admin opens it so students can apply.
+    await request(app.getHttpServer())
+      .post(`${API}/communities/hiring`)
+      .set(auth(admin.token))
+      .send({ open: true })
+      .expect(201);
   });
   afterAll(async () => {
     await app?.close();
@@ -127,6 +134,40 @@ describe('Community heads & governance (e2e)', () => {
     await request(app.getHttpServer())
       .post(`${API}/reviews/${review.body.data.id}/verify`)
       .set(auth(admin.token))
+      .expect(201);
+  });
+
+  it('admin can close hiring, which blocks new applications', async () => {
+    const fresh = await registerVerifiedUser(app, { fullName: 'Late Applicant' });
+    await prisma.profile.update({
+      where: { userId: fresh.userId },
+      data: { collegeVerification: 'VERIFIED' },
+    });
+
+    // close hiring (admin only)
+    await request(app.getHttpServer())
+      .post(`${API}/communities/hiring`)
+      .set(auth(admin.token))
+      .send({ open: false })
+      .expect(201);
+    // a non-admin cannot toggle hiring
+    await request(app.getHttpServer())
+      .post(`${API}/communities/hiring`)
+      .set(auth(fresh.token))
+      .send({ open: true })
+      .expect(403);
+    // applications are now blocked
+    await request(app.getHttpServer())
+      .post(`${API}/communities/${slug}/head-applications`)
+      .set(auth(fresh.token))
+      .send({ requestedRole: 'MODERATOR' })
+      .expect(403);
+
+    // reopen for other suites
+    await request(app.getHttpServer())
+      .post(`${API}/communities/hiring`)
+      .set(auth(admin.token))
+      .send({ open: true })
       .expect(201);
   });
 });

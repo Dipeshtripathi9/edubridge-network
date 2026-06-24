@@ -20,6 +20,21 @@ export interface HeadApplication {
   user?: { id: string; email: string | null; profile?: { fullName: string } | null };
 }
 
+export function useHiringStatus() {
+  return useQuery({
+    queryKey: ['hiring'],
+    queryFn: () => api.get<{ open: boolean }>('/communities/hiring'),
+  });
+}
+
+export function useSetHiring() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (open: boolean) => api.post<{ open: boolean }>('/communities/hiring', { open }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['hiring'] }),
+  });
+}
+
 export function useApplyHead(slug: string) {
   const qc = useQueryClient();
   return useMutation({

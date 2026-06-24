@@ -35,6 +35,8 @@ import {
   useAppointHead,
   useDecideHeadApp,
   useHeadAppQueue,
+  useHiringStatus,
+  useSetHiring,
 } from '@/hooks/use-heads';
 import { useCreateCommunity } from '@/hooks/use-communities';
 import { useColleges } from '@/hooks/use-colleges';
@@ -375,6 +377,8 @@ function CommunitiesTab() {
   const { data, isLoading } = useHeadAppQueue();
   const decide = useDecideHeadApp();
   const appoint = useAppointHead();
+  const hiring = useHiringStatus();
+  const setHiring = useSetHiring();
   const create = useCreateCommunity();
   const { data: collegesData } = useColleges({ sort: 'name' });
   const colleges = collegesData?.pages.flatMap((p) => p.data) ?? [];
@@ -416,8 +420,37 @@ function CommunitiesTab() {
     });
   };
 
+  const hiringOpen = hiring.data?.open ?? false;
+
   return (
     <div className="space-y-6">
+      <Card className="max-w-xl border-primary/30 bg-primary/5">
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+          <div>
+            <p className="font-medium">Manager hiring</p>
+            <p className="text-sm text-muted-foreground">
+              Applications for community head/manager posts are{' '}
+              <span className={hiringOpen ? 'text-green-600' : 'text-destructive'}>
+                {hiringOpen ? 'OPEN' : 'CLOSED'}
+              </span>
+              .
+            </p>
+          </div>
+          <Button
+            variant={hiringOpen ? 'outline' : 'default'}
+            disabled={setHiring.isPending}
+            onClick={() =>
+              setHiring.mutate(!hiringOpen, {
+                onSuccess: (r) => toast.success(r.open ? 'Hiring opened' : 'Hiring closed'),
+                onError: (e) => toast.error((e as Error).message),
+              })
+            }
+          >
+            {hiringOpen ? 'Close hiring' : 'Open hiring'}
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card className="max-w-xl">
         <CardHeader>
           <CardTitle className="text-base">Create a community</CardTitle>
