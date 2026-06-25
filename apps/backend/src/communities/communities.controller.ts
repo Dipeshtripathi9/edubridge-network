@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CommunitiesService } from './communities.service';
-import { CreateCommunityDto } from './dto/create-community.dto';
+import { CreateCommunityDto, UpdateCommunityDto } from './dto/create-community.dto';
 import { CommunityQueryDto } from './dto/query.dto';
 import {
   AppointHeadDto,
@@ -28,6 +28,20 @@ export class CommunitiesController {
   @ApiOperation({ summary: 'Create a community' })
   create(@CurrentUser('sub') userId: string, @Body() dto: CreateCommunityDto) {
     return this.communities.createCommunity(userId, dto);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Patch(':slug')
+  @ApiOperation({ summary: 'Edit a community (admin)' })
+  update(@Param('slug') slug: string, @Body() dto: UpdateCommunityDto) {
+    return this.communities.updateCommunity(slug, dto);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Delete(':slug')
+  @ApiOperation({ summary: 'Delete a community (admin)' })
+  remove(@Param('slug') slug: string) {
+    return this.communities.deleteCommunity(slug);
   }
 
   @Public()

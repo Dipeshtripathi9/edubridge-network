@@ -39,7 +39,12 @@ import {
   useSetCommunityHiring,
 } from '@/hooks/use-heads';
 import Link from 'next/link';
-import { useCommunities, useCreateCommunity } from '@/hooks/use-communities';
+import {
+  useCommunities,
+  useCreateCommunity,
+  useDeleteCommunity,
+  useUpdateCommunity,
+} from '@/hooks/use-communities';
 import { useColleges } from '@/hooks/use-colleges';
 import { useComplaints, useResolveComplaint } from '@/hooks/use-complaints';
 
@@ -463,12 +468,17 @@ function AllCommunities() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommunities();
   const appoint = useAppointHead();
   const setHiring = useSetCommunityHiring();
+  const update = useUpdateCommunity();
+  const del = useDeleteCommunity();
   const [q, setQ] = useState('');
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('CAMPUS_LEAD');
   const [hiringSlug, setHiringSlug] = useState<string | null>(null);
   const [note, setNote] = useState('');
+  const [editSlug, setEditSlug] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editTopic, setEditTopic] = useState('');
   const all = data?.pages.flatMap((p) => p.data) ?? [];
   const term = q.trim().toLowerCase();
   const items = term ? all.filter((c) => c.name.toLowerCase().includes(term)) : all;
@@ -486,6 +496,13 @@ function AllCommunities() {
     setHiringSlug((cur) => (cur === slug ? null : slug));
     setOpenSlug(null);
     setNote(currentNote ?? '');
+  };
+  const toggleEdit = (slug: string, name: string, topic?: string | null) => {
+    setEditSlug((cur) => (cur === slug ? null : slug));
+    setOpenSlug(null);
+    setHiringSlug(null);
+    setEditName(name);
+    setEditTopic(topic ?? '');
   };
 
   return (
@@ -527,11 +544,66 @@ function AllCommunities() {
                     <Button size="sm" variant="outline" onClick={() => toggle(c.slug)}>
                       {openSlug === c.slug ? 'Cancel' : 'Appoint here'}
                     </Button>
+                    <Button size="sm" variant="outline" onClick={() => toggleEdit(c.slug, c.name, c.topic)}>
+                      {editSlug === c.slug ? 'Cancel' : 'Edit'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-destructive"
+                      onClick={() => {
+                        if (window.confirm(`Delete "${c.name}"? This removes its posts, members & pools.`)) {
+                          del.mutate(c.slug, {
+                            onSuccess: () => toast.success('Community deleted'),
+                            onError: (e) => toast.error((e as Error).message),
+                          });
+                        }
+                      }}
+                    >
+                      Delete
+                    </Button>
                     <Button asChild size="sm">
                       <Link href={`/leadership/${c.slug}`}>Manage</Link>
                     </Button>
                   </div>
                 </div>
+
+                {editSlug === c.slug && (
+                  <div className="space-y-2 rounded-md border border-border p-2">
+                    <Input
+                      placeholder="Community name"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="h-9"
+                    />
+                    {c.type !== 'COLLEGE' && (
+                      <Input
+                        placeholder="Topic (optional)"
+                        value={editTopic}
+                        onChange={(e) => setEditTopic(e.target.value)}
+                        className="h-9"
+                      />
+                    )}
+                    <Button
+                      size="sm"
+                      disabled={!editName.trim() || update.isPending}
+                      onClick={() =>
+                        update.mutate(
+                          { slug: c.slug, name: editName.trim(), topic: editTopic || undefined },
+                          {
+                            onSuccess: () => {
+                              toast.success('Community updated');
+                              setEditSlug(null);
+                            },
+                            onError: (e) => toast.error((e as Error).message),
+                          },
+                        )
+                      }
+                    >
+                      Save changes
+                    </Button>
+                  </div>
+                )}
 
                 {hiringSlug === c.slug && (
                   <div className="space-y-2 rounded-md border border-border p-2">

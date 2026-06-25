@@ -87,6 +87,31 @@ export class CommunitiesService {
     return community;
   }
 
+  /** Admin edits a community's name/description/topic. */
+  async updateCommunity(slug: string, dto: { name?: string; description?: string; topic?: string }) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    const updated = await this.prisma.community.update({
+      where: { id: community.id },
+      data: {
+        ...(dto.name !== undefined ? { name: dto.name } : {}),
+        ...(dto.description !== undefined ? { description: dto.description } : {}),
+        ...(dto.topic !== undefined ? { topic: dto.topic } : {}),
+      },
+    });
+    await this.invalidate(slug);
+    return updated;
+  }
+
+  /** Admin deletes a community (cascades members, posts, pools, etc.). */
+  async deleteCommunity(slug: string) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    await this.prisma.community.delete({ where: { id: community.id } });
+    await this.invalidate(slug);
+    return { deleted: true };
+  }
+
   async listCommunities(query: CommunityQueryDto, userId?: string) {
     const cacheKey = `community:list:${JSON.stringify(query)}`;
     const where: Prisma.CommunityWhereInput = {

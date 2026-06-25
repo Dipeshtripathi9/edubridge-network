@@ -100,6 +100,26 @@ export function useJoinCommunity(slug: string) {
   });
 }
 
+export function useUpdateCommunity() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ slug, ...data }: { slug: string; name?: string; description?: string; topic?: string }) =>
+      api.patch<Community>(`/communities/${slug}`, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['communities'] });
+      qc.invalidateQueries({ queryKey: ['community'] });
+    },
+  });
+}
+
+export function useDeleteCommunity() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (slug: string) => api.delete(`/communities/${slug}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['communities'] }),
+  });
+}
+
 export function useCreateCommunity() {
   const qc = useQueryClient();
   return useMutation({
