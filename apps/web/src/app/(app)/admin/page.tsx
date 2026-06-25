@@ -7,6 +7,7 @@ import {
   Activity,
   BadgeCheck,
   Ban,
+  Flag,
   Megaphone,
   ShieldCheck,
   Users as UsersIcon,
@@ -53,6 +54,59 @@ function Stat({ label, value }: { label: string; value: number | string }) {
   );
 }
 
+// Flagged posts/content reported by community leaders & users — shown at the top.
+function FlaggedReports() {
+  const { data } = useReports('OPEN');
+  const resolve = useResolveReport();
+  const reports = data?.data ?? [];
+  if (reports.length === 0) return null;
+  return (
+    <Card className="border-destructive/40 bg-destructive/5">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Flag className="h-4 w-4 text-destructive" /> Flagged content ({reports.length})
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Reported by community leaders & members — review and act.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {reports.slice(0, 6).map((r) => (
+          <div
+            key={r.id}
+            className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-background p-2"
+          >
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">{r.targetType}</Badge>
+                <span className="text-sm font-medium">{r.reason}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                by {r.reporter?.profile?.fullName ?? 'User'} · target {r.targetId.slice(0, 8)}…
+              </p>
+            </div>
+            <div className="flex gap-1">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => resolve.mutate({ id: r.id, status: 'DISMISSED' }, { onSuccess: () => toast.success('Dismissed') })}
+              >
+                Dismiss
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => resolve.mutate({ id: r.id, status: 'RESOLVED' }, { onSuccess: () => toast.success('Resolved') })}
+              >
+                Resolve
+              </Button>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
 function Overview() {
   const { data, isLoading } = useAnalytics();
   if (isLoading || !data) {
@@ -66,6 +120,7 @@ function Overview() {
   }
   return (
     <div className="space-y-6">
+      <FlaggedReports />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Total users" value={data.users.total} />
         <Stat label="DAU" value={data.users.dau} />
