@@ -110,6 +110,18 @@ export function useResolveReport() {
   });
 }
 
+/** Admin deletes a post by id (e.g. a flagged post) and refreshes the report queue. */
+export function useAdminDeletePost() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (postId: string) => api.delete(`/posts/${postId}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin', 'reports'] });
+      qc.invalidateQueries({ queryKey: ['feed'] });
+    },
+  });
+}
+
 export function useBroadcast() {
   return useMutation({
     mutationFn: (input: {

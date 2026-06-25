@@ -26,6 +26,7 @@ import {
   useAnalytics,
   useBroadcast,
   useReports,
+  useAdminDeletePost,
   useResolveReport,
   useSetUserStatus,
   useVerifyCollege,
@@ -63,6 +64,7 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 function FlaggedReports() {
   const { data } = useReports('OPEN');
   const resolve = useResolveReport();
+  const deletePost = useAdminDeletePost();
   const reports = data?.data ?? [];
   if (reports.length === 0) return null;
   return (
@@ -91,6 +93,26 @@ function FlaggedReports() {
               </p>
             </div>
             <div className="flex gap-1">
+              {r.targetType === 'POST' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-destructive"
+                  onClick={() => {
+                    if (window.confirm('Delete the reported post?')) {
+                      deletePost.mutate(r.targetId, {
+                        onSuccess: () => {
+                          resolve.mutate({ id: r.id, status: 'RESOLVED' });
+                          toast.success('Post deleted');
+                        },
+                        onError: (e: unknown) => toast.error((e as Error).message),
+                      });
+                    }
+                  }}
+                >
+                  Delete post
+                </Button>
+              )}
               <Button
                 size="sm"
                 variant="outline"
