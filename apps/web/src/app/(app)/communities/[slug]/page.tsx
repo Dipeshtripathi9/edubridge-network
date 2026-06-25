@@ -9,11 +9,13 @@ import { CommunityMonitor } from '@/components/community-monitor';
 import { CommunitySections } from '@/components/community-sections';
 import { ApplyHead } from '@/components/apply-head';
 import { isCommunityManager, useCommunity, useJoinCommunity } from '@/hooks/use-communities';
+import { useMe } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth.store';
 
 export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { data: community, isLoading } = useCommunity(slug);
+  const { data: me } = useMe();
   const join = useJoinCommunity(slug);
   const [showManage, setShowManage] = useState(false);
   const globalRole = useAuthStore((s) => s.user?.role);
@@ -75,13 +77,15 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         <CommunityMonitor slug={slug} communityId={community.id} myRole={community.myRole} />
       )}
 
-      {community.isMember && community.myRole === 'MEMBER' && (
-        <ApplyHead
-          slug={slug}
-          hiringOpen={community.hiringOpen}
-          hiringNote={community.hiringNote}
-        />
-      )}
+      {community.isMember &&
+        community.myRole === 'MEMBER' &&
+        me?.profile?.collegeVerification === 'VERIFIED' && (
+          <ApplyHead
+            slug={slug}
+            hiringOpen={community.hiringOpen}
+            hiringNote={community.hiringNote}
+          />
+        )}
 
       <CommunitySections
         slug={slug}
