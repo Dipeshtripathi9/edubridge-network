@@ -44,3 +44,22 @@ export class CreateCommunityDto {
   @IsString()
   bannerUrl?: string;
 }
+
+export class UpdateCommunityDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  name?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  description?: string;
+
+  @ApiPropertyOptional({ description: 'Topic for TOPIC communities' })
+  @IsOptional()
+  @IsString()
+  topic?: string;
+}
