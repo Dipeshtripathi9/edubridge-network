@@ -1,6 +1,6 @@
 'use client';
 
-import { Bookmark, Flag, Heart, MessageCircle, Pin, Share2 } from 'lucide-react';
+import { Bookmark, Flag, Heart, MessageCircle, Pin, Share2, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn, timeAgo } from '@/lib/utils';
 import {
   type Post,
+  useDeletePost,
   usePinPost,
   useToggleBookmark,
   useToggleLike,
@@ -29,6 +30,7 @@ export function PostCard({
   const bookmark = useToggleBookmark(slug);
   const vote = useVotePoll(slug);
   const pin = usePinPost(slug);
+  const del = useDeletePost(slug);
   const report = useCreateReport();
 
   const onReport = () => {
@@ -144,9 +146,27 @@ export function PostCard({
               className={cn('flex items-center gap-1.5 hover:text-destructive', !canModerate && 'ml-auto')}
               onClick={onReport}
               aria-label="Report post"
+              title="Report this post"
             >
               <Flag className="h-4 w-4" />
             </button>
+            {canModerate && (
+              <button
+                className="flex items-center gap-1.5 hover:text-destructive"
+                onClick={() => {
+                  if (window.confirm('Delete this post?')) {
+                    del.mutate(post.id, {
+                      onSuccess: () => toast.success('Post deleted'),
+                      onError: (e: unknown) => toast.error((e as Error).message),
+                    });
+                  }
+                }}
+                aria-label="Delete post"
+                title="Delete post"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </CardContent>
       </Card>

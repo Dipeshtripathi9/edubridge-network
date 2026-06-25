@@ -78,6 +78,14 @@ export function usePinPost(slug: string) {
   });
 }
 
+export function useDeletePost(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (postId: string) => api.delete(`/posts/${postId}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['feed', slug] }),
+  });
+}
+
 export function useToggleBookmark(slug: string) {
   const qc = useQueryClient();
   return useMutation({
