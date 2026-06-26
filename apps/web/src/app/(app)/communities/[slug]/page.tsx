@@ -90,15 +90,16 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         <CommunityMonitor slug={slug} communityId={community.id} myRole={community.myRole} />
       )}
 
-      {community.isMember &&
-        community.myRole === 'MEMBER' &&
-        me?.profile?.collegeVerification === 'VERIFIED' && (
-          <ApplyHead
-            slug={slug}
-            hiringOpen={community.hiringOpen}
-            hiringNote={community.hiringNote}
-          />
-        )}
+      {community.isMember && community.myRole === 'MEMBER' && (
+        <ApplyHead
+          slug={slug}
+          hiringOpen={community.hiringOpen}
+          hiringNote={community.hiringNote}
+          verified={me?.profile?.collegeVerification === 'VERIFIED'}
+          eligible={community.type !== 'COLLEGE' || me?.profile?.college?.id === community.college?.id}
+          collegeName={community.college?.name}
+        />
+      )}
 
       <CommunitySections
         slug={slug}

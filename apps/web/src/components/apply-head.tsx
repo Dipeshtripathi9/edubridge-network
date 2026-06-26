@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Crown } from 'lucide-react';
+import Link from 'next/link';
+import { Crown, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,10 +14,19 @@ export function ApplyHead({
   slug,
   hiringOpen = false,
   hiringNote,
+  verified = false,
+  eligible = true,
+  collegeName,
 }: {
   slug: string;
   hiringOpen?: boolean;
   hiringNote?: string | null;
+  /** Whether the viewer is a verified student. */
+  verified?: boolean;
+  /** For college communities: whether the viewer belongs to this college. Topic/Startup → always true. */
+  eligible?: boolean;
+  /** The community's college name, used in the ineligible message. */
+  collegeName?: string | null;
 }) {
   const apply = useApplyHead(slug);
   const { data: mine } = useMyHeadApplications();
@@ -34,6 +44,40 @@ export function ApplyHead({
       <Card className="border-amber-500/40 bg-amber-500/5">
         <CardContent className="p-4 text-sm">
           Your application for <strong>{pending.requestedRole.replace(/_/g, ' ').toLowerCase()}</strong> is pending admin review.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Hiring is open. Unverified students see a prompt to verify before they can apply.
+  if (!verified) {
+    return (
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="flex flex-wrap items-center justify-between gap-2 p-4">
+          <div>
+            <p className="text-sm font-medium">This community is hiring managers 🎉</p>
+            {hiringNote && <p className="text-sm text-muted-foreground">{hiringNote}</p>}
+            <p className="mt-1 text-sm text-muted-foreground">
+              Verify your college/university to apply for a leadership position.
+            </p>
+          </div>
+          <Button asChild variant="default">
+            <Link href="/verify">
+              <ShieldCheck className="h-4 w-4" /> Get verified
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Verified, but a college community they don't belong to → can't lead this campus.
+  if (!eligible) {
+    return (
+      <Card className="border-border">
+        <CardContent className="p-4 text-sm text-muted-foreground">
+          This community is hiring, but only verified students of{' '}
+          <strong>{collegeName ?? 'this college/university'}</strong> can lead its community.
         </CardContent>
       </Card>
     );
