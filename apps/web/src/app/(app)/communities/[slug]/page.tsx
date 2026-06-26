@@ -1,7 +1,8 @@
 'use client';
 
 import { use, useState } from 'react';
-import { Settings, Users } from 'lucide-react';
+import { Settings, Share2, Users } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -57,6 +58,18 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
             </span>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              title="Share this community"
+              onClick={() => {
+                navigator.clipboard
+                  ?.writeText(`${window.location.origin}/communities/${slug}`)
+                  .catch(() => {});
+                toast.success('Community link copied to clipboard');
+              }}
+            >
+              <Share2 className="h-4 w-4" /> Share
+            </Button>
             {canModerate && (
               <Button variant="outline" onClick={() => setShowManage((v) => !v)}>
                 <Settings className="h-4 w-4" /> Manage
