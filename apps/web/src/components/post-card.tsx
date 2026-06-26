@@ -11,6 +11,7 @@ import {
   type Post,
   useDeletePost,
   usePinPost,
+  useSharePost,
   useToggleBookmark,
   useToggleLike,
   useVotePoll,
@@ -28,6 +29,14 @@ export function PostCard({
 }) {
   const like = useToggleLike(slug);
   const bookmark = useToggleBookmark(slug);
+  const share = useSharePost(slug);
+
+  const onShare = () => {
+    const url = `${window.location.origin}/communities/${slug}`;
+    navigator.clipboard?.writeText(url).catch(() => {});
+    share.mutate(post.id);
+    toast.success('Link copied to clipboard');
+  };
   const vote = useVotePoll(slug);
   const pin = usePinPost(slug);
   const del = useDeletePost(slug);
@@ -128,10 +137,10 @@ export function PostCard({
               <Bookmark className={cn('h-4 w-4', post.savedByMe && 'fill-current')} />
               {post.saveCount}
             </button>
-            <span className="flex items-center gap-1.5">
+            <button className="flex items-center gap-1.5 hover:text-primary" onClick={onShare} title="Share">
               <Share2 className="h-4 w-4" />
               {post.shareCount}
-            </span>
+            </button>
             {canModerate && (
               <button
                 className={cn('ml-auto flex items-center gap-1.5 hover:text-primary', post.isPinned && 'text-primary')}

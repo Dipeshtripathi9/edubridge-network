@@ -53,6 +53,14 @@ export function useFeed(slug: string, section?: 'ANNOUNCEMENTS' | 'DISCUSSION' |
   });
 }
 
+export function useSharePost(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (postId: string) => api.post<{ shared: boolean }>(`/posts/${postId}/share`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['feed', slug] }),
+  });
+}
+
 export function useMySavedPosts() {
   return useQuery({
     queryKey: ['saved-posts'],
