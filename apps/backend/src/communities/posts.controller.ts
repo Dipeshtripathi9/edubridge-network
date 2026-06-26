@@ -57,6 +57,12 @@ export class PostsController {
     return this.posts.toggleLike(id, userId);
   }
 
+  @Get('posts/bookmarks/me')
+  @ApiOperation({ summary: 'My saved (bookmarked) posts' })
+  savedPosts(@CurrentUser('sub') userId: string) {
+    return this.posts.mySavedPosts(userId);
+  }
+
   @Post('posts/:id/bookmark')
   @ApiOperation({ summary: 'Toggle bookmark on a post' })
   bookmark(@Param('id') id: string, @CurrentUser('sub') userId: string) {
