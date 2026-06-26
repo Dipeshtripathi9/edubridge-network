@@ -268,6 +268,24 @@ export class PostsService {
     return { saved: true };
   }
 
+  /** Posts the user has bookmarked/saved. */
+  async mySavedPosts(userId: string) {
+    const bookmarks = await this.prisma.bookmark.findMany({
+      where: { userId, post: { deletedAt: null } },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      include: {
+        post: {
+          include: {
+            author: POST_AUTHOR_SELECT,
+            community: { select: { slug: true, name: true } },
+          },
+        },
+      },
+    });
+    return bookmarks.map((b) => ({ ...b.post, savedByMe: true, community: b.post.community }));
+  }
+
   async sharePost(postId: string) {
     const post = await this.prisma.post.updateMany({
       where: { id: postId, deletedAt: null },

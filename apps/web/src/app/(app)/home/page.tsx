@@ -16,6 +16,8 @@ import { useMe } from '@/hooks/use-profile';
 import { useMyApplications, useRecommendedOpportunities } from '@/hooks/use-opportunities';
 import { useCommunities } from '@/hooks/use-communities';
 import { useMyPools } from '@/hooks/use-pools';
+import { useMySavedPosts } from '@/hooks/use-posts';
+import { useMyResourceBookmarks } from '@/hooks/use-resources';
 
 function StatCard({
   icon: Icon,
@@ -66,10 +68,13 @@ export default function HomePage() {
   const { data: communitiesData, isLoading: communitiesLoading } = useCommunities();
   const { data: recommended } = useRecommendedOpportunities();
   const { data: myPools } = useMyPools();
+  const { data: savedPosts } = useMySavedPosts();
+  const { data: savedResources } = useMyResourceBookmarks();
 
   const firstName = me?.profile?.fullName?.split(' ')[0];
   const applications = (apps ?? []).filter((a) => a.status !== 'SAVED');
   const savedOpps = (apps ?? []).filter((a) => a.status === 'SAVED');
+  const savedCount = savedOpps.length + (savedPosts?.length ?? 0) + (savedResources?.length ?? 0);
   const joined = (communitiesData?.pages.flatMap((p) => p.data) ?? []).filter((c) => c.isMember);
   const recommendedCommunities = (communitiesData?.pages.flatMap((p) => p.data) ?? [])
     .filter((c) => !c.isMember)
@@ -89,7 +94,7 @@ export default function HomePage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatCard icon={LayoutGrid} label="Communities" value={joined.length} hint="Active communities" href="/communities" />
         <StatCard icon={Target} label="Applications" value={applications.length} hint="Active applications" href="/opportunities" />
-        <StatCard icon={BookOpen} label="Saved Opportunities" value={savedOpps.length} hint="Saved for later" href="/opportunities" />
+        <StatCard icon={BookOpen} label="Saved" value={savedCount} hint="Opportunities, posts & resources" href="/saved" />
       </div>
 
       <div className="grid gap-6">

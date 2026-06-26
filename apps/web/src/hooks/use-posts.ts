@@ -53,6 +53,13 @@ export function useFeed(slug: string, section?: 'ANNOUNCEMENTS' | 'DISCUSSION' |
   });
 }
 
+export function useMySavedPosts() {
+  return useQuery({
+    queryKey: ['saved-posts'],
+    queryFn: () => api.get<(Post & { community?: { slug: string; name: string } })[]>('/posts/bookmarks/me'),
+  });
+}
+
 export function useCreatePost(slug: string) {
   const qc = useQueryClient();
   return useMutation({
