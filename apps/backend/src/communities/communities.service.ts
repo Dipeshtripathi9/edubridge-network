@@ -350,7 +350,18 @@ export class CommunitiesService {
 
     const profile = await this.prisma.profile.findUnique({ where: { userId } });
     if (profile?.collegeVerification !== 'VERIFIED') {
-      throw new ForbiddenException('Only verified students can apply to lead a community');
+      throw new ForbiddenException('Verify your college/university before applying to lead a community');
+    }
+    // A college/university community can only be led by a verified student of THAT campus.
+    // Topic/Startup communities are open to any verified student.
+    if (
+      community.type === 'COLLEGE' &&
+      community.collegeId &&
+      profile.collegeId !== community.collegeId
+    ) {
+      throw new ForbiddenException(
+        'Only verified students of this college/university can lead its community',
+      );
     }
     // Ensure they're a member.
     await this.prisma.communityMember.upsert({
