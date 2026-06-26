@@ -18,15 +18,6 @@ import {
 } from './community-permissions';
 
 // Roles that act as a "head" of a community (full management privilege).
-const HEAD_ROLES: CommunityRole[] = [
-  'ADMIN',
-  'CAMPUS_LEAD',
-  'OPPORTUNITY_HEAD',
-  'STUDENT_RELATIONS_HEAD',
-];
-const isHead = (r?: CommunityRole | null) => !!r && HEAD_ROLES.includes(r);
-const isMod = (r?: CommunityRole | null) => !!r && (r === 'MODERATOR' || HEAD_ROLES.includes(r));
-
 function slugify(input: string): string {
   return input
     .toLowerCase()
@@ -243,24 +234,6 @@ export class CommunitiesService {
     }
   }
 
-  /** Require global admin/mod OR a community ADMIN (level 'ADMIN') / mod (level 'MOD'). */
-  private async assertCommunityPrivilege(
-    communityId: string,
-    actor: { sub: string; role: string },
-    level: 'ADMIN' | 'MOD',
-  ) {
-    const globalOk =
-      actor.role === 'ADMIN' ||
-      actor.role === 'SUPER_ADMIN' ||
-      (level === 'MOD' && actor.role === 'MODERATOR');
-    if (globalOk) return;
-    const member = await this.prisma.communityMember.findUnique({
-      where: { communityId_userId: { communityId, userId: actor.sub } },
-    });
-    const ok = level === 'ADMIN' ? isHead(member?.role) : isMod(member?.role);
-    if (!ok) throw new ForbiddenException('Insufficient community privileges');
-  }
-
   /** Lock an action to the role whose job it is (Campus Lead/ADMIN are full). */
   private async assertCapability(
     communityId: string,
@@ -294,7 +267,7 @@ export class CommunitiesService {
     targetUserId: string,
     role: CommunityRole,
   ) {
-    const { community, member } = await this.resolveMember(slug, targetUserId);
+    const { member } = await this.resolveMember(slug, targetUserId);
     // Roles are managed by platform admins only — community managers cannot
     // change anyone's role.
     if (!isPlatformAdmin(actor.role)) {

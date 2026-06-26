@@ -6,7 +6,6 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
 import {
   CreateVerificationRequestDto,
-  RejectVerificationDto,
   VerificationQueryDto,
   VerificationUploadUrlDto,
 } from './dto/verification.dto';
