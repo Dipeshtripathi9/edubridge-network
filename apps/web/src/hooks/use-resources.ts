@@ -15,7 +15,8 @@ export interface Resource {
   type: ResourceType;
   title: string;
   description?: string | null;
-  fileKey: string;
+  externalUrl?: string | null;
+  fileKey?: string | null;
   fileSize?: number | null;
   mimeType?: string | null;
   tags: string[];
@@ -72,12 +73,6 @@ export function useMyResourceBookmarks() {
   });
 }
 
-interface UploadUrlResult {
-  uploadUrl: string | null;
-  key: string;
-  configured: boolean;
-}
-
 /**
  * Full upload flow: request a presigned URL, PUT the file to S3 (when configured),
  * then create the resource record. In dev (no S3) the PUT is skipped.
@@ -85,38 +80,24 @@ interface UploadUrlResult {
 export function useUploadResource() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: {
-      file: File;
+    mutationFn: (input: {
+      externalUrl: string;
       type: string;
       title: string;
       description?: string;
       tags?: string[];
       collegeId?: string;
       communityId?: string;
-    }) => {
-      const presign = await api.post<UploadUrlResult>('/resources/upload-url', {
-        fileName: input.file.name,
-        contentType: input.file.type || 'application/octet-stream',
-      });
-      if (presign.uploadUrl) {
-        await fetch(presign.uploadUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': input.file.type || 'application/octet-stream' },
-          body: input.file,
-        });
-      }
-      return api.post<Resource>('/resources', {
+    }) =>
+      api.post<Resource>('/resources', {
         type: input.type,
         title: input.title,
         description: input.description,
-        fileKey: presign.key,
-        fileSize: input.file.size,
-        mimeType: input.file.type,
+        externalUrl: input.externalUrl,
         tags: input.tags ?? [],
         collegeId: input.collegeId,
         communityId: input.communityId,
-      });
-    },
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['resources'] }),
   });
 }
@@ -140,7 +121,8 @@ export function useToggleResourceBookmark() {
 
 export function useDownloadResource() {
   return useMutation({
-    mutationFn: (id: string) => api.get<{ url: string; configured: boolean }>(`/resources/${id}/download`),
+    mutationFn: (id: string) =>
+      api.get<{ url: string | null; configured: boolean }>(`/resources/${id}/download`),
   });
 }
 

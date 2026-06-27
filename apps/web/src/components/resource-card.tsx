@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bookmark, Download, FileText, Heart, MessageCircle, Send, Share2 } from 'lucide-react';
+import { Bookmark, ExternalLink, FileText, Heart, MessageCircle, Send, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -49,10 +49,10 @@ export function ResourceCard({ resource }: { resource: Resource }) {
   const onDownload = () => {
     download.mutate(resource.id, {
       onSuccess: (res) => {
-        if (res.configured && res.url.startsWith('http')) {
-          window.open(res.url, '_blank');
+        if (res.url && res.url.startsWith('http')) {
+          window.open(res.url, '_blank', 'noopener,noreferrer');
         } else {
-          toast.success('Download recorded (S3 not configured in this environment)');
+          toast.error('No link available for this resource');
         }
       },
       onError: (e) => toast.error((e as Error).message),
@@ -94,14 +94,14 @@ export function ResourceCard({ resource }: { resource: Resource }) {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          by {resource.uploader.profile?.fullName ?? 'Student'} · {resource.downloadCount} downloads ·{' '}
+          by {resource.uploader.profile?.fullName ?? 'Student'} · {resource.downloadCount} opens ·{' '}
           {timeAgo(resource.createdAt)} ago
         </p>
 
         <div className="mt-auto flex items-center gap-2 pt-2">
           <Button size="sm" className="flex-1" onClick={onDownload} disabled={download.isPending}>
-            <Download className="h-4 w-4" />
-            Download
+            <ExternalLink className="h-4 w-4" />
+            Open
           </Button>
           <Button
             variant="outline"
