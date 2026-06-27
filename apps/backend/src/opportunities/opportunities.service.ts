@@ -81,10 +81,34 @@ export class OpportunitiesService {
   }
 
   async create(actor: { sub: string; role: string }, dto: CreateOpportunityDto) {
-    // Platform admins publish immediately; everyone else needs approval when the
-    // opportunity is submitted to a community.
-    const isAdmin = actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN';
-    const needsApproval = !!dto.communityId && !isAdmin;
+    const isAdmin = isPlatformAdmin(actor.role);
+    let isStartup = false;
+    let canManageHere = isAdmin;
+
+    if (dto.communityId) {
+      const community = await this.prisma.community.findUnique({
+        where: { id: dto.communityId },
+        select: { type: true },
+      });
+      if (!community) throw new NotFoundException('Community not found');
+      isStartup = community.type === 'STARTUP';
+      if (!canManageHere) {
+        const member = await this.prisma.communityMember.findUnique({
+          where: { communityId_userId: { communityId: dto.communityId, userId: actor.sub } },
+        });
+        canManageHere = roleHasCapability(member?.role, 'VIEW');
+      }
+      // Startup communities: only admins & the community's managers may post.
+      if (isStartup && !canManageHere) {
+        throw new ForbiddenException(
+          "Only admins & this community's managers can post opportunities here",
+        );
+      }
+    }
+
+    // Admins, and managers posting in their startup community, publish immediately;
+    // members submitting to a topic/college community still need manager approval.
+    const needsApproval = !!dto.communityId && !isAdmin && !(isStartup && canManageHere);
     const opportunity = await this.prisma.opportunity.create({
       data: {
         ...dto,

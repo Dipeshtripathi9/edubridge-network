@@ -40,7 +40,7 @@ describe('Per-role action locks (e2e)', () => {
     const c = await request(app.getHttpServer())
       .post(`${API}/communities`)
       .set(auth(admin.token))
-      .send({ name: `Locks ${Date.now()}`, type: 'STARTUP' })
+      .send({ name: `Locks ${Date.now()}`, type: 'TOPIC', topic: 'Locks' })
       .expect(201);
     slug = c.body.data.slug;
     communityId = c.body.data.id;
