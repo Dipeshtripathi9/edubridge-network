@@ -160,7 +160,7 @@ function Overview() {
         <Stat label="Open reports" value={data.moderation.openReports} />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Top Communities</CardTitle>
@@ -185,19 +185,6 @@ function Overview() {
                 <span className="text-muted-foreground">
                   {c.reviewCount} · {c.avgRating.toFixed(1)}★
                 </span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Top Contributors</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {data.topContributors.map((u) => (
-              <div key={u.id} className="flex justify-between text-sm">
-                <span className="truncate">{u.profile?.fullName ?? 'Student'}</span>
-                <span className="text-muted-foreground">{u.reputationPoints} pts</span>
               </div>
             ))}
           </CardContent>
