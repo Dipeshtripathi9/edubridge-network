@@ -29,6 +29,7 @@ export interface Opportunity {
   tags: string[];
   stipend?: string | null;
   deadline?: string | null;
+  communityId?: string | null;
   score?: number;
 }
 
@@ -100,6 +101,17 @@ export function useDecideOpportunity(communityId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['opportunities', 'pending', communityId] });
       qc.invalidateQueries({ queryKey: ['opportunities'] });
+    },
+  });
+}
+
+export function useDeleteOpportunity(communityId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/opportunities/${id}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['opportunities'] });
+      void communityId;
     },
   });
 }

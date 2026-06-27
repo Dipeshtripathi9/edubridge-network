@@ -163,13 +163,25 @@ export class OpportunitiesService {
   async remove(id: string, userId: string, role: string) {
     const opportunity = await this.prisma.opportunity.findUnique({ where: { id } });
     if (!opportunity) throw new NotFoundException('Opportunity not found');
-    const isPrivileged = role === 'ADMIN' || role === 'SUPER_ADMIN';
-    if (opportunity.createdById !== userId && !isPrivileged) {
+    if (
+      opportunity.createdById !== userId &&
+      !(await this.canModerate(opportunity.communityId, userId, role))
+    ) {
       throw new ForbiddenException('Cannot delete this opportunity');
     }
     await this.prisma.opportunity.update({ where: { id }, data: { isActive: false } });
     await this.invalidate();
     return { deleted: true };
+  }
+
+  /** Platform admins/mods, or a manager of the opportunity's community, may moderate it. */
+  private async canModerate(communityId: string | null, userId: string, role: string): Promise<boolean> {
+    if (isPlatformAdmin(role) || role === 'MODERATOR') return true;
+    if (!communityId) return false;
+    const member = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId, userId } },
+    });
+    return roleHasCapability(member?.role, 'MODERATE');
   }
 
   // ---------------- Applications (save / apply / track) ----------------

@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { buildPaginatedResult, PaginationDto } from '../common/dto/pagination.dto';
+import { isPlatformAdmin, roleHasCapability } from '../communities/community-permissions';
 import {
   CreateResourceDto,
   RateResourceDto,
@@ -266,11 +267,20 @@ export class ResourcesService {
   async remove(id: string, userId: string, role: string) {
     const resource = await this.prisma.resource.findUnique({ where: { id } });
     if (!resource || resource.deletedAt) throw new NotFoundException('Resource not found');
-    const isPrivileged = role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'MODERATOR';
-    if (resource.uploaderId !== userId && !isPrivileged) {
+    if (resource.uploaderId !== userId && !(await this.canModerate(resource.communityId, userId, role))) {
       throw new ForbiddenException('Cannot delete this resource');
     }
     await this.prisma.resource.update({ where: { id }, data: { deletedAt: new Date() } });
     return { deleted: true };
+  }
+
+  /** Platform admins/mods, or a manager of the item's community, may moderate it. */
+  private async canModerate(communityId: string | null, userId: string, role: string): Promise<boolean> {
+    if (isPlatformAdmin(role) || role === 'MODERATOR') return true;
+    if (!communityId) return false;
+    const member = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId, userId } },
+    });
+    return roleHasCapability(member?.role, 'MODERATE');
   }
 }
