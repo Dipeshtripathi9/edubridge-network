@@ -400,7 +400,7 @@ export function CommunitySections({
       {discussion}
 
       <TabsContent value="polls" className="space-y-4">
-        <Composer slug={slug} placeholder="Ask the community…" />
+        <Composer slug={slug} allowPoll placeholder="Ask the community…" />
         <FeedSection slug={slug} section="POLLS" canModerate={canModerate} empty="No polls yet." />
       </TabsContent>
 
