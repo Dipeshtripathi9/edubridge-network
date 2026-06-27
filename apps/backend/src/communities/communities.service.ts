@@ -117,10 +117,11 @@ export class CommunitiesService {
     const fetch = async () => {
       const items = await this.prisma.community.findMany({
         where,
-        // id is a stable tiebreaker so offset pages don't overlap when memberCount ties/changes
+        // id is a stable tiebreaker so cursor paging is deterministic when memberCount ties
         orderBy: [{ memberCount: 'desc' }, { id: 'desc' }],
-        skip: query.skip,
         take: query.limit,
+        // Cursor pagination (matches the web infinite-query). Cursor = last item's id.
+        ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
         include: { college: { select: { id: true, name: true, slug: true, logoUrl: true } } },
       });
       return buildPaginatedResult(items, query);

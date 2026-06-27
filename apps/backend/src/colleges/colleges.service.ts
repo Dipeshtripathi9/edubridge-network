@@ -31,7 +31,7 @@ export class CollegesService {
       const items = await this.prisma.college.findMany({
         where,
         orderBy,
-        skip: query.skip,
+        ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
         take: query.limit,
         select: {
           id: true,

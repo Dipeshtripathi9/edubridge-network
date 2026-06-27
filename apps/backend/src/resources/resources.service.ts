@@ -83,7 +83,7 @@ export class ResourcesService {
     const items = await this.prisma.resource.findMany({
       where,
       orderBy,
-      skip: query.skip,
+      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
       take: query.limit,
       include: { uploader: UPLOADER_SELECT },
     });
@@ -149,7 +149,7 @@ export class ResourcesService {
     const items = await this.prisma.resourceComment.findMany({
       where: { resourceId: id },
       orderBy: { createdAt: 'desc' },
-      skip: query.skip,
+      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
       take: query.limit,
       include: { user: UPLOADER_SELECT },
     });

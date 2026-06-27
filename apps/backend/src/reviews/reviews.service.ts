@@ -111,7 +111,7 @@ export class ReviewsService {
     const reviews = await this.prisma.review.findMany({
       where,
       orderBy,
-      skip: query.skip,
+      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
       take: query.limit,
       include: {
         author: REVIEW_AUTHOR_SELECT,
@@ -200,7 +200,7 @@ export class ReviewsService {
     const reviews = await this.prisma.review.findMany({
       where: { communityId: community.id, category: 'COMMUNITY_MANAGERS', deletedAt: null },
       orderBy,
-      skip: query.skip,
+      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
       take: query.limit,
       include: {
         author: REVIEW_AUTHOR_SELECT,
