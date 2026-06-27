@@ -95,9 +95,12 @@ function ResourcesSection({
 function OpportunitiesSection({
   communityId,
   canModerate,
+  managersOnly = false,
 }: {
   communityId: string;
   canModerate: boolean;
+  /** Startup communities: only admins & this community's managers may post. */
+  managersOnly?: boolean;
 }) {
   const { data, isLoading } = useOpportunities({ communityId });
   const submit = useSubmitOpportunity(communityId);
@@ -133,9 +136,16 @@ function OpportunitiesSection({
     );
   };
 
+  // In startup communities only admins & managers can post opportunities.
+  const canPost = !managersOnly || canModerate;
+
   return (
     <div className="space-y-4">
-      {!open ? (
+      {!canPost ? (
+        <p className="text-sm text-muted-foreground">
+          Only admins &amp; this community&apos;s managers can post opportunities here.
+        </p>
+      ) : !open ? (
         <Button variant="outline" onClick={() => setOpen(true)}>
           Submit an opportunity
         </Button>
@@ -367,12 +377,16 @@ export function CommunitySections({
       <Tabs defaultValue="announcements">
         <TabsList className="flex-wrap">
           <TabsTrigger value="announcements">Announcements</TabsTrigger>
+          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
           <TabsTrigger value="discussion">Discussion</TabsTrigger>
           <TabsTrigger value="pools">Pools</TabsTrigger>
           <TabsTrigger value="reviews">Reviews</TabsTrigger>
           <TabsTrigger value="help">Help</TabsTrigger>
         </TabsList>
         {announcements}
+        <TabsContent value="opportunities">
+          <OpportunitiesSection communityId={communityId} canModerate={canModerate} managersOnly />
+        </TabsContent>
         {discussion}
         {pools}
         {reviews}
