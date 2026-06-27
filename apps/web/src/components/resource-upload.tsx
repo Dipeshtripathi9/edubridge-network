@@ -28,16 +28,20 @@ export function ResourceUpload({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [url, setUrl] = useState('');
 
   const submit = () => {
-    if (!file || !title.trim()) {
-      toast.error('Add a file and a title');
+    if (!title.trim() || !url.trim()) {
+      toast.error('Add a title and a link');
+      return;
+    }
+    if (!/^https?:\/\//i.test(url.trim())) {
+      toast.error('Enter a valid link (including https://)');
       return;
     }
     upload.mutate(
       {
-        file,
+        externalUrl: url.trim(),
         type,
         title,
         description: description || undefined,
@@ -50,12 +54,12 @@ export function ResourceUpload({
       },
       {
         onSuccess: () => {
-          toast.success('Resource uploaded');
+          toast.success('Resource shared');
           setOpen(false);
           setTitle('');
           setDescription('');
           setTags('');
-          setFile(null);
+          setUrl('');
         },
         onError: (e) => toast.error((e as Error).message),
       },
@@ -66,7 +70,7 @@ export function ResourceUpload({
     return (
       <Button onClick={() => setOpen(true)}>
         <Upload className="h-4 w-4" />
-        Upload resource
+        Share resource
       </Button>
     );
   }
@@ -74,7 +78,7 @@ export function ResourceUpload({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Upload a resource</CardTitle>
+        <CardTitle>Share a resource</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex flex-wrap gap-2">
@@ -104,13 +108,21 @@ export function ResourceUpload({
           value={tags}
           onChange={(e) => setTags(e.target.value)}
         />
-        <Input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+        <Input
+          type="url"
+          placeholder="Google Drive (or any) link, e.g. https://drive.google.com/…"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
+        <p className="text-xs text-muted-foreground">
+          Paste a shareable link. Tip: set the Drive link to “Anyone with the link can view”.
+        </p>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
           <Button onClick={submit} disabled={upload.isPending}>
-            {upload.isPending ? 'Uploading…' : 'Upload'}
+            {upload.isPending ? 'Sharing…' : 'Share'}
           </Button>
         </div>
       </CardContent>

@@ -8,6 +8,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUrl,
   Max,
   MaxLength,
   Min,
@@ -43,10 +44,16 @@ export class CreateResourceDto {
   @MaxLength(2000)
   description?: string;
 
-  @ApiProperty({ description: 'S3 object key returned from /resources/upload-url' })
+  @ApiPropertyOptional({ description: 'Google Drive / external link to the resource' })
+  @IsOptional()
+  @IsUrl({ require_protocol: true }, { message: 'Enter a valid link (including https://)' })
+  @MaxLength(2000)
+  externalUrl?: string;
+
+  @ApiPropertyOptional({ description: 'S3 object key returned from /resources/upload-url (legacy file upload)' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  fileKey!: string;
+  fileKey?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

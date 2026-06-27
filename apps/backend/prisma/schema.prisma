@@ -890,7 +890,8 @@ model Resource {
   type        ResourceType
   title       String
   description String?
-  fileKey     String // S3 key
+  externalUrl String? // Google Drive / external link (preferred)
+  fileKey     String? // S3 key (legacy file uploads)
   fileSize    Int?
   mimeType    String?
   tags        String[]

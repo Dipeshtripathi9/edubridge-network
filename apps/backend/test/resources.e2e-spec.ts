@@ -52,6 +52,38 @@ describe('Resource Hub (e2e)', () => {
       .expect(400);
   });
 
+  it('shares a resource via an external (Google Drive) link; open returns the link', async () => {
+    const link = 'https://drive.google.com/file/d/abc123/view';
+    const created = await request(app.getHttpServer())
+      .post(`${API}/resources`)
+      .set(auth(owner.token))
+      .send({ type: 'NOTES', title: `Drive Notes ${Date.now()}`, externalUrl: link })
+      .expect(201);
+    const id = created.body.data.id;
+
+    const open = await request(app.getHttpServer())
+      .get(`${API}/resources/${id}/download`)
+      .set(auth(other.token))
+      .expect(200);
+    expect(open.body.data.url).toBe(link);
+  });
+
+  it('rejects a resource with neither a link nor a file (400)', async () => {
+    await request(app.getHttpServer())
+      .post(`${API}/resources`)
+      .set(auth(owner.token))
+      .send({ type: 'NOTES', title: 'no source' })
+      .expect(400);
+  });
+
+  it('rejects a malformed external link (400)', async () => {
+    await request(app.getHttpServer())
+      .post(`${API}/resources`)
+      .set(auth(owner.token))
+      .send({ type: 'NOTES', title: 'bad link', externalUrl: 'not-a-url' })
+      .expect(400);
+  });
+
   it('rates a resource and updates the average', async () => {
     await request(app.getHttpServer())
       .post(`${API}/resources/${resourceId}/rate`)

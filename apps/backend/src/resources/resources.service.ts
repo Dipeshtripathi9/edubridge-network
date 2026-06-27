@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
@@ -33,12 +33,16 @@ export class ResourcesService {
   }
 
   async create(userId: string, dto: CreateResourceDto) {
+    if (!dto.externalUrl && !dto.fileKey) {
+      throw new BadRequestException('Provide a link (externalUrl) or an uploaded file');
+    }
     const resource = await this.prisma.resource.create({
       data: {
         uploaderId: userId,
         type: dto.type,
         title: dto.title,
         description: dto.description,
+        externalUrl: dto.externalUrl,
         fileKey: dto.fileKey,
         fileSize: dto.fileSize,
         mimeType: dto.mimeType,
@@ -189,7 +193,11 @@ export class ResourcesService {
       }),
     ]);
 
-    const url = await this.storage.getDownloadUrl(resource.fileKey);
+    // External (Google Drive) link → return it directly; otherwise presign the S3 file.
+    if (resource.externalUrl) {
+      return { url: resource.externalUrl, configured: true };
+    }
+    const url = resource.fileKey ? await this.storage.getDownloadUrl(resource.fileKey) : null;
     return { url, configured: this.storage.isConfigured };
   }
 
