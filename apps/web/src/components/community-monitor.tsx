@@ -1,12 +1,17 @@
 'use client';
 
+import { useState } from 'react';
+import { Megaphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MemberManager } from '@/components/member-manager';
+import { useCommunityBroadcast } from '@/hooks/use-notifications';
 import { timeAgo } from '@/lib/utils';
 import {
   useCommunityActivity,
@@ -187,6 +192,54 @@ function Analytics({ slug, active }: { slug: string; active: boolean }) {
   );
 }
 
+function BroadcastToCommunity({ communityId }: { communityId: string }) {
+  const broadcast = useCommunityBroadcast(communityId);
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  if (!open) {
+    return (
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+        <Megaphone className="h-4 w-4" /> Broadcast to members
+      </Button>
+    );
+  }
+  return (
+    <Card className="border-primary/30 bg-primary/5">
+      <CardContent className="space-y-2 p-3">
+        <p className="text-sm font-medium">Notify every member of this community</p>
+        <Input placeholder="Title (e.g. New event this Friday)" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Textarea placeholder="Message (optional)" value={body} onChange={(e) => setBody(e.target.value)} />
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            size="sm"
+            disabled={!title.trim() || broadcast.isPending}
+            onClick={() =>
+              broadcast.mutate(
+                { title: title.trim(), body: body.trim() || undefined },
+                {
+                  onSuccess: (r) => {
+                    toast.success(`Sent to ${r.sent} members`);
+                    setOpen(false);
+                    setTitle('');
+                    setBody('');
+                  },
+                  onError: (e) => toast.error((e as Error).message),
+                },
+              )
+            }
+          >
+            Send broadcast
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function CommunityMonitor({
   slug,
   communityId,
@@ -203,6 +256,7 @@ export function CommunityMonitor({
         <p className="rounded-md border border-primary/30 bg-primary/5 p-2 text-sm text-muted-foreground">
           {info.desc}
         </p>
+        {communityId && <BroadcastToCommunity communityId={communityId} />}
         <Tabs defaultValue={communityId ? info.tab : info.tab === 'opportunities' ? 'members' : info.tab}>
           <TabsList className="flex-wrap">
             <TabsTrigger value="members">Members</TabsTrigger>
