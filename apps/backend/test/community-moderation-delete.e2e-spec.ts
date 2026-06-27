@@ -77,4 +77,35 @@ describe('Community managers can delete resources & opportunities (e2e)', () => 
       .set(auth(manager.token))
       .expect(200);
   });
+
+  it("scopes a manager to their own community; admin can delete across all", async () => {
+    // A second community where `manager` holds no leadership post.
+    const other = await request(app.getHttpServer())
+      .post(`${API}/communities`)
+      .set(auth(admin.token))
+      .send({ name: `Other ${Date.now()}`, type: 'TOPIC', topic: 'Other' })
+      .expect(201);
+    const otherId = other.body.data.id;
+    await request(app.getHttpServer())
+      .post(`${API}/communities/${other.body.data.slug}/join`)
+      .set(auth(member.token));
+
+    const r = await request(app.getHttpServer())
+      .post(`${API}/resources`)
+      .set(auth(member.token))
+      .send({ type: 'NOTES', title: `Other Notes ${Date.now()}`, externalUrl: 'https://drive.google.com/z', communityId: otherId })
+      .expect(201);
+    const resId = r.body.data.id;
+
+    // manager of the FIRST community cannot delete the OTHER community's resource
+    await request(app.getHttpServer())
+      .delete(`${API}/resources/${resId}`)
+      .set(auth(manager.token))
+      .expect(403);
+    // platform admin can delete it (any community)
+    await request(app.getHttpServer())
+      .delete(`${API}/resources/${resId}`)
+      .set(auth(admin.token))
+      .expect(200);
+  });
 });
