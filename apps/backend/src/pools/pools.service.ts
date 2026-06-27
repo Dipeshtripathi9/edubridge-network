@@ -124,20 +124,34 @@ export class PoolsService {
   }
 
   /**
-   * Ranking for a community's pools: open pools first (completely-full ones sink
-   * to the bottom), then the most active / fastest-filling (highest fill ratio,
-   * then most members, most liked, newest).
+   * How "trending" a pool is — its interest level. Driven by engagement
+   * (members, likes, shares) with a small freshness bonus so brand-new pools
+   * people are asking for get a chance, fading over ~3 days. Low-interest pools
+   * (nobody joining/liking) score near zero and sink.
+   */
+  private static trendScore(p: {
+    memberCount: number;
+    likeCount: number;
+    shareCount: number;
+    createdAt: Date;
+  }): number {
+    const ageDays = (Date.now() - p.createdAt.getTime()) / 86_400_000;
+    const freshness = Math.max(0, 3 - ageDays); // up to +3 for new, gone after 3 days
+    return p.memberCount * 3 + p.likeCount * 2 + p.shareCount + freshness;
+  }
+
+  /**
+   * Ranking for a community's pools: trending pools that still have space rise to
+   * the top; completely-full pools (and low-interest ones nobody is joining) sink
+   * to the bottom.
    */
   private static poolRank(
-    a: { isFull: boolean; memberCount: number; maxMembers: number; likeCount: number; createdAt: Date },
-    b: { isFull: boolean; memberCount: number; maxMembers: number; likeCount: number; createdAt: Date },
+    a: { isFull: boolean; memberCount: number; likeCount: number; shareCount: number; createdAt: Date },
+    b: { isFull: boolean; memberCount: number; likeCount: number; shareCount: number; createdAt: Date },
   ): number {
-    if (a.isFull !== b.isFull) return a.isFull ? 1 : -1;
-    const fillA = a.memberCount / Math.max(1, a.maxMembers);
-    const fillB = b.memberCount / Math.max(1, b.maxMembers);
-    if (fillB !== fillA) return fillB - fillA;
-    if (b.memberCount !== a.memberCount) return b.memberCount - a.memberCount;
-    if (b.likeCount !== a.likeCount) return b.likeCount - a.likeCount;
+    if (a.isFull !== b.isFull) return a.isFull ? 1 : -1; // full → bottom
+    const s = PoolsService.trendScore(b) - PoolsService.trendScore(a); // more trending → top
+    if (s !== 0) return s;
     return b.createdAt.getTime() - a.createdAt.getTime();
   }
 

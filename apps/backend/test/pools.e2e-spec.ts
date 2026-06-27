@@ -175,6 +175,39 @@ describe('Pools — private capped group chats (e2e)', () => {
     expect(pools.some((p) => p.title === 'Full Capped Pool' && p.isFull)).toBe(true);
   });
 
+  it('ranks a more popular open pool above a low-interest one', async () => {
+    const low = await request(app.getHttpServer())
+      .post(`${API}/communities/${slug}/pools`)
+      .set(auth(creator.token))
+      .send({ title: 'Quiet Pool', maxMembers: 10 })
+      .expect(201);
+    const popular = await request(app.getHttpServer())
+      .post(`${API}/communities/${slug}/pools`)
+      .set(auth(creator.token))
+      .send({ title: 'Popular Pool', maxMembers: 10 })
+      .expect(201);
+    // give the popular pool real interest: more members + a like
+    await request(app.getHttpServer())
+      .post(`${API}/pools/${popular.body.data.id}/join`)
+      .set(auth(member2.token))
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`${API}/pools/${popular.body.data.id}/join`)
+      .set(auth(member3.token))
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`${API}/pools/${popular.body.data.id}/like`)
+      .set(auth(member2.token))
+      .expect(201);
+
+    const list = await request(app.getHttpServer())
+      .get(`${API}/communities/${slug}/pools`)
+      .set(auth(creator.token))
+      .expect(200);
+    const ids: string[] = list.body.data.map((p: { id: string }) => p.id);
+    expect(ids.indexOf(popular.body.data.id)).toBeLessThan(ids.indexOf(low.body.data.id));
+  });
+
   it('suggests similar existing pools by title/topic', async () => {
     await request(app.getHttpServer())
       .post(`${API}/communities/${slug}/pools`)

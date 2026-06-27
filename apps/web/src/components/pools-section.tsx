@@ -271,8 +271,20 @@ export function PoolsSection({ slug }: { slug: string }) {
           {pools!.map((p) => (
             <Card key={p.id}>
               <CardContent className="space-y-2 p-4">
-                <div className="flex items-center justify-between">
-                  <p className="font-medium">{p.title}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="flex min-w-0 items-center gap-1.5 font-medium">
+                    <span className="truncate">{p.title}</span>
+                    {!p.isFull && (p.memberCount >= 2 || (p.likeCount ?? 0) >= 1) && (
+                      <span className="shrink-0 rounded bg-orange-500/15 px-1.5 py-0.5 text-xs text-orange-600">
+                        🔥 Trending
+                      </span>
+                    )}
+                    {p.isFull && (
+                      <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                        Full
+                      </span>
+                    )}
+                  </p>
                   <Badge variant={p.isFull ? 'outline' : 'secondary'}>
                     <Users className="mr-1 h-3 w-3" />
                     {p.memberCount}/{p.maxMembers}
