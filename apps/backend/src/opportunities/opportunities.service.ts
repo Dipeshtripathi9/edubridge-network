@@ -60,7 +60,7 @@ export class OpportunitiesService {
     const items = await this.prisma.opportunity.findMany({
       where,
       orderBy,
-      skip: query.skip,
+      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
       take: query.limit,
     });
     return buildPaginatedResult(items, query);

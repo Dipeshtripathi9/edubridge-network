@@ -111,7 +111,7 @@ export class ReputationService {
     const users = await this.prisma.user.findMany({
       where,
       orderBy: { reputationPoints: 'desc' },
-      skip: query.skip,
+      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
       take: query.limit,
       select: {
         id: true,
