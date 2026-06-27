@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/commo
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { NotificationsService } from './notifications.service';
-import { BroadcastDto, NotificationQueryDto } from './dto/notification.dto';
+import { BroadcastDto, CommunityBroadcastDto, NotificationQueryDto } from './dto/notification.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 
@@ -47,5 +47,16 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Broadcast a notification to all users (admin)' })
   broadcast(@Body() dto: BroadcastDto) {
     return this.notifications.broadcast(dto);
+  }
+
+  @Post('community/:communityId/broadcast')
+  @ApiOperation({ summary: 'Broadcast to a community you manage' })
+  broadcastToCommunity(
+    @Param('communityId') communityId: string,
+    @CurrentUser('sub') userId: string,
+    @CurrentUser('role') role: string,
+    @Body() dto: CommunityBroadcastDto,
+  ) {
+    return this.notifications.broadcastToCommunity(communityId, { sub: userId, role }, dto);
   }
 }

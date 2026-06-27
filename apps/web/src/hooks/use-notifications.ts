@@ -77,3 +77,11 @@ export function useNotificationStream() {
     };
   }, [qc]);
 }
+
+/** A community manager broadcasts a message to that community's members. */
+export function useCommunityBroadcast(communityId: string) {
+  return useMutation({
+    mutationFn: (input: { title: string; body?: string; link?: string }) =>
+      api.post<{ sent: number }>(`/notifications/community/${communityId}/broadcast`, input),
+  });
+}
