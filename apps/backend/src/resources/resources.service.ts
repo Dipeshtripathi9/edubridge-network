@@ -63,6 +63,10 @@ export class ResourcesService {
   }
 
   async list(query: ResourceQueryDto, userId?: string) {
+    // A specific community or college view is "scoped" and shows everything in it.
+    // The global feed (no scope) hides college/university resources — those live
+    // only inside their own college community; topic/startup resources go global.
+    const scoped = !!(query.communityId || query.collegeId);
     const where: Prisma.ResourceWhereInput = {
       deletedAt: null,
       ...(query.type ? { type: query.type } : {}),
@@ -70,6 +74,12 @@ export class ResourcesService {
       ...(query.communityId ? { communityId: query.communityId } : {}),
       ...(query.tag ? { tags: { has: query.tag } } : {}),
       ...(query.q ? { title: { contains: query.q, mode: 'insensitive' } } : {}),
+      ...(scoped
+        ? {}
+        : {
+            collegeId: null,
+            OR: [{ communityId: null }, { community: { type: { not: 'COLLEGE' } } }],
+          }),
     };
     const sortBy: Prisma.ResourceOrderByWithRelationInput =
       query.sort === 'top'
