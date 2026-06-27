@@ -1,14 +1,19 @@
 'use client';
 
-import { Bookmark, Flag, Heart, MessageCircle, Pin, Share2, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Bookmark, Flag, Heart, MessageCircle, Pin, Send, Share2, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn, timeAgo } from '@/lib/utils';
 import {
   type Post,
+  useAddComment,
+  useComments,
   useDeletePost,
   usePinPost,
   useSharePost,
@@ -40,6 +45,12 @@ export function PostCard({
   const vote = useVotePoll(slug);
   const pin = usePinPost(slug);
   const del = useDeletePost(slug);
+
+  // Comments stay collapsed until the reader clicks the comment button.
+  const [showComments, setShowComments] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const comments = useComments(showComments ? post.id : null);
+  const addComment = useAddComment(post.id);
   const report = useCreateReport();
 
   const onReport = () => {
@@ -126,10 +137,14 @@ export function PostCard({
               <Heart className={cn('h-4 w-4', post.likedByMe && 'fill-current')} />
               {post.likeCount}
             </button>
-            <span className="flex items-center gap-1.5">
+            <button
+              className={cn('flex items-center gap-1.5 hover:text-primary', showComments && 'text-primary')}
+              onClick={() => setShowComments((v) => !v)}
+              title="Comments"
+            >
               <MessageCircle className="h-4 w-4" />
               {post.commentCount}
-            </span>
+            </button>
             <button
               className={cn('flex items-center gap-1.5 hover:text-primary', post.savedByMe && 'text-primary')}
               onClick={() => bookmark.mutate(post.id)}
@@ -177,6 +192,50 @@ export function PostCard({
               </button>
             )}
           </div>
+
+          {showComments && (
+            <div className="mt-3 space-y-3 border-t border-border pt-3">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add a comment…"
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && commentText.trim()) {
+                      addComment.mutate(
+                        { body: commentText.trim() },
+                        { onSuccess: () => setCommentText('') },
+                      );
+                    }
+                  }}
+                />
+                <Button
+                  size="icon"
+                  disabled={!commentText.trim() || addComment.isPending}
+                  onClick={() =>
+                    addComment.mutate(
+                      { body: commentText.trim() },
+                      { onSuccess: () => setCommentText('') },
+                    )
+                  }
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+              {comments.isLoading ? (
+                <p className="text-sm text-muted-foreground">Loading comments…</p>
+              ) : comments.data && comments.data.data.length > 0 ? (
+                comments.data.data.map((c) => (
+                  <div key={c.id} className="text-sm">
+                    <span className="font-medium">{c.author.profile?.fullName ?? 'Student'}</span>{' '}
+                    <span className="text-muted-foreground">{c.body}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No comments yet — be the first.</p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>
