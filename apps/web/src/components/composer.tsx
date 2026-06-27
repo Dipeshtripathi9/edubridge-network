@@ -13,14 +13,18 @@ export function Composer({
   slug,
   kind,
   placeholder,
+  allowPoll = false,
 }: {
   slug: string;
   kind?: string;
   placeholder?: string;
+  /** Show the poll creator. Polls live in their own section, so Discussion/Announcements leave this off. */
+  allowPoll?: boolean;
 }) {
   const create = useCreatePost(slug);
   const [body, setBody] = useState('');
-  const [pollMode, setPollMode] = useState(false);
+  // In the Polls section the composer opens straight into poll mode.
+  const [pollMode, setPollMode] = useState(allowPoll);
   const [options, setOptions] = useState(['', '']);
 
   const submit = () => {
@@ -28,7 +32,7 @@ export function Composer({
     const hashtags = Array.from(body.matchAll(/#(\w+)/g)).map((m) => m[1]);
     const payload: Record<string, unknown> = { body, hashtags };
     if (kind) payload.kind = kind;
-    if (pollMode) {
+    if (allowPoll && pollMode) {
       const opts = options.map((o) => o.trim()).filter(Boolean);
       if (opts.length < 2) {
         toast.error('Add at least two poll options');
@@ -41,7 +45,7 @@ export function Composer({
       onSuccess: () => {
         setBody('');
         setOptions(['', '']);
-        setPollMode(false);
+        setPollMode(allowPoll);
         toast.success('Posted!');
       },
       onError: (e) => toast.error((e as Error).message),
@@ -56,7 +60,7 @@ export function Composer({
           value={body}
           onChange={(e) => setBody(e.target.value)}
         />
-        {pollMode && (
+        {allowPoll && pollMode && (
           <div className="space-y-2">
             {options.map((opt, i) => (
               <div key={i} className="flex gap-2">
@@ -88,14 +92,18 @@ export function Composer({
           </div>
         )}
         <div className="flex items-center justify-between">
-          <Button
-            variant={pollMode ? 'secondary' : 'ghost'}
-            size="sm"
-            onClick={() => setPollMode((v) => !v)}
-          >
-            <ListChecks className="h-4 w-4" />
-            Poll
-          </Button>
+          {allowPoll ? (
+            <Button
+              variant={pollMode ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setPollMode((v) => !v)}
+            >
+              <ListChecks className="h-4 w-4" />
+              Poll
+            </Button>
+          ) : (
+            <span />
+          )}
           <Button size="sm" onClick={submit} disabled={create.isPending}>
             <Send className="h-4 w-4" />
             Post
