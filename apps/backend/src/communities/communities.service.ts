@@ -117,7 +117,8 @@ export class CommunitiesService {
     const fetch = async () => {
       const items = await this.prisma.community.findMany({
         where,
-        orderBy: { memberCount: 'desc' },
+        // id is a stable tiebreaker so offset pages don't overlap when memberCount ties/changes
+        orderBy: [{ memberCount: 'desc' }, { id: 'desc' }],
         skip: query.skip,
         take: query.limit,
         include: { college: { select: { id: true, name: true, slug: true, logoUrl: true } } },

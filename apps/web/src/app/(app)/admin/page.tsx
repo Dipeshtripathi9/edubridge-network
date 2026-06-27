@@ -15,6 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { uniqueById } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -369,7 +370,7 @@ function ReportsTab() {
 function BroadcastTab() {
   const broadcast = useBroadcast();
   const { data: communitiesData } = useCommunities();
-  const communities = communitiesData?.pages.flatMap((p) => p.data) ?? [];
+  const communities = uniqueById(communitiesData?.pages.flatMap((p) => p.data) ?? []);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [link, setLink] = useState('');
@@ -501,7 +502,7 @@ function AllCommunities() {
   const [editSlug, setEditSlug] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editTopic, setEditTopic] = useState('');
-  const all = data?.pages.flatMap((p) => p.data) ?? [];
+  const all = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
   const term = q.trim().toLowerCase();
   const items = term ? all.filter((c) => c.name.toLowerCase().includes(term)) : all;
 
@@ -780,7 +781,7 @@ function CommunitiesTab() {
   const appoint = useAppointHead();
   const create = useCreateCommunity();
   const { data: collegesData } = useColleges({ sort: 'name' });
-  const colleges = collegesData?.pages.flatMap((p) => p.data) ?? [];
+  const colleges = uniqueById(collegesData?.pages.flatMap((p) => p.data) ?? []);
   const [slug, setSlug] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<string>('CAMPUS_LEAD');

@@ -30,3 +30,10 @@ export function initials(name?: string | null): string {
     .map((p) => p[0]?.toUpperCase())
     .join('');
 }
+
+/** Dedupe a list of objects by their `id` (keeps first occurrence). Guards against
+ * duplicate React keys when paginated infinite-query pages overlap. */
+export function uniqueById<T extends { id: string }>(items: T[]): T[] {
+  const seen = new Set<string>();
+  return items.filter((it) => (seen.has(it.id) ? false : seen.add(it.id)));
+}

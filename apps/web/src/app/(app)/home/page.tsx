@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMe } from '@/hooks/use-profile';
+import { uniqueById } from '@/lib/utils';
 import { useMyApplications, useRecommendedOpportunities } from '@/hooks/use-opportunities';
 import { useCommunities } from '@/hooks/use-communities';
 import { useMyPools } from '@/hooks/use-pools';
@@ -75,8 +76,9 @@ export default function HomePage() {
   const applications = (apps ?? []).filter((a) => a.status !== 'SAVED');
   const savedOpps = (apps ?? []).filter((a) => a.status === 'SAVED');
   const savedCount = savedOpps.length + (savedPosts?.length ?? 0) + (savedResources?.length ?? 0);
-  const joined = (communitiesData?.pages.flatMap((p) => p.data) ?? []).filter((c) => c.isMember);
-  const recommendedCommunities = (communitiesData?.pages.flatMap((p) => p.data) ?? [])
+  const allCommunities = uniqueById(communitiesData?.pages.flatMap((p) => p.data) ?? []);
+  const joined = allCommunities.filter((c) => c.isMember);
+  const recommendedCommunities = allCommunities
     .filter((c) => !c.isMember)
     .sort((a, b) => b.memberCount - a.memberCount)
     .slice(0, 4);

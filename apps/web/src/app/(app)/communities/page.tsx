@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CommunityCard } from '@/components/community-card';
+import { uniqueById } from '@/lib/utils';
 import { useCommunities } from '@/hooks/use-communities';
 
 export default function CommunitiesPage() {
@@ -18,7 +19,7 @@ export default function CommunitiesPage() {
     type,
     q: search || undefined,
   });
-  const communities = data?.pages.flatMap((p) => p.data) ?? [];
+  const communities = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
