@@ -145,4 +145,53 @@ describe('Pools — private capped group chats (e2e)', () => {
       .set(auth(member3.token))
       .expect(201);
   });
+
+  it('ranks open pools above completely-full ones', async () => {
+    // A brand-new open pool (1/5) and a full pool (2/2).
+    await request(app.getHttpServer())
+      .post(`${API}/communities/${slug}/pools`)
+      .set(auth(creator.token))
+      .send({ title: 'Open Study Group', maxMembers: 5 })
+      .expect(201);
+    const fullPool = await request(app.getHttpServer())
+      .post(`${API}/communities/${slug}/pools`)
+      .set(auth(creator.token))
+      .send({ title: 'Full Capped Pool', maxMembers: 2 })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`${API}/pools/${fullPool.body.data.id}/join`)
+      .set(auth(member2.token))
+      .expect(201);
+
+    const list = await request(app.getHttpServer())
+      .get(`${API}/communities/${slug}/pools`)
+      .set(auth(creator.token))
+      .expect(200);
+    const pools: { title: string; isFull: boolean }[] = list.body.data;
+    const lastFullIdx = pools.map((p) => p.isFull).lastIndexOf(true);
+    const firstOpenAfterFull = pools.findIndex((p, i) => i > lastFullIdx && !p.isFull);
+    // every full pool sits at the tail — no open pool appears after a full one
+    expect(firstOpenAfterFull).toBe(-1);
+    expect(pools.some((p) => p.title === 'Full Capped Pool' && p.isFull)).toBe(true);
+  });
+
+  it('suggests similar existing pools by title/topic', async () => {
+    await request(app.getHttpServer())
+      .post(`${API}/communities/${slug}/pools`)
+      .set(auth(creator.token))
+      .send({ title: 'DSA Interview Prep', maxMembers: 6 })
+      .expect(201);
+
+    const hit = await request(app.getHttpServer())
+      .get(`${API}/communities/${slug}/pools/similar?q=${encodeURIComponent('dsa prep')}`)
+      .set(auth(member2.token))
+      .expect(200);
+    expect(hit.body.data.some((p: { title: string }) => p.title === 'DSA Interview Prep')).toBe(true);
+
+    const miss = await request(app.getHttpServer())
+      .get(`${API}/communities/${slug}/pools/similar?q=${encodeURIComponent('zzqq')}`)
+      .set(auth(member2.token))
+      .expect(200);
+    expect(miss.body.data.length).toBe(0);
+  });
 });

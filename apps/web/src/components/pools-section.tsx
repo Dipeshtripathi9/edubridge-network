@@ -19,6 +19,7 @@ import {
   useLikePool,
   usePools,
   useSharePool,
+  useSimilarPools,
 } from '@/hooks/use-pools';
 
 export function PoolChat({
@@ -148,6 +149,14 @@ export function PoolsSection({ slug }: { slug: string }) {
   const [title, setTitle] = useState('');
   const [max, setMax] = useState(8);
 
+  // Debounce the title so we suggest similar existing pools as the user types.
+  const [debouncedTitle, setDebouncedTitle] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedTitle(title), 350);
+    return () => clearTimeout(t);
+  }, [title]);
+  const similar = useSimilarPools(slug, showForm ? debouncedTitle : '');
+
   const active = pools?.find((p) => p.id === openId);
   if (active && active.isMember) {
     return <PoolChat pool={active} onBack={() => setOpenId(null)} communitySlug={slug} />;
@@ -170,6 +179,46 @@ export function PoolsSection({ slug }: { slug: string }) {
         <Card>
           <CardContent className="space-y-2 p-4">
             <Input placeholder="Pool heading" value={title} onChange={(e) => setTitle(e.target.value)} />
+            {similar.data && similar.data.length > 0 && (
+              <div className="space-y-1 rounded-md border border-amber-500/40 bg-amber-500/5 p-2">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Similar pools already exist — join one instead?
+                </p>
+                {similar.data.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="min-w-0 truncate">
+                      {p.title}{' '}
+                      <span className="text-xs text-muted-foreground">
+                        · {p.memberCount}/{p.maxMembers}
+                      </span>
+                    </span>
+                    {p.isMember ? (
+                      <span className="text-xs text-muted-foreground">Joined</span>
+                    ) : p.isFull ? (
+                      <span className="text-xs text-muted-foreground">Full</span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          join.mutate(p.id, {
+                            onSuccess: () => {
+                              toast.success(`Joined “${p.title}”`);
+                              setShowForm(false);
+                              setTitle('');
+                              setOpenId(p.id);
+                            },
+                            onError: (e) => toast.error((e as Error).message),
+                          })
+                        }
+                      >
+                        Join
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
               Max members
               <Input
