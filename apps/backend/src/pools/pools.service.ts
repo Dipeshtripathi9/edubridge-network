@@ -48,32 +48,97 @@ export class PoolsService {
     return { ...pool, memberCount: 1, isMember: true };
   }
 
-  async list(slug: string, userId: string) {
+  /**
+   * Suggest existing pools in this community that loosely match a title/topic, so a
+   * user about to create a pool can join a similar one instead of duplicating it.
+   * Matches the whole phrase or any 3+ char word; open pools first.
+   */
+  async searchSimilar(slug: string, q: string, userId: string) {
     const community = await this.prisma.community.findUnique({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
+    const term = (q ?? '').trim();
+    if (term.length < 2) return [];
+
+    const words = Array.from(new Set(term.split(/\s+/).filter((w) => w.length >= 3)));
+    const contains = [term, ...words].map((w) => ({
+      title: { contains: w, mode: 'insensitive' as const },
+    }));
+
     const pools = await this.prisma.pool.findMany({
-      where: { communityId: community.id },
-      orderBy: { createdAt: 'desc' },
+      where: { communityId: community.id, OR: contains },
+      take: 20,
       include: {
         _count: { select: { members: true } },
         members: { where: { userId }, select: { id: true } },
         likes: { where: { userId }, select: { id: true } },
       },
     });
-    return pools.map((p) => ({
-      id: p.id,
-      title: p.title,
-      description: p.description,
-      maxMembers: p.maxMembers,
-      chatId: p.chatId,
-      createdById: p.createdById,
-      memberCount: p._count.members,
-      isMember: p.members.length > 0,
-      isFull: p._count.members >= p.maxMembers,
-      likeCount: p.likeCount,
-      shareCount: p.shareCount,
-      likedByMe: p.likes.length > 0,
-    }));
+    return pools
+      .map((p) => ({
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        maxMembers: p.maxMembers,
+        chatId: p.chatId,
+        createdById: p.createdById,
+        memberCount: p._count.members,
+        isMember: p.members.length > 0,
+        isFull: p._count.members >= p.maxMembers,
+        likeCount: p.likeCount,
+        shareCount: p.shareCount,
+        likedByMe: p.likes.length > 0,
+        createdAt: p.createdAt,
+      }))
+      .sort((a, b) => PoolsService.poolRank(a, b))
+      .slice(0, 5);
+  }
+
+  async list(slug: string, userId: string) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    const pools = await this.prisma.pool.findMany({
+      where: { communityId: community.id },
+      include: {
+        _count: { select: { members: true } },
+        members: { where: { userId }, select: { id: true } },
+        likes: { where: { userId }, select: { id: true } },
+      },
+    });
+    return pools
+      .map((p) => ({
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        maxMembers: p.maxMembers,
+        chatId: p.chatId,
+        createdById: p.createdById,
+        memberCount: p._count.members,
+        isMember: p.members.length > 0,
+        isFull: p._count.members >= p.maxMembers,
+        likeCount: p.likeCount,
+        shareCount: p.shareCount,
+        likedByMe: p.likes.length > 0,
+        createdAt: p.createdAt,
+      }))
+      .sort((a, b) => PoolsService.poolRank(a, b));
+  }
+
+  /**
+   * Ranking for a community's pools: open pools first (completely-full ones sink
+   * to the bottom), then the most active / fastest-filling (highest fill ratio,
+   * then most members, most liked, newest).
+   */
+  private static poolRank(
+    a: { isFull: boolean; memberCount: number; maxMembers: number; likeCount: number; createdAt: Date },
+    b: { isFull: boolean; memberCount: number; maxMembers: number; likeCount: number; createdAt: Date },
+  ): number {
+    if (a.isFull !== b.isFull) return a.isFull ? 1 : -1;
+    const fillA = a.memberCount / Math.max(1, a.maxMembers);
+    const fillB = b.memberCount / Math.max(1, b.maxMembers);
+    if (fillB !== fillA) return fillB - fillA;
+    if (b.memberCount !== a.memberCount) return b.memberCount - a.memberCount;
+    if (b.likeCount !== a.likeCount) return b.likeCount - a.likeCount;
+    return b.createdAt.getTime() - a.createdAt.getTime();
   }
 
   /** Pools the user belongs to, across all communities (their "network"). */

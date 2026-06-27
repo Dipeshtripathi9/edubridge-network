@@ -27,6 +27,15 @@ export function usePools(slug: string) {
   });
 }
 
+export function useSimilarPools(slug: string, q: string) {
+  const term = q.trim();
+  return useQuery({
+    queryKey: ['pools', 'similar', slug, term],
+    queryFn: () => api.get<Pool[]>(`/communities/${slug}/pools/similar?q=${encodeURIComponent(term)}`),
+    enabled: !!slug && term.length >= 2,
+  });
+}
+
 export function useMyPools() {
   return useQuery({
     queryKey: ['pools', 'me'],

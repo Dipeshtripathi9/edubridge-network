@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PoolsService } from './pools.service';
 import { CreatePoolDto } from './dto/pool.dto';
@@ -14,6 +14,16 @@ export class PoolsController {
   @ApiOperation({ summary: 'List private pools in a community' })
   list(@Param('slug') slug: string, @CurrentUser('sub') userId: string) {
     return this.pools.list(slug, userId);
+  }
+
+  @Get('communities/:slug/pools/similar')
+  @ApiOperation({ summary: 'Suggest existing pools matching a title/topic' })
+  similar(
+    @Param('slug') slug: string,
+    @Query('q') q: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.pools.searchSimilar(slug, q ?? '', userId);
   }
 
   @Post('communities/:slug/pools')
