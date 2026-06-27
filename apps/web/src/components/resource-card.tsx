@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bookmark, ExternalLink, FileText, Heart, MessageCircle, Send, Share2 } from 'lucide-react';
+import { Bookmark, ExternalLink, FileText, Heart, MessageCircle, Send, Share2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ import { Stars } from '@/components/stars';
 import { cn, timeAgo } from '@/lib/utils';
 import {
   useAddResourceComment,
+  useDeleteResource,
   useDownloadResource,
   useRateResource,
   useResourceComments,
@@ -28,8 +29,15 @@ const TYPE_LABEL: Record<string, string> = {
   STUDY_MATERIAL: 'Study Material',
 };
 
-export function ResourceCard({ resource }: { resource: Resource }) {
+export function ResourceCard({
+  resource,
+  canModerate = false,
+}: {
+  resource: Resource;
+  canModerate?: boolean;
+}) {
   const download = useDownloadResource();
+  const del = useDeleteResource();
   const rate = useRateResource();
   const bookmark = useToggleResourceBookmark();
   const like = useToggleResourceLike();
@@ -66,10 +74,26 @@ export function ResourceCard({ resource }: { resource: Resource }) {
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <FileText className="h-5 w-5" />
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h3 className="truncate font-semibold">{resource.title}</h3>
             <Badge variant="secondary">{TYPE_LABEL[resource.type] ?? resource.type}</Badge>
           </div>
+          {canModerate && (
+            <button
+              className="shrink-0 text-muted-foreground hover:text-destructive"
+              title="Delete resource"
+              onClick={() => {
+                if (window.confirm('Delete this resource?')) {
+                  del.mutate(resource.id, {
+                    onSuccess: () => toast.success('Resource deleted'),
+                    onError: (e) => toast.error((e as Error).message),
+                  });
+                }
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         {resource.description && (

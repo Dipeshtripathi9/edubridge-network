@@ -59,7 +59,15 @@ function FeedSection({
   );
 }
 
-function ResourcesSection({ slug, communityId }: { slug: string; communityId: string }) {
+function ResourcesSection({
+  slug,
+  communityId,
+  canModerate,
+}: {
+  slug: string;
+  communityId: string;
+  canModerate: boolean;
+}) {
   void slug;
   const { data, isLoading } = useResources({ communityId });
   const items = data?.pages.flatMap((p) => p.data) ?? [];
@@ -76,7 +84,7 @@ function ResourcesSection({ slug, communityId }: { slug: string; communityId: st
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((r) => (
-            <ResourceCard key={r.id} resource={r} />
+            <ResourceCard key={r.id} resource={r} canModerate={canModerate} />
           ))}
         </div>
       )}
@@ -191,7 +199,7 @@ function OpportunitiesSection({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {items.map((o) => (
-            <OpportunityCard key={o.id} opportunity={o} />
+            <OpportunityCard key={o.id} opportunity={o} canModerate={canModerate} />
           ))}
         </div>
       )}
@@ -390,7 +398,7 @@ export function CommunitySections({
       {announcements}
 
       <TabsContent value="resources">
-        <ResourcesSection slug={slug} communityId={communityId} />
+        <ResourcesSection slug={slug} communityId={communityId} canModerate={canModerate} />
       </TabsContent>
 
       <TabsContent value="opportunities">

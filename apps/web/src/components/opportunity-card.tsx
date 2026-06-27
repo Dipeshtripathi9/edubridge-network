@@ -1,13 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Bookmark, CalendarClock, ExternalLink, MapPin, Wallet } from 'lucide-react';
+import { Bookmark, CalendarClock, ExternalLink, MapPin, Trash2, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { timeAgo } from '@/lib/utils';
-import { useApply, type Opportunity } from '@/hooks/use-opportunities';
+import { useApply, useDeleteOpportunity, type Opportunity } from '@/hooks/use-opportunities';
 
 const TYPE_COLORS: Record<string, string> = {
   INTERNSHIP: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
@@ -25,8 +25,15 @@ function deadlineLabel(deadline?: string | null) {
   return `${days}d left`;
 }
 
-export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
+export function OpportunityCard({
+  opportunity,
+  canModerate = false,
+}: {
+  opportunity: Opportunity;
+  canModerate?: boolean;
+}) {
   const apply = useApply();
+  const del = useDeleteOpportunity(opportunity.communityId ?? '');
   const dl = deadlineLabel(opportunity.deadline);
 
   return (
@@ -39,12 +46,30 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
             >
               {opportunity.type.toLowerCase()}
             </span>
-            {dl && (
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <CalendarClock className="h-3.5 w-3.5" />
-                {dl}
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {dl && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <CalendarClock className="h-3.5 w-3.5" />
+                  {dl}
+                </span>
+              )}
+              {canModerate && (
+                <button
+                  className="text-muted-foreground hover:text-destructive"
+                  title="Delete opportunity"
+                  onClick={() => {
+                    if (window.confirm('Delete this opportunity?')) {
+                      del.mutate(opportunity.id, {
+                        onSuccess: () => toast.success('Opportunity deleted'),
+                        onError: (e) => toast.error((e as Error).message),
+                      });
+                    }
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div>

@@ -126,6 +126,14 @@ export function useDownloadResource() {
   });
 }
 
+export function useDeleteResource() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/resources/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['resources'] }),
+  });
+}
+
 export function useToggleResourceLike() {
   const qc = useQueryClient();
   return useMutation({
