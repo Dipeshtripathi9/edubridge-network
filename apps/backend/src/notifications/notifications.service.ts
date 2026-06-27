@@ -1,9 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { NotificationType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MessagingGateway } from '../messaging/messaging.gateway';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
-import { BroadcastDto, NotificationQueryDto } from './dto/notification.dto';
+import { isPlatformAdmin, roleHasCapability } from '../communities/community-permissions';
+import { BroadcastDto, CommunityBroadcastDto, NotificationQueryDto } from './dto/notification.dto';
 
 export interface CreateNotificationInput {
   recipientId: string;
@@ -109,6 +110,34 @@ export class NotificationsService {
    * Admin broadcast (e.g. a new scholarship). Batched; at large scale this
    * would run as a BullMQ job rather than inline.
    */
+  /**
+   * A community manager (or platform admin) broadcasts to their own community's
+   * members. Any managing role (VIEW capability) of that community may do this.
+   */
+  async broadcastToCommunity(
+    communityId: string,
+    actor: { sub: string; role: string },
+    dto: CommunityBroadcastDto,
+  ) {
+    const community = await this.prisma.community.findUnique({ where: { id: communityId } });
+    if (!community) throw new NotFoundException('Community not found');
+    if (!isPlatformAdmin(actor.role)) {
+      const member = await this.prisma.communityMember.findUnique({
+        where: { communityId_userId: { communityId, userId: actor.sub } },
+      });
+      if (!roleHasCapability(member?.role, 'VIEW')) {
+        throw new ForbiddenException('Only this community’s managers can broadcast to it');
+      }
+    }
+    return this.broadcast({
+      type: 'SYSTEM',
+      title: `${community.name}: ${dto.title}`,
+      body: dto.body,
+      link: dto.link ?? `/communities/${community.slug}`,
+      communityId,
+    });
+  }
+
   async broadcast(dto: BroadcastDto) {
     let ids: string[];
     if (dto.communityId) {
