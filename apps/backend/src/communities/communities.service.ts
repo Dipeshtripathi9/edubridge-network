@@ -437,7 +437,8 @@ export class CommunitiesService {
   async listHeadApplications(query: PaginationDto) {
     const items = await this.prisma.communityHeadApplication.findMany({
       where: { status: 'PENDING' },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' }, // newest pending applications first
+
       skip: query.skip,
       take: query.limit,
       include: {

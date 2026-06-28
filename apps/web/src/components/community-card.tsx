@@ -16,11 +16,14 @@ export function CommunityCard({ community }: { community: Community }) {
       .catch(() => {});
     toast.success('Community link copied to clipboard');
   };
-  // College communities open the full College Community Hub.
+  // College communities open the full College Community Hub; 99x Developers opens
+  // its standalone agency landing page.
   const href =
-    community.type === 'COLLEGE' && community.college?.slug
-      ? `/colleges/${community.college.slug}`
-      : `/communities/${community.slug}`;
+    community.slug === '99x-developers'
+      ? '/startups/99x-developers'
+      : community.type === 'COLLEGE' && community.college?.slug
+        ? `/colleges/${community.college.slug}`
+        : `/communities/${community.slug}`;
   return (
     <Link href={href} className="block h-full">
       <Card className="h-full transition-shadow hover:border-primary/50 hover:shadow-md">
