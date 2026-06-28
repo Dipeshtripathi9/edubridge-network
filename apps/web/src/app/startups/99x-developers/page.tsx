@@ -64,157 +64,213 @@ const FAQ = [
 
 const ROLES = ['Web Developer', 'Mobile App Developer', 'UI/UX Designer', 'SEO Specialist', 'Digital Marketer', 'Content Writer'];
 
-const NAV = ['Services', 'Why Us', 'Process', 'Pricing', 'FAQ', 'Apply'];
+const NAV = ['Proposal', 'Services', 'Process', 'Pricing', 'Careers', 'FAQ'];
 
-type Kind = 'PROPOSAL' | 'CAREER' | 'INFLUENCER';
+// Shared name/email/phone row used by every form.
+function Contact({
+  name,
+  setName,
+  email,
+  setEmail,
+  phone,
+  setPhone,
+}: {
+  name: string;
+  setName: (v: string) => void;
+  email: string;
+  setEmail: (v: string) => void;
+  phone: string;
+  setPhone: (v: string) => void;
+}) {
+  return (
+    <div className="grid gap-2 sm:grid-cols-3">
+      <Input placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
+      <Input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <Input placeholder="Phone / WhatsApp (optional)" value={phone} onChange={(e) => setPhone(e.target.value)} />
+    </div>
+  );
+}
 
-function LeadForm() {
+function useLead(reset: () => void) {
   const submit = useSubmitAgencyLead();
-  const [kind, setKind] = useState<Kind>('PROPOSAL');
+  const send = (payload: Parameters<typeof submit.mutate>[0]) => {
+    if (!payload.name?.trim() || !payload.email?.trim()) {
+      toast.error('Please add your name and email');
+      return;
+    }
+    submit.mutate(payload, {
+      onSuccess: () => {
+        toast.success('Sent! Our team will reach out soon.');
+        reset();
+      },
+      onError: (e) => toast.error((e as Error).message),
+    });
+  };
+  return { send, pending: submit.isPending };
+}
+
+function ProposalForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [services, setServices] = useState<string[]>([]);
   const [message, setMessage] = useState('');
-  const [role, setRole] = useState(ROLES[0]);
-  const [projectUrl, setProjectUrl] = useState('');
-  const [video1, setVideo1] = useState('');
-  const [video2, setVideo2] = useState('');
-
-  const toggleService = (s: string) =>
+  const { send, pending } = useLead(() => {
+    setName('');
+    setEmail('');
+    setPhone('');
+    setServices([]);
+    setMessage('');
+  });
+  const toggle = (s: string) =>
     setServices((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s]));
 
-  const onSubmit = () => {
-    if (!name.trim() || !email.trim()) {
-      toast.error('Please add your name and email');
-      return;
-    }
-    submit.mutate(
-      {
-        kind,
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone.trim() || undefined,
-        services: kind === 'PROPOSAL' ? services : undefined,
-        message: message.trim() || undefined,
-        role: kind === 'CAREER' ? role : undefined,
-        projectUrl: kind === 'CAREER' ? projectUrl.trim() || undefined : undefined,
-        videoUrls: kind === 'INFLUENCER' ? [video1, video2].map((v) => v.trim()).filter(Boolean) : undefined,
-      },
-      {
-        onSuccess: () => {
-          toast.success('Sent! Our team will reach out soon.');
-          setName('');
-          setEmail('');
-          setPhone('');
-          setServices([]);
-          setMessage('');
-          setProjectUrl('');
-          setVideo1('');
-          setVideo2('');
-        },
-        onError: (e) => toast.error((e as Error).message),
-      },
-    );
-  };
-
-  const tabs: { k: Kind; label: string }[] = [
-    { k: 'PROPOSAL', label: 'Request a proposal' },
-    { k: 'CAREER', label: 'Join our team' },
-    { k: 'INFLUENCER', label: 'Become an influencer' },
-  ];
-
   return (
-    <Card className="border-primary/30">
-      <CardContent className="space-y-4 p-6">
+    <Card className="border-primary/30 shadow-sm">
+      <CardContent className="space-y-3 p-6">
+        <p className="text-sm font-medium">Select the services you want</p>
         <div className="flex flex-wrap gap-2">
-          {tabs.map((t) => (
+          {SERVICES.map((s) => (
             <button
-              key={t.k}
-              onClick={() => setKind(t.k)}
+              key={s.name}
+              onClick={() => toggle(s.name)}
               className={cn(
-                'rounded-full border px-3 py-1 text-sm',
-                kind === t.k ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent',
+                'rounded-full border px-3 py-1 text-xs',
+                services.includes(s.name)
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border hover:bg-accent',
               )}
             >
-              {t.label}
+              {services.includes(s.name) && <Check className="mr-1 inline h-3 w-3" />}
+              {s.name}
             </button>
           ))}
         </div>
+        <Textarea
+          placeholder="Tell us your requirements — what are you building?"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <Contact name={name} setName={setName} email={email} setEmail={setEmail} phone={phone} setPhone={setPhone} />
+        <Button
+          disabled={pending}
+          onClick={() =>
+            send({
+              kind: 'PROPOSAL',
+              name: name.trim(),
+              email: email.trim(),
+              phone: phone.trim() || undefined,
+              services,
+              message: message.trim() || undefined,
+            })
+          }
+        >
+          Get free proposal <ArrowRight className="h-4 w-4" />
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
-        {kind === 'PROPOSAL' && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Select the services you want</p>
-            <div className="flex flex-wrap gap-2">
-              {SERVICES.map((s) => (
-                <button
-                  key={s.name}
-                  onClick={() => toggleService(s.name)}
-                  className={cn(
-                    'rounded-full border px-3 py-1 text-xs',
-                    services.includes(s.name)
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border hover:bg-accent',
-                  )}
-                >
-                  {services.includes(s.name) && <Check className="mr-1 inline h-3 w-3" />}
-                  {s.name}
-                </button>
-              ))}
-            </div>
-            <Textarea
-              placeholder="Tell us your requirements — what are you building?"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-          </div>
-        )}
+function CareerForm() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [role, setRole] = useState(ROLES[0]);
+  const [projectUrl, setProjectUrl] = useState('');
+  const [message, setMessage] = useState('');
+  const { send, pending } = useLead(() => {
+    setName('');
+    setEmail('');
+    setPhone('');
+    setProjectUrl('');
+    setMessage('');
+  });
 
-        {kind === 'CAREER' && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Apply for a role</p>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
-            >
-              {ROLES.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-            <Input
-              placeholder="Link to your older project / portfolio (https://)"
-              value={projectUrl}
-              onChange={(e) => setProjectUrl(e.target.value)}
-            />
-            <Textarea placeholder="Anything else about you (optional)" value={message} onChange={(e) => setMessage(e.target.value)} />
-          </div>
-        )}
+  return (
+    <Card>
+      <CardContent className="space-y-3 p-6">
+        <p className="text-sm font-medium">Apply for a role</p>
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
+        >
+          {ROLES.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+        <Input
+          placeholder="Link to your older project / portfolio (https://)"
+          value={projectUrl}
+          onChange={(e) => setProjectUrl(e.target.value)}
+        />
+        <Textarea placeholder="Anything else about you (optional)" value={message} onChange={(e) => setMessage(e.target.value)} />
+        <Contact name={name} setName={setName} email={email} setEmail={setEmail} phone={phone} setPhone={setPhone} />
+        <Button
+          disabled={pending}
+          onClick={() =>
+            send({
+              kind: 'CAREER',
+              name: name.trim(),
+              email: email.trim(),
+              phone: phone.trim() || undefined,
+              role,
+              projectUrl: projectUrl.trim() || undefined,
+              message: message.trim() || undefined,
+            })
+          }
+        >
+          Submit application <ArrowRight className="h-4 w-4" />
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
-        {kind === 'INFLUENCER' && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Become a 99x influencer</p>
-            <p className="text-sm text-muted-foreground">
-              Upload 2 sample videos made from our script. We post them online — if they perform, you become a
-              <strong> top influencer</strong> and earn collab charges from our customers.
-            </p>
-            <Input placeholder="Sample video 1 link (YouTube/Drive/Instagram)" value={video1} onChange={(e) => setVideo1(e.target.value)} />
-            <Input placeholder="Sample video 2 link" value={video2} onChange={(e) => setVideo2(e.target.value)} />
-            <Textarea placeholder="Your handles & reach (optional)" value={message} onChange={(e) => setMessage(e.target.value)} />
-          </div>
-        )}
+function InfluencerForm() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [video1, setVideo1] = useState('');
+  const [video2, setVideo2] = useState('');
+  const [message, setMessage] = useState('');
+  const { send, pending } = useLead(() => {
+    setName('');
+    setEmail('');
+    setPhone('');
+    setVideo1('');
+    setVideo2('');
+    setMessage('');
+  });
 
-        <div className="grid gap-2 sm:grid-cols-3">
-          <Input placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
-          <Input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <Input placeholder="Phone / WhatsApp (optional)" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </div>
-
-        <Button onClick={onSubmit} disabled={submit.isPending} className="w-full sm:w-auto">
-          {kind === 'PROPOSAL' ? 'Get free proposal' : kind === 'CAREER' ? 'Submit application' : 'Apply as influencer'}
-          <ArrowRight className="h-4 w-4" />
+  return (
+    <Card className="border-accent/40 bg-accent/5">
+      <CardContent className="space-y-3 p-6">
+        <p className="text-sm text-muted-foreground">
+          Upload 2 sample videos made from our script. We post them online — if they perform, you become a
+          <strong> top influencer</strong> and earn collab charges from our customers.
+        </p>
+        <Input placeholder="Sample video 1 link (YouTube/Drive/Instagram)" value={video1} onChange={(e) => setVideo1(e.target.value)} />
+        <Input placeholder="Sample video 2 link" value={video2} onChange={(e) => setVideo2(e.target.value)} />
+        <Textarea placeholder="Your handles & reach (optional)" value={message} onChange={(e) => setMessage(e.target.value)} />
+        <Contact name={name} setName={setName} email={email} setEmail={setEmail} phone={phone} setPhone={setPhone} />
+        <Button
+          disabled={pending}
+          onClick={() =>
+            send({
+              kind: 'INFLUENCER',
+              name: name.trim(),
+              email: email.trim(),
+              phone: phone.trim() || undefined,
+              videoUrls: [video1, video2].map((v) => v.trim()).filter(Boolean),
+              message: message.trim() || undefined,
+            })
+          }
+        >
+          Apply as influencer <ArrowRight className="h-4 w-4" />
         </Button>
       </CardContent>
     </Card>
@@ -244,7 +300,7 @@ export default function Agency99xPage() {
             ))}
           </nav>
           <Button asChild size="sm">
-            <a href="#apply">Get Proposal</a>
+            <a href="#proposal">Get Proposal</a>
           </Button>
         </div>
       </header>
@@ -265,10 +321,10 @@ export default function Agency99xPage() {
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
-              <a href="#apply">Get Free Proposal</a>
+              <a href="#proposal">Get Free Proposal</a>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href="#apply">Book a Call</a>
+              <a href="#proposal">Book a Call</a>
             </Button>
           </div>
           <div className="mx-auto mt-10 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
@@ -299,6 +355,17 @@ export default function Agency99xPage() {
               be next.
             </p>
           </div>
+        </section>
+
+        {/* Request a proposal — primary CTA, front & center */}
+        <section id="proposal" className="space-y-3">
+          <div>
+            <h2 className="text-2xl font-bold">Request a proposal</h2>
+            <p className="text-muted-foreground">
+              Pick the services you want and tell us what you’re building — we’ll reply with a plan & quote.
+            </p>
+          </div>
+          <ProposalForm />
         </section>
 
         {/* Services */}
@@ -374,7 +441,7 @@ export default function Agency99xPage() {
                     ))}
                   </ul>
                   <Button asChild size="sm" variant="outline" className="w-full">
-                    <a href="#apply">Choose</a>
+                    <a href="#proposal">Choose</a>
                   </Button>
                 </CardContent>
               </Card>
@@ -397,13 +464,22 @@ export default function Agency99xPage() {
           </div>
         </section>
 
-        {/* Apply / lead capture */}
-        <section id="apply" className="space-y-4">
-          <h2 className="text-2xl font-bold">Get started</h2>
-          <p className="text-muted-foreground">
-            Tell us what you need and we’ll help — request a proposal, join our team, or apply to be an influencer.
-          </p>
-          <LeadForm />
+        {/* Careers */}
+        <section id="careers" className="space-y-3">
+          <div>
+            <h2 className="text-2xl font-bold">Join our team</h2>
+            <p className="text-muted-foreground">Apply for a role and share an older project — we review every portfolio.</p>
+          </div>
+          <CareerForm />
+        </section>
+
+        {/* Influencer program */}
+        <section id="influencer" className="space-y-3">
+          <div>
+            <h2 className="text-2xl font-bold">Become a 99x influencer</h2>
+            <p className="text-muted-foreground">Make 2 videos from our script. Perform well → become a top influencer & earn collab charges.</p>
+          </div>
+          <InfluencerForm />
         </section>
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground">
