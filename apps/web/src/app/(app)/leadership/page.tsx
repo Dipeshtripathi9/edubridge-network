@@ -82,7 +82,7 @@ function BecomeALeader() {
             <Crown className="h-6 w-6 text-primary" /> Become a community leader
           </h2>
           <p className="text-sm text-muted-foreground">
-            Lead a community on EduBridge — grow your network, your career, and even your business.
+            Lead a community on EduBridge Network — grow your network, your career, and even your business.
           </p>
         </CardContent>
       </Card>
