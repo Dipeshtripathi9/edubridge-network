@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
-import { useManagedCommunities } from '@/hooks/use-communities';
 
 const NAV = [
   { href: '/home', label: 'Home', icon: Home },
@@ -24,19 +23,15 @@ const NAV = [
   { href: '/resources', label: 'Resources', icon: BookOpen },
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
   { href: '/network', label: 'Network', icon: Users },
+  { href: '/leadership', label: 'Leadership', icon: Crown },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const role = useAuthStore((s) => s.user?.role);
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
-  const { data: managed } = useManagedCommunities();
   const nav = [
     ...NAV,
-    // Leadership dashboard — only for users who hold a head/mod post.
-    ...((managed?.length ?? 0) > 0
-      ? [{ href: '/leadership', label: 'Leadership', icon: Crown }]
-      : []),
     ...(isAdmin ? [{ href: '/admin', label: 'Admin', icon: ShieldCheck }] : []),
   ];
   return (
