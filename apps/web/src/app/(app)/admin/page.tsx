@@ -28,6 +28,7 @@ import {
   useBroadcast,
   useReports,
   useAdminDeletePost,
+  useAdminDeleteResource,
   useResolveReport,
   useSetUserStatus,
   useVerifyCollege,
@@ -61,11 +62,48 @@ function Stat({ label, value }: { label: string; value: number | string }) {
   );
 }
 
+// Lets the admin delete the reported content (post/resource) and resolve the report.
+function ReportDeleteButton({
+  targetType,
+  targetId,
+  onDeleted,
+}: {
+  targetType: string;
+  targetId: string;
+  onDeleted: () => void;
+}) {
+  const delPost = useAdminDeletePost();
+  const delResource = useAdminDeleteResource();
+  const label = targetType.toLowerCase();
+  const mut = targetType === 'POST' ? delPost : targetType === 'RESOURCE' ? delResource : null;
+  if (!mut) return null; // only POST/RESOURCE targets are directly deletable
+  return (
+    <Button
+      size="sm"
+      variant="outline"
+      className="text-destructive"
+      disabled={mut.isPending}
+      onClick={() => {
+        if (window.confirm(`Delete the reported ${label}? This can’t be undone.`)) {
+          mut.mutate(targetId, {
+            onSuccess: () => {
+              onDeleted();
+              toast.success(`${label.charAt(0).toUpperCase()}${label.slice(1)} deleted`);
+            },
+            onError: (e) => toast.error((e as Error).message),
+          });
+        }
+      }}
+    >
+      Delete {label}
+    </Button>
+  );
+}
+
 // Flagged posts/content reported by community leaders & users — shown at the top.
 function FlaggedReports() {
   const { data } = useReports('OPEN');
   const resolve = useResolveReport();
-  const deletePost = useAdminDeletePost();
   const reports = data?.data ?? [];
   if (reports.length === 0) return null;
   return (
@@ -93,27 +131,12 @@ function FlaggedReports() {
                 by {r.reporter?.profile?.fullName ?? 'User'} · target {r.targetId.slice(0, 8)}…
               </p>
             </div>
-            <div className="flex gap-1">
-              {r.targetType === 'POST' && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-destructive"
-                  onClick={() => {
-                    if (window.confirm('Delete the reported post?')) {
-                      deletePost.mutate(r.targetId, {
-                        onSuccess: () => {
-                          resolve.mutate({ id: r.id, status: 'RESOLVED' });
-                          toast.success('Post deleted');
-                        },
-                        onError: (e: unknown) => toast.error((e as Error).message),
-                      });
-                    }
-                  }}
-                >
-                  Delete post
-                </Button>
-              )}
+            <div className="flex flex-wrap gap-1">
+              <ReportDeleteButton
+                targetType={r.targetType}
+                targetId={r.targetId}
+                onDeleted={() => resolve.mutate({ id: r.id, status: 'RESOLVED' })}
+              />
               <Button
                 size="sm"
                 variant="outline"
@@ -328,7 +351,12 @@ function ReportsTab() {
                 by {r.reporter?.profile?.fullName ?? 'User'} · target {r.targetId.slice(0, 8)}…
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <ReportDeleteButton
+                targetType={r.targetType}
+                targetId={r.targetId}
+                onDeleted={() => resolve.mutate({ id: r.id, status: 'RESOLVED' })}
+              />
               <Button
                 size="sm"
                 variant="outline"
