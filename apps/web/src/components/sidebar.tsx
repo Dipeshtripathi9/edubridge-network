@@ -40,7 +40,7 @@ export function Sidebar() {
         <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <GraduationCap className="h-5 w-5" />
         </span>
-        <span className="text-lg font-bold tracking-tight">EduBridge</span>
+        <span className="text-lg font-bold tracking-tight">EduBridge Network</span>
       </Link>
       <nav className="flex-1 space-y-1 px-3">
         {nav.map((item) => {
