@@ -22,45 +22,58 @@ export function CommunityCard({ community }: { community: Community }) {
       ? `/colleges/${community.college.slug}`
       : `/communities/${community.slug}`;
   return (
-    <Card className="transition-shadow hover:shadow-md">
-      <CardContent className="flex flex-col gap-3 p-5">
-        <div className="flex items-start justify-between">
-          <div>
-            <Link href={href} className="font-semibold hover:underline">
-              {community.name}
-            </Link>
-            <Badge variant="secondary" className="ml-2">
-              {community.type === 'COLLEGE'
-                ? 'College'
-                : community.type === 'STARTUP'
-                  ? 'Startup'
-                  : community.topic ?? 'Interest'}
-            </Badge>
+    <Link href={href} className="block h-full">
+      <Card className="h-full transition-shadow hover:border-primary/50 hover:shadow-md">
+        <CardContent className="flex h-full flex-col gap-3 p-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="font-semibold">{community.name}</span>
+              <Badge variant="secondary" className="ml-2">
+                {community.type === 'COLLEGE'
+                  ? 'College'
+                  : community.type === 'STARTUP'
+                    ? 'Startup'
+                    : community.topic ?? 'Interest'}
+              </Badge>
+            </div>
           </div>
-        </div>
-        {community.description && (
-          <p className="line-clamp-2 text-sm text-muted-foreground">{community.description}</p>
-        )}
-        <div className="mt-auto flex items-center justify-between pt-2">
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Users className="h-3.5 w-3.5" />
-            {community.memberCount.toLocaleString()} members
-          </span>
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="ghost" title="Share community" onClick={onShare}>
-              <Share2 className="h-4 w-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant={community.isMember ? 'outline' : 'default'}
-              disabled={join.isPending}
-              onClick={() => join.mutate(!community.isMember)}
-            >
-              {community.isMember ? 'Joined' : 'Join'}
-            </Button>
+          {community.description && (
+            <p className="line-clamp-2 text-sm text-muted-foreground">{community.description}</p>
+          )}
+          <div className="mt-auto flex items-center justify-between pt-2">
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Users className="h-3.5 w-3.5" />
+              {community.memberCount.toLocaleString()} members
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                title="Share community"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onShare();
+                }}
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant={community.isMember ? 'outline' : 'default'}
+                disabled={join.isPending}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  join.mutate(!community.isMember);
+                }}
+              >
+                {community.isMember ? 'Joined' : 'Join'}
+              </Button>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
