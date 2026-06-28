@@ -6,9 +6,9 @@ import {
   ArrowRight,
   Check,
   Code2,
+  GraduationCap,
   Megaphone,
   Palette,
-  Rocket,
   Search,
   Smartphone,
   Sparkles,
@@ -223,13 +223,19 @@ function LeadForm() {
 
 export default function Agency99xPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-background to-accent/20">
       {/* Nav */}
       <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <p className="text-lg font-bold">
-            99x<span className="text-primary"> Developers</span>
-          </p>
+          <Link href="/" className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <GraduationCap className="h-5 w-5" />
+            </span>
+            <div className="leading-tight">
+              <p className="text-sm font-bold tracking-tight">EduBridge Network</p>
+              <p className="text-xs font-semibold text-primary">99x Developers · Studio</p>
+            </div>
+          </Link>
           <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
             {NAV.map((n) => (
               <a key={n} href={`#${n.toLowerCase().replace(/\s+/g, '-')}`} className="hover:text-foreground">
@@ -245,24 +251,53 @@ export default function Agency99xPage() {
 
       <main className="mx-auto max-w-6xl space-y-16 px-4 py-12">
         {/* Hero */}
-        <section className="space-y-4 text-center">
-          <p className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <Rocket className="h-3.5 w-3.5" /> A startup on EduBridge Network
+        <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-accent/10 px-6 py-14 text-center">
+          <p className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            <Sparkles className="h-3.5 w-3.5" /> The product studio that built EduBridge Network
           </p>
-          <h1 className="mx-auto max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
-            We design, build & grow your <span className="text-primary">business online</span>.
+          <h1 className="mx-auto mt-4 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
+            We design, build & grow your <span className="bg-gradient-to-r from-primary to-accent-foreground bg-clip-text text-transparent">business online</span>.
           </h1>
-          <p className="mx-auto max-w-2xl text-muted-foreground">
-            99x Developers is a web design, development & digital marketing studio. Conversion-focused websites,
-            apps, SEO and ads — everything your business needs to generate leads.
+          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+            <strong className="text-foreground">99x Developers</strong> is the in-house studio of EduBridge Network —
+            we built this very platform, and we ship conversion-focused websites, apps, SEO and ads for businesses
+            every week.
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
               <a href="#apply">Get Free Proposal</a>
             </Button>
             <Button asChild size="lg" variant="outline">
               <a href="#apply">Book a Call</a>
             </Button>
+          </div>
+          <div className="mx-auto mt-10 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              { n: '50+', l: 'Projects shipped' },
+              { n: '1', l: 'Platform we built — EduBridge' },
+              { n: '11', l: 'Services in-house' },
+              { n: '100%', l: 'Custom-built' },
+            ].map((s) => (
+              <div key={s.l}>
+                <p className="text-2xl font-bold text-primary">{s.n}</p>
+                <p className="text-xs text-muted-foreground">{s.l}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Built EduBridge — proof / part of the network */}
+        <section className="grid gap-4 rounded-2xl border border-border bg-card p-6 sm:grid-cols-[auto_1fr] sm:items-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+            <GraduationCap className="h-7 w-7" />
+          </span>
+          <div>
+            <p className="font-semibold">Part of EduBridge Network</p>
+            <p className="text-sm text-muted-foreground">
+              The platform you’re on was designed & engineered by 99x Developers. We’re EduBridge Network’s product
+              studio — and we’re actively building websites, apps & growth systems for many businesses. Yours could
+              be next.
+            </p>
           </div>
         </section>
 
@@ -372,8 +407,13 @@ export default function Agency99xPage() {
         </section>
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground">
-          <p className="font-semibold text-foreground">99x Developers</p>
-          <p>Web design · development · digital marketing — a startup on EduBridge Network.</p>
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <GraduationCap className="h-4 w-4" />
+            </span>
+            <p className="font-semibold text-foreground">EduBridge Network · 99x Developers</p>
+          </div>
+          <p className="mt-1">Web design · development · digital marketing — the in-house studio of EduBridge Network.</p>
           <p className="mt-2">
             <Link href="/" className="text-primary hover:underline">
               ← Back to EduBridge Network
