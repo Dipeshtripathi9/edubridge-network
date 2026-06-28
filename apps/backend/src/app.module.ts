@@ -22,7 +22,6 @@ import { AdsModule } from './ads/ads.module';
 import { ReferralsModule } from './referrals/referrals.module';
 import { AgencyModule } from './agency/agency.module';
 import { RentalsModule } from './rentals/rentals.module';
-import { TravelModule } from './travel/travel.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReputationModule } from './reputation/reputation.module';
 import { AdminModule } from './admin/admin.module';
@@ -79,7 +78,6 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     ReferralsModule,
     AgencyModule,
     RentalsModule,
-    TravelModule,
     ComplaintsModule,
     NotificationsModule,
     ReputationModule,

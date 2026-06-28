@@ -289,8 +289,6 @@ model User {
   adCards              AdCard[]
   discountClaims       DiscountClaim[]
   referralsPosted      Referral[]
-  travelPoolsCreated   TravelPool[]
-  travelPoolMemberships TravelPoolMember[]
 
   @@index([status])
   @@index([role])
@@ -1218,52 +1216,6 @@ model RentalLead {
 
   @@index([kind, createdAt])
   @@map("rental_leads")
-}
-
-// GoTogether — travel & ride sharing pools for verified students.
-model TravelPool {
-  id            String   @id @default(cuid())
-  kind          String // TRIP | RIDE
-  createdById   String
-  createdBy     User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  title         String
-  // trip
-  destination   String?
-  startDate     String?
-  returnDate    String?
-  budget        String?
-  // ride
-  fromLocation  String?
-  toLocation    String?
-  date          String?
-  time          String?
-  frequency     String? // DAILY | ONE_TIME
-  estimatedFare String?
-  costPerPerson String?
-  // common
-  seats         Int      @default(4)
-  college       String?
-  genderPref    String?
-  description   String?
-  completed     Boolean  @default(false)
-  createdAt     DateTime @default(now())
-
-  members TravelPoolMember[]
-
-  @@index([kind, createdAt])
-  @@map("travel_pools")
-}
-
-model TravelPoolMember {
-  id       String     @id @default(cuid())
-  poolId   String
-  pool     TravelPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
-  userId   String
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  joinedAt DateTime   @default(now())
-
-  @@unique([poolId, userId])
-  @@map("travel_pool_members")
 }
 
 model ChatParticipant {
