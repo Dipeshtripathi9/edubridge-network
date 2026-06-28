@@ -8,9 +8,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { isPlatformAdmin, roleHasCapability } from '../communities/community-permissions';
 import { CreateAdCardDto } from './dto/ad-card.dto';
 
-const RUN_DAYS = 7;
+const RUN_DAYS = 1; // one ad card runs for exactly its scheduled day
+const WEEK_DAYS = 7;
 const LEADER_WEEKLY_LIMIT = 5; // 5 ad cards / week for a community head
-const ADMIN_LIMIT = 2; // admin's 2-ad allowance per community
+const ADMIN_LIMIT = 2; // admin's 2 ad cards / week per community
 
 const AD_SELECT = {
   id: true,
@@ -31,6 +32,13 @@ export class AdsService {
   private startOfDay(d: Date): Date {
     const x = new Date(d);
     x.setHours(0, 0, 0, 0);
+    return x;
+  }
+
+  /** Start of the day 7 days from today — the end of the rolling weekly window. */
+  private weekEnd(): Date {
+    const x = this.startOfDay(new Date());
+    x.setDate(x.getDate() + WEEK_DAYS);
     return x;
   }
 
@@ -55,7 +63,7 @@ export class AdsService {
 
     const scheduledFor = this.startOfDay(new Date(dto.scheduledFor));
     // Leaders must book before 12am of the run day (a future day). Admins may book
-    // same-day (today) — they can fill a day after midnight if leaders haven't.
+    // same-day (today) — they can fill a day after midnight if the leader didn't.
     const earliest = this.startOfDay(new Date());
     if (!admin) earliest.setDate(earliest.getDate() + 1);
     if (scheduledFor < earliest) {
@@ -66,16 +74,25 @@ export class AdsService {
       );
     }
 
-    // Quota: active + upcoming ad cards this booker holds in this community.
+    // One card per day per community — whoever books first (leader has priority by
+    // booking earlier) takes the day; the other is then restricted from that day.
+    const taken = await this.prisma.adCard.findFirst({
+      where: { communityId: community.id, scheduledFor },
+    });
+    if (taken) {
+      throw new BadRequestException('An ad card is already booked for that day');
+    }
+
+    // Weekly quota: this booker's cards scheduled within the next 7 days.
     const used = await this.prisma.adCard.count({
       where: {
         communityId: community.id,
         createdById: actor.sub,
-        expiresAt: { gte: this.startOfDay(new Date()) },
+        scheduledFor: { gte: this.startOfDay(new Date()), lt: this.weekEnd() },
       },
     });
     if (used >= limit) {
-      throw new BadRequestException(`Ad limit reached (${limit}). Wait for an existing ad to expire.`);
+      throw new BadRequestException(`Weekly ad limit reached (${limit}).`);
     }
 
     const expiresAt = new Date(scheduledFor);
@@ -115,7 +132,7 @@ export class AdsService {
       where: {
         communityId: community.id,
         createdById: actor.sub,
-        expiresAt: { gte: this.startOfDay(new Date()) },
+        scheduledFor: { gte: this.startOfDay(new Date()), lt: this.weekEnd() },
       },
     });
     return { used, limit, remaining: Math.max(0, limit - used) };
