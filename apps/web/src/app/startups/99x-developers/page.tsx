@@ -279,7 +279,7 @@ function InfluencerForm() {
 
 export default function Agency99xPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-accent/20">
+    <div className="min-h-screen scroll-smooth bg-gradient-to-b from-background to-accent/20">
       {/* Nav */}
       <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
@@ -305,7 +305,7 @@ export default function Agency99xPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-16 px-4 py-12">
+      <main className="mx-auto max-w-6xl space-y-16 px-4 py-12 [&_section[id]]:scroll-mt-24">
         {/* Hero */}
         <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-accent/10 px-6 py-14 text-center">
           <p className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
