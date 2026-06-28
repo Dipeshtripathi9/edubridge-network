@@ -49,7 +49,7 @@ export default function SavedPage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {savedOpps.map((a) => (
-                <OpportunityCard key={a.id} opportunity={a.opportunity} />
+                <OpportunityCard key={a.id} opportunity={a.opportunity} savedApplicationId={a.id} />
               ))}
             </div>
           )}

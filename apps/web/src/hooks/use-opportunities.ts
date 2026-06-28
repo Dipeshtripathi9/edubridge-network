@@ -127,3 +127,12 @@ export function useApply() {
     },
   });
 }
+
+/** Remove a saved/applied opportunity from "my applications" (e.g. unsave). */
+export function useDeleteApplication() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (applicationId: string) => api.delete(`/opportunities/applications/${applicationId}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['applications', 'me'] }),
+  });
+}

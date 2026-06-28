@@ -1,13 +1,18 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Bookmark, CalendarClock, ExternalLink, MapPin, Trash2, Wallet } from 'lucide-react';
+import { Bookmark, BookmarkX, CalendarClock, ExternalLink, MapPin, Share2, Trash2, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { timeAgo } from '@/lib/utils';
-import { useApply, useDeleteOpportunity, type Opportunity } from '@/hooks/use-opportunities';
+import {
+  useApply,
+  useDeleteApplication,
+  useDeleteOpportunity,
+  type Opportunity,
+} from '@/hooks/use-opportunities';
 
 const TYPE_COLORS: Record<string, string> = {
   INTERNSHIP: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
@@ -28,13 +33,22 @@ function deadlineLabel(deadline?: string | null) {
 export function OpportunityCard({
   opportunity,
   canModerate = false,
+  savedApplicationId,
 }: {
   opportunity: Opportunity;
   canModerate?: boolean;
+  /** When set (e.g. on the Saved page), the Save button becomes Unsave. */
+  savedApplicationId?: string;
 }) {
   const apply = useApply();
+  const unsave = useDeleteApplication();
   const del = useDeleteOpportunity(opportunity.communityId ?? '');
   const dl = deadlineLabel(opportunity.deadline);
+
+  const onShare = () => {
+    navigator.clipboard?.writeText(`${window.location.origin}/opportunities`).catch(() => {});
+    toast.success('Link copied to clipboard');
+  };
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
@@ -107,19 +121,39 @@ export function OpportunityCard({
           )}
 
           <div className="mt-auto flex items-center gap-2 pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={apply.isPending}
-              onClick={() =>
-                apply.mutate(
-                  { id: opportunity.id, status: 'SAVED' },
-                  { onSuccess: () => toast.success('Saved') },
-                )
-              }
-            >
-              <Bookmark className="h-4 w-4" />
-              Save
+            {savedApplicationId ? (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={unsave.isPending}
+                onClick={() =>
+                  unsave.mutate(savedApplicationId, {
+                    onSuccess: () => toast.success('Removed from saved'),
+                    onError: (e) => toast.error((e as Error).message),
+                  })
+                }
+              >
+                <BookmarkX className="h-4 w-4" />
+                Unsave
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={apply.isPending}
+                onClick={() =>
+                  apply.mutate(
+                    { id: opportunity.id, status: 'SAVED' },
+                    { onSuccess: () => toast.success('Saved') },
+                  )
+                }
+              >
+                <Bookmark className="h-4 w-4" />
+                Save
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={onShare} title="Share">
+              <Share2 className="h-4 w-4" />
             </Button>
             {opportunity.applyUrl && (
               <Button asChild size="sm" className="flex-1">
