@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,8 +11,12 @@ import { CommunityCard } from '@/components/community-card';
 import { uniqueById } from '@/lib/utils';
 import { useCommunities } from '@/hooks/use-communities';
 
+const TYPES = ['COLLEGE', 'TOPIC', 'STARTUP'];
+
 export default function CommunitiesPage() {
-  const [type, setType] = useState<string | undefined>(undefined);
+  const params = useSearchParams();
+  const initialType = TYPES.includes(params.get('type') ?? '') ? params.get('type')! : undefined;
+  const [type, setType] = useState<string | undefined>(initialType);
   const [q, setQ] = useState('');
   const [search, setSearch] = useState('');
 
@@ -45,7 +50,7 @@ export default function CommunitiesPage() {
         </form>
       </div>
 
-      <Tabs defaultValue="all" onValueChange={(v) => setType(v === 'all' ? undefined : v)}>
+      <Tabs defaultValue={initialType ?? 'all'} onValueChange={(v) => setType(v === 'all' ? undefined : v)}>
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="COLLEGE">College/University</TabsTrigger>
