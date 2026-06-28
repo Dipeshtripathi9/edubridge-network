@@ -55,8 +55,8 @@ const BENEFITS = [
   },
   {
     icon: Gift,
-    title: 'Career referrals',
-    desc: 'Get referral opportunities for your own career.',
+    title: 'Career boost',
+    desc: 'Priority access to roles posted on EduBridge, plus guidance on networking your way to a referral — we help where we can.',
   },
   {
     icon: Rocket,
