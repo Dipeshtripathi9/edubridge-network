@@ -94,6 +94,50 @@ export class CommunitiesService {
     return updated;
   }
 
+  // ---------------- Perk: 45%-off web-dev discount at 600+ members ----------------
+  private static readonly DISCOUNT_MIN_MEMBERS = 600;
+
+  async getDiscountStatus(slug: string) {
+    const community = await this.prisma.community.findUnique({
+      where: { slug },
+      select: { id: true, memberCount: true },
+    });
+    if (!community) throw new NotFoundException('Community not found');
+    const claim = await this.prisma.discountClaim.findUnique({
+      where: { communityId: community.id },
+    });
+    return {
+      eligible: community.memberCount >= CommunitiesService.DISCOUNT_MIN_MEMBERS,
+      minMembers: CommunitiesService.DISCOUNT_MIN_MEMBERS,
+      memberCount: community.memberCount,
+      claim,
+    };
+  }
+
+  /** A community head (or admin) claims the 45%-off offer once it hits 600 members. */
+  async claimDiscount(slug: string, actor: { sub: string; role: string }) {
+    const community = await this.prisma.community.findUnique({ where: { slug } });
+    if (!community) throw new NotFoundException('Community not found');
+    if (community.memberCount < CommunitiesService.DISCOUNT_MIN_MEMBERS) {
+      throw new BadRequestException(
+        `This unlocks once your community reaches ${CommunitiesService.DISCOUNT_MIN_MEMBERS} members`,
+      );
+    }
+    if (!isPlatformAdmin(actor.role)) {
+      const member = await this.prisma.communityMember.findUnique({
+        where: { communityId_userId: { communityId: community.id, userId: actor.sub } },
+      });
+      if (!roleHasCapability(member?.role, 'ANNOUNCE')) {
+        throw new ForbiddenException('Only the community head can claim this offer');
+      }
+    }
+    return this.prisma.discountClaim.upsert({
+      where: { communityId: community.id },
+      update: {},
+      create: { communityId: community.id, claimedById: actor.sub },
+    });
+  }
+
   /** Admin deletes a community (cascades members, posts, pools, etc.). */
   async deleteCommunity(slug: string) {
     const community = await this.prisma.community.findUnique({ where: { slug } });

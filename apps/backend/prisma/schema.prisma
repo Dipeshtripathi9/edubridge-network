@@ -287,6 +287,8 @@ model User {
   verificationRequests VerificationRequest[]
   headApplications     CommunityHeadApplication[]
   adCards              AdCard[]
+  discountClaims       DiscountClaim[]
+  referralsPosted      Referral[]
 
   @@index([status])
   @@index([role])
@@ -542,6 +544,7 @@ model Community {
   helpRequests     HelpRequest[]
   complaints       Complaint[]
   adCards          AdCard[]
+  discountClaim    DiscountClaim?
 
   @@index([type])
   @@index([collegeId])
@@ -1136,6 +1139,35 @@ model AdCard {
   @@index([communityId, scheduledFor])
   @@index([createdById, scheduledFor])
   @@map("ad_cards")
+}
+
+// Perk: a head claims the 45%-off website-development offer once their community
+// crosses 600 members. One claim per community; admin follows up.
+model DiscountClaim {
+  id          String    @id @default(cuid())
+  communityId String    @unique
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  claimedById String
+  claimedBy   User      @relation(fields: [claimedById], references: [id], onDelete: Cascade)
+  status      String    @default("PENDING") // PENDING | CONTACTED | DONE
+  createdAt   DateTime  @default(now())
+
+  @@map("discount_claims")
+}
+
+// Perk: career referral opportunities surfaced to community leaders.
+model Referral {
+  id          String   @id @default(cuid())
+  role        String
+  company     String
+  description String?
+  link        String?
+  postedById  String
+  postedBy    User     @relation(fields: [postedById], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt(sort: Desc)])
+  @@map("referrals")
 }
 
 model ChatParticipant {
