@@ -49,7 +49,7 @@ export default function CommunitiesPage() {
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="COLLEGE">College/University</TabsTrigger>
-          <TabsTrigger value="TOPIC">Topic</TabsTrigger>
+          <TabsTrigger value="TOPIC">Interests</TabsTrigger>
           <TabsTrigger value="STARTUP">Startup</TabsTrigger>
         </TabsList>
       </Tabs>

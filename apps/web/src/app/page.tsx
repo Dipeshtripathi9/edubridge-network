@@ -16,7 +16,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 const MODULES = [
   { icon: Star, title: 'College Reviews', desc: 'Genuine, verified reviews on placements, hostels & faculty.' },
   { icon: Compass, title: 'College Selection', desc: 'For new students — choose the right college with real insight from verified students.' },
-  { icon: LayoutGrid, title: 'Communities', desc: 'College & topic communities — posts, polls, discussions.', href: '/signup' },
+  { icon: LayoutGrid, title: 'Communities', desc: 'College & interest communities — posts, polls, discussions.', href: '/signup' },
   { icon: Target, title: 'Opportunities', desc: 'Internships, scholarships, fellowships & competitions.', href: '/signup' },
   { icon: BookOpen, title: 'Resource Hub', desc: 'Notes, roadmaps & placement reports from peers.', href: '/signup' },
   { icon: Repeat, title: 'Transfer Hub', desc: 'Find eligible colleges, requirements, deadlines & credit transfer.', href: '/signup' },
