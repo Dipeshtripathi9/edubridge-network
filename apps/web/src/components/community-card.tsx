@@ -21,9 +21,11 @@ export function CommunityCard({ community }: { community: Community }) {
   const href =
     community.slug === '99x-developers'
       ? '/startups/99x-developers'
-      : community.type === 'COLLEGE' && community.college?.slug
-        ? `/colleges/${community.college.slug}`
-        : `/communities/${community.slug}`;
+      : community.slug === 'ez-rentbuddy'
+        ? '/startups/ez-rentbuddy'
+        : community.type === 'COLLEGE' && community.college?.slug
+          ? `/colleges/${community.college.slug}`
+          : `/communities/${community.slug}`;
   return (
     <Link href={href} className="block h-full">
       <Card className="h-full transition-shadow hover:border-primary/50 hover:shadow-md">

@@ -1189,6 +1189,35 @@ model AgencyLead {
   @@map("agency_leads")
 }
 
+// Lead captured by the EZ-Rentbuddy startup landing (accommodation seeker or a
+// property owner/broker sharing a listing for cashback).
+model RentalLead {
+  id           String   @id @default(cuid())
+  kind         String // SEEKER | PROPERTY
+  name         String
+  phone        String?
+  email        String?
+  // seeker fields
+  college      String?
+  location     String?
+  propertyType String? // PG | HOSTEL | FLAT | ROOM
+  budget       String?
+  moveInDate   String?
+  occupants    String?
+  gender       String?
+  furnished    String?
+  requirements String?
+  // property-share fields
+  participant  String? // OWNER | BROKER | STUDENT | RESIDENT
+  driveUrl     String? // Google Drive folder with photos/videos/details
+  details      String?
+  status       String   @default("NEW")
+  createdAt    DateTime @default(now())
+
+  @@index([kind, createdAt])
+  @@map("rental_leads")
+}
+
 model ChatParticipant {
   id         String    @id @default(cuid())
   chatId     String
