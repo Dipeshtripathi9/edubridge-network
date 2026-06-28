@@ -81,7 +81,10 @@ export function useToggleLike(slug: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (postId: string) => api.post<{ liked: boolean }>(`/posts/${postId}/like`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['feed', slug] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['feed', slug] });
+      qc.invalidateQueries({ queryKey: ['saved-posts'] });
+    },
   });
 }
 
@@ -105,7 +108,10 @@ export function useToggleBookmark(slug: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (postId: string) => api.post<{ saved: boolean }>(`/posts/${postId}/bookmark`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['feed', slug] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['feed', slug] });
+      qc.invalidateQueries({ queryKey: ['saved-posts'] });
+    },
   });
 }
 
