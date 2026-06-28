@@ -17,6 +17,7 @@ import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
 import { OpportunityCard } from '@/components/opportunity-card';
 import { PoolsSection } from '@/components/pools-section';
+import { CommunityAds } from '@/components/ad-cards';
 import { CommunityReviews } from '@/components/community-reviews';
 import { useHelpRequests, useResolveHelp, useSubmitHelp } from '@/hooks/use-help';
 import { useFeed } from '@/hooks/use-posts';
@@ -374,6 +375,8 @@ export function CommunitySections({
 
   if (isStartup) {
     return (
+      <div className="space-y-4">
+      <CommunityAds slug={slug} canModerate={canModerate} />
       <Tabs defaultValue="announcements">
         <TabsList className="flex-wrap">
           <TabsTrigger value="announcements">Announcements</TabsTrigger>
@@ -394,10 +397,13 @@ export function CommunitySections({
           <HelpSection slug={slug} canModerate={canModerate} isMember={isMember} />
         </TabsContent>
       </Tabs>
+      </div>
     );
   }
 
   return (
+    <div className="space-y-4">
+    <CommunityAds slug={slug} canModerate={canModerate} />
     <Tabs defaultValue="announcements">
       <TabsList className="flex-wrap">
         <TabsTrigger value="announcements">Announcements</TabsTrigger>
@@ -430,5 +436,6 @@ export function CommunitySections({
 
       {reviews}
     </Tabs>
+    </div>
   );
 }

@@ -286,6 +286,7 @@ model User {
 
   verificationRequests VerificationRequest[]
   headApplications     CommunityHeadApplication[]
+  adCards              AdCard[]
 
   @@index([status])
   @@index([role])
@@ -540,6 +541,7 @@ model Community {
   reviews          Review[]
   helpRequests     HelpRequest[]
   complaints       Complaint[]
+  adCards          AdCard[]
 
   @@index([type])
   @@index([collegeId])
@@ -1113,6 +1115,27 @@ model HelpRequest {
 
   @@index([communityId, status, createdAt])
   @@map("help_requests")
+}
+
+// Advertisement cards a community head (or admin) books to pin in their community.
+// Booked for a future day (before it starts), runs for 7 days; quota per booker.
+model AdCard {
+  id           String    @id @default(cuid())
+  communityId  String
+  community    Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  createdById  String
+  createdBy    User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  title        String
+  body         String?
+  imageUrl     String?
+  linkUrl      String?
+  scheduledFor DateTime // the day the ad starts running
+  expiresAt    DateTime // scheduledFor + 7 days
+  createdAt    DateTime  @default(now())
+
+  @@index([communityId, scheduledFor])
+  @@index([createdById, scheduledFor])
+  @@map("ad_cards")
 }
 
 model ChatParticipant {

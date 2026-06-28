@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MemberManager } from '@/components/member-manager';
+import { BookAdCard } from '@/components/ad-cards';
 import { useCommunityBroadcast } from '@/hooks/use-notifications';
 import { timeAgo } from '@/lib/utils';
 import {
@@ -256,7 +257,10 @@ export function CommunityMonitor({
         <p className="rounded-md border border-primary/30 bg-primary/5 p-2 text-sm text-muted-foreground">
           {info.desc}
         </p>
-        {communityId && <BroadcastToCommunity communityId={communityId} />}
+        <div className="flex flex-wrap gap-2">
+          {communityId && <BroadcastToCommunity communityId={communityId} />}
+          <BookAdCard slug={slug} />
+        </div>
         <Tabs defaultValue={communityId ? info.tab : info.tab === 'opportunities' ? 'members' : info.tab}>
           <TabsList className="flex-wrap">
             <TabsTrigger value="members">Members</TabsTrigger>
