@@ -35,19 +35,21 @@ function StatCard({
   href: string;
 }) {
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Icon className="h-4 w-4 text-primary" />
-          <span className="text-sm">{label}</span>
-        </div>
-        <p className="mt-1 text-2xl font-bold">{value}</p>
-        <p className="text-xs text-muted-foreground">{hint}</p>
-        <Link href={href} className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline">
-          View all <ArrowRight className="h-3 w-3" />
-        </Link>
-      </CardContent>
-    </Card>
+    <Link href={href} className="block h-full">
+      <Card className="h-full transition-shadow hover:border-primary/50 hover:shadow-md">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Icon className="h-4 w-4 text-primary" />
+            <span className="text-sm">{label}</span>
+          </div>
+          <p className="mt-1 text-2xl font-bold">{value}</p>
+          <p className="text-xs text-muted-foreground">{hint}</p>
+          <span className="mt-1 inline-flex items-center gap-1 text-xs text-primary">
+            View all <ArrowRight className="h-3 w-3" />
+          </span>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
