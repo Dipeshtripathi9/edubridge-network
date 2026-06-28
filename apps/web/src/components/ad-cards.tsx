@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuthStore } from '@/stores/auth.store';
 import { useAdQuota, useBookAd, useCommunityAds, useDeleteAd } from '@/hooks/use-ads';
 
 function daysLeft(expiresAt: string): number {
@@ -70,6 +71,8 @@ export function CommunityAds({ slug, canModerate = false }: { slug: string; canM
 export function BookAdCard({ slug }: { slug: string }) {
   const book = useBookAd(slug);
   const { data: quota } = useAdQuota(slug, true);
+  const role = useAuthStore((s) => s.user?.role);
+  const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -77,8 +80,8 @@ export function BookAdCard({ slug }: { slug: string }) {
   const [linkUrl, setLinkUrl] = useState('');
   const [date, setDate] = useState('');
 
-  // Default the date picker to tomorrow (earliest bookable day).
-  const minDate = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+  // Leaders book a future day (before midnight of the run day); admins may book today.
+  const minDate = new Date(Date.now() + (isAdmin ? 0 : 86_400_000)).toISOString().slice(0, 10);
 
   const submit = () => {
     if (!title.trim() || !date) {
@@ -138,7 +141,7 @@ export function BookAdCard({ slug }: { slug: string }) {
           onChange={(e) => setLinkUrl(e.target.value)}
         />
         <label className="block text-xs text-muted-foreground">
-          Run date (book before midnight of that day)
+          Run date {isAdmin ? '(today or later)' : '(book before midnight of that day)'}
           <Input type="date" min={minDate} value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
         <div className="flex gap-2">
