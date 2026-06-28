@@ -23,7 +23,9 @@ export function CommunityCard({ community }: { community: Community }) {
       ? '/startups/99x-developers'
       : community.slug === 'ez-rentbuddy'
         ? '/startups/ez-rentbuddy'
-        : community.type === 'COLLEGE' && community.college?.slug
+        : community.slug === 'gotogether'
+          ? '/startups/gotogether'
+          : community.type === 'COLLEGE' && community.college?.slug
           ? `/colleges/${community.college.slug}`
           : `/communities/${community.slug}`;
   return (
