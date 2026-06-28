@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Search, Sparkles, Target } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -144,6 +145,10 @@ function Saved() {
 }
 
 export default function OpportunitiesPage() {
+  const params = useSearchParams();
+  const tab = params.get('tab') === 'recommended' || params.get('tab') === 'saved'
+    ? params.get('tab')!
+    : 'browse';
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div>
@@ -156,7 +161,7 @@ export default function OpportunitiesPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="browse">
+      <Tabs defaultValue={tab}>
         <TabsList>
           <TabsTrigger value="browse">Browse</TabsTrigger>
           <TabsTrigger value="recommended">For You</TabsTrigger>

@@ -73,7 +73,6 @@ export default function HomePage() {
   const { data: savedResources } = useMyResourceBookmarks();
 
   const firstName = me?.profile?.fullName?.split(' ')[0];
-  const applications = (apps ?? []).filter((a) => a.status !== 'SAVED');
   const savedOpps = (apps ?? []).filter((a) => a.status === 'SAVED');
   const savedCount = savedOpps.length + (savedPosts?.length ?? 0) + (savedResources?.length ?? 0);
   const allCommunities = uniqueById(communitiesData?.pages.flatMap((p) => p.data) ?? []);
@@ -95,7 +94,7 @@ export default function HomePage() {
       {/* Quick stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatCard icon={LayoutGrid} label="Communities" value={joined.length} hint="Active communities" href="/communities" />
-        <StatCard icon={Target} label="Applications" value={applications.length} hint="Active applications" href="/opportunities" />
+        <StatCard icon={Target} label="For You" value={(recommended ?? []).length} hint="Opportunities picked for you" href="/opportunities?tab=recommended" />
         <StatCard icon={BookOpen} label="Saved" value={savedCount} hint="Opportunities, posts & resources" href="/saved" />
       </div>
 
