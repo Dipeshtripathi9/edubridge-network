@@ -20,6 +20,7 @@ import { PoolsModule } from './pools/pools.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { AdsModule } from './ads/ads.module';
 import { ReferralsModule } from './referrals/referrals.module';
+import { AgencyModule } from './agency/agency.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReputationModule } from './reputation/reputation.module';
 import { AdminModule } from './admin/admin.module';
@@ -74,6 +75,7 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     PoolsModule,
     AdsModule,
     ReferralsModule,
+    AgencyModule,
     ComplaintsModule,
     NotificationsModule,
     ReputationModule,
