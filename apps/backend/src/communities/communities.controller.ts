@@ -44,6 +44,22 @@ export class CommunitiesController {
     return this.communities.deleteCommunity(slug);
   }
 
+  @Get(':slug/discount')
+  @ApiOperation({ summary: 'Website-dev discount eligibility & claim status' })
+  discountStatus(@Param('slug') slug: string) {
+    return this.communities.getDiscountStatus(slug);
+  }
+
+  @Post(':slug/discount/claim')
+  @ApiOperation({ summary: 'Claim the 45%-off web-dev offer (head/admin, 600+ members)' })
+  claimDiscount(
+    @Param('slug') slug: string,
+    @CurrentUser('sub') userId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.communities.claimDiscount(slug, { sub: userId, role });
+  }
+
   @Public()
   @Get()
   @ApiOperation({ summary: 'List / search communities (paginated)' })

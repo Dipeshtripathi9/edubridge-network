@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CommunityMonitor } from '@/components/community-monitor';
+import { DiscountUnlock } from '@/components/perks';
 import { isCommunityManager, useCommunity } from '@/hooks/use-communities';
 import { useSubmitComplaint } from '@/hooks/use-complaints';
 import { useAuthStore } from '@/stores/auth.store';
@@ -101,6 +102,7 @@ export default function ManageCommunityPage({ params }: { params: Promise<{ slug
         </Button>
       </div>
 
+      {canManage && <DiscountUnlock slug={slug} />}
       {canManage && <RaiseIssue communityId={community.id} />}
 
       {canManage ? (

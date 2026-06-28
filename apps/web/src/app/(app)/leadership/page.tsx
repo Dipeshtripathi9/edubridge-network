@@ -19,6 +19,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { uniqueById } from '@/lib/utils';
 import { useCommunities, useManagedCommunities } from '@/hooks/use-communities';
 import { useMe } from '@/hooks/use-profile';
+import { useAuthStore } from '@/stores/auth.store';
+import { ReferralsSection } from '@/components/perks';
 
 const roleLabel = (r: string) => r.replace(/_/g, ' ').toLowerCase();
 
@@ -167,6 +169,8 @@ function BecomeALeader() {
 
 export default function LeadershipPage() {
   const { data: managed, isLoading } = useManagedCommunities();
+  const role = useAuthStore((s) => s.user?.role);
+  const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
   const isLeader = (managed?.length ?? 0) > 0;
 
   return (
@@ -189,7 +193,8 @@ export default function LeadershipPage() {
           ))}
         </div>
       ) : isLeader ? (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <>
+          <div className="grid gap-3 sm:grid-cols-2">
           {managed!.map((m) => (
             <Card key={m.community.id} className="transition-colors hover:border-primary/50">
               <CardContent className="space-y-2 p-4">
@@ -209,7 +214,11 @@ export default function LeadershipPage() {
               </CardContent>
             </Card>
           ))}
-        </div>
+          </div>
+          <ReferralsSection enabled isAdmin={isAdmin} />
+        </>
+      ) : isAdmin ? (
+        <ReferralsSection enabled isAdmin />
       ) : (
         <BecomeALeader />
       )}
