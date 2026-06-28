@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Briefcase, ExternalLink, PartyPopper, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
@@ -87,17 +88,27 @@ export function ReferralsSection({ enabled, isAdmin }: { enabled: boolean; isAdm
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 font-semibold">
-          <Briefcase className="h-5 w-5 text-primary" /> Career referrals
+          <Briefcase className="h-5 w-5 text-primary" /> Career boost
         </h3>
         {isAdmin && (
           <Button size="sm" variant="outline" onClick={() => setOpen((v) => !v)}>
-            {open ? 'Cancel' : 'Post referral'}
+            {open ? 'Cancel' : 'Post opportunity'}
           </Button>
         )}
       </div>
       <p className="text-sm text-muted-foreground">
-        Referral opportunities for community leaders — a perk of leading on EduBridge Network.
+        A perk of leading on EduBridge Network: priority access to roles on the platform, and
+        guidance on networking your way to a referral — we help where we can (no guarantees).
       </p>
+
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="flex flex-wrap items-center justify-between gap-2 p-4">
+          <p className="text-sm font-medium">🎯 Priority access to internships & scholarships on EduBridge</p>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/opportunities?tab=recommended">Browse opportunities</Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       {isAdmin && open && (
         <Card>
@@ -114,7 +125,7 @@ export function ReferralsSection({ enabled, isAdmin }: { enabled: boolean; isAdm
                   { role: role.trim(), company: company.trim(), description: desc.trim() || undefined, link: link.trim() || undefined },
                   {
                     onSuccess: () => {
-                      toast.success('Referral posted');
+                      toast.success('Opportunity posted');
                       setOpen(false);
                       setRole('');
                       setCompany('');
@@ -137,7 +148,7 @@ export function ReferralsSection({ enabled, isAdmin }: { enabled: boolean; isAdm
       ) : (referrals?.length ?? 0) === 0 ? (
         <Card>
           <CardContent className="p-6 text-center text-sm text-muted-foreground">
-            No referral opportunities yet — check back soon.
+            No opportunities posted yet — check back soon.
           </CardContent>
         </Card>
       ) : (
