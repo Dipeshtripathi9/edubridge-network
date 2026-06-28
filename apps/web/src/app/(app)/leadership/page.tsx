@@ -129,19 +129,28 @@ function BecomeALeader() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid items-stretch gap-3 sm:grid-cols-2">
             {vacancies.map((c) => (
-              <Card key={c.id} className="border-green-500/30 bg-green-500/5">
-                <CardContent className="space-y-2 p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="font-medium">{c.name}</p>
-                    <Badge variant="secondary">{typeLabel(c.type)}</Badge>
+              <Card key={c.id} className="h-full border-green-500/30 bg-green-500/5">
+                <CardContent className="flex h-full flex-col gap-3 p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="min-w-0 truncate font-medium">{c.name}</p>
+                    <Badge variant="secondary" className="shrink-0">
+                      {typeLabel(c.type)}
+                    </Badge>
                   </div>
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Users className="h-3 w-3" /> {c.memberCount.toLocaleString()} members · hiring now
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Users className="h-3 w-3" /> {c.memberCount.toLocaleString()} members
+                    </span>
+                    <span className="rounded-full bg-green-500/15 px-2 py-0.5 font-medium text-green-600">
+                      Hiring now
+                    </span>
+                  </div>
+                  <p className="line-clamp-2 min-h-[2.5rem] text-sm text-muted-foreground">
+                    {c.hiringNote || 'Open leadership position — apply to lead this community.'}
                   </p>
-                  {c.hiringNote && <p className="text-sm text-muted-foreground">{c.hiringNote}</p>}
-                  <Button asChild size="sm" className="w-full">
+                  <Button asChild size="sm" className="mt-auto w-full">
                     <Link href={`/communities/${c.slug}`}>
                       View &amp; apply <ArrowRight className="h-4 w-4" />
                     </Link>
