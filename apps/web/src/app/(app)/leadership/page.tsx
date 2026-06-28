@@ -59,7 +59,7 @@ export default function LeadershipPage() {
                     ? 'College'
                     : m.community.type === 'STARTUP'
                       ? 'Startup'
-                      : 'Topic'}
+                      : 'Interests'}
                 </p>
                 <Button asChild size="sm" className="w-full">
                   <Link href={`/leadership/${m.community.slug}`}>

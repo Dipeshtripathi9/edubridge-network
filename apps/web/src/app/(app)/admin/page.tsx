@@ -494,7 +494,7 @@ function AllCommunities() {
   const items = term ? all.filter((c) => c.name.toLowerCase().includes(term)) : all;
 
   const typeLabel = (t: string) =>
-    t === 'COLLEGE' ? 'College' : t === 'STARTUP' ? 'Startup' : 'Topic';
+    t === 'COLLEGE' ? 'College' : t === 'STARTUP' ? 'Startup' : 'Interests';
 
   const toggle = (slug: string) => {
     setOpenSlug((cur) => (cur === slug ? null : slug));
@@ -588,7 +588,7 @@ function AllCommunities() {
                     />
                     {c.type !== 'COLLEGE' && (
                       <Input
-                        placeholder="Topic (optional)"
+                        placeholder="Interest (optional)"
                         value={editTopic}
                         onChange={(e) => setEditTopic(e.target.value)}
                         className="h-9"
@@ -823,12 +823,12 @@ function CommunitiesTab() {
                 onClick={() => setCType(t)}
                 className={`flex-1 rounded-md border px-3 py-1.5 text-sm capitalize ${cType === t ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent'}`}
               >
-                {t.toLowerCase()}
+                {t === 'TOPIC' ? 'interests' : t.toLowerCase()}
               </button>
             ))}
           </div>
           {cType === 'TOPIC' ? (
-            <Input placeholder="Topic (e.g. AI, DSA)" value={cTopic} onChange={(e) => setCTopic(e.target.value)} />
+            <Input placeholder="Interest (e.g. AI, DSA)" value={cTopic} onChange={(e) => setCTopic(e.target.value)} />
           ) : cType === 'STARTUP' ? null : (
             <select
               value={cCollegeId}

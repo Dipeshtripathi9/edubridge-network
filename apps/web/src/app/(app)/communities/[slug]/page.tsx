@@ -48,7 +48,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold">{community.name}</h1>
               <Badge variant="secondary">
-                {community.type === 'COLLEGE' ? 'College' : community.topic ?? 'Topic'}
+                {community.type === 'COLLEGE' ? 'College' : community.topic ?? 'Interest'}
               </Badge>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">{community.description}</p>

@@ -34,7 +34,7 @@ export function CommunityCard({ community }: { community: Community }) {
                 ? 'College'
                 : community.type === 'STARTUP'
                   ? 'Startup'
-                  : community.topic ?? 'Topic'}
+                  : community.topic ?? 'Interest'}
             </Badge>
           </div>
         </div>

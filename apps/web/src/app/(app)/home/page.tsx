@@ -126,8 +126,8 @@ export default function HomePage() {
                             : c.type === 'STARTUP'
                               ? 'Startup community'
                               : c.topic
-                                ? `Topic · ${c.topic}`
-                                : 'Topic community'}
+                                ? `Interest · ${c.topic}`
+                                : 'Interest community'}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {c.memberCount.toLocaleString()} members
