@@ -41,7 +41,6 @@ export function Topbar() {
           <Avatar src={me?.profile?.avatarUrl} name={me?.profile?.fullName} />
           <div className="hidden text-sm leading-tight lg:block">
             <p className="font-medium">{me?.profile?.fullName ?? 'Student'}</p>
-            <p className="text-xs text-muted-foreground">{me?.reputationPoints ?? 0} pts</p>
           </div>
         </div>
         <Button variant="ghost" size="icon" aria-label="Logout" onClick={logout}>
