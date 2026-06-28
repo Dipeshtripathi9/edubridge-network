@@ -8,12 +8,18 @@ const dayStr = (offsetDays: number) => {
   return d.toISOString().slice(0, 10);
 };
 
-describe('Ad cards (e2e)', () => {
+describe('Ad cards — one per day, leader-first, admin fallback (e2e)', () => {
   let app: INestApplication;
   let admin: TestUser;
   let head: TestUser;
   let member: TestUser;
   let slug: string;
+
+  const book = (tok: string, title: string, offset: number) =>
+    request(app.getHttpServer())
+      .post(`${API}/communities/${slug}/ads`)
+      .set(auth(tok))
+      .send({ title, scheduledFor: dayStr(offset) });
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -39,63 +45,39 @@ describe('Ad cards (e2e)', () => {
     await app?.close();
   });
 
-  it('lets a head book an ad for a future day', async () => {
-    await request(app.getHttpServer())
-      .post(`${API}/communities/${slug}/ads`)
-      .set(auth(head.token))
-      .send({ title: 'Hackathon!', scheduledFor: dayStr(1) })
-      .expect(201);
+  it('lets a head book a future day; rejects today and rejects a plain member', async () => {
+    await book(head.token, 'Day 1', 1).expect(201);
+    await book(head.token, 'Today?', 0).expect(400); // leaders must book before the run day
+    await book(member.token, 'Nope', 2).expect(403);
   });
 
-  it('rejects booking for today / a past day (must book before the run day)', async () => {
-    await request(app.getHttpServer())
-      .post(`${API}/communities/${slug}/ads`)
-      .set(auth(head.token))
-      .send({ title: 'Too late', scheduledFor: dayStr(0) })
-      .expect(400);
+  it('allows only one ad per day — leader has the day, admin is blocked from it', async () => {
+    await book(admin.token, 'Admin wants day 1', 1).expect(400); // already taken by the head
+    await book(admin.token, 'Admin day 2', 2).expect(201); // a free day is fine
   });
 
-  it('forbids a plain member from booking ads', async () => {
-    await request(app.getHttpServer())
-      .post(`${API}/communities/${slug}/ads`)
-      .set(auth(member.token))
-      .send({ title: 'nope', scheduledFor: dayStr(1) })
-      .expect(403);
+  it('lets admin fill the current day (same-day) when it is free', async () => {
+    await book(admin.token, 'Admin today', 0).expect(201);
   });
 
-  it('enforces the head weekly quota of 5', async () => {
-    // already booked 1 above; book 4 more to reach 5, the 6th fails
-    for (let i = 0; i < 4; i++) {
-      await request(app.getHttpServer())
-        .post(`${API}/communities/${slug}/ads`)
-        .set(auth(head.token))
-        .send({ title: `Ad ${i}`, scheduledFor: dayStr(2 + i) })
-        .expect(201);
-    }
-    const quota = await request(app.getHttpServer())
-      .get(`${API}/communities/${slug}/ads/quota`)
-      .set(auth(head.token))
-      .expect(200);
-    expect(quota.body.data.remaining).toBe(0);
-
-    await request(app.getHttpServer())
-      .post(`${API}/communities/${slug}/ads`)
-      .set(auth(head.token))
-      .send({ title: 'Over limit', scheduledFor: dayStr(7) })
-      .expect(400);
-  });
-
-  it('admin can book in any community (own 2-ad allowance), including same-day', async () => {
-    // admin may book TODAY (leaders cannot — see the "today" test above)
-    await request(app.getHttpServer())
-      .post(`${API}/communities/${slug}/ads`)
-      .set(auth(admin.token))
-      .send({ title: 'Admin same-day ad', scheduledFor: dayStr(0) })
-      .expect(201);
-    const quota = await request(app.getHttpServer())
+  it('enforces the admin weekly cap of 2', async () => {
+    const q = await request(app.getHttpServer())
       .get(`${API}/communities/${slug}/ads/quota`)
       .set(auth(admin.token))
       .expect(200);
-    expect(quota.body.data.limit).toBe(2);
+    expect(q.body.data.limit).toBe(2);
+    expect(q.body.data.remaining).toBe(0); // booked day 2 + today
+    await book(admin.token, 'Admin third', 5).expect(400);
+  });
+
+  it('enforces the head weekly cap of 5', async () => {
+    // head already has day 1; book 4 more free days → 5
+    for (const d of [3, 4, 5, 6]) await book(head.token, `Head ${d}`, d).expect(201);
+    const q = await request(app.getHttpServer())
+      .get(`${API}/communities/${slug}/ads/quota`)
+      .set(auth(head.token))
+      .expect(200);
+    expect(q.body.data.remaining).toBe(0);
+    await book(head.token, 'Head sixth', 8).expect(400);
   });
 });
