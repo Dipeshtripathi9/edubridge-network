@@ -85,11 +85,12 @@ describe('Ad cards (e2e)', () => {
       .expect(400);
   });
 
-  it('admin can book in any community (own 2-ad allowance)', async () => {
+  it('admin can book in any community (own 2-ad allowance), including same-day', async () => {
+    // admin may book TODAY (leaders cannot — see the "today" test above)
     await request(app.getHttpServer())
       .post(`${API}/communities/${slug}/ads`)
       .set(auth(admin.token))
-      .send({ title: 'Admin ad', scheduledFor: dayStr(1) })
+      .send({ title: 'Admin same-day ad', scheduledFor: dayStr(0) })
       .expect(201);
     const quota = await request(app.getHttpServer())
       .get(`${API}/communities/${slug}/ads/quota`)

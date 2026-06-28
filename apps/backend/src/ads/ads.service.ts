@@ -51,14 +51,19 @@ export class AdsService {
   }
 
   async create(slug: string, actor: { sub: string; role: string }, dto: CreateAdCardDto) {
-    const { community, limit } = await this.resolve(slug, actor);
+    const { community, admin, limit } = await this.resolve(slug, actor);
 
     const scheduledFor = this.startOfDay(new Date(dto.scheduledFor));
-    const startOfTomorrow = this.startOfDay(new Date());
-    startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
-    // Must be booked before 12am of the run day → the day cannot have started yet.
-    if (scheduledFor < startOfTomorrow) {
-      throw new BadRequestException('Book an ad before midnight of the run day — choose a future date');
+    // Leaders must book before 12am of the run day (a future day). Admins may book
+    // same-day (today) — they can fill a day after midnight if leaders haven't.
+    const earliest = this.startOfDay(new Date());
+    if (!admin) earliest.setDate(earliest.getDate() + 1);
+    if (scheduledFor < earliest) {
+      throw new BadRequestException(
+        admin
+          ? 'Choose today or a future day'
+          : 'Book an ad before midnight of the run day — choose a future date',
+      );
     }
 
     // Quota: active + upcoming ad cards this booker holds in this community.
