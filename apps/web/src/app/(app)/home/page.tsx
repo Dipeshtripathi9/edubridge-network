@@ -5,6 +5,7 @@ import {
   ArrowRight,
   BookOpen,
   LayoutGrid,
+  Rocket,
   Star,
   Target,
   Users,
@@ -77,6 +78,7 @@ export default function HomePage() {
   const savedCount = savedOpps.length + (savedPosts?.length ?? 0) + (savedResources?.length ?? 0);
   const allCommunities = uniqueById(communitiesData?.pages.flatMap((p) => p.data) ?? []);
   const joined = allCommunities.filter((c) => c.isMember);
+  const startupCount = allCommunities.filter((c) => c.type === 'STARTUP').length;
   const recommendedCommunities = allCommunities
     .filter((c) => !c.isMember)
     .sort((a, b) => b.memberCount - a.memberCount)
@@ -92,8 +94,9 @@ export default function HomePage() {
       </div>
 
       {/* Quick stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard icon={LayoutGrid} label="Communities" value={joined.length} hint="Active communities" href="/communities" />
+        <StatCard icon={Rocket} label="Startups" value={startupCount} hint="Startup communities" href="/communities?type=STARTUP" />
         <StatCard icon={Target} label="For You" value={(recommended ?? []).length} hint="Opportunities picked for you" href="/opportunities?tab=recommended" />
         <StatCard icon={BookOpen} label="Saved" value={savedCount} hint="Opportunities, posts & resources" href="/saved" />
       </div>
