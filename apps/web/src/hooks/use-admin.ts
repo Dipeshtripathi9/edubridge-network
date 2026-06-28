@@ -122,6 +122,18 @@ export function useAdminDeletePost() {
   });
 }
 
+/** Admin deletes a reported resource by id and refreshes the report queue. */
+export function useAdminDeleteResource() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (resourceId: string) => api.delete(`/resources/${resourceId}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin', 'reports'] });
+      qc.invalidateQueries({ queryKey: ['resources'] });
+    },
+  });
+}
+
 export function useBroadcast() {
   return useMutation({
     mutationFn: (input: {
