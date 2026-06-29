@@ -96,6 +96,9 @@ export default function HomePage() {
         <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your journey.</p>
       </div>
 
+      {/* Why EduBridge — experts, verified reviews & real data */}
+      <ExpertGuidance />
+
       {/* Quick stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard icon={LayoutGrid} label="Communities" value={joined.length} hint="Active communities" href="/communities" />
@@ -103,9 +106,6 @@ export default function HomePage() {
         <StatCard icon={Target} label="For You" value={(recommended ?? []).length} hint="Opportunities picked for you" href="/opportunities?tab=recommended" />
         <StatCard icon={BookOpen} label="Saved" value={savedCount} hint="Opportunities, posts & resources" href="/saved" />
       </div>
-
-      {/* Why EduBridge — experts, verified reviews & real data */}
-      <ExpertGuidance />
 
       <div className="grid gap-6">
         {/* Main column */}
