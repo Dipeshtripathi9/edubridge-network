@@ -13,7 +13,6 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useMe } from '@/hooks/use-profile';
 import { uniqueById } from '@/lib/utils';
 import { useMyApplications, useRecommendedOpportunities } from '@/hooks/use-opportunities';
 import { useCommunities } from '@/hooks/use-communities';
@@ -68,7 +67,6 @@ function SectionHeader({ title, href }: { title: string; href?: string }) {
 }
 
 export default function HomePage() {
-  const { data: me } = useMe();
   const { data: apps } = useMyApplications();
   const { data: communitiesData, isLoading: communitiesLoading } = useCommunities();
   const { data: recommended } = useRecommendedOpportunities();
@@ -76,7 +74,6 @@ export default function HomePage() {
   const { data: savedPosts } = useMySavedPosts();
   const { data: savedResources } = useMyResourceBookmarks();
 
-  const firstName = me?.profile?.fullName?.split(' ')[0];
   const savedOpps = (apps ?? []).filter((a) => a.status === 'SAVED');
   const savedCount = savedOpps.length + (savedPosts?.length ?? 0) + (savedResources?.length ?? 0);
   const allCommunities = uniqueById(communitiesData?.pages.flatMap((p) => p.data) ?? []);
@@ -90,12 +87,6 @@ export default function HomePage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      {/* Welcome banner */}
-      <div className="rounded-xl border border-border bg-gradient-to-r from-primary/10 via-primary/5 to-accent/20 p-5">
-        <h1 className="text-2xl font-bold">Welcome back{firstName ? `, ${firstName}` : ''}! 👋</h1>
-        <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your journey.</p>
-      </div>
-
       {/* Why EduBridge — experts, verified reviews & real data */}
       <ExpertGuidance />
 
