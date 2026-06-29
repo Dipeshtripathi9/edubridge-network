@@ -1218,6 +1218,27 @@ model RentalLead {
   @@map("rental_leads")
 }
 
+// A student's request for 1:1 expert guidance ("Mentors" on the admin dashboard).
+model MentorRequest {
+  id               String   @id @default(cuid())
+  name             String
+  phone            String
+  email            String?
+  course           String? // course interest
+  location         String? // preferred location
+  marks            String? // marks / percentage
+  budget           String?
+  category         String? // optional
+  preferredCollege String? // optional
+  contactMethod    String? // CALL | CHAT
+  message          String?
+  status           String   @default("NEW") // NEW | CONTACTED | DONE
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("mentor_requests")
+}
+
 model ChatParticipant {
   id         String    @id @default(cuid())
   chatId     String

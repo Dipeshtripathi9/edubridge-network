@@ -50,6 +50,7 @@ import {
 } from '@/hooks/use-communities';
 import { useColleges } from '@/hooks/use-colleges';
 import { useComplaints, useResolveComplaint } from '@/hooks/use-complaints';
+import { useMentorRequests } from '@/hooks/use-mentors';
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
@@ -754,6 +755,46 @@ function AllCommunities() {
   );
 }
 
+function MentorsTab() {
+  const { data, isLoading } = useMentorRequests();
+  const items = data ?? [];
+  if (isLoading) return <Skeleton className="h-40 w-full" />;
+  if (items.length === 0) {
+    return <p className="py-8 text-center text-sm text-muted-foreground">No expert-guidance requests yet.</p>;
+  }
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">{items.length} student{items.length === 1 ? '' : 's'} requested 1:1 expert guidance.</p>
+      {items.map((m) => (
+        <Card key={m.id}>
+          <CardContent className="p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="font-semibold">{m.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  📞 {m.phone}
+                  {m.email ? ` · ✉️ ${m.email}` : ''}
+                  {m.contactMethod ? ` · prefers ${m.contactMethod === 'CALL' ? 'call' : 'chat'}` : ''}
+                </p>
+              </div>
+              <span className="text-xs text-muted-foreground">{new Date(m.createdAt).toLocaleString()}</span>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+              {m.course && <Badge variant="secondary">Course: {m.course}</Badge>}
+              {m.location && <Badge variant="secondary">Location: {m.location}</Badge>}
+              {m.marks && <Badge variant="secondary">Marks: {m.marks}</Badge>}
+              {m.budget && <Badge variant="secondary">Budget: ₹{m.budget}</Badge>}
+              {m.category && <Badge variant="secondary">Category: {m.category}</Badge>}
+              {m.preferredCollege && <Badge variant="secondary">Prefers: {m.preferredCollege}</Badge>}
+            </div>
+            {m.message && <p className="mt-2 text-sm">{m.message}</p>}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 function ComplaintsTab() {
   const { data, isLoading } = useComplaints();
   const resolve = useResolveComplaint();
@@ -996,6 +1037,7 @@ export default function AdminPage() {
           <TabsTrigger value="verification">Verification</TabsTrigger>
           <TabsTrigger value="communities">Communities</TabsTrigger>
           <TabsTrigger value="complaints">Complaints</TabsTrigger>
+          <TabsTrigger value="mentors">Mentors</TabsTrigger>
           <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
@@ -1015,6 +1057,9 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="complaints">
           <ComplaintsTab />
+        </TabsContent>
+        <TabsContent value="mentors">
+          <MentorsTab />
         </TabsContent>
         <TabsContent value="broadcast">
           <BroadcastTab />
