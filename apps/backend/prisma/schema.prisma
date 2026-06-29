@@ -195,6 +195,7 @@ enum MessageStatus {
 enum VerificationPurpose {
   EMAIL_VERIFY
   PASSWORD_RESET
+  MAGIC_LINK
 }
 
 enum VerificationMethod {

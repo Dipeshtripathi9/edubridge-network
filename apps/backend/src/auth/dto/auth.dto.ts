@@ -90,6 +90,24 @@ export class GoogleAuthDto {
   idToken!: string;
 }
 
+export class MagicLinkRequestDto {
+  @ApiProperty()
+  @IsEmail()
+  email!: string;
+
+  @ApiPropertyOptional({ description: 'Used as the display name when creating a new account' })
+  @IsOptional()
+  @IsString()
+  fullName?: string;
+}
+
+export class MagicLinkVerifyDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  token!: string;
+}
+
 export class RequestOtpDto {
   @ApiProperty({ example: '+919876543210' })
   @IsPhoneNumber('IN')

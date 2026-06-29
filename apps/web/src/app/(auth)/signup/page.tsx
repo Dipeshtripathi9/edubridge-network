@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { SocialAuth } from '@/components/social-auth';
 import { useSignup } from '@/hooks/use-auth';
 import { api } from '@/lib/api';
 import { useAuthStore, type AuthUser } from '@/stores/auth.store';
@@ -86,6 +87,9 @@ export default function SignupPage() {
             {signup.isPending ? 'Creating…' : 'Create account'}
           </Button>
         </form>
+        <div className="mt-4">
+          <SocialAuth mode="signup" />
+        </div>
         <p className="mt-4 text-center text-sm text-muted-foreground">
           Already have an account?{' '}
           <Link href="/login" className="text-primary hover:underline">

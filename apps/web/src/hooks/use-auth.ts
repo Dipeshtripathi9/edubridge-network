@@ -43,6 +43,26 @@ export function useGoogleAuth() {
   });
 }
 
+export function useRequestMagicLink() {
+  return useMutation({
+    mutationFn: (input: { email: string; fullName?: string }) =>
+      api.post<{ message: string; devLink?: string }>('/auth/magic/request', input, { auth: false }),
+  });
+}
+
+export function useVerifyMagicLink() {
+  const setSession = useAuthStore((s) => s.setSession);
+  const router = useRouter();
+  return useMutation({
+    mutationFn: (token: string) =>
+      api.post<AuthResult>('/auth/magic/verify', { token }, { auth: false }),
+    onSuccess: (res) => {
+      setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
+      router.push('/home');
+    },
+  });
+}
+
 export function useRequestOtp() {
   return useMutation({
     mutationFn: (phone: string) => api.post('/auth/otp/request', { phone }, { auth: false }),
