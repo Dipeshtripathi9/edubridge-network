@@ -17,7 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 
-const NAV = [
+export const NAV = [
   { href: '/home', label: 'Home', icon: Home },
   { href: '/communities', label: 'Communities', icon: LayoutGrid },
   { href: '/startups', label: 'Startups', icon: Rocket },
