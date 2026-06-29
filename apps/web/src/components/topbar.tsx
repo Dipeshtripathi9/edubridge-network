@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { MobileNav } from '@/components/mobile-nav';
 import { NotificationBell } from '@/components/notification-bell';
 import { useLogout } from '@/hooks/use-auth';
 import { useMe } from '@/hooks/use-profile';
@@ -19,6 +20,7 @@ export function Topbar() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/80 px-4 backdrop-blur md:px-6">
+      <MobileNav />
       <form
         className="relative hidden max-w-md flex-1 sm:block"
         onSubmit={(e) => {

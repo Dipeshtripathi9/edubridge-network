@@ -90,11 +90,23 @@
   .animate-page {
     animation: page-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  .animate-slide-in-left {
+    animation: slide-in-left 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
     }
-    .animate-page {
+    .animate-page,
+    .animate-slide-in-left {
       animation: none;
     }
   }
