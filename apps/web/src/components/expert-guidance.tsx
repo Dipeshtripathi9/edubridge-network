@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
@@ -320,6 +321,8 @@ function GuidanceForm({ onDone }: { onDone: () => void }) {
   );
 }
 
+const TRUST = ['Verified students', 'Real college data', 'No AI predictions'];
+
 export function ExpertGuidance() {
   const [open, setOpen] = useState(false);
   return (
@@ -330,49 +333,73 @@ export function ExpertGuidance() {
       transition={{ duration: 0.5 }}
       className="overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-card to-accent/20 p-6 shadow-sm sm:p-8"
     >
-      <p className="text-sm font-medium text-primary">
-        Make informed decisions for your future with experts &amp; verified students.
-      </p>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="mt-1 text-2xl font-bold tracking-tight">Why EduBridge Network</h2>
-        {!open && (
-          <Button onClick={() => setOpen(true)}>
-            <Phone className="h-4 w-4" /> Get 1:1 Expert Guidance
-          </Button>
-        )}
-      </div>
-      {open && <GuidanceForm onDone={() => setOpen(false)} />}
+      {/* Hero */}
+      <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+        <div>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            <ShieldCheck className="h-3.5 w-3.5" /> Experts &amp; verified students
+          </span>
+          <h2 className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+            Choose the right course.
+            <br />
+            Find the right college.
+            <br />
+            <span className="bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent">
+              Build the right future.
+            </span>
+          </h2>
+          <p className="mt-4 max-w-xl text-muted-foreground">
+            Expert guidance, verified student reviews and real college insights help you decide with confidence — and
+            after admission we keep supporting you with scholarships, internships, communities &amp; career
+            opportunities.
+          </p>
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:items-center">
-        {/* cards */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          {CARDS.map((c, i) => (
-            <motion.div
-              key={c.title}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.08 }}
-              whileHover={{ y: -4 }}
-              className="group rounded-3xl border border-border bg-background/70 p-5 backdrop-blur transition-shadow hover:shadow-lg"
-            >
-              <span className={cn('mb-3 flex h-12 w-12 items-center justify-center rounded-full', c.tone)}>
-                <c.icon className="h-6 w-6" />
+          <div className="mt-5 flex flex-wrap gap-3">
+            {!open && (
+              <Button size="lg" onClick={() => setOpen(true)}>
+                <Phone className="h-4 w-4" /> Get Expert Guidance
+              </Button>
+            )}
+            <Button asChild size="lg" variant="outline">
+              <Link href="/communities">Explore Communities</Link>
+            </Button>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2">
+            {TRUST.map((t) => (
+              <span key={t} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> {t}
               </span>
-              <h3 className="font-semibold">{c.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{c.desc}</p>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* hero scene */}
         <HeroScene />
       </div>
 
-      <p className="mt-6 text-xs text-muted-foreground">
-        Real experts, verified student reviews &amp; real data — not AI-generated predictions. After admission, unlock
-        scholarships, internships &amp; personal-growth opportunities.
-      </p>
+      {open && <GuidanceForm onDone={() => setOpen(false)} />}
+
+      {/* Feature cards */}
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {CARDS.map((c, i) => (
+          <motion.div
+            key={c.title}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: i * 0.08 }}
+            whileHover={{ y: -4 }}
+            className="group rounded-3xl border border-border bg-background/70 p-5 backdrop-blur transition-shadow hover:shadow-lg"
+          >
+            <span className={cn('mb-3 flex h-12 w-12 items-center justify-center rounded-full', c.tone)}>
+              <c.icon className="h-6 w-6" />
+            </span>
+            <h3 className="font-semibold">{c.title}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{c.desc}</p>
+          </motion.div>
+        ))}
+      </div>
     </motion.section>
   );
 }
