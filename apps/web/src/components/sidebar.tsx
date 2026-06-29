@@ -8,6 +8,7 @@ import {
   Home,
   LayoutGrid,
   Repeat,
+  Rocket,
   ShieldCheck,
   Target,
   BookOpen,
@@ -19,6 +20,7 @@ import { useAuthStore } from '@/stores/auth.store';
 const NAV = [
   { href: '/home', label: 'Home', icon: Home },
   { href: '/communities', label: 'Communities', icon: LayoutGrid },
+  { href: '/startups', label: 'Startups', icon: Rocket },
   { href: '/opportunities', label: 'Opportunities', icon: Target },
   { href: '/resources', label: 'Resources', icon: BookOpen },
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
