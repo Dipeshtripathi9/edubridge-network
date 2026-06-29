@@ -1,26 +1,20 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
 import { Sidebar } from '@/components/sidebar';
 import { Topbar } from '@/components/topbar';
 import { useNotificationStream } from '@/hooks/use-notifications';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const pathname = usePathname();
-  const token = useAuthStore((s) => s.accessToken);
   const hydrated = useAuthStore((s) => s.hydrated);
 
   useNotificationStream();
 
-  useEffect(() => {
-    if (hydrated && !token) router.replace('/login');
-  }, [hydrated, token, router]);
-
+  // The app is browseable by guests — no login redirect here. Individual actions
+  // (join, get expert guidance, save, apply…) prompt sign-in when needed.
   if (!hydrated) return null;
-  if (!token) return null;
 
   return (
     <div className="flex min-h-screen">

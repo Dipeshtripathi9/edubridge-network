@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/stores/auth.store';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
@@ -325,6 +327,8 @@ const TRUST = ['Verified students', 'Real college data', 'No AI predictions'];
 
 export function ExpertGuidance() {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const loggedIn = useAuthStore((s) => !!s.accessToken);
   return (
     <motion.section
       initial={{ opacity: 0, y: 16 }}
@@ -356,7 +360,7 @@ export function ExpertGuidance() {
 
           <div className="mt-5 flex flex-wrap gap-3">
             {!open && (
-              <Button size="lg" onClick={() => setOpen(true)}>
+              <Button size="lg" onClick={() => (loggedIn ? setOpen(true) : router.push('/login?next=/home'))}>
                 <Phone className="h-4 w-4" /> Get Expert Guidance
               </Button>
             )}

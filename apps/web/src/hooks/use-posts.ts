@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth.store';
 
 export interface PollOption {
   id: string;
@@ -62,9 +63,11 @@ export function useSharePost(slug: string) {
 }
 
 export function useMySavedPosts() {
+  const token = useAuthStore((s) => s.accessToken);
   return useQuery({
     queryKey: ['saved-posts'],
     queryFn: () => api.get<(Post & { community?: { slug: string; name: string } })[]>('/posts/bookmarks/me'),
+    enabled: !!token,
   });
 }
 
