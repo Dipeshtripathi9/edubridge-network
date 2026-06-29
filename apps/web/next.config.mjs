@@ -7,9 +7,10 @@ const nextConfig = {
   devIndicators: {
     appIsrStatus: false,
   },
-  // Smaller JS bundles on slow connections: tree-shake big icon/animation libs.
+  // Smaller JS bundles on slow connections: tree-shake the icon barrel.
+  // (framer-motion is intentionally excluded — its internals break the optimizer.)
   experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
+    optimizePackageImports: ['lucide-react'],
   },
   images: {
     remotePatterns: [
