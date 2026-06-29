@@ -199,9 +199,9 @@ function ProductCollage() {
 function PhotoScene() {
   return (
     <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[2rem] border border-border shadow-xl">
-      <Image src={HERO_IMAGE as string} alt="Students choosing their college with EduBridge" fill className="object-cover" sizes="(max-width:768px) 100vw, 28rem" priority />
-      {/* legibility gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-transparent to-indigo-900/15" />
+      <Image src={HERO_IMAGE as string} alt="Students choosing their college with EduBridge" fill className="object-cover transition dark:brightness-[0.82]" sizes="(max-width:768px) 100vw, 28rem" priority />
+      {/* legibility gradient — a touch stronger in dark mode so the photo doesn't glare */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-transparent to-indigo-900/15 dark:from-slate-950/65 dark:via-slate-950/10 dark:to-slate-950/30" />
 
       {/* expert-online chip */}
       <Float className="left-3 top-3" delay={0.2}>
