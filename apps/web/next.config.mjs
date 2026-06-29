@@ -7,10 +7,17 @@ const nextConfig = {
   devIndicators: {
     appIsrStatus: false,
   },
+  // Smaller JS bundles on slow connections: tree-shake big icon/animation libs.
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'framer-motion'],
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**' },
     ],
+    // Serve modern, smaller formats and cache aggressively.
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 86400,
   },
   // The dashboard is the front page — redirect at the framework level so the root
   // route never renders a component (avoids the NEXT_REDIRECT dev-overlay noise).
