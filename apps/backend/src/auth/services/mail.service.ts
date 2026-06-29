@@ -53,6 +53,18 @@ export class MailService {
     );
   }
 
+  async sendMagicLink(to: string, token: string): Promise<void> {
+    const url = `${this.config.get('corsOrigins')[0]}/auth/callback?token=${token}`;
+    await this.send(
+      to,
+      'Your EduBridge sign-in link',
+      `<h2>Sign in to EduBridge Network</h2>
+       <p>Click the button below to sign in — no password needed.</p>
+       <p><a href="${url}">Sign in to EduBridge</a></p>
+       <p>This link expires in 15 minutes. If you didn't request it, you can ignore this email.</p>`,
+    );
+  }
+
   async sendPasswordReset(to: string, token: string): Promise<void> {
     const url = `${this.config.get('corsOrigins')[0]}/reset-password?token=${token}`;
     await this.send(

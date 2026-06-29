@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { SocialAuth } from '@/components/social-auth';
 import { useLogin, useRequestOtp, useVerifyOtp } from '@/hooks/use-auth';
 
 export default function LoginPage() {
@@ -116,6 +117,8 @@ export default function LoginPage() {
             )}
           </div>
         )}
+
+        <SocialAuth mode="login" />
 
         <p className="text-center text-sm text-muted-foreground">
           New here?{' '}

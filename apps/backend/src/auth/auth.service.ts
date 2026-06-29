@@ -15,6 +15,8 @@ import {
   ForgotPasswordDto,
   GoogleAuthDto,
   LoginDto,
+  MagicLinkRequestDto,
+  MagicLinkVerifyDto,
   RequestOtpDto,
   ResetPasswordDto,
   SignupDto,
@@ -302,6 +304,59 @@ export class AuthService {
       });
     }
 
+    const tokens = await this.tokens.issueTokens(user, { userAgent: meta.userAgent, ip: meta.ip });
+    return { tokens, user: this.sanitize(user) };
+  }
+
+  // ---------------- MAGIC EMAIL LINK (passwordless) ----------------
+  async requestMagicLink(dto: MagicLinkRequestDto) {
+    const email = dto.email.toLowerCase();
+    let user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          authProvider: AuthProvider.EMAIL,
+          status: 'ACTIVE',
+          profile: { create: { fullName: dto.fullName?.trim() || 'Student' } },
+        },
+      });
+    }
+    const token = this.tokens.generateOpaqueToken(32);
+    await this.prisma.emailVerification.create({
+      data: {
+        userId: user.id,
+        tokenHash: this.tokens.hashToken(token),
+        purpose: 'MAGIC_LINK',
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 min
+      },
+    });
+    void this.mail.sendMagicLink(email, token).catch(() => undefined);
+
+    // In non-production (or when SMTP isn't set up) email won't arrive, so return
+    // the link directly so it remains usable. Never leak it in production.
+    const isProd = process.env.NODE_ENV === 'production';
+    const webUrl = this.config.get<string[]>('corsOrigins')?.[0] ?? 'http://localhost:3000';
+    return {
+      message: 'If that email is valid, a sign-in link has been sent.',
+      ...(isProd ? {} : { devLink: `${webUrl}/auth/callback?token=${token}` }),
+    };
+  }
+
+  async verifyMagicLink(dto: MagicLinkVerifyDto, meta: RequestMeta) {
+    const record = await this.prisma.emailVerification.findFirst({
+      where: { tokenHash: this.tokens.hashToken(dto.token), purpose: 'MAGIC_LINK' },
+    });
+    if (!record || record.usedAt || record.expiresAt < new Date()) {
+      throw new BadRequestException('This sign-in link is invalid or has expired.');
+    }
+    const [, user] = await this.prisma.$transaction([
+      this.prisma.emailVerification.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+      this.prisma.user.update({
+        where: { id: record.userId },
+        data: { emailVerifiedAt: new Date(), status: 'ACTIVE' },
+      }),
+    ]);
     const tokens = await this.tokens.issueTokens(user, { userAgent: meta.userAgent, ip: meta.ip });
     return { tokens, user: this.sanitize(user) };
   }

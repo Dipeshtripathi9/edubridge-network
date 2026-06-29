@@ -9,6 +9,8 @@ import {
   ForgotPasswordDto,
   GoogleAuthDto,
   LoginDto,
+  MagicLinkRequestDto,
+  MagicLinkVerifyDto,
   RefreshDto,
   RequestOtpDto,
   ResetPasswordDto,
@@ -87,6 +89,22 @@ export class AuthController {
   @ApiOperation({ summary: 'Login/Signup with a Google ID token' })
   google(@Body() dto: GoogleAuthDto, @Req() req: Request) {
     return this.auth.googleAuth(dto, this.meta(req));
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @Post('magic/request')
+  @ApiOperation({ summary: 'Email a passwordless sign-in link' })
+  requestMagicLink(@Body() dto: MagicLinkRequestDto) {
+    return this.auth.requestMagicLink(dto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('magic/verify')
+  @ApiOperation({ summary: 'Verify a magic link token and sign in' })
+  verifyMagicLink(@Body() dto: MagicLinkVerifyDto, @Req() req: Request) {
+    return this.auth.verifyMagicLink(dto, this.meta(req));
   }
 
   @Public()
