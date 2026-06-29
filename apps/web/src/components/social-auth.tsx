@@ -9,7 +9,7 @@ import { useGoogleAuth, useRequestMagicLink } from '@/hooks/use-auth';
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
-export function SocialAuth({ mode }: { mode: 'login' | 'signup' }) {
+export function SocialAuth({ mode, showDivider = true }: { mode: 'login' | 'signup'; showDivider?: boolean }) {
   const google = useGoogleAuth();
   const magic = useRequestMagicLink();
   const [email, setEmail] = useState('');
@@ -34,9 +34,11 @@ export function SocialAuth({ mode }: { mode: 'login' | 'signup' }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="h-px flex-1 bg-border" /> or continue with <span className="h-px flex-1 bg-border" />
-      </div>
+      {showDivider && (
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" /> or continue with <span className="h-px flex-1 bg-border" />
+        </div>
+      )}
 
       {GOOGLE_CLIENT_ID ? (
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
