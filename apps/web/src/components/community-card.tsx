@@ -28,7 +28,7 @@ export function CommunityCard({ community }: { community: Community }) {
           : `/communities/${community.slug}`;
   return (
     <Link href={href} className="block h-full">
-      <Card className="h-full transition-shadow hover:border-primary/50 hover:shadow-md">
+      <Card className="h-full transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg">
         <CardContent className="flex h-full flex-col gap-3 p-5">
           <div className="flex items-start justify-between">
             <div>

@@ -53,13 +53,13 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
                 active
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                  ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/30'
+                  : 'text-muted-foreground hover:translate-x-0.5 hover:bg-accent hover:text-accent-foreground',
               )}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className={cn('h-4 w-4 transition-transform duration-200', !active && 'group-hover:scale-110')} />
               {item.label}
             </Link>
           );

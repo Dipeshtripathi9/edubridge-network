@@ -36,7 +36,7 @@ function StatCard({
 }) {
   return (
     <Link href={href} className="block h-full">
-      <Card className="h-full transition-shadow hover:border-primary/50 hover:shadow-md">
+      <Card className="h-full transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg">
         <CardContent className="p-4">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Icon className="h-4 w-4 text-primary" />
