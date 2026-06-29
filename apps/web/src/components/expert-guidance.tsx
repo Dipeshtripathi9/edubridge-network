@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 // To use a real generated photo as the centerpiece, drop the file into
 // apps/web/public (e.g. hero-students.png) and set this to its path, e.g.
 // '/hero-students.png'. While null, the premium product collage is shown.
-const HERO_IMAGE: string | null = null;
+const HERO_IMAGE: string | null = '/hero-students.jpg';
 
 const CARDS = [
   {
@@ -186,15 +186,64 @@ function ProductCollage() {
   );
 }
 
+// Real photo as the centerpiece, with premium floating SaaS cards overlaid.
+function PhotoScene() {
+  return (
+    <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[2rem] border border-border shadow-xl">
+      <Image src={HERO_IMAGE as string} alt="Students choosing their college with EduBridge" fill className="object-cover" sizes="(max-width:768px) 100vw, 28rem" priority />
+      {/* legibility gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-transparent to-indigo-900/15" />
+
+      {/* expert-online chip */}
+      <Float className="left-3 top-3" delay={0.2}>
+        <div className="flex items-center gap-1.5 rounded-2xl border border-white/60 bg-white/85 px-2.5 py-1.5 shadow-lg backdrop-blur dark:bg-slate-900/80">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
+            <Headset className="h-3.5 w-3.5" />
+          </span>
+          <div className="leading-tight">
+            <p className="text-[11px] font-bold text-slate-800 dark:text-slate-100">Expert Counselor</p>
+            <p className="flex items-center gap-1 text-[9px] text-emerald-600"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Online now</p>
+          </div>
+        </div>
+      </Float>
+
+      {/* verified review chip */}
+      <Float className="bottom-3 left-3" delay={0.4}>
+        <div className="flex items-center gap-1.5 rounded-2xl border border-emerald-300/70 bg-white/85 px-2.5 py-1.5 shadow-lg backdrop-blur dark:bg-slate-900/80">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+            <ShieldCheck className="h-3.5 w-3.5" />
+          </span>
+          <div className="leading-tight">
+            <div className="flex items-center gap-0.5">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+              ))}
+            </div>
+            <p className="text-[9px] font-semibold text-slate-600 dark:text-slate-300">Verified student reviews</p>
+          </div>
+        </div>
+      </Float>
+
+      {/* data chip */}
+      <Float className="right-3 top-3" delay={0.55}>
+        <div className="flex items-center gap-1.5 rounded-2xl border border-white/60 bg-white/85 px-2.5 py-1.5 shadow-lg backdrop-blur dark:bg-slate-900/80">
+          <TrendingUp className="h-4 w-4 text-indigo-600" />
+          <div className="leading-tight">
+            <p className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">₹12L avg</p>
+            <p className="text-[9px] text-slate-500 dark:text-slate-400">Real placement data</p>
+          </div>
+        </div>
+      </Float>
+
+      {/* opportunity pills */}
+      <Pill icon={Award} label="Scholarships" tone="text-rose-500" className="right-3 bottom-14" delay={0.7} />
+      <Pill icon={Briefcase} label="Internships" tone="text-amber-600" className="right-6 bottom-4" delay={0.9} />
+    </div>
+  );
+}
+
 function HeroScene() {
-  if (HERO_IMAGE) {
-    return (
-      <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[2rem] border border-border">
-        <Image src={HERO_IMAGE} alt="EduBridge students" fill className="object-cover" sizes="(max-width:768px) 100vw, 28rem" />
-      </div>
-    );
-  }
-  return <ProductCollage />;
+  return HERO_IMAGE ? <PhotoScene /> : <ProductCollage />;
 }
 
 export function ExpertGuidance() {
