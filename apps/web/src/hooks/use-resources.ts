@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth.store';
 
 export type ResourceType = 'NOTES' | 'PDF' | 'ROADMAP' | 'PLACEMENT_REPORT' | 'STUDY_MATERIAL';
 
@@ -67,9 +68,11 @@ export function useResources(
 }
 
 export function useMyResourceBookmarks() {
+  const token = useAuthStore((s) => s.accessToken);
   return useQuery({
     queryKey: ['resources', 'bookmarks'],
     queryFn: () => api.get<Resource[]>('/resources/bookmarks/me'),
+    enabled: !!token,
   });
 }
 

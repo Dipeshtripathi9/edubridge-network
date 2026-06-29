@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth.store';
 
 export type OpportunityType =
   | 'INTERNSHIP'
@@ -53,9 +54,11 @@ export function useOpportunities(
 }
 
 export function useRecommendedOpportunities() {
+  const token = useAuthStore((s) => s.accessToken);
   return useQuery({
     queryKey: ['opportunities', 'recommended'],
     queryFn: () => api.get<Opportunity[]>('/opportunities/recommended'),
+    enabled: !!token,
   });
 }
 
@@ -67,9 +70,11 @@ export interface Application {
 }
 
 export function useMyApplications() {
+  const token = useAuthStore((s) => s.accessToken);
   return useQuery({
     queryKey: ['applications', 'me'],
     queryFn: () => api.get<Application[]>('/opportunities/applications/me'),
+    enabled: !!token,
   });
 }
 

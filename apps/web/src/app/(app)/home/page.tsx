@@ -13,7 +13,8 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { uniqueById } from '@/lib/utils';
+import { cn, uniqueById } from '@/lib/utils';
+import { useAuthStore } from '@/stores/auth.store';
 import { useMyApplications, useRecommendedOpportunities } from '@/hooks/use-opportunities';
 import { useCommunities } from '@/hooks/use-communities';
 import { useMyPools } from '@/hooks/use-pools';
@@ -67,6 +68,7 @@ function SectionHeader({ title, href }: { title: string; href?: string }) {
 }
 
 export default function HomePage() {
+  const loggedIn = useAuthStore((s) => !!s.accessToken);
   const { data: apps } = useMyApplications();
   const { data: communitiesData, isLoading: communitiesLoading } = useCommunities();
   const { data: recommended } = useRecommendedOpportunities();
@@ -91,11 +93,21 @@ export default function HomePage() {
       <ExpertGuidance />
 
       {/* Quick stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard icon={LayoutGrid} label="Communities" value={joined.length} hint="Active communities" href="/communities" />
+      <div className={cn('grid grid-cols-2 gap-3', loggedIn ? 'sm:grid-cols-4' : 'sm:grid-cols-2')}>
+        <StatCard
+          icon={LayoutGrid}
+          label="Communities"
+          value={loggedIn ? joined.length : allCommunities.length}
+          hint={loggedIn ? 'Active communities' : 'Browse communities'}
+          href="/communities"
+        />
         <StatCard icon={Rocket} label="Startups" value={startupCount} hint="Startup communities" href="/communities?type=STARTUP" />
-        <StatCard icon={Target} label="For You" value={(recommended ?? []).length} hint="Opportunities picked for you" href="/opportunities?tab=recommended" />
-        <StatCard icon={BookOpen} label="Saved" value={savedCount} hint="Opportunities, posts & resources" href="/saved" />
+        {loggedIn && (
+          <>
+            <StatCard icon={Target} label="For You" value={(recommended ?? []).length} hint="Opportunities picked for you" href="/opportunities?tab=recommended" />
+            <StatCard icon={BookOpen} label="Saved" value={savedCount} hint="Opportunities, posts & resources" href="/saved" />
+          </>
+        )}
       </div>
 
       <div className="grid gap-6">
@@ -145,7 +157,16 @@ export default function HomePage() {
             <SectionHeader title="Recommended Opportunities" href="/opportunities" />
             <div className="space-y-3">
               {opps.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No recommendations yet — add interests to your profile.</p>
+                <p className="text-sm text-muted-foreground">
+                  {loggedIn ? (
+                    'No recommendations yet — add interests to your profile.'
+                  ) : (
+                    <>
+                      <Link href="/opportunities" className="text-primary hover:underline">Browse all opportunities →</Link> or{' '}
+                      <Link href="/login" className="text-primary hover:underline">sign in</Link> for personalised picks.
+                    </>
+                  )}
+                </p>
               ) : (
                 opps.map((o) => (
                   <Card key={o.id}>
@@ -169,6 +190,8 @@ export default function HomePage() {
           </section>
 
           {/* My communities */}
+          {loggedIn && (
+          <>
           <section>
             <SectionHeader title="My Communities" href="/communities" />
             <div className="grid gap-3 sm:grid-cols-2">
@@ -226,6 +249,8 @@ export default function HomePage() {
               </div>
             )}
           </section>
+          </>
+          )}
         </div>
       </div>
     </div>

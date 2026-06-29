@@ -1,15 +1,19 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Share2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/stores/auth.store';
 import { type Community, useJoinCommunity } from '@/hooks/use-communities';
 
 export function CommunityCard({ community }: { community: Community }) {
   const join = useJoinCommunity(community.slug);
+  const router = useRouter();
+  const loggedIn = useAuthStore((s) => !!s.accessToken);
   const onShare = () => {
     navigator.clipboard
       ?.writeText(`${window.location.origin}/communities/${community.slug}`)
@@ -70,6 +74,10 @@ export function CommunityCard({ community }: { community: Community }) {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  if (!loggedIn) {
+                    router.push('/login');
+                    return;
+                  }
                   join.mutate(!community.isMember);
                 }}
               >

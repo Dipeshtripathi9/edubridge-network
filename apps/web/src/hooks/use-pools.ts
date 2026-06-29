@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth.store';
 
 export interface Pool {
   id: string;
@@ -37,9 +38,11 @@ export function useSimilarPools(slug: string, q: string) {
 }
 
 export function useMyPools() {
+  const token = useAuthStore((s) => s.accessToken);
   return useQuery({
     queryKey: ['pools', 'me'],
     queryFn: () => api.get<Pool[]>('/pools/me'),
+    enabled: !!token,
   });
 }
 

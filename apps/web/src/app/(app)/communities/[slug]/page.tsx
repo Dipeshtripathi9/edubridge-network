@@ -20,6 +20,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
   const join = useJoinCommunity(slug);
   const [showManage, setShowManage] = useState(false);
   const globalRole = useAuthStore((s) => s.user?.role);
+  const loggedIn = useAuthStore((s) => !!s.accessToken);
   const canModerate =
     isCommunityManager(community?.myRole) ||
     globalRole === 'ADMIN' ||
@@ -78,7 +79,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
             <Button
               variant={community.isMember ? 'outline' : 'default'}
               disabled={join.isPending}
-              onClick={() => join.mutate(!community.isMember)}
+              onClick={() => (loggedIn ? join.mutate(!community.isMember) : window.location.assign('/login'))}
             >
               {community.isMember ? 'Joined' : 'Join'}
             </Button>
