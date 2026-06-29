@@ -18,6 +18,7 @@ import { uniqueById } from '@/lib/utils';
 import { useMyApplications, useRecommendedOpportunities } from '@/hooks/use-opportunities';
 import { useCommunities } from '@/hooks/use-communities';
 import { useMyPools } from '@/hooks/use-pools';
+import { ExpertGuidance } from '@/components/expert-guidance';
 import { useMySavedPosts } from '@/hooks/use-posts';
 import { useMyResourceBookmarks } from '@/hooks/use-resources';
 
@@ -102,6 +103,9 @@ export default function HomePage() {
         <StatCard icon={Target} label="For You" value={(recommended ?? []).length} hint="Opportunities picked for you" href="/opportunities?tab=recommended" />
         <StatCard icon={BookOpen} label="Saved" value={savedCount} hint="Opportunities, posts & resources" href="/saved" />
       </div>
+
+      {/* Why EduBridge — experts, verified reviews & real data */}
+      <ExpertGuidance />
 
       <div className="grid gap-6">
         {/* Main column */}
