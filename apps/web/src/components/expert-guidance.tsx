@@ -65,8 +65,7 @@ function Float({ children, className, delay = 0, rotate = 0 }: { children: React
     <motion.div
       className={cn('absolute', className)}
       initial={{ opacity: 0, y: 14, rotate }}
-      whileInView={{ opacity: 1, y: 0, rotate }}
-      viewport={{ once: true }}
+      animate={{ opacity: 1, y: 0, rotate }}
       transition={{ duration: 0.55, delay }}
     >
       <motion.div animate={{ y: [0, -7, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay }}>
@@ -125,8 +124,7 @@ function ProductCollage() {
               <motion.span
                 key={i}
                 initial={{ height: 4 }}
-                whileInView={{ height: `${h}%` }}
-                viewport={{ once: true }}
+                animate={{ height: `${h}%` }}
                 transition={{ duration: 0.6, delay: 0.3 + i * 0.08 }}
                 style={{ height: `${h}%` }}
                 className="w-full rounded-sm bg-gradient-to-t from-indigo-500 to-blue-400"
@@ -332,8 +330,7 @@ export function ExpertGuidance() {
   return (
     <motion.section
       initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="rounded-3xl border border-border bg-gradient-to-br from-card to-accent/20 p-5 shadow-sm sm:p-8"
     >
@@ -390,8 +387,7 @@ export function ExpertGuidance() {
           <motion.div
             key={c.title}
             initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: i * 0.08 }}
             whileHover={{ y: -4 }}
             className="group rounded-3xl border border-border bg-background/70 p-5 backdrop-blur transition-shadow hover:shadow-lg"
