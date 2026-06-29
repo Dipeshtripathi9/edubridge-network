@@ -3,6 +3,10 @@ const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   transpilePackages: ['@edubridge/shared'],
+  // Hide the dev-only "Static route / Dynamic route" indicator badge.
+  devIndicators: {
+    appIsrStatus: false,
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**' },
