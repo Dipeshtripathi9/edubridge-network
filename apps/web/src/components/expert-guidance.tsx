@@ -331,7 +331,7 @@ export function ExpertGuidance() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.5 }}
-      className="overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-card to-accent/20 p-5 shadow-sm sm:p-8"
+      className="rounded-3xl border border-border bg-gradient-to-br from-card to-accent/20 p-5 shadow-sm sm:p-8"
     >
       {/* Hero */}
       <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:items-center">
@@ -340,10 +340,10 @@ export function ExpertGuidance() {
             <ShieldCheck className="h-3.5 w-3.5" /> Experts &amp; verified students
           </span>
           <h2 className="mt-3 text-2xl font-bold leading-tight tracking-tight [text-wrap:balance] sm:text-3xl lg:text-4xl">
-            Choose the right course.
-            <br />
-            Find the right college.
-            <br />
+            Choose the right course.{' '}
+            <br className="hidden sm:block" />
+            Find the right college.{' '}
+            <br className="hidden sm:block" />
             <span className="bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent">
               Build the right future.
             </span>
