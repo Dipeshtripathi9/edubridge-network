@@ -1,13 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
+  ArrowRight,
   Award,
   Briefcase,
   CheckCircle2,
   GraduationCap,
   Headset,
+  Phone,
   Quote,
   ShieldCheck,
   Sparkles,
@@ -15,6 +18,11 @@ import {
   Target,
   TrendingUp,
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useSubmitMentorRequest } from '@/hooks/use-mentors';
 import { cn } from '@/lib/utils';
 
 // To use a real generated photo as the centerpiece, drop the file into
@@ -246,7 +254,74 @@ function HeroScene() {
   return HERO_IMAGE ? <PhotoScene /> : <ProductCollage />;
 }
 
+function GuidanceForm({ onDone }: { onDone: () => void }) {
+  const submit = useSubmitMentorRequest();
+  const [f, setF] = useState({
+    name: '', phone: '', email: '', course: '', location: '', marks: '', budget: '', category: '', preferredCollege: '', contactMethod: 'CALL', message: '',
+  });
+  const set = (k: keyof typeof f, v: string) => setF((c) => ({ ...c, [k]: v }));
+
+  const onSubmit = () => {
+    if (!f.name.trim() || !f.phone.trim()) {
+      toast.error('Please add your name and phone number');
+      return;
+    }
+    submit.mutate(
+      { ...f, contactMethod: f.contactMethod as 'CALL' | 'CHAT' },
+      {
+        onSuccess: () => {
+          toast.success('Request sent! Our expert will reach out to guide you.');
+          onDone();
+        },
+        onError: (e) => toast.error((e as Error).message),
+      },
+    );
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      className="mt-4 overflow-hidden rounded-2xl border border-primary/30 bg-background/70 p-5 backdrop-blur"
+    >
+      <p className="mb-3 text-sm font-medium">Tell us about you — our expert will call or chat with personalised guidance.</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Input placeholder="Your name *" value={f.name} onChange={(e) => set('name', e.target.value)} />
+        <Input placeholder="Phone / WhatsApp *" value={f.phone} onChange={(e) => set('phone', e.target.value)} />
+        <Input placeholder="Email (optional)" value={f.email} onChange={(e) => set('email', e.target.value)} />
+        <Input placeholder="Course interest (e.g. B.Tech CSE)" value={f.course} onChange={(e) => set('course', e.target.value)} />
+        <Input placeholder="Preferred location" value={f.location} onChange={(e) => set('location', e.target.value)} />
+        <Input placeholder="Marks / percentage" value={f.marks} onChange={(e) => set('marks', e.target.value)} />
+        <Input placeholder="Budget (₹ / year)" value={f.budget} onChange={(e) => set('budget', e.target.value)} />
+        <Input placeholder="Category (optional)" value={f.category} onChange={(e) => set('category', e.target.value)} />
+        <Input placeholder="Preferred college (optional)" value={f.preferredCollege} onChange={(e) => set('preferredCollege', e.target.value)} />
+        <select
+          value={f.contactMethod}
+          onChange={(e) => set('contactMethod', e.target.value)}
+          className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
+        >
+          <option value="CALL">Contact me by call</option>
+          <option value="CHAT">Contact me by chat</option>
+        </select>
+      </div>
+      <Textarea
+        className="mt-2"
+        placeholder="Anything else we should know? (optional)"
+        value={f.message}
+        onChange={(e) => set('message', e.target.value)}
+      />
+      <div className="mt-3 flex gap-2">
+        <Button variant="outline" size="sm" onClick={onDone}>Cancel</Button>
+        <Button size="sm" onClick={onSubmit} disabled={submit.isPending}>
+          Request guidance <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </motion.div>
+  );
+}
+
 export function ExpertGuidance() {
+  const [open, setOpen] = useState(false);
   return (
     <motion.section
       initial={{ opacity: 0, y: 16 }}
@@ -258,7 +333,15 @@ export function ExpertGuidance() {
       <p className="text-sm font-medium text-primary">
         Make informed decisions for your future with experts &amp; verified students.
       </p>
-      <h2 className="mt-1 text-2xl font-bold tracking-tight">Why EduBridge Network</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="mt-1 text-2xl font-bold tracking-tight">Why EduBridge Network</h2>
+        {!open && (
+          <Button onClick={() => setOpen(true)}>
+            <Phone className="h-4 w-4" /> Get 1:1 Expert Guidance
+          </Button>
+        )}
+      </div>
+      {open && <GuidanceForm onDone={() => setOpen(false)} />}
 
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:items-center">
         {/* cards */}
