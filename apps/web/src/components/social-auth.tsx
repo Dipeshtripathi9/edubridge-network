@@ -58,17 +58,27 @@ export function SocialAuth({ mode, showDivider = true }: { mode: 'login' | 'sign
 
       {/* Passwordless email link */}
       {sent ? (
-        <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
-          <p>
-            📧 We sent a sign-in link to <strong>{email}</strong>. Open it to continue — it expires in 15 minutes.
-          </p>
+        <div className="space-y-3">
           {sent.devLink ? (
-            <p className="mt-2">
-              <a className="font-medium text-primary underline" href={sent.devLink}>
-                Open sign-in link (dev)
-              </a>
-            </p>
-          ) : null}
+            <div className="rounded-lg border border-amber-400/50 bg-amber-50 p-3 text-sm dark:bg-amber-500/10">
+              <p className="font-medium text-amber-700 dark:text-amber-300">
+                ⚠️ Email isn’t configured here, so the link wasn’t emailed.
+              </p>
+              <p className="mt-1 text-muted-foreground">Click below to sign in directly:</p>
+              <Button asChild className="mt-2 w-full">
+                <a href={sent.devLink}>Continue sign-in →</a>
+              </Button>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
+              <p>
+                📧 We sent a sign-in link to <strong>{email}</strong>. Open it to continue — it expires in 15 minutes.
+              </p>
+            </div>
+          )}
+          <button onClick={() => setSent(null)} className="text-xs text-muted-foreground underline">
+            Use a different email
+          </button>
         </div>
       ) : (
         <div className="space-y-2">
