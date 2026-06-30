@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth.store';
 
 export interface Community {
   id: string;
@@ -56,9 +57,11 @@ export interface ManagedCommunity {
 }
 
 export function useManagedCommunities() {
+  const token = useAuthStore((s) => s.accessToken);
   return useQuery({
     queryKey: ['communities', 'managed'],
     queryFn: () => api.get<ManagedCommunity[]>('/communities/managed'),
+    enabled: !!token,
   });
 }
 
