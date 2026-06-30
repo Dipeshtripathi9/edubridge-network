@@ -17,8 +17,14 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             // cache is empty — so the app stays usable on very low bandwidth.
             staleTime: 5 * 60_000, // 5 min
             gcTime: 24 * 60 * 60_000, // 1 day
-            retry: 2,
-            retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 15_000),
+            // Don't retry client errors (401/403/404) — pointless and slow. Only
+            // retry transient/network/5xx failures, twice.
+            retry: (failureCount, error) => {
+              const status = (error as { status?: number })?.status;
+              if (status && status >= 400 && status < 500) return false;
+              return failureCount < 2;
+            },
+            retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8_000),
             refetchOnWindowFocus: false,
             refetchOnReconnect: true,
             networkMode: 'offlineFirst',
