@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   BarChart3,
+  Code2,
   Crown,
   GraduationCap,
   Home,
@@ -33,6 +34,7 @@ export const NAV = [
 export const ADMIN_NAV = [
   { href: '/admin', label: 'Admin', icon: ShieldCheck },
   { href: '/analysis', label: 'Analysis', icon: BarChart3 },
+  { href: '/manage/99x', label: '99x Developers', icon: Code2 },
 ];
 
 export function Sidebar() {
