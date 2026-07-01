@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { VerificationMethod } from '@prisma/client';
-import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsInt, IsNotEmpty, IsObject, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class VerificationUploadUrlDto {
@@ -49,6 +49,19 @@ export class CreateVerificationRequestDto {
   @IsOptional()
   @IsObject()
   feedback?: Record<string, string>;
+
+  @ApiPropertyOptional({ description: 'Course / branch, e.g. B.Tech CSE' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  course?: string;
+
+  @ApiPropertyOptional({ description: 'Year of study (1-6)' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(6)
+  year?: number;
 }
 
 export class RequestCollegeEmailDto {

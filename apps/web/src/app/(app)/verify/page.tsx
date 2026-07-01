@@ -46,6 +46,8 @@ export default function VerifyPage() {
   const [college, setCollege] = useState<CollegeSelection | null>(
     me?.profile?.college ? { collegeId: me.profile.college.id, collegeName: me.profile.college.name } : null,
   );
+  const [course, setCourse] = useState(me?.profile?.branch ?? '');
+  const [year, setYear] = useState<string>(me?.profile?.year ? String(me.profile.year) : '');
   const [collegeEmail, setCollegeEmail] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
   const [linkSent, setLinkSent] = useState<{ devLink?: string } | null>(null);
@@ -87,6 +89,8 @@ export default function VerifyPage() {
 
   const goToStep2 = () => {
     if (!college) return toast.error('Select your college');
+    if (!course.trim()) return toast.error('Enter your course / branch');
+    if (!year) return toast.error('Select your year');
     if (method === 'COLLEGE_EMAIL' && !emailVerified) return toast.error('Authenticate your college email first');
     if (method !== 'COLLEGE_EMAIL' && !/^https?:\/\//i.test(driveUrl.trim()))
       return toast.error('Paste a valid Google Drive link');
@@ -107,6 +111,8 @@ export default function VerifyPage() {
         collegeEmail: method === 'COLLEGE_EMAIL' ? collegeEmail : undefined,
         collegeEmailVerified: emailVerified,
         feedback,
+        course: course.trim(),
+        year: Number(year) || undefined,
         evidenceUrl: driveUrl.trim(),
       },
       {
@@ -178,6 +184,28 @@ export default function VerifyPage() {
               <p className="text-sm font-medium">Your college / university</p>
               <CollegePicker value={college} onChange={setCollege} />
               <p className="text-xs text-muted-foreground">Pick from the list, or type your college name if it isn&apos;t there.</p>
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Course / branch</label>
+                <Input placeholder="e.g. B.Tech CSE" value={course} onChange={(e) => setCourse(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Year of study</label>
+                <select
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
+                >
+                  <option value="">Select year</option>
+                  {[1, 2, 3, 4, 5].map((y) => (
+                    <option key={y} value={y}>
+                      {y === 1 ? '1st' : y === 2 ? '2nd' : y === 3 ? '3rd' : `${y}th`} year
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {method === 'COLLEGE_EMAIL' ? (
