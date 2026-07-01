@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  BarChart3,
   Crown,
   GraduationCap,
   Home,
@@ -28,14 +29,17 @@ export const NAV = [
   { href: '/leadership', label: 'Leadership', icon: Crown },
 ];
 
+// Admin-only nav items, appended after the shared nav.
+export const ADMIN_NAV = [
+  { href: '/admin', label: 'Admin', icon: ShieldCheck },
+  { href: '/analysis', label: 'Analysis', icon: BarChart3 },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
   const role = useAuthStore((s) => s.user?.role);
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
-  const nav = [
-    ...NAV,
-    ...(isAdmin ? [{ href: '/admin', label: 'Admin', icon: ShieldCheck }] : []),
-  ];
+  const nav = [...NAV, ...(isAdmin ? ADMIN_NAV : [])];
   return (
     <aside className="hidden w-64 shrink-0 border-r border-border bg-card/40 md:flex md:flex-col">
       <Link href="/home" className="flex items-center gap-2 px-6 py-5">

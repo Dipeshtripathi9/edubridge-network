@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { VerificationMethod } from '@prisma/client';
+import { Prisma, VerificationMethod } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -124,6 +124,31 @@ export class VerificationService {
       },
     });
     return buildPaginatedResult(items, query);
+  }
+
+  /** Admin analysis: verified students' honest feedback, grouped by college. */
+  async analysis() {
+    const rows = await this.prisma.verificationRequest.findMany({
+      where: { status: 'APPROVED', feedback: { not: Prisma.JsonNull } },
+      orderBy: { createdAt: 'desc' },
+      take: 1000,
+      include: {
+        college: { select: { id: true, name: true } },
+        user: {
+          select: { id: true, email: true, profile: { select: { fullName: true, branch: true, year: true } } },
+        },
+      },
+    });
+
+    // Group by college (directory name or free-typed name).
+    const groups = new Map<string, { college: string; students: typeof rows }>();
+    for (const r of rows) {
+      const name = r.college?.name ?? r.collegeName ?? 'Unspecified';
+      const g = groups.get(name) ?? { college: name, students: [] as typeof rows };
+      g.students.push(r);
+      groups.set(name, g);
+    }
+    return Array.from(groups.values()).sort((a, b) => b.students.length - a.students.length);
   }
 
   async decide(adminId: string, id: string, approve: boolean, note?: string) {

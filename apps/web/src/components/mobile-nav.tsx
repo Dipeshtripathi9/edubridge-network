@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { GraduationCap, Menu, ShieldCheck, X } from 'lucide-react';
+import { GraduationCap, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
-import { NAV } from '@/components/sidebar';
+import { ADMIN_NAV, NAV } from '@/components/sidebar';
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -16,7 +16,7 @@ export function MobileNav() {
   const pathname = usePathname();
   const role = useAuthStore((s) => s.user?.role);
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
-  const nav = [...NAV, ...(isAdmin ? [{ href: '/admin', label: 'Admin', icon: ShieldCheck }] : [])];
+  const nav = [...NAV, ...(isAdmin ? ADMIN_NAV : [])];
 
   // Lock body scroll while the drawer is open.
   useEffect(() => setMounted(true), []);

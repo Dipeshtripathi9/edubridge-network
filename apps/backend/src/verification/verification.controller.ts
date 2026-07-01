@@ -58,6 +58,13 @@ export class VerificationController {
   }
 
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Get('analysis')
+  @ApiOperation({ summary: 'Verified students’ feedback grouped by college (admin)' })
+  analysis() {
+    return this.verification.analysis();
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @Post('requests/:id/approve')
   @ApiOperation({ summary: 'Approve a verification request (admin)' })
   approve(@CurrentUser('sub') adminId: string, @Param('id') id: string) {
