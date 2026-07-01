@@ -139,7 +139,15 @@ export interface Comment {
   likeCount: number;
   isHelpful: boolean;
   createdAt: string;
-  author: { id: string; profile?: { fullName: string; avatarUrl?: string | null } | null };
+  author: {
+    id: string;
+    profile?: {
+      fullName: string;
+      avatarUrl?: string | null;
+      collegeVerification?: string | null;
+      college?: { name: string } | null;
+    } | null;
+  };
   replies?: Comment[];
 }
 

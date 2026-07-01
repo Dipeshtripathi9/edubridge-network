@@ -233,7 +233,12 @@ export function PostCard({
               ) : comments.data && comments.data.data.length > 0 ? (
                 comments.data.data.map((c) => (
                   <div key={c.id} className="text-sm">
-                    <span className="font-medium">{c.author.profile?.fullName ?? 'Student'}</span>{' '}
+                    <span className="inline-flex items-center gap-1 font-medium align-middle">
+                      {c.author.profile?.fullName ?? 'Student'}
+                      {c.author.profile?.collegeVerification === 'VERIFIED' && (
+                        <VerifiedBadge college={c.author.profile?.college?.name} size="xs" />
+                      )}
+                    </span>{' '}
                     <span className="text-muted-foreground">{c.body}</span>
                   </div>
                 ))

@@ -8,7 +8,15 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 const COMMENT_AUTHOR_SELECT = {
   select: {
     id: true,
-    profile: { select: { fullName: true, username: true, avatarUrl: true } },
+    profile: {
+      select: {
+        fullName: true,
+        username: true,
+        avatarUrl: true,
+        collegeVerification: true,
+        college: { select: { name: true } },
+      },
+    },
   },
 };
 
