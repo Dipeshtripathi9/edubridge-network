@@ -24,6 +24,8 @@ export interface Review {
       avatarUrl?: string | null;
       branch?: string | null;
       year?: number | null;
+      collegeVerification?: string | null;
+      college?: { name: string } | null;
     } | null;
   };
 }

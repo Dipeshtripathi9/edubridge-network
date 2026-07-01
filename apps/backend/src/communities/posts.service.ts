@@ -13,7 +13,15 @@ const POST_AUTHOR_SELECT = {
   select: {
     id: true,
     reputationPoints: true,
-    profile: { select: { fullName: true, username: true, avatarUrl: true } },
+    profile: {
+      select: {
+        fullName: true,
+        username: true,
+        avatarUrl: true,
+        collegeVerification: true,
+        college: { select: { name: true } },
+      },
+    },
   },
 };
 

@@ -15,7 +15,15 @@ const REVIEW_AUTHOR_SELECT = {
   select: {
     id: true,
     profile: {
-      select: { fullName: true, username: true, avatarUrl: true, branch: true, year: true },
+      select: {
+        fullName: true,
+        username: true,
+        avatarUrl: true,
+        branch: true,
+        year: true,
+        collegeVerification: true,
+        college: { select: { name: true } },
+      },
     },
   },
 };
