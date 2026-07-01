@@ -968,6 +968,8 @@ model VerificationRequest {
   collegeName  String? // free-text college when not in the directory
   method       VerificationMethod
   collegeEmail String?
+  collegeEmailVerified Boolean @default(false) // student clicked the emailed link
+  feedback     Json? // honest per-category thoughts about the college
   evidenceKey  String? // S3 key for ID card / admission proof
   status       VerificationRequestStatus @default(PENDING)
   note         String?

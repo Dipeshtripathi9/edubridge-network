@@ -3,8 +3,10 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { VerificationService } from './verification.service';
 import {
+  ConfirmCollegeEmailDto,
   CreateVerificationRequestDto,
   RejectVerificationDto,
+  RequestCollegeEmailDto,
   VerificationQueryDto,
   VerificationUploadUrlDto,
 } from './dto/verification.dto';
@@ -21,6 +23,18 @@ export class VerificationController {
   @ApiOperation({ summary: 'Presigned URL for ID-card / admission-proof upload' })
   uploadUrl(@Body() dto: VerificationUploadUrlDto) {
     return this.verification.getUploadUrl(dto);
+  }
+
+  @Post('college-email/request')
+  @ApiOperation({ summary: 'Send a verification link to a college email' })
+  requestCollegeEmail(@CurrentUser('sub') userId: string, @Body() dto: RequestCollegeEmailDto) {
+    return this.verification.requestCollegeEmail(userId, dto);
+  }
+
+  @Post('college-email/confirm')
+  @ApiOperation({ summary: 'Confirm a college-email verification token' })
+  confirmCollegeEmail(@CurrentUser('sub') userId: string, @Body() dto: ConfirmCollegeEmailDto) {
+    return this.verification.confirmCollegeEmail(userId, dto);
   }
 
   @Post('request')

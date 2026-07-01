@@ -476,6 +476,22 @@ function VerificationTab() {
                   </span>
                 )}
               </div>
+              {r.collegeEmailVerified && (
+                <span className="mt-1 inline-flex items-center gap-1 rounded bg-green-500/15 px-1.5 py-0.5 text-[10px] font-medium text-green-600">
+                  ✓ college email authenticated
+                </span>
+              )}
+              {r.feedback && Object.values(r.feedback).some(Boolean) && (
+                <div className="mt-1 space-y-0.5 rounded bg-muted/40 p-2 text-xs">
+                  {Object.entries(r.feedback)
+                    .filter(([, v]) => v)
+                    .map(([k, v]) => (
+                      <p key={k}>
+                        <span className="font-medium capitalize">{k}:</span> {v}
+                      </p>
+                    ))}
+                </div>
+              )}
               <p className="mt-1 text-xs text-muted-foreground">
                 {r.collegeEmail ? `email: ${r.collegeEmail}` : r.evidenceKey ? `doc: ${r.evidenceKey}` : ''}
                 {r.user.profile?.branch ? ` · ${r.user.profile.branch}` : ''}

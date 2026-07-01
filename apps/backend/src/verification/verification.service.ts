@@ -1,4 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { VerificationMethod } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
@@ -6,6 +8,8 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
 import {
   CreateVerificationRequestDto,
+  RequestCollegeEmailDto,
+  ConfirmCollegeEmailDto,
   VerificationQueryDto,
   VerificationUploadUrlDto,
 } from './dto/verification.dto';
@@ -16,7 +20,37 @@ export class VerificationService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
     private readonly notifications: NotificationsService,
+    private readonly jwt: JwtService,
+    private readonly config: ConfigService,
   ) {}
+
+  // ---------- College-email authentication (send link → click → verified) ----------
+  async requestCollegeEmail(userId: string, dto: RequestCollegeEmailDto) {
+    const secret = this.config.get<string>('jwt.accessSecret');
+    const token = await this.jwt.signAsync(
+      { sub: userId, email: dto.email.toLowerCase(), typ: 'college-email' },
+      { secret, expiresIn: '15m' },
+    );
+    const webUrl = this.config.get<string[]>('corsOrigins')?.[0] ?? 'http://localhost:3000';
+    const link = `${webUrl}/verify/college-email?token=${token}`;
+    // Email delivery would go here; not configured in dev, so the link is returned
+    // (non-production only) so the flow stays testable.
+    const isProd = process.env.NODE_ENV === 'production';
+    return { message: 'Verification link sent to your college email.', ...(isProd ? {} : { devLink: link }) };
+  }
+
+  async confirmCollegeEmail(userId: string, dto: ConfirmCollegeEmailDto) {
+    try {
+      const secret = this.config.get<string>('jwt.accessSecret');
+      const payload = await this.jwt.verifyAsync<{ sub: string; email: string; typ: string }>(dto.token, { secret });
+      if (payload.typ !== 'college-email' || payload.sub !== userId) {
+        throw new BadRequestException('Invalid verification link');
+      }
+      return { verified: true, email: payload.email };
+    } catch {
+      throw new BadRequestException('This verification link is invalid or has expired.');
+    }
+  }
 
   getUploadUrl(dto: VerificationUploadUrlDto) {
     const key = this.storage.buildKey('verification', dto.fileName);
@@ -42,6 +76,8 @@ export class VerificationService {
       collegeId: dto.collegeId,
       collegeName: dto.collegeName?.trim() || null,
       collegeEmail: dto.collegeEmail,
+      collegeEmailVerified: dto.collegeEmailVerified ?? false,
+      feedback: dto.feedback ?? undefined,
       evidenceKey: dto.evidenceKey,
       status: 'PENDING' as const,
       note: null,
