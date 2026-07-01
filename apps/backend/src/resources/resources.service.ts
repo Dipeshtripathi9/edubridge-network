@@ -64,9 +64,36 @@ export class ResourcesService {
 
   async list(query: ResourceQueryDto, userId?: string) {
     // A specific community or college view is "scoped" and shows everything in it.
-    // The global feed (no scope) hides college/university resources — those live
-    // only inside their own college community; topic/startup resources go global.
+    // The global feed (no scope):
+    //  - always includes topic/startup (and college-less) resources;
+    //  - hides OTHER colleges' resources;
+    //  - adds the viewer's OWN college resources only if they're a VERIFIED student.
     const scoped = !!(query.communityId || query.collegeId);
+
+    let verifiedCollegeId: string | null = null;
+    if (!scoped && userId) {
+      const profile = await this.prisma.profile.findUnique({
+        where: { userId },
+        select: { collegeId: true, collegeVerification: true },
+      });
+      if (profile?.collegeVerification === 'VERIFIED') verifiedCollegeId = profile.collegeId ?? null;
+    }
+
+    // Topic/startup + college-less resources (visible to everyone).
+    const globalOnly: Prisma.ResourceWhereInput = {
+      collegeId: null,
+      OR: [{ communityId: null }, { community: { type: { not: 'COLLEGE' } } }],
+    };
+    const unscopedWhere: Prisma.ResourceWhereInput = verifiedCollegeId
+      ? {
+          OR: [
+            globalOnly,
+            { collegeId: verifiedCollegeId },
+            { community: { type: 'COLLEGE', collegeId: verifiedCollegeId } },
+          ],
+        }
+      : globalOnly;
+
     const where: Prisma.ResourceWhereInput = {
       deletedAt: null,
       ...(query.type ? { type: query.type } : {}),
@@ -74,12 +101,7 @@ export class ResourcesService {
       ...(query.communityId ? { communityId: query.communityId } : {}),
       ...(query.tag ? { tags: { has: query.tag } } : {}),
       ...(query.q ? { title: { contains: query.q, mode: 'insensitive' } } : {}),
-      ...(scoped
-        ? {}
-        : {
-            collegeId: null,
-            OR: [{ communityId: null }, { community: { type: { not: 'COLLEGE' } } }],
-          }),
+      ...(scoped ? {} : unscopedWhere),
     };
     const sortBy: Prisma.ResourceOrderByWithRelationInput =
       query.sort === 'top'
