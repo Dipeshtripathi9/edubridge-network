@@ -212,15 +212,21 @@ export class CommunitiesService {
     if (!community) throw new NotFoundException('Community not found');
 
     // Membership rules by community type:
-    //  - COLLEGE: only students of that college may join.
-    //  - TOPIC (interests): only verified students may join.
+    //  - COLLEGE: only VERIFIED students of that college may join.
+    //  - TOPIC (interests): only VERIFIED students may join.
+    //  - STARTUP: any logged-in user.
     if (community.type === 'COLLEGE' || community.type === 'TOPIC') {
       const profile = await this.prisma.profile.findUnique({
         where: { userId },
         select: { collegeId: true, collegeVerification: true },
       });
-      if (community.type === 'COLLEGE' && community.collegeId && profile?.collegeId !== community.collegeId) {
-        throw new ForbiddenException('Only students of this college can join this community');
+      if (community.type === 'COLLEGE') {
+        if (community.collegeId && profile?.collegeId !== community.collegeId) {
+          throw new ForbiddenException('Only students of this college can join this community');
+        }
+        if (profile?.collegeVerification !== 'VERIFIED') {
+          throw new ForbiddenException('Only verified students of this college can join this community');
+        }
       }
       if (community.type === 'TOPIC' && profile?.collegeVerification !== 'VERIFIED') {
         throw new ForbiddenException('Only verified students can join interest communities');
