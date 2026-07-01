@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -74,7 +75,12 @@ export function PostCard({
           <div className="flex items-center gap-3">
             <Avatar src={post.author.profile?.avatarUrl} name={post.author.profile?.fullName} />
             <div>
-              <p className="text-sm font-medium">{post.author.profile?.fullName ?? 'Student'}</p>
+              <p className="flex items-center gap-1 text-sm font-medium">
+                {post.author.profile?.fullName ?? 'Student'}
+                {post.author.profile?.collegeVerification === 'VERIFIED' && (
+                  <VerifiedBadge college={post.author.profile?.college?.name} />
+                )}
+              </p>
               <p className="text-xs text-muted-foreground">{timeAgo(post.createdAt)} ago</p>
             </div>
             <div className="ml-auto flex items-center gap-1.5">

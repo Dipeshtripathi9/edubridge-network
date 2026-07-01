@@ -35,7 +35,13 @@ export interface Post {
   author: {
     id: string;
     reputationPoints?: number;
-    profile?: { fullName: string; username?: string | null; avatarUrl?: string | null } | null;
+    profile?: {
+      fullName: string;
+      username?: string | null;
+      avatarUrl?: string | null;
+      collegeVerification?: string | null;
+      college?: { name: string } | null;
+    } | null;
   };
 }
 

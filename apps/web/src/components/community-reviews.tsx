@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { BadgeCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -118,8 +119,11 @@ export function CommunityReviews({ slug, canReview }: { slug: string; canReview:
               </div>
               {r.title && <p className="mt-1 font-medium">{r.title}</p>}
               <p className="mt-1 text-sm text-muted-foreground">{r.body}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                 — {r.author?.profile?.fullName ?? 'Member'}
+                {r.author?.profile?.collegeVerification === 'VERIFIED' && (
+                  <VerifiedBadge college={r.author?.profile?.college?.name} size="xs" />
+                )}
               </p>
             </CardContent>
           </Card>

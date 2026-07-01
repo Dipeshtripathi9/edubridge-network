@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, BadgeCheck, ChevronUp, PenLine } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -156,8 +157,11 @@ function ReviewItem({ review, collegeId }: { review: Review; collegeId: string }
           </div>
           {review.title && <h4 className="mt-2 font-semibold">{review.title}</h4>}
           <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{review.body}</p>
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="mt-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
             {review.author.profile?.fullName ?? 'Student'}
+            {review.author.profile?.collegeVerification === 'VERIFIED' && (
+              <VerifiedBadge college={review.author.profile?.college?.name} size="xs" />
+            )}
             {review.author.profile?.branch ? ` · ${review.author.profile.branch}` : ''} ·{' '}
             {timeAgo(review.createdAt)} ago
           </p>
