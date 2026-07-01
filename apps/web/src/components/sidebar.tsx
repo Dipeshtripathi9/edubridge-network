@@ -35,6 +35,7 @@ export const ADMIN_NAV = [
   { href: '/admin', label: 'Admin', icon: ShieldCheck },
   { href: '/analysis', label: 'Analysis', icon: BarChart3 },
   { href: '/manage/99x', label: '99x Developers', icon: Code2 },
+  { href: '/manage/ez-rentbuddy', label: 'EZ-Rentbuddy', icon: Home },
 ];
 
 export function Sidebar() {

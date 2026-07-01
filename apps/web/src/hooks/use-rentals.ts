@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
 export interface RentalLeadInput {
@@ -25,5 +25,18 @@ export interface RentalLeadInput {
 export function useSubmitRentalLead() {
   return useMutation({
     mutationFn: (input: RentalLeadInput) => api.post('/rentals/leads', input),
+  });
+}
+
+export interface RentalLead extends RentalLeadInput {
+  id: string;
+  status: string;
+  createdAt: string;
+}
+
+export function useRentalLeads(kind?: 'SEEKER' | 'PROPERTY') {
+  return useQuery({
+    queryKey: ['rentals', 'leads', kind ?? 'all'],
+    queryFn: () => api.get<RentalLead[]>(`/rentals/leads${kind ? `?kind=${kind}` : ''}`),
   });
 }
