@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BadgeCheck, CheckCircle2, Clock, Lock, ShieldCheck, XCircle } from 'lucide-react';
+import Link from 'next/link';
+import { BadgeCheck, CheckCircle2, Clock, Lock, LogIn, ShieldCheck, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { CollegePicker, type CollegeSelection } from '@/components/college-picker';
+import { useAuthStore } from '@/stores/auth.store';
 import { useMe } from '@/hooks/use-profile';
 import {
   useConfirmCollegeEmail,
@@ -35,6 +37,7 @@ const FEEDBACK_FIELDS: { key: string; label: string }[] = [
 const LS_KEY = 'ebd_college_email_verified';
 
 export default function VerifyPage() {
+  const loggedIn = useAuthStore((s) => !!s.accessToken);
   const { data: me, refetch: refetchMe } = useMe();
   const { data: current, refetch: refetchCurrent } = useMyVerification();
 
@@ -145,7 +148,23 @@ export default function VerifyPage() {
         </p>
       </div>
 
-      {verified ? (
+      {!loggedIn ? (
+        <Card>
+          <CardContent className="flex flex-col items-start gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold">Log in to get verified</p>
+              <p className="text-sm text-muted-foreground">
+                You need an account to verify — sign in with Google or an email link, then come back here.
+              </p>
+            </div>
+            <Button asChild className="shrink-0">
+              <Link href="/login">
+                <LogIn className="h-4 w-4" /> Log in / Sign up
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : verified ? (
         <Card>
           <CardContent className="flex items-center gap-3 p-6">
             <BadgeCheck className="h-10 w-10 shrink-0 text-green-500" />
