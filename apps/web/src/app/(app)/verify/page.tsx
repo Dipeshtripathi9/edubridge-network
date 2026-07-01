@@ -94,6 +94,11 @@ export default function VerifyPage() {
   };
 
   const onSubmit = () => {
+    const missing = FEEDBACK_FIELDS.filter((f) => !(feedback[f.key] ?? '').trim());
+    if (missing.length > 0) {
+      toast.error(`Please fill all fields — missing: ${missing.map((f) => f.label).join(', ')}`);
+      return;
+    }
     submit.mutate(
       {
         method,
@@ -257,7 +262,9 @@ export default function VerifyPage() {
           <CardContent className="space-y-4">
             {FEEDBACK_FIELDS.map((f) => (
               <div key={f.key} className="space-y-1">
-                <label className="text-sm font-medium">{f.label}</label>
+                <label className="text-sm font-medium">
+                  {f.label} <span className="text-destructive">*</span>
+                </label>
                 <Textarea
                   placeholder={`Your honest take on ${f.label.toLowerCase()}…`}
                   value={feedback[f.key] ?? ''}
@@ -278,7 +285,10 @@ export default function VerifyPage() {
               <Button variant="outline" onClick={() => setStep(1)}>
                 ← Back
               </Button>
-              <Button onClick={onSubmit} disabled={submit.isPending}>
+              <Button
+                onClick={onSubmit}
+                disabled={submit.isPending || FEEDBACK_FIELDS.some((f) => !(feedback[f.key] ?? '').trim())}
+              >
                 {submit.isPending ? 'Submitting…' : 'Submit for verification'}
               </Button>
             </div>
