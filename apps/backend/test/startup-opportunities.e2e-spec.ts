@@ -31,9 +31,11 @@ describe('Startup community opportunities — managers/admin only (e2e)', () => 
       .send({ name: `Topic ${Date.now()}`, type: 'TOPIC', topic: 'T' })
       .expect(201);
     topicId = t.body.data.id;
+    const topicSlug = t.body.data.slug;
 
     for (const u of [manager, member]) {
       await request(app.getHttpServer()).post(`${API}/communities/${startupSlug}/join`).set(auth(u.token));
+      await request(app.getHttpServer()).post(`${API}/communities/${topicSlug}/join`).set(auth(u.token));
     }
     await request(app.getHttpServer())
       .post(`${API}/communities/${startupSlug}/appoint-head`)

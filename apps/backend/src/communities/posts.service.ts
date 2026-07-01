@@ -60,8 +60,8 @@ export class PostsService {
     const member = await this.prisma.communityMember.findUnique({
       where: { communityId_userId: { communityId: community.id, userId } },
     });
-    // Members-only posting for non-public communities.
-    if (community.visibility !== 'PUBLIC' && !member) {
+    // You must join a community to post in it (platform admins are exempt).
+    if (!member && !isPlatformAdmin(role)) {
       throw new ForbiddenException('Join the community to post');
     }
     // Moderation: banned/muted members cannot post.

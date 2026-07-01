@@ -65,19 +65,23 @@ function ResourcesSection({
   slug,
   communityId,
   canModerate,
+  isMember,
 }: {
   slug: string;
   communityId: string;
   canModerate: boolean;
+  isMember: boolean;
 }) {
   void slug;
   const { data, isLoading } = useResources({ communityId });
   const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">Anyone can upload — admins/heads monitor.</p>
-        <ResourceUpload communityId={communityId} />
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">
+          {isMember ? 'Members can upload — admins/heads monitor.' : 'Join the community to share resources.'}
+        </p>
+        {isMember && <ResourceUpload communityId={communityId} />}
       </div>
       {isLoading ? (
         <Skeleton className="h-40 w-full" />
@@ -97,10 +101,12 @@ function ResourcesSection({
 function OpportunitiesSection({
   communityId,
   canModerate,
+  isMember = false,
   managersOnly = false,
 }: {
   communityId: string;
   canModerate: boolean;
+  isMember?: boolean;
   /** Startup communities: only admins & this community's managers may post. */
   managersOnly?: boolean;
 }) {
@@ -139,13 +145,16 @@ function OpportunitiesSection({
   };
 
   // In startup communities only admins & managers can post opportunities.
-  const canPost = !managersOnly || canModerate;
+  // Managers/admins always; regular members only in non-managers-only communities.
+  const canPost = canModerate || (isMember && !managersOnly);
 
   return (
     <div className="space-y-4">
       {!canPost ? (
         <p className="text-sm text-muted-foreground">
-          Only admins &amp; this community&apos;s managers can post opportunities here.
+          {!isMember
+            ? 'Join the community to post opportunities.'
+            : "Only admins & this community's managers can post opportunities here."}
         </p>
       ) : !open ? (
         <Button variant="outline" onClick={() => setOpen(true)}>
@@ -330,6 +339,14 @@ export function CommunitySections({
 }) {
   const isStartup = type === 'STARTUP';
 
+  const joinPrompt = (
+    <Card>
+      <CardContent className="p-4 text-sm text-muted-foreground">
+        Join this community to post, comment and participate.
+      </CardContent>
+    </Card>
+  );
+
   const announcements = (
     <TabsContent value="announcements" className="space-y-4">
       {canModerate ? (
@@ -345,7 +362,7 @@ export function CommunitySections({
 
   const discussion = (
     <TabsContent value="discussion" className="space-y-4">
-      <Composer slug={slug} placeholder="Start a discussion…" />
+      {isMember ? <Composer slug={slug} placeholder="Start a discussion…" /> : joinPrompt}
       <FeedSection slug={slug} section="DISCUSSION" canModerate={canModerate} empty="No discussions yet — start one!" />
     </TabsContent>
   );
@@ -389,7 +406,7 @@ export function CommunitySections({
         </TabsList>
         {announcements}
         <TabsContent value="opportunities">
-          <OpportunitiesSection communityId={communityId} canModerate={canModerate} managersOnly />
+          <OpportunitiesSection communityId={communityId} canModerate={canModerate} isMember={isMember} managersOnly />
         </TabsContent>
         {discussion}
         {pools}
@@ -419,17 +436,17 @@ export function CommunitySections({
       {announcements}
 
       <TabsContent value="resources">
-        <ResourcesSection slug={slug} communityId={communityId} canModerate={canModerate} />
+        <ResourcesSection slug={slug} communityId={communityId} canModerate={canModerate} isMember={isMember} />
       </TabsContent>
 
       <TabsContent value="opportunities">
-        <OpportunitiesSection communityId={communityId} canModerate={canModerate} />
+        <OpportunitiesSection communityId={communityId} canModerate={canModerate} isMember={isMember} />
       </TabsContent>
 
       {discussion}
 
       <TabsContent value="polls" className="space-y-4">
-        <Composer slug={slug} allowPoll placeholder="Ask the community…" />
+        {isMember ? <Composer slug={slug} allowPoll placeholder="Ask the community…" /> : joinPrompt}
         <FeedSection slug={slug} section="POLLS" canModerate={canModerate} empty="No polls yet." />
       </TabsContent>
 
