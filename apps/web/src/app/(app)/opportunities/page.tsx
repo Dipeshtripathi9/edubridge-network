@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { uniqueById } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { Search, Sparkles, Target } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -45,7 +46,7 @@ function Browse() {
     type,
     q: search || undefined,
   });
-  const items = data?.pages.flatMap((p) => p.data) ?? [];
+  const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
 
   return (
     <div className="space-y-4">

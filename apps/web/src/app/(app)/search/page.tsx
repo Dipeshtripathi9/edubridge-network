@@ -15,7 +15,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { cn, uniqueById } from '@/lib/utils';
 import {
   useSearchAll,
   useSearchType,
@@ -88,7 +88,7 @@ function AllResults({ q, onPickType }: { q: string; onPickType: (t: SearchType) 
 
 function TypeResults({ q, type }: { q: string; type: SearchType }) {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useSearchType(q, type);
-  const items = data?.pages.flatMap((p) => p.data) ?? [];
+  const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
   if (isLoading) return <Skeleton className="h-64 w-full" />;
   if (items.length === 0) {
     return <p className="py-16 text-center text-muted-foreground">No {TYPE_META[type].label.toLowerCase()} found.</p>;
