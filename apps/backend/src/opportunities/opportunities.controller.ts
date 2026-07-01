@@ -19,8 +19,8 @@ export class OpportunitiesController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'List / search opportunities' })
-  list(@Query() query: OpportunityQueryDto) {
-    return this.opportunities.list(query);
+  list(@Query() query: OpportunityQueryDto, @CurrentUser('sub') userId?: string) {
+    return this.opportunities.list(query, userId);
   }
 
   @Get('recommended')
