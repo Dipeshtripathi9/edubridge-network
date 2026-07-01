@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { CollegePicker, type CollegeSelection } from '@/components/college-picker';
 import { useMe } from '@/hooks/use-profile';
 import {
+  useConfirmCollegeEmail,
   useMyVerification,
   useRequestCollegeEmail,
   useSubmitVerification,
@@ -38,6 +39,7 @@ export default function VerifyPage() {
   const { data: current } = useMyVerification();
   const submit = useSubmitVerification();
   const requestEmail = useRequestCollegeEmail();
+  const confirmEmail = useConfirmCollegeEmail();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [method, setMethod] = useState<VerificationMethod>('COLLEGE_EMAIL');
@@ -198,10 +200,25 @@ export default function VerifyPage() {
                 </div>
                 {linkSent && !emailVerified && (
                   <div className="rounded-lg border border-amber-400/50 bg-amber-50 p-3 text-sm dark:bg-amber-500/10">
-                    <p>📧 We sent a verification link to <strong>{collegeEmail}</strong>. Open it, then come back here.</p>
+                    <p>📧 We sent a verification link to <strong>{collegeEmail}</strong>. Open it to confirm.</p>
                     {linkSent.devLink && (
-                      <Button asChild size="sm" className="mt-2">
-                        <a href={linkSent.devLink} target="_blank" rel="noreferrer">Open verification link (dev)</a>
+                      <Button
+                        size="sm"
+                        className="mt-2"
+                        disabled={confirmEmail.isPending}
+                        onClick={() => {
+                          const token = linkSent.devLink!.split('token=')[1] ?? '';
+                          confirmEmail.mutate(token, {
+                            onSuccess: () => {
+                              setEmailVerified(true);
+                              setLinkSent(null);
+                              toast.success('College email verified ✓');
+                            },
+                            onError: (e) => toast.error((e as Error).message),
+                          });
+                        }}
+                      >
+                        {confirmEmail.isPending ? 'Verifying…' : 'Open verification link (dev)'}
                       </Button>
                     )}
                   </div>
