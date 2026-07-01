@@ -33,6 +33,11 @@ export function useMe() {
     queryKey: ['me'],
     queryFn: () => api.get<Me>('/users/me'),
     enabled: !!token,
+    // Profile status (e.g. verification) can change server-side (admin approval),
+    // so always refresh on mount/focus — shows cached instantly, then updates.
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 }
 
