@@ -15,7 +15,7 @@ describe('Community heads & governance (e2e)', () => {
     app = await createTestApp();
     prisma = app.get(PrismaService);
     applicant = await registerVerifiedUser(app, { fullName: 'Lead Hopeful' });
-    plain = await registerVerifiedUser(app, { fullName: 'Plain' });
+    plain = await registerVerifiedUser(app, { fullName: 'Plain', unverified: true });
     admin = await registerVerifiedUser(app, { role: 'ADMIN', fullName: 'Platform Admin' });
 
     await prisma.profile.update({
