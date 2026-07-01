@@ -33,6 +33,27 @@ export interface VerificationRequestRow {
   };
 }
 
+export interface CollegeAnalysis {
+  college: string;
+  students: {
+    id: string;
+    createdAt: string;
+    feedback?: Record<string, string> | null;
+    user: {
+      id: string;
+      email: string | null;
+      profile?: { fullName: string; branch?: string | null; year?: number | null } | null;
+    };
+  }[];
+}
+
+export function useVerificationAnalysis() {
+  return useQuery({
+    queryKey: ['verification', 'analysis'],
+    queryFn: () => api.get<CollegeAnalysis[]>('/verification/analysis'),
+  });
+}
+
 export function useMyVerification() {
   return useQuery({
     queryKey: ['verification', 'me'],
