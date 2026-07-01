@@ -33,11 +33,6 @@ export interface VerificationRequestRow {
   };
 }
 
-interface UploadResult {
-  uploadUrl: string | null;
-  key: string;
-}
-
 export function useMyVerification() {
   return useQuery({
     queryKey: ['verification', 'me'],
@@ -55,23 +50,8 @@ export function useSubmitVerification() {
       collegeEmail?: string;
       collegeEmailVerified?: boolean;
       feedback?: Record<string, string>;
-      file?: File | null;
+      evidenceUrl?: string; // Google Drive link for ID card / admission proof
     }) => {
-      let evidenceKey: string | undefined;
-      if (input.method !== 'COLLEGE_EMAIL' && input.file) {
-        const presign = await api.post<UploadResult>('/verification/upload-url', {
-          fileName: input.file.name,
-          contentType: input.file.type || 'application/octet-stream',
-        });
-        if (presign.uploadUrl) {
-          await fetch(presign.uploadUrl, {
-            method: 'PUT',
-            headers: { 'Content-Type': input.file.type || 'application/octet-stream' },
-            body: input.file,
-          });
-        }
-        evidenceKey = presign.key;
-      }
       return api.post('/verification/request', {
         method: input.method,
         collegeId: input.collegeId,
@@ -79,7 +59,8 @@ export function useSubmitVerification() {
         collegeEmail: input.collegeEmail,
         collegeEmailVerified: input.collegeEmailVerified,
         feedback: input.feedback,
-        evidenceKey,
+        // Store the Drive link in evidenceKey (a plain string).
+        evidenceKey: input.method !== 'COLLEGE_EMAIL' ? input.evidenceUrl : undefined,
       });
     },
     onSuccess: () => {
