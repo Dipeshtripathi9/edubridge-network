@@ -23,6 +23,7 @@ export interface VerificationRequestRow {
   evidenceKey?: string | null;
   createdAt: string;
   college?: { id: string; name: string } | null;
+  collegeName?: string | null;
   user: {
     id: string;
     email: string | null;
@@ -48,6 +49,7 @@ export function useSubmitVerification() {
     mutationFn: async (input: {
       method: VerificationMethod;
       collegeId?: string;
+      collegeName?: string;
       collegeEmail?: string;
       file?: File | null;
     }) => {
@@ -69,6 +71,7 @@ export function useSubmitVerification() {
       return api.post('/verification/request', {
         method: input.method,
         collegeId: input.collegeId,
+        collegeName: input.collegeName,
         collegeEmail: input.collegeEmail,
         evidenceKey,
       });

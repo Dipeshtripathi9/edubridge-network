@@ -469,7 +469,12 @@ function VerificationTab() {
               <div className="flex items-center gap-2">
                 <span className="font-medium">{r.user.profile?.fullName ?? r.user.email}</span>
                 <Badge variant="secondary">{r.method.replace('_', ' ').toLowerCase()}</Badge>
-                {r.college && <span className="text-xs text-muted-foreground">{r.college.name}</span>}
+                {(r.college?.name || r.collegeName) && (
+                  <span className="text-xs text-muted-foreground">
+                    {r.college?.name ?? r.collegeName}
+                    {!r.college && r.collegeName ? ' (new)' : ''}
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
                 {r.collegeEmail ? `email: ${r.collegeEmail}` : r.evidenceKey ? `doc: ${r.evidenceKey}` : ''}
