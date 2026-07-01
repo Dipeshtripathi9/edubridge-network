@@ -83,7 +83,11 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
             <Button
               variant={community.isMember ? 'outline' : 'default'}
               disabled={join.isPending}
-              onClick={() => (loggedIn ? join.mutate(!community.isMember) : window.location.assign('/login'))}
+              onClick={() =>
+                loggedIn
+                  ? join.mutate(!community.isMember, { onError: (err) => toast.error((err as Error).message) })
+                  : window.location.assign('/login')
+              }
             >
               {community.isMember ? 'Joined' : 'Join'}
             </Button>

@@ -211,6 +211,17 @@ export class CommunitiesService {
     const community = await this.prisma.community.findUnique({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
 
+    // College/University communities are restricted to students of that college.
+    if (community.type === 'COLLEGE' && community.collegeId) {
+      const profile = await this.prisma.profile.findUnique({
+        where: { userId },
+        select: { collegeId: true },
+      });
+      if (profile?.collegeId !== community.collegeId) {
+        throw new ForbiddenException('Only students of this college can join this community');
+      }
+    }
+
     const existing = await this.prisma.communityMember.findUnique({
       where: { communityId_userId: { communityId: community.id, userId } },
     });
