@@ -35,8 +35,20 @@ const FEEDBACK_FIELDS: { key: string; label: string }[] = [
 const LS_KEY = 'ebd_college_email_verified';
 
 export default function VerifyPage() {
-  const { data: me } = useMe();
-  const { data: current } = useMyVerification();
+  const { data: me, refetch: refetchMe } = useMe();
+  const { data: current, refetch: refetchCurrent } = useMyVerification();
+
+  // Always fetch fresh status when opening this page (and on focus), so an admin's
+  // approval reflects immediately instead of showing a stale "pending".
+  useEffect(() => {
+    const refresh = () => {
+      refetchMe();
+      refetchCurrent();
+    };
+    refresh();
+    window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, [refetchMe, refetchCurrent]);
   const submit = useSubmitVerification();
   const requestEmail = useRequestCollegeEmail();
   const confirmEmail = useConfirmCollegeEmail();
@@ -136,10 +148,15 @@ export default function VerifyPage() {
       {verified ? (
         <Card>
           <CardContent className="flex items-center gap-3 p-6">
-            <BadgeCheck className="h-8 w-8 text-green-500" />
+            <BadgeCheck className="h-10 w-10 shrink-0 text-green-500" />
             <div>
-              <p className="font-semibold">You&apos;re a verified student 🎉</p>
-              <p className="text-sm text-muted-foreground">{me?.profile?.college?.name ?? 'Your college'} verified.</p>
+              <p className="flex items-center gap-1 font-semibold">
+                You are a verified student
+                <BadgeCheck className="h-4 w-4 text-green-500" />
+              </p>
+              <p className="text-sm text-muted-foreground">
+                of <strong>{me?.profile?.college?.name ?? 'your college'}</strong> — verified by EduBridge Network.
+              </p>
             </div>
           </CardContent>
         </Card>
