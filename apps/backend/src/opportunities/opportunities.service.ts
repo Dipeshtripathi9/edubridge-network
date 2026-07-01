@@ -35,7 +35,48 @@ export class OpportunitiesService {
     return this.redis.delPattern('opportunity:list:*');
   }
 
-  async list(query: OpportunityQueryDto) {
+  async list(query: OpportunityQueryDto, userId?: string) {
+    // Global feed scoping (mirrors resources):
+    //  - everyone sees topic/startup (and college-less) opportunities;
+    //  - other colleges' opportunities stay hidden;
+    //  - a VERIFIED student also sees THEIR OWN college's opportunities.
+    const scoped = !!(query.communityId || query.collegeId);
+
+    let verifiedCollegeId: string | null = null;
+    if (!scoped && userId) {
+      const profile = await this.prisma.profile.findUnique({
+        where: { userId },
+        select: { collegeId: true, collegeVerification: true },
+      });
+      if (profile?.collegeVerification === 'VERIFIED') verifiedCollegeId = profile.collegeId ?? null;
+    }
+
+    const globalOnly: Prisma.OpportunityWhereInput = {
+      collegeId: null,
+      OR: [{ communityId: null }, { community: { type: { not: 'COLLEGE' } } }],
+    };
+    const scopeWhere: Prisma.OpportunityWhereInput = verifiedCollegeId
+      ? {
+          OR: [
+            globalOnly,
+            { collegeId: verifiedCollegeId },
+            { community: { type: 'COLLEGE', collegeId: verifiedCollegeId } },
+          ],
+        }
+      : globalOnly;
+
+    // Use AND so the search-OR and the scope-OR don't overwrite each other.
+    const and: Prisma.OpportunityWhereInput[] = [];
+    if (query.q) {
+      and.push({
+        OR: [
+          { title: { contains: query.q, mode: 'insensitive' } },
+          { organization: { contains: query.q, mode: 'insensitive' } },
+        ],
+      });
+    }
+    if (!scoped) and.push(scopeWhere);
+
     const where: Prisma.OpportunityWhereInput = {
       isActive: true,
       approvalStatus: 'APPROVED', // only approved opportunities are public
@@ -44,14 +85,7 @@ export class OpportunitiesService {
       ...(query.communityId ? { communityId: query.communityId } : {}),
       ...(query.isRemote !== undefined ? { isRemote: query.isRemote } : {}),
       ...(query.tag ? { tags: { has: query.tag } } : {}),
-      ...(query.q
-        ? {
-            OR: [
-              { title: { contains: query.q, mode: 'insensitive' } },
-              { organization: { contains: query.q, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
+      ...(and.length ? { AND: and } : {}),
     };
 
     const orderBy: Prisma.OpportunityOrderByWithRelationInput =
