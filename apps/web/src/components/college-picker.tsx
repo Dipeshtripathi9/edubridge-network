@@ -63,7 +63,7 @@ export function CollegePicker({
         onFocus={() => setOpen(true)}
       />
       {open && typed.length > 0 && (
-        <div className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
+        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-md border border-border bg-card shadow-xl">
           {colleges.map((c) => (
             <button
               key={c.id}
