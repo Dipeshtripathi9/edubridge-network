@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
-import { cn } from '@/lib/utils';
+import { cn, uniqueById } from '@/lib/utils';
 import { useMyResourceBookmarks, useResources } from '@/hooks/use-resources';
 
 const TYPES = [
@@ -43,7 +43,7 @@ function Browse() {
     sort,
     q: search || undefined,
   });
-  const items = data?.pages.flatMap((p) => p.data) ?? [];
+  const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
 
   return (
     <div className="space-y-4">

@@ -1,6 +1,7 @@
 'use client';
 
 import { use } from 'react';
+import { uniqueById } from '@/lib/utils';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -59,7 +60,7 @@ function SectionFeed({
   empty: string;
 }) {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeed(slug, section);
-  const posts = data?.pages.flatMap((p) => p.data) ?? [];
+  const posts = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
   const showComposer = section !== 'ANNOUNCEMENTS' || canModerate;
   const placeholder =
     section === 'ANNOUNCEMENTS'
@@ -161,7 +162,7 @@ function Reviews({ collegeId, collegeSlug }: { collegeId: string; collegeSlug: s
 
 function Opportunities({ collegeId }: { collegeId: string }) {
   const { data, isLoading } = useOpportunities({ collegeId });
-  const items = data?.pages.flatMap((p) => p.data) ?? [];
+  const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
   if (isLoading) return <Skeleton className="h-40 w-full" />;
   return items.length === 0 ? (
     <p className="py-10 text-center text-muted-foreground">No opportunities yet.</p>
@@ -217,7 +218,7 @@ function Transfers({ collegeId }: { collegeId: string }) {
 
 function Resources({ collegeId }: { collegeId: string }) {
   const { data, isLoading } = useResources({ collegeId });
-  const items = data?.pages.flatMap((p) => p.data) ?? [];
+  const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
   return (
     <div className="space-y-4">
       <div className="flex justify-end">

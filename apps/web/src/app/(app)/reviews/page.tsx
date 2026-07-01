@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { uniqueById } from '@/lib/utils';
 import Link from 'next/link';
 import { MapPin, Search, Star, Trophy } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -17,7 +18,7 @@ export default function ReviewsPage() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useColleges({
     q: search || undefined,
   });
-  const colleges = data?.pages.flatMap((p) => p.data) ?? [];
+  const colleges = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">

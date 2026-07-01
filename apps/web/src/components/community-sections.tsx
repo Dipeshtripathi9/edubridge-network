@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Composer } from '@/components/composer';
+import { uniqueById } from '@/lib/utils';
 import { PostCard } from '@/components/post-card';
 import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
@@ -41,7 +42,7 @@ function FeedSection({
   empty: string;
 }) {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeed(slug, section);
-  const posts = data?.pages.flatMap((p) => p.data) ?? [];
+  const posts = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
   if (isLoading) return <Skeleton className="h-40 w-full" />;
   if (!posts.length) return <p className="py-10 text-center text-muted-foreground">{empty}</p>;
   return (
@@ -71,7 +72,7 @@ function ResourcesSection({
 }) {
   void slug;
   const { data, isLoading } = useResources({ communityId });
-  const items = data?.pages.flatMap((p) => p.data) ?? [];
+  const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -107,7 +108,7 @@ function OpportunitiesSection({
   const submit = useSubmitOpportunity(communityId);
   const pending = usePendingOpportunities(communityId, canModerate);
   const decide = useDecideOpportunity(communityId);
-  const items = data?.pages.flatMap((p) => p.data) ?? [];
+  const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
 
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
