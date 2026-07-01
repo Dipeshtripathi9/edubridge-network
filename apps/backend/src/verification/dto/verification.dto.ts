@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { VerificationMethod } from '@prisma/client';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class VerificationUploadUrlDto {
@@ -39,6 +39,29 @@ export class CreateVerificationRequestDto {
   @IsOptional()
   @IsString()
   evidenceKey?: string;
+
+  @ApiPropertyOptional({ description: 'Whether the student confirmed the college-email link' })
+  @IsOptional()
+  @IsBoolean()
+  collegeEmailVerified?: boolean;
+
+  @ApiPropertyOptional({ description: 'Honest per-category thoughts about the college' })
+  @IsOptional()
+  @IsObject()
+  feedback?: Record<string, string>;
+}
+
+export class RequestCollegeEmailDto {
+  @ApiProperty()
+  @IsEmail()
+  email!: string;
+}
+
+export class ConfirmCollegeEmailDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  token!: string;
 }
 
 export class VerificationQueryDto extends PaginationDto {}

@@ -24,6 +24,8 @@ export interface VerificationRequestRow {
   createdAt: string;
   college?: { id: string; name: string } | null;
   collegeName?: string | null;
+  collegeEmailVerified?: boolean;
+  feedback?: Record<string, string> | null;
   user: {
     id: string;
     email: string | null;
@@ -51,6 +53,8 @@ export function useSubmitVerification() {
       collegeId?: string;
       collegeName?: string;
       collegeEmail?: string;
+      collegeEmailVerified?: boolean;
+      feedback?: Record<string, string>;
       file?: File | null;
     }) => {
       let evidenceKey: string | undefined;
@@ -73,6 +77,8 @@ export function useSubmitVerification() {
         collegeId: input.collegeId,
         collegeName: input.collegeName,
         collegeEmail: input.collegeEmail,
+        collegeEmailVerified: input.collegeEmailVerified,
+        feedback: input.feedback,
         evidenceKey,
       });
     },
@@ -80,6 +86,20 @@ export function useSubmitVerification() {
       qc.invalidateQueries({ queryKey: ['verification', 'me'] });
       qc.invalidateQueries({ queryKey: ['me'] });
     },
+  });
+}
+
+export function useRequestCollegeEmail() {
+  return useMutation({
+    mutationFn: (email: string) =>
+      api.post<{ message: string; devLink?: string }>('/verification/college-email/request', { email }),
+  });
+}
+
+export function useConfirmCollegeEmail() {
+  return useMutation({
+    mutationFn: (token: string) =>
+      api.post<{ verified: boolean; email: string }>('/verification/college-email/confirm', { token }),
   });
 }
 
