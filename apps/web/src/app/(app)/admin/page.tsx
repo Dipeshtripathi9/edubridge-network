@@ -493,7 +493,22 @@ function VerificationTab() {
                 </div>
               )}
               <p className="mt-1 text-xs text-muted-foreground">
-                {r.collegeEmail ? `email: ${r.collegeEmail}` : r.evidenceKey ? `doc: ${r.evidenceKey}` : ''}
+                {r.collegeEmail ? (
+                  `email: ${r.collegeEmail}`
+                ) : r.evidenceKey ? (
+                  /^https?:\/\//i.test(r.evidenceKey) ? (
+                    <>
+                      doc:{' '}
+                      <a href={r.evidenceKey} target="_blank" rel="noreferrer" className="text-primary underline">
+                        open document
+                      </a>
+                    </>
+                  ) : (
+                    `doc: ${r.evidenceKey}`
+                  )
+                ) : (
+                  ''
+                )}
                 {r.user.profile?.branch ? ` · ${r.user.profile.branch}` : ''}
                 {r.user.profile?.year ? ` · Year ${r.user.profile.year}` : ''}
               </p>

@@ -49,7 +49,7 @@ export default function VerifyPage() {
   const [collegeEmail, setCollegeEmail] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
   const [linkSent, setLinkSent] = useState<{ devLink?: string } | null>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [driveUrl, setDriveUrl] = useState('');
   const [feedback, setFeedback] = useState<Record<string, string>>({});
 
   const verified = me?.profile && (me.profile as { collegeVerification?: string }).collegeVerification === 'VERIFIED';
@@ -88,7 +88,8 @@ export default function VerifyPage() {
   const goToStep2 = () => {
     if (!college) return toast.error('Select your college');
     if (method === 'COLLEGE_EMAIL' && !emailVerified) return toast.error('Authenticate your college email first');
-    if (method !== 'COLLEGE_EMAIL' && !file) return toast.error('Upload your document');
+    if (method !== 'COLLEGE_EMAIL' && !/^https?:\/\//i.test(driveUrl.trim()))
+      return toast.error('Paste a valid Google Drive link');
     setStep(2);
   };
 
@@ -101,7 +102,7 @@ export default function VerifyPage() {
         collegeEmail: method === 'COLLEGE_EMAIL' ? collegeEmail : undefined,
         collegeEmailVerified: emailVerified,
         feedback,
-        file,
+        evidenceUrl: driveUrl.trim(),
       },
       {
         onSuccess: () => toast.success('Submitted — an admin will review it shortly'),
@@ -225,7 +226,18 @@ export default function VerifyPage() {
                 )}
               </div>
             ) : (
-              <Input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+              <div className="space-y-1">
+                <Input
+                  type="url"
+                  placeholder="https://drive.google.com/… (link to your document)"
+                  value={driveUrl}
+                  onChange={(e) => setDriveUrl(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Upload your {method === 'ID_CARD' ? 'student ID card' : 'admission / fee receipt'} to Google Drive,
+                  set sharing to <strong>“Anyone with the link”</strong>, and paste the link here.
+                </p>
+              </div>
             )}
 
             <Button onClick={goToStep2} disabled={submit.isPending} className="w-full sm:w-auto">
