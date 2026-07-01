@@ -42,7 +42,7 @@ export interface TestUser {
  */
 export async function registerVerifiedUser(
   app: INestApplication,
-  opts: { role?: 'STUDENT' | 'ADMIN' | 'SUPER_ADMIN'; fullName?: string } = {},
+  opts: { role?: 'STUDENT' | 'ADMIN' | 'SUPER_ADMIN'; fullName?: string; unverified?: boolean } = {},
 ): Promise<TestUser> {
   const prisma = app.get(PrismaService);
   const email = uniqueEmail();
@@ -63,7 +63,14 @@ export async function registerVerifiedUser(
     .send({ email, password })
     .expect(201);
 
-  return { email, userId: res.body.data.user.id, token: res.body.data.tokens.accessToken };
+  const userId = res.body.data.user.id;
+  // College-verify by default (matches the helper name & lets users join
+  // interest/college communities). Pass { unverified: true } to opt out.
+  if (!opts.unverified) {
+    await prisma.profile.update({ where: { userId }, data: { collegeVerification: 'VERIFIED' } });
+  }
+
+  return { email, userId, token: res.body.data.tokens.accessToken };
 }
 
 export function auth(token: string) {
