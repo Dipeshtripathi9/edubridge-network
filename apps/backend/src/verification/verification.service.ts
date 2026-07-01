@@ -94,6 +94,8 @@ export class VerificationService {
       data: {
         collegeVerification: 'PENDING',
         ...(dto.collegeId ? { collegeId: dto.collegeId } : {}),
+        ...(dto.course ? { branch: dto.course.trim() } : {}),
+        ...(dto.year ? { year: dto.year } : {}),
       },
     });
     return requestRow;

@@ -50,6 +50,8 @@ export function useSubmitVerification() {
       collegeEmail?: string;
       collegeEmailVerified?: boolean;
       feedback?: Record<string, string>;
+      course?: string;
+      year?: number;
       evidenceUrl?: string; // Google Drive link for ID card / admission proof
     }) => {
       return api.post('/verification/request', {
@@ -59,6 +61,8 @@ export function useSubmitVerification() {
         collegeEmail: input.collegeEmail,
         collegeEmailVerified: input.collegeEmailVerified,
         feedback: input.feedback,
+        course: input.course,
+        year: input.year,
         // Store the Drive link in evidenceKey (a plain string).
         evidenceKey: input.method !== 'COLLEGE_EMAIL' ? input.evidenceUrl : undefined,
       });
