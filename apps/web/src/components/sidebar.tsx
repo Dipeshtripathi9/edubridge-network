@@ -7,6 +7,7 @@ import {
   Code2,
   Crown,
   GraduationCap,
+  Headset,
   Home,
   LayoutGrid,
   Repeat,
@@ -33,6 +34,7 @@ export const NAV = [
 // Admin-only nav items, appended after the shared nav.
 export const ADMIN_NAV = [
   { href: '/admin', label: 'Admin', icon: ShieldCheck },
+  { href: '/manage/mentors', label: 'Mentors', icon: Headset },
   { href: '/analysis', label: 'Analysis', icon: BarChart3 },
   { href: '/manage/99x', label: '99x Developers', icon: Code2 },
   { href: '/manage/ez-rentbuddy', label: 'EZ-Rentbuddy', icon: Home },
