@@ -78,7 +78,9 @@ export function CommunityCard({ community }: { community: Community }) {
                     router.push('/login');
                     return;
                   }
-                  join.mutate(!community.isMember);
+                  join.mutate(!community.isMember, {
+                    onError: (err) => toast.error((err as Error).message),
+                  });
                 }}
               >
                 {community.isMember ? 'Joined' : 'Join'}
