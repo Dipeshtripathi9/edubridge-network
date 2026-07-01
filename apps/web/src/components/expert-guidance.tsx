@@ -292,7 +292,11 @@ function GuidanceForm({ onDone }: { onDone: () => void }) {
         <Input placeholder="Email (optional)" value={f.email} onChange={(e) => set('email', e.target.value)} />
         <Input placeholder="Course interest (e.g. B.Tech CSE)" value={f.course} onChange={(e) => set('course', e.target.value)} />
         <Input placeholder="Preferred location" value={f.location} onChange={(e) => set('location', e.target.value)} />
-        <Input placeholder="Marks / percentage" value={f.marks} onChange={(e) => set('marks', e.target.value)} />
+        <Input
+          placeholder="Marks & rank — e.g. 92% class 12, 30k JEE Mains / NEET, or none"
+          value={f.marks}
+          onChange={(e) => set('marks', e.target.value)}
+        />
         <Input placeholder="Budget (₹ / year)" value={f.budget} onChange={(e) => set('budget', e.target.value)} />
         <Input placeholder="Category (optional)" value={f.category} onChange={(e) => set('category', e.target.value)} />
         <Input placeholder="Preferred college (optional)" value={f.preferredCollege} onChange={(e) => set('preferredCollege', e.target.value)} />
