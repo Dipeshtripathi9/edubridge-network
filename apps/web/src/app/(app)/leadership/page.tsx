@@ -69,6 +69,7 @@ function BecomeALeader() {
   const { data: me } = useMe();
   const { data, isLoading } = useCommunities();
   const myCollegeId = me?.profile?.college?.id;
+  const verified = (me?.profile as { collegeVerification?: string })?.collegeVerification === 'VERIFIED';
   const all = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
   // Vacancies relevant to this student: their own college community + any
   // interest/startup community that's currently hiring leaders.
@@ -88,6 +89,23 @@ function BecomeALeader() {
           </p>
         </CardContent>
       </Card>
+
+      {!verified && (
+        <Card className="border-amber-400/50 bg-amber-50 dark:bg-amber-500/10">
+          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold">Verify you&apos;re a college student first</p>
+              <p className="text-sm text-muted-foreground">
+                Pick your college, then verify with your college email or by uploading your ID card / fee receipt —
+                an admin reviews it. Only verified students can lead a community.
+              </p>
+            </div>
+            <Button asChild className="shrink-0">
+              <Link href="/verify">Verify now</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div>
         <h3 className="mb-2 font-semibold">What you can lead</h3>

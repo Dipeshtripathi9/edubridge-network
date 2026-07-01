@@ -40,6 +40,7 @@ export class VerificationService {
       userId,
       method: dto.method,
       collegeId: dto.collegeId,
+      collegeName: dto.collegeName?.trim() || null,
       collegeEmail: dto.collegeEmail,
       evidenceKey: dto.evidenceKey,
       status: 'PENDING' as const,

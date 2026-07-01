@@ -25,6 +25,11 @@ export class CreateVerificationRequestDto {
   @IsString()
   collegeId?: string;
 
+  @ApiPropertyOptional({ description: 'Free-text college name when not in the directory' })
+  @IsOptional()
+  @IsString()
+  collegeName?: string;
+
   @ApiPropertyOptional({ description: 'Required for COLLEGE_EMAIL method' })
   @IsOptional()
   @IsEmail()

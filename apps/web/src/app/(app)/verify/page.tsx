@@ -6,8 +6,8 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { CollegePicker, type CollegeSelection } from '@/components/college-picker';
 import { useMe } from '@/hooks/use-profile';
 import {
   useMyVerification,
@@ -27,12 +27,19 @@ export default function VerifyPage() {
   const submit = useSubmitVerification();
 
   const [method, setMethod] = useState<VerificationMethod>('COLLEGE_EMAIL');
+  const [college, setCollege] = useState<CollegeSelection | null>(
+    me?.profile?.college ? { collegeId: me.profile.college.id, collegeName: me.profile.college.name } : null,
+  );
   const [collegeEmail, setCollegeEmail] = useState('');
   const [file, setFile] = useState<File | null>(null);
 
   const verified = me?.profile && (me.profile as { collegeVerification?: string }).collegeVerification === 'VERIFIED';
 
   const onSubmit = () => {
+    if (!college) {
+      toast.error('Select your college');
+      return;
+    }
     if (method === 'COLLEGE_EMAIL' && !collegeEmail.trim()) {
       toast.error('Enter your college email');
       return;
@@ -44,7 +51,8 @@ export default function VerifyPage() {
     submit.mutate(
       {
         method,
-        collegeId: me?.profile?.college?.id,
+        collegeId: college.collegeId,
+        collegeName: college.collegeName,
         collegeEmail: collegeEmail || undefined,
         file,
       },
@@ -122,13 +130,13 @@ export default function VerifyPage() {
               {METHODS.find((m) => m.value === method)?.hint}
             </p>
 
-            {me?.profile?.college ? (
-              <Badge variant="secondary">College: {me.profile.college.name}</Badge>
-            ) : (
-              <p className="text-xs text-amber-600">
-                Tip: set your college in onboarding so we verify the right institution.
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Your college / university</p>
+              <CollegePicker value={college} onChange={setCollege} />
+              <p className="text-xs text-muted-foreground">
+                Pick from the list, or type your college name if it isn&apos;t there.
               </p>
-            )}
+            </div>
 
             {method === 'COLLEGE_EMAIL' ? (
               <Input

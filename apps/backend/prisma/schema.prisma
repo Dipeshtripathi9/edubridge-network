@@ -965,6 +965,7 @@ model VerificationRequest {
   user         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   collegeId    String?
   college      College?                  @relation(fields: [collegeId], references: [id])
+  collegeName  String? // free-text college when not in the directory
   method       VerificationMethod
   collegeEmail String?
   evidenceKey  String? // S3 key for ID card / admission proof
