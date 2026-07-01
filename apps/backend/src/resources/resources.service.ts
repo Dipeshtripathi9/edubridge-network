@@ -33,9 +33,16 @@ export class ResourcesService {
     return this.storage.getUploadUrl(key, dto.contentType);
   }
 
-  async create(userId: string, dto: CreateResourceDto) {
+  async create(userId: string, dto: CreateResourceDto, role = 'STUDENT') {
     if (!dto.externalUrl && !dto.fileKey) {
       throw new BadRequestException('Provide a link (externalUrl) or an uploaded file');
+    }
+    // Must be a member to share a resource in a community (platform admins exempt).
+    if (dto.communityId && !isPlatformAdmin(role)) {
+      const member = await this.prisma.communityMember.findUnique({
+        where: { communityId_userId: { communityId: dto.communityId, userId } },
+      });
+      if (!member) throw new ForbiddenException('Join the community to share resources');
     }
     const resource = await this.prisma.resource.create({
       data: {

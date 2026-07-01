@@ -41,6 +41,14 @@ describe('Resource scoping by community type (e2e)', () => {
       .expect(201);
     topicCommunityId = topic.body.data.id;
 
+    // Uploader must be a member of both communities to share resources.
+    await prisma.communityMember.createMany({
+      data: [
+        { communityId: collegeCommunityId, userId: user.userId },
+        { communityId: topicCommunityId, userId: user.userId },
+      ],
+    });
+
     const r1 = await request(app.getHttpServer())
       .post(`${API}/resources`)
       .set(auth(user.token))

@@ -130,6 +130,10 @@ export class OpportunitiesService {
         const member = await this.prisma.communityMember.findUnique({
           where: { communityId_userId: { communityId: dto.communityId, userId: actor.sub } },
         });
+        // Must be a member to post in a community.
+        if (!member && !isAdmin) {
+          throw new ForbiddenException('Join the community to post opportunities');
+        }
         canManageHere = roleHasCapability(member?.role, 'VIEW');
       }
       // Startup communities: only admins & the community's managers may post.

@@ -25,9 +25,11 @@ describe('College Community Hub (e2e)', () => {
     });
     collegeId = college.id;
     communitySlug = `hub-college-${stamp}-community`;
-    await prisma.community.create({
+    const hubCommunity = await prisma.community.create({
       data: { name: `Hub College ${stamp}`, slug: communitySlug, type: 'COLLEGE', collegeId, memberCount: 0 },
     });
+    // Student joins so they can post in the community.
+    await prisma.communityMember.create({ data: { communityId: hubCommunity.id, userId: student.userId } });
     // Make the student a verified student of this college (counts toward the header).
     await prisma.profile.update({
       where: { userId: student.userId },
