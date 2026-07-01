@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { BarChart3, ChevronDown, GraduationCap } from 'lucide-react';
+import { BarChart3, ChevronDown, GraduationCap, Search } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 import { useVerificationAnalysis } from '@/hooks/use-verification';
@@ -24,10 +24,13 @@ export default function AnalysisPage() {
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
   const { data, isLoading } = useVerificationAnalysis();
   const [open, setOpen] = useState<string | null>(null);
+  const [q, setQ] = useState('');
 
   if (!isAdmin) {
     return <p className="py-16 text-center text-muted-foreground">Admins only.</p>;
   }
+
+  const groups = (data ?? []).filter((g) => g.college.toLowerCase().includes(q.trim().toLowerCase()));
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -40,6 +43,16 @@ export default function AnalysisPage() {
         </p>
       </div>
 
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search a college / university…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -50,9 +63,11 @@ export default function AnalysisPage() {
         <p className="py-16 text-center text-muted-foreground">
           No verified-student feedback yet. It appears here once verified students submit their reviews.
         </p>
+      ) : groups.length === 0 ? (
+        <p className="py-16 text-center text-muted-foreground">No colleges match “{q}”.</p>
       ) : (
         <div className="space-y-3">
-          {data.map((group) => {
+          {groups.map((group) => {
             const isOpen = open === group.college;
             return (
               <Card key={group.college} className="overflow-hidden">
