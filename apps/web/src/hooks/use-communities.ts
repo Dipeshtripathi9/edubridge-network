@@ -136,6 +136,9 @@ export function useMembers(slug: string) {
     queryKey: ['members', slug],
     queryFn: () => api.paginated<CommunityMember>(`/communities/${slug}/members?limit=50`),
     enabled: !!slug,
+    // Roles change via appoint/moderate — always show fresh data when opened.
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 }
 
