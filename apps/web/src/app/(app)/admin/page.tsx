@@ -46,6 +46,7 @@ import {
   useCommunities,
   useCreateCommunity,
   useDeleteCommunity,
+  useMembers,
   useUpdateCommunity,
 } from '@/hooks/use-communities';
 import { useColleges } from '@/hooks/use-colleges';
@@ -560,6 +561,34 @@ function VerificationTab() {
   );
 }
 
+const MANAGER_LABELS: Record<string, string> = {
+  ADMIN: 'Admin',
+  CAMPUS_LEAD: 'Campus Lead',
+  OPPORTUNITY_HEAD: 'Opportunity Head',
+  STUDENT_RELATIONS_HEAD: 'Student Relations Head',
+  MODERATOR: 'Moderator',
+};
+
+function CommunityManagers({ slug }: { slug: string }) {
+  const { data, isLoading } = useMembers(slug);
+  if (isLoading) return <Skeleton className="h-10 w-full" />;
+  const managers = (data?.data ?? []).filter((m) => m.role !== 'MEMBER');
+  if (managers.length === 0) {
+    return <p className="rounded-md bg-muted/40 p-2 text-xs text-muted-foreground">No managers appointed yet.</p>;
+  }
+  return (
+    <div className="space-y-1 rounded-md border border-border bg-muted/30 p-2">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Managers</p>
+      {managers.map((m) => (
+        <div key={m.id} className="flex items-center justify-between text-sm">
+          <span>{m.user.profile?.fullName ?? 'Member'}</span>
+          <Badge variant="secondary">{MANAGER_LABELS[m.role] ?? m.role}</Badge>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function AllCommunities() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommunities();
   const appoint = useAppointHead();
@@ -572,6 +601,7 @@ function AllCommunities() {
   const [role, setRole] = useState('CAMPUS_LEAD');
   const [hiringSlug, setHiringSlug] = useState<string | null>(null);
   const [note, setNote] = useState('');
+  const [managersSlug, setManagersSlug] = useState<string | null>(null);
   const [editSlug, setEditSlug] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editTopic, setEditTopic] = useState('');
@@ -585,8 +615,15 @@ function AllCommunities() {
   const toggle = (slug: string) => {
     setOpenSlug((cur) => (cur === slug ? null : slug));
     setHiringSlug(null);
+    setManagersSlug(null);
     setEmail('');
     setRole('CAMPUS_LEAD');
+  };
+  const toggleManagers = (slug: string) => {
+    setManagersSlug((cur) => (cur === slug ? null : slug));
+    setOpenSlug(null);
+    setHiringSlug(null);
+    setEditSlug(null);
   };
   const toggleHiring = (slug: string, currentNote?: string | null) => {
     setHiringSlug((cur) => (cur === slug ? null : slug));
@@ -637,6 +674,9 @@ function AllCommunities() {
                     <Button size="sm" variant="outline" onClick={() => toggleHiring(c.slug, c.hiringNote)}>
                       {hiringSlug === c.slug ? 'Cancel' : 'Hiring'}
                     </Button>
+                    <Button size="sm" variant="outline" onClick={() => toggleManagers(c.slug)}>
+                      {managersSlug === c.slug ? 'Hide' : 'Managers'}
+                    </Button>
                     <Button size="sm" variant="outline" onClick={() => toggle(c.slug)}>
                       {openSlug === c.slug ? 'Cancel' : 'Appoint here'}
                     </Button>
@@ -663,6 +703,8 @@ function AllCommunities() {
                     </Button>
                   </div>
                 </div>
+
+                {managersSlug === c.slug && <CommunityManagers slug={c.slug} />}
 
                 {editSlug === c.slug && (
                   <div className="space-y-2 rounded-md border border-border p-2">
