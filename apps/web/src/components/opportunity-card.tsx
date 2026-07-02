@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Bookmark, BookmarkX, CalendarClock, ExternalLink, MapPin, Share2, Trash2, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
@@ -51,7 +50,7 @@ export function OpportunityCard({
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+    <div className="animate-page">
       <Card className="h-full">
         <CardContent className="flex h-full flex-col gap-3 p-5">
           <div className="flex items-start justify-between gap-2">
@@ -170,6 +169,6 @@ export function OpportunityCard({
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }

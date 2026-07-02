@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Bookmark, Flag, Heart, MessageCircle, Pin, Send, Share2, Trash2 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
@@ -69,7 +68,7 @@ export function PostCard({
   const totalVotes = post.poll?.options.reduce((s, o) => s + o.voteCount, 0) ?? 0;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+    <div className="animate-page">
       <Card>
         <CardContent className="p-5">
           <div className="flex items-center gap-3">
@@ -249,6 +248,6 @@ export function PostCard({
           )}
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }
