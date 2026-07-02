@@ -73,6 +73,14 @@ export class AuthController {
 
   @Public()
   @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @Post('resend-verification')
+  @ApiOperation({ summary: 'Resend the email verification link' })
+  resendVerification(@Body() dto: ForgotPasswordDto) {
+    return this.auth.resendVerification(dto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @Post('forgot-password')
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.auth.forgotPassword(dto);

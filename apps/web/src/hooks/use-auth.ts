@@ -26,7 +26,24 @@ export function useLogin() {
 export function useSignup() {
   return useMutation({
     mutationFn: (input: { email: string; password: string; fullName: string }) =>
-      api.post<{ user: AuthUser; autoVerified: boolean }>('/auth/signup', input, { auth: false }),
+      api.post<{ user: AuthUser; autoVerified: boolean; message: string; devLink?: string }>(
+        '/auth/signup',
+        input,
+        { auth: false },
+      ),
+  });
+}
+
+export function useVerifyEmail() {
+  return useMutation({
+    mutationFn: (token: string) => api.post<{ message: string }>('/auth/verify-email', { token }, { auth: false }),
+  });
+}
+
+export function useResendVerification() {
+  return useMutation({
+    mutationFn: (email: string) =>
+      api.post<{ message: string; devLink?: string }>('/auth/resend-verification', { email }, { auth: false }),
   });
 }
 

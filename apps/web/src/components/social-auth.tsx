@@ -9,6 +9,27 @@ import { useGoogleAuth, useRequestMagicLink } from '@/hooks/use-auth';
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
+/** Standalone "Continue with Google" button (shown only when a client id is set). */
+export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {
+  const google = useGoogleAuth();
+  if (!GOOGLE_CLIENT_ID) return null;
+  return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <div className="flex justify-center">
+        <GoogleLogin
+          onSuccess={(cred) =>
+            cred.credential ? google.mutate(cred.credential) : toast.error('Google sign-in failed')
+          }
+          onError={() => toast.error('Google sign-in failed')}
+          text={mode === 'signup' ? 'signup_with' : 'signin_with'}
+          shape="pill"
+          width="320"
+        />
+      </div>
+    </GoogleOAuthProvider>
+  );
+}
+
 export function SocialAuth({ mode, showDivider = true }: { mode: 'login' | 'signup'; showDivider?: boolean }) {
   const google = useGoogleAuth();
   const magic = useRequestMagicLink();
