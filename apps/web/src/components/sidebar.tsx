@@ -48,7 +48,7 @@ export function Sidebar() {
   return (
     <aside className="hidden w-64 shrink-0 border-r border-border bg-card/40 md:flex md:flex-col">
       <Link href="/home" className="flex items-center gap-2 px-6 py-5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent-foreground text-primary-foreground shadow-sm shadow-primary/30">
           <GraduationCap className="h-5 w-5" />
         </span>
         <span className="text-lg font-bold tracking-tight">EduBridge Network</span>

@@ -19,7 +19,7 @@ export function Topbar() {
   const verified = me?.profile?.collegeVerification === 'VERIFIED';
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/80 px-4 backdrop-blur md:px-6">
+    <header className="glass sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/70 px-4 md:px-6">
       <MobileNav />
       <div className="ml-auto flex items-center gap-1">
         <ThemeToggle />
