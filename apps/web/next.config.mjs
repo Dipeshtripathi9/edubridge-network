@@ -2,6 +2,8 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  // gzip responses when self-hosting (default true) — smaller transfers on slow links.
+  compress: true,
   transpilePackages: ['@edubridge/shared'],
   // Hide the dev-only "Static route / Dynamic route" indicator badge.
   devIndicators: {
