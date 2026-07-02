@@ -1,6 +1,6 @@
 'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { keepPreviousData, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { useState, type ReactNode } from 'react';
@@ -17,6 +17,9 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             // cache is empty — so the app stays usable on very low bandwidth.
             staleTime: 5 * 60_000, // 5 min
             gcTime: 24 * 60 * 60_000, // 1 day
+            // Keep showing the previous results while a new query (filter/page/search)
+            // loads — no skeleton flash, so lists feel instant and smooth.
+            placeholderData: keepPreviousData,
             // Don't retry client errors (401/403/404) — pointless and slow. Only
             // retry transient/network/5xx failures, twice.
             retry: (failureCount, error) => {
