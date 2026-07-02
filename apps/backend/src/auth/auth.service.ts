@@ -62,7 +62,7 @@ export class AuthService {
         authProvider: AuthProvider.EMAIL,
         status: autoVerify ? 'ACTIVE' : 'PENDING_VERIFICATION',
         emailVerifiedAt: autoVerify ? new Date() : null,
-        profile: { create: { fullName: dto.fullName } },
+        profile: { create: { fullName: dto.fullName, gender: dto.gender?.trim() || null } },
       },
     });
 

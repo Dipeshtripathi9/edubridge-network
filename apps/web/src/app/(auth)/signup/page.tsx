@@ -15,11 +15,12 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [gender, setGender] = useState('');
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     signup.mutate(
-      { email: email.trim(), password, fullName: fullName.trim() },
+      { email: email.trim(), password, fullName: fullName.trim(), gender: gender || undefined },
       {
         onSuccess: (res) => {
           // Stash the dev verification link (no SMTP in dev) for the verify page.
@@ -62,6 +63,22 @@ export default function SignupPage() {
           <div>
             <label className="text-sm font-medium">Name</label>
             <Input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Gender</label>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              required
+              className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="">Select gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+              <option>Prefer not to say</option>
+            </select>
           </div>
 
           <p className="text-xs text-muted-foreground">
