@@ -7,6 +7,8 @@ import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { RedisIoAdapter } from './common/adapters/redis-io.adapter';
+import { RedisService } from './redis/redis.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -34,6 +36,12 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.enableShutdownHooks();
+
+  // Broadcast Socket.IO events across all replicas via Redis pub/sub, so the API
+  // can run as multiple horizontally-scaled instances behind a load balancer.
+  const redisIoAdapter = new RedisIoAdapter(app, app.get(RedisService));
+  await redisIoAdapter.connect();
+  app.useWebSocketAdapter(redisIoAdapter);
 
   // Swagger / OpenAPI
   const swaggerConfig = new DocumentBuilder()
