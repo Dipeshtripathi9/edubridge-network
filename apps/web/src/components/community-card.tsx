@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Share2, Users } from 'lucide-react';
+import { ArrowRight, Share2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -40,7 +40,7 @@ export function CommunityCard({ community }: { community: Community }) {
   };
   return (
     <Link href={href} className="block h-full">
-      <Card className="h-full transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg">
+      <Card className="group h-full transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg">
         <CardContent className="flex h-full flex-col gap-3 p-5">
           <div className="flex items-start justify-between">
             <div>
@@ -59,7 +59,9 @@ export function CommunityCard({ community }: { community: Community }) {
           )}
           <div className="mt-auto flex items-center justify-between pt-2">
             {isShowcase ? (
-              <span className="text-xs font-medium text-primary">Visit page →</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                Explore <ArrowRight className="h-3.5 w-3.5" />
+              </span>
             ) : (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Users className="h-3.5 w-3.5" />
