@@ -35,6 +35,12 @@ describe('Community heads & governance (e2e)', () => {
       .set(auth(admin.token))
       .send({ open: true, note: 'Looking for a Campus Lead' })
       .expect(200);
+
+    // You must join a community before applying to lead it.
+    await request(app.getHttpServer())
+      .post(`${API}/communities/${slug}/join`)
+      .set(auth(applicant.token))
+      .expect(201);
   });
   afterAll(async () => {
     await app?.close();

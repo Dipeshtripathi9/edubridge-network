@@ -52,6 +52,16 @@ describe('Campus-scoped leadership (e2e)', () => {
       .set(auth(admin.token))
       .send({ open: true })
       .expect(200);
+
+    // You must join a community before applying to lead it.
+    await request(app.getHttpServer())
+      .post(`${API}/communities/${collegeASlug}/join`)
+      .set(auth(studentA.token))
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`${API}/communities/${topicSlug}/join`)
+      .set(auth(studentB.token))
+      .expect(201);
   });
   afterAll(async () => {
     await app?.close();
