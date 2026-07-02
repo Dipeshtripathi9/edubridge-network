@@ -1043,7 +1043,7 @@ export default function AdminPage() {
       </div>
 
       <Tabs defaultValue="overview">
-        <TabsList>
+        <TabsList className="h-auto flex-wrap justify-start">
           <TabsTrigger value="overview">
             <Activity className="mr-1 h-4 w-4" /> Overview
           </TabsTrigger>
