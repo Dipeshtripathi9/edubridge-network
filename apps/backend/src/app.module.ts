@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { LoggerModule } from 'nestjs-pino';
 import configuration from './config/configuration';
 import { PrismaModule } from './prisma/prisma.module';
@@ -60,6 +61,12 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
             limit: config.get<number>('rateLimit.max')!,
           },
         ],
+        // Share rate-limit counters across replicas via Redis in production, so the
+        // limit is global (not per-instance). Dev/test use the default in-memory
+        // store (the guard is skipped in tests anyway).
+        ...(config.get<string>('env') === 'production'
+          ? { storage: new ThrottlerStorageRedisService(config.get<string>('redis.url')!) }
+          : {}),
       }),
     }),
     PrismaModule,
