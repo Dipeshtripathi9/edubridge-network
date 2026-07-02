@@ -50,7 +50,7 @@ export function OpportunityCard({
   };
 
   return (
-    <div className="animate-page">
+    <div className="content-auto animate-page">
       <Card className="h-full">
         <CardContent className="flex h-full flex-col gap-3 p-5">
           <div className="flex items-start justify-between gap-2">

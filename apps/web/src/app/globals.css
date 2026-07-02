@@ -55,11 +55,19 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    /* Soft ambient wash so flat sections gain depth without heavy assets. */
+  }
+  /* Soft ambient wash on its own composited, fixed layer. Painting it via a
+     fixed pseudo-element (instead of `background-attachment: fixed` on body)
+     keeps it off the scroll repaint path — scrolling stays smooth. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
     background-image:
       radial-gradient(60rem 60rem at 100% -10%, hsl(var(--primary) / 0.06), transparent 60%),
       radial-gradient(50rem 50rem at -10% 10%, hsl(var(--accent-foreground) / 0.05), transparent 55%);
-    background-attachment: fixed;
   }
   /* Smoother, consistent focus ring across interactive elements. */
   :focus-visible {
@@ -86,6 +94,13 @@
 }
 
 @layer utilities {
+  /* Skip rendering off-screen list items — faster first paint and smoother
+     scrolling on long feeds. The remembered intrinsic size avoids scrollbar jump. */
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 260px;
+  }
+
   /* Gradient headline text — used for hero / section titles. */
   .text-gradient {
     background-image: linear-gradient(

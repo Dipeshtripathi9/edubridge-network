@@ -68,7 +68,7 @@ export function PostCard({
   const totalVotes = post.poll?.options.reduce((s, o) => s + o.voteCount, 0) ?? 0;
 
   return (
-    <div className="animate-page">
+    <div className="content-auto animate-page">
       <Card>
         <CardContent className="p-5">
           <div className="flex items-center gap-3">
