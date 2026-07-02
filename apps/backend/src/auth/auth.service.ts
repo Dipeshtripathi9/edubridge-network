@@ -69,11 +69,33 @@ export class AuthService {
     if (autoVerify) {
       return { user: this.sanitize(user), autoVerified: true, message: 'Account ready' };
     }
-    await this.issueEmailVerification(user.id, user.email!);
-    return { user: this.sanitize(user), autoVerified: false, message: 'Verification email sent' };
+    const token = await this.issueEmailVerification(user.id, user.email!);
+    return {
+      user: this.sanitize(user),
+      autoVerified: false,
+      message: 'Verification email sent',
+      ...this.devVerifyLink(token),
+    };
   }
 
-  private async issueEmailVerification(userId: string, email: string) {
+  /** Re-send the verification link for a still-pending account. */
+  async resendVerification(dto: ForgotPasswordDto) {
+    const user = await this.prisma.user.findUnique({ where: { email: dto.email.toLowerCase() } });
+    if (user && user.status === 'PENDING_VERIFICATION' && user.email) {
+      const token = await this.issueEmailVerification(user.id, user.email);
+      return { message: 'Verification email resent.', ...this.devVerifyLink(token) };
+    }
+    return { message: 'If that account needs verification, a link has been sent.' };
+  }
+
+  // In non-production (no SMTP) return the link so the flow stays testable.
+  private devVerifyLink(token: string): { devLink?: string } {
+    if (process.env.NODE_ENV === 'production') return {};
+    const webUrl = this.config.get<string[]>('corsOrigins')?.[0] ?? 'http://localhost:3000';
+    return { devLink: `${webUrl}/verify-email?token=${token}` };
+  }
+
+  private async issueEmailVerification(userId: string, email: string): Promise<string> {
     const token = this.tokens.generateOpaqueToken(32);
     await this.prisma.emailVerification.create({
       data: {
@@ -85,6 +107,7 @@ export class AuthService {
     });
     // Fire-and-forget — never block signup on the SMTP send (it can hang/fail).
     void this.mail.sendVerificationEmail(email, token).catch(() => undefined);
+    return token;
   }
 
   async verifyEmail(dto: VerifyEmailDto) {
