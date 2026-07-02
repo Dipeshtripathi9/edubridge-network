@@ -431,13 +431,13 @@ export class CommunitiesService {
         'Only verified students of this college/university can lead its community',
       );
     }
-    // Ensure they're a member.
-    await this.prisma.communityMember.upsert({
+    // Must have already joined the community to apply for a leadership role.
+    const membership = await this.prisma.communityMember.findUnique({
       where: { communityId_userId: { communityId: community.id, userId } },
-      update: {},
-      create: { communityId: community.id, userId },
     });
-    await this.syncMemberCount(community.id);
+    if (!membership) {
+      throw new ForbiddenException('Join the community before applying to lead it');
+    }
 
     const pending = await this.prisma.communityHeadApplication.findFirst({
       where: { userId, communityId: community.id, status: 'PENDING' },
