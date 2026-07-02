@@ -316,6 +316,7 @@ model Profile {
   course String?
   branch String?
   year   Int?
+  gender String? // Male | Female | Other | Prefer not to say
   cgpa   Float?
   state  String?
   city   String?

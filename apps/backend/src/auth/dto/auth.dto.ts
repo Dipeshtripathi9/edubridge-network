@@ -7,6 +7,7 @@ import {
   IsPhoneNumber,
   IsString,
   Matches,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 
@@ -30,6 +31,12 @@ export class SignupDto {
   @IsString()
   @IsNotEmpty()
   fullName!: string;
+
+  @ApiPropertyOptional({ example: 'Male' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  gender?: string;
 }
 
 export class LoginDto {
