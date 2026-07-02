@@ -65,8 +65,13 @@ export function useDecideHeadApp() {
 }
 
 export function useAppointHead() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ slug, email, role }: { slug: string; email: string; role: string }) =>
       api.post(`/communities/${slug}/appoint-head`, { email, role }),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['members', vars.slug] });
+      qc.invalidateQueries({ queryKey: ['communities'] });
+    },
   });
 }
