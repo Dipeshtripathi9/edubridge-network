@@ -53,8 +53,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup(`${globalPrefix}/docs`, app, document);
 
-  const port = parseInt(process.env.API_PORT ?? '4000', 10);
-  await app.listen(port);
+  // Container hosts (Railway/Render/Fly) inject $PORT; fall back to API_PORT then 4000.
+  // Bind to 0.0.0.0 so the platform's proxy can reach the container.
+  const port = parseInt(process.env.PORT ?? process.env.API_PORT ?? '4000', 10);
+  await app.listen(port, '0.0.0.0');
   // eslint-disable-next-line no-console
   console.log(`🚀 EduBridge API ready on http://localhost:${port}/${globalPrefix}`);
 }
