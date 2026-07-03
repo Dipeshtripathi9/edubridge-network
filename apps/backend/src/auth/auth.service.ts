@@ -91,7 +91,7 @@ export class AuthService {
   // In non-production (no SMTP) return the link so the flow stays testable.
   private devVerifyLink(token: string): { devLink?: string } {
     if (process.env.NODE_ENV === 'production') return {};
-    const webUrl = this.config.get<string[]>('corsOrigins')?.[0] ?? 'http://localhost:3000';
+    const webUrl = this.config.get<string>('appUrl') ?? 'http://localhost:3000';
     return { devLink: `${webUrl}/verify-email?token=${token}` };
   }
 
@@ -361,7 +361,7 @@ export class AuthService {
     // In non-production (or when SMTP isn't set up) email won't arrive, so return
     // the link directly so it remains usable. Never leak it in production.
     const isProd = process.env.NODE_ENV === 'production';
-    const webUrl = this.config.get<string[]>('corsOrigins')?.[0] ?? 'http://localhost:3000';
+    const webUrl = this.config.get<string>('appUrl') ?? 'http://localhost:3000';
     return {
       message: 'If that email is valid, a sign-in link has been sent.',
       ...(isProd ? {} : { devLink: `${webUrl}/auth/callback?token=${token}` }),
