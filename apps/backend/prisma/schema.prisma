@@ -290,6 +290,7 @@ model User {
   adCards              AdCard[]
   discountClaims       DiscountClaim[]
   referralsPosted      Referral[]
+  managerSupportRequests ManagerSupportRequest[]
 
   @@index([status])
   @@index([role])
@@ -1242,6 +1243,23 @@ model MentorRequest {
 
   @@index([createdAt])
   @@map("mentor_requests")
+}
+
+// A community manager (head/mod) reaching out to the platform admin team — for a
+// referral, personal mentorship, or any question. Only community managers can
+// create these; admins read & resolve them.
+model ManagerSupportRequest {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic     String // REFERRAL | MENTORSHIP | GENERAL
+  message   String
+  status    String   @default("OPEN") // OPEN | RESOLVED
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
+  @@index([userId])
+  @@map("manager_support_requests")
 }
 
 model ChatParticipant {

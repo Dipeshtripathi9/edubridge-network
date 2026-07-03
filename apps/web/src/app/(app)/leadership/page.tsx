@@ -21,6 +21,7 @@ import { useCommunities, useManagedCommunities } from '@/hooks/use-communities';
 import { useMe } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth.store';
 import { ReferralsSection } from '@/components/perks';
+import { ContactAdminTeam } from '@/components/contact-admin-team';
 
 const roleLabel = (r: string) => r.replace(/_/g, ' ').toLowerCase();
 
@@ -233,6 +234,7 @@ export default function LeadershipPage() {
             </Card>
           ))}
           </div>
+          <ContactAdminTeam />
           <ReferralsSection enabled isAdmin={isAdmin} />
         </>
       ) : isAdmin ? (

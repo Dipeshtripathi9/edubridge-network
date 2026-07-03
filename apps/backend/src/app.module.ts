@@ -24,6 +24,7 @@ import { ReferralsModule } from './referrals/referrals.module';
 import { AgencyModule } from './agency/agency.module';
 import { RentalsModule } from './rentals/rentals.module';
 import { MentorsModule } from './mentors/mentors.module';
+import { LeadershipModule } from './leadership/leadership.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReputationModule } from './reputation/reputation.module';
 import { AdminModule } from './admin/admin.module';
@@ -87,6 +88,7 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     AgencyModule,
     RentalsModule,
     MentorsModule,
+    LeadershipModule,
     ComplaintsModule,
     NotificationsModule,
     ReputationModule,

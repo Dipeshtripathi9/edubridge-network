@@ -10,6 +10,7 @@ import {
   Headset,
   Home,
   LayoutGrid,
+  LifeBuoy,
   Repeat,
   Rocket,
   ShieldCheck,
@@ -35,6 +36,7 @@ export const NAV = [
 export const ADMIN_NAV = [
   { href: '/admin', label: 'Admin', icon: ShieldCheck },
   { href: '/manage/mentors', label: 'Mentors', icon: Headset },
+  { href: '/manage/support', label: 'Manager Requests', icon: LifeBuoy },
   { href: '/analysis', label: 'Analysis', icon: BarChart3 },
   { href: '/manage/99x', label: '99x Developers', icon: Code2 },
   { href: '/manage/ez-rentbuddy', label: 'EZ-Rentbuddy', icon: Home },
