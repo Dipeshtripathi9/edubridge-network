@@ -91,4 +91,10 @@ export class AdminController {
   auditLogs(@Query() query: AuditQueryDto) {
     return this.admin.listAuditLogs(query);
   }
+
+  @Get('email-logs')
+  @ApiOperation({ summary: 'Email delivery audit (Email Management)' })
+  emailLogs(@Query() query: AuditQueryDto) {
+    return this.admin.listEmailLogs(query);
+  }
 }

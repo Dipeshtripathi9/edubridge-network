@@ -46,11 +46,11 @@ The models cover your entire table list. Mapping of your names → existing mode
 - Support Tickets → `Complaint`/`HelpRequest`/`ManagerSupportRequest`
 - Media Files → object keys via `StorageService`; Email Logs → app logs (see gaps)
 
-### Genuine gaps (small, tracked)
-1. **Soft delete** is partial (6 `deletedAt` fields). Extend to `Post`, `Comment`, `Review` if you want restore/audit on user content.
-2. **Email Logs** table — currently logged to stdout; add a `EmailLog` model if you need per-send auditing/analytics.
-3. **Search** is Postgres ILIKE — fine to 50k; swap to Meilisearch when result quality/latency demands (interface already isolated in `search.service.ts`).
-4. **CSP** header — add a Content-Security-Policy on the web app when you lock down third-party origins (Google OAuth needs allow-listing).
+### Gap status
+1. **Soft delete** — ✅ already implemented on `Post` (`deletedAt` + `status=REMOVED`), `Comment`, `Review`, `Application`, `Resource`, `ManagerSupportRequest`, `User`; read queries filter `deletedAt: null`.
+2. **Email Logs** — ✅ `EmailLog` model added; every send records `SENT | FAILED | SKIPPED` (+ error, kind) via `MailService`; admin view at `GET /api/v1/admin/email-logs`.
+3. **Search** is Postgres ILIKE — fine to 50k; swap to Meilisearch when result quality/latency demands (interface already isolated in `search.service.ts`). *Deliberately deferred — not needed at current scale.*
+4. **CSP** header — deliberately deferred until third-party origins are finalized, because a strict Content-Security-Policy must allow-list Google OAuth (`accounts.google.com` script/frame/connect) and Next's inline bootstrap, and a wrong policy silently breaks login. The high-value headers (`X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, `HSTS`) are already enforced.
 
 ---
 

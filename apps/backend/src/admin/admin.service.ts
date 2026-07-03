@@ -209,6 +209,16 @@ export class AdminService {
     return buildPaginatedResult(items, query);
   }
 
+  /** Email delivery audit for the admin "Email Management" view. */
+  async listEmailLogs(query: AuditQueryDto) {
+    const items = await this.prisma.emailLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      skip: query.skip,
+      take: query.limit,
+    });
+    return buildPaginatedResult(items, query);
+  }
+
   // ---------------- Analytics ----------------
   async analytics() {
     const now = Date.now();
