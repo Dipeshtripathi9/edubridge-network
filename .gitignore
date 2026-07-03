@@ -38,3 +38,6 @@ prisma/*.db
 *.pem
 .cache/
 tmp/
+
+# Local database backups (contain user data — never commit)
+backups/
