@@ -10,8 +10,12 @@ import {
   Megaphone,
   Palette,
   Search,
+  Share2,
   Smartphone,
   Sparkles,
+  Target,
+  Users,
+  Video,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
@@ -230,6 +234,30 @@ function CareerForm() {
   );
 }
 
+// Talking points for the promo-video brief — what an influencer should showcase.
+const INFLUENCER_BRIEF = [
+  {
+    icon: GraduationCap,
+    title: 'College Insights',
+    desc: 'Honest reviews & complete insights from verified students — academics, faculty, placements, internships, campus life, hostels, fees & ROI — plus unlimited 1:1 calls with verified EduBridge Experts for admissions, course/branch selection, scholarships, entrance exams & career planning.',
+  },
+  {
+    icon: Users,
+    title: 'Communities',
+    desc: 'Connect with verified students across colleges — ask questions, share experiences, learn from seniors and collaborate on projects.',
+  },
+  {
+    icon: Share2,
+    title: 'Network',
+    desc: 'Build connections with students, alumni, mentors, recruiters & industry professionals to discover opportunities and accelerate your career.',
+  },
+  {
+    icon: Target,
+    title: 'Opportunities',
+    desc: 'Internships, scholarships, hackathons, competitions, campus-ambassador programs, events & certifications tailored to your goals.',
+  },
+] as const;
+
 function InfluencerForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -250,8 +278,8 @@ function InfluencerForm() {
     <Card className="border-accent/40 bg-accent/5">
       <CardContent className="space-y-3 p-6">
         <p className="text-sm text-muted-foreground">
-          Upload 2 sample videos made from our script. We post them online — if they perform, you become a
-          <strong> top influencer</strong> and earn collab charges from our customers.
+          Upload 2 sample promotional videos made from the brief above. We post them online — if they
+          perform, you become a <strong>top influencer</strong> and earn collab charges from our customers.
         </p>
         <Input placeholder="Sample video 1 link (YouTube/Drive/Instagram)" value={video1} onChange={(e) => setVideo1(e.target.value)} />
         <Input placeholder="Sample video 2 link" value={video2} onChange={(e) => setVideo2(e.target.value)} />
@@ -473,12 +501,52 @@ export default function Agency99xPage() {
           <CareerForm />
         </section>
 
-        {/* Influencer program */}
-        <section id="influencer" className="space-y-3">
+        {/* Influencer program — promote EduBridge Network */}
+        <section id="influencer" className="space-y-4">
           <div>
-            <h2 className="text-2xl font-bold">Become a 99x influencer</h2>
-            <p className="text-muted-foreground">Make 2 videos from our script. Perform well → become a top influencer & earn collab charges.</p>
+            <h2 className="text-2xl font-bold">Become a top influencer</h2>
+            <p className="text-muted-foreground">
+              Make 2 promotional videos for <strong>EduBridge Network</strong> from the brief below.
+              Perform well → become a top influencer &amp; earn collab charges from our customers.
+            </p>
           </div>
+
+          {/* The brief / script */}
+          <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-accent/10">
+            <CardContent className="space-y-4 p-6">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent-foreground text-primary-foreground shadow-sm">
+                  <Video className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="font-semibold">Your brief — promote EduBridge Network</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Your future, EduBridge Network. Create a <strong>30–90 second</strong> promotional
+                    video showing how EduBridge Network helps students. Explain why every student should
+                    join and how it can change their academic &amp; career journey.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {INFLUENCER_BRIEF.map((b) => (
+                  <div key={b.title} className="rounded-xl border border-border bg-background/60 p-4">
+                    <p className="flex items-center gap-2 font-medium">
+                      <b.icon className="h-4 w-4 text-primary" /> {b.title}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{b.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                Cover all four in your own style. This helps us evaluate your{' '}
+                <strong>creativity, communication, storytelling &amp; marketing skills</strong> — we
+                can&apos;t wait to see your unique perspective!
+              </p>
+            </CardContent>
+          </Card>
+
           <InfluencerForm />
         </section>
 
