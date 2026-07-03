@@ -25,9 +25,13 @@ export class StorageService {
     const secretAccessKey = this.config.get<string>('s3.secretAccessKey');
 
     if (this.bucket && accessKeyId && secretAccessKey) {
+      const endpoint = this.config.get<string>('s3.endpoint');
       this.client = new S3Client({
         region: this.config.get<string>('s3.region'),
         credentials: { accessKeyId, secretAccessKey },
+        // Cloudflare R2 (or any S3-compatible store): set a custom endpoint. R2
+        // needs path-style addressing. Omit endpoint → native AWS S3.
+        ...(endpoint ? { endpoint, forcePathStyle: true } : {}),
       });
     } else {
       this.client = null;
