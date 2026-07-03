@@ -68,7 +68,7 @@ export function MobileNav() {
                 );
               })}
             </nav>
-            <p className="px-5 py-4 text-xs text-muted-foreground">Your Future, Our Network</p>
+            <p className="px-5 py-4 text-xs text-muted-foreground">Your Future, EduBridge Network</p>
           </aside>
         </div>
   );
