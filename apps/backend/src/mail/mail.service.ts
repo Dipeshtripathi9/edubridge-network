@@ -1,13 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private transporter: nodemailer.Transporter | null = null;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {
     const host = this.config.get<string>('smtp.host');
     if (host) {
       this.transporter = nodemailer.createTransport({
@@ -31,10 +35,18 @@ export class MailService {
     return this.config.get<string>('appUrl') ?? 'http://localhost:3000';
   }
 
-  private async send(to: string, subject: string, html: string): Promise<void> {
+  /** Persist a delivery-audit row (best-effort — never blocks or breaks a send). */
+  private record(to: string, subject: string, kind: string, status: string, error?: string) {
+    void this.prisma.emailLog
+      .create({ data: { to, subject, kind, status, error: error?.slice(0, 500) } })
+      .catch(() => undefined);
+  }
+
+  private async send(to: string, subject: string, html: string, kind = 'OTHER'): Promise<void> {
     if (!this.transporter) {
       // Dev fallback: log instead of failing when SMTP is not configured.
       this.logger.warn(`[DEV MAIL] to=${to} subject="${subject}"\n${html}`);
+      this.record(to, subject, kind, 'SKIPPED', 'SMTP not configured');
       return;
     }
     // Delivery is best-effort: a transient SMTP failure must not break the calling
@@ -46,8 +58,10 @@ export class MailService {
         subject,
         html,
       });
+      this.record(to, subject, kind, 'SENT');
     } catch (err) {
       this.logger.error(`Failed to send "${subject}" to ${to}: ${(err as Error).message}`);
+      this.record(to, subject, kind, 'FAILED', (err as Error).message);
     }
   }
 
@@ -60,6 +74,7 @@ export class MailService {
        <p>Confirm your email to activate your account.</p>
        <p><a href="${url}">Verify Email</a></p>
        <p>This link expires in 24 hours.</p>`,
+      'VERIFY',
     );
   }
 
@@ -72,6 +87,7 @@ export class MailService {
        <p>Click the button below to sign in — no password needed.</p>
        <p><a href="${url}">Sign in to EduBridge</a></p>
        <p>This link expires in 15 minutes. If you didn't request it, you can ignore this email.</p>`,
+      'MAGIC_LINK',
     );
   }
 
@@ -83,6 +99,7 @@ export class MailService {
       `<h2>Password reset requested</h2>
        <p><a href="${url}">Reset Password</a></p>
        <p>If you didn't request this, you can ignore this email. Link expires in 1 hour.</p>`,
+      'RESET',
     );
   }
 
@@ -97,6 +114,7 @@ export class MailService {
           get your verified-student badge on EduBridge Network.</p>
        <p><a href="${url}">Verify College Email</a></p>
        <p>This link expires in 15 minutes. If you didn't request it, you can ignore this email.</p>`,
+      'COLLEGE_VERIFY',
     );
   }
 }

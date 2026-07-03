@@ -1245,6 +1245,23 @@ model MentorRequest {
   @@map("mentor_requests")
 }
 
+// Per-email delivery audit — one row per send attempt (verification, reset, magic
+// link, college-verify). Powers the admin "Email Management" view and deliverability
+// debugging without leaking the email body.
+model EmailLog {
+  id        String   @id @default(cuid())
+  to        String
+  subject   String
+  kind      String? // VERIFY | RESET | MAGIC_LINK | COLLEGE_VERIFY | OTHER
+  status    String // SENT | FAILED | SKIPPED
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@map("email_logs")
+}
+
 // A community manager (head/mod) reaching out to the platform admin team — for a
 // referral, personal mentorship, or any question. Only community managers can
 // create these; admins read & resolve them.
