@@ -50,7 +50,7 @@ The models cover your entire table list. Mapping of your names → existing mode
 1. **Soft delete** — ✅ already implemented on `Post` (`deletedAt` + `status=REMOVED`), `Comment`, `Review`, `Application`, `Resource`, `ManagerSupportRequest`, `User`; read queries filter `deletedAt: null`.
 2. **Email Logs** — ✅ `EmailLog` model added; every send records `SENT | FAILED | SKIPPED` (+ error, kind) via `MailService`; admin view at `GET /api/v1/admin/email-logs`.
 3. **Search** is Postgres ILIKE — fine to 50k; swap to Meilisearch when result quality/latency demands (interface already isolated in `search.service.ts`). *Deliberately deferred — not needed at current scale.*
-4. **CSP** header — deliberately deferred until third-party origins are finalized, because a strict Content-Security-Policy must allow-list Google OAuth (`accounts.google.com` script/frame/connect) and Next's inline bootstrap, and a wrong policy silently breaks login. The high-value headers (`X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, `HSTS`) are already enforced.
+4. **CSP** header — ✅ implemented in `apps/web/next.config.mjs`: an allow-listed Content-Security-Policy that permits Next's inline bootstrap (`'unsafe-inline'`), Google OAuth (`accounts.google.com` script/frame/connect), the API origin + its WebSocket scheme (`connect-src`), and image/font sources — with dev-only `'unsafe-eval'` (HMR) and `upgrade-insecure-requests` only when the API is https. External scripts are locked to self + Google. *Verify Google login on a preview deploy once your OAuth client is configured; if a resource is blocked, its origin is added to the matching directive.*
 
 ---
 
