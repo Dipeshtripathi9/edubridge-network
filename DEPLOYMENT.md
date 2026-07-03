@@ -155,6 +155,36 @@ Point the **frontend at your root/www domain** and the **backend at an `api` sub
 
 ---
 
+## Starting cheap: 200 → 5,000 users (~$0–5 / month)
+
+At this stage, **use free tiers and run ONE of everything.** Do not provision replicas,
+PgBouncer, or read replicas yet — that's 50k+ territory and would only add cost.
+
+| Piece | Cheapest option | Free allowance (plenty at 5k users) |
+|---|---|---|
+| **Frontend** | **Vercel Hobby** | Free — CDN + SSL included |
+| **Backend** | **Fly.io** (free small always-on VM) or **Railway Hobby** (~$5/mo) | Backend must stay **always-on** (Socket.IO/SSE), so avoid "sleep on idle" free tiers (Render free) — cold starts break realtime |
+| **Postgres** | **Neon free** | 0.5 GB — your data is a few MB at 5k users; scales to zero when idle |
+| **Redis** | **Upstash free** | 10k commands/day — caching keeps you well under it |
+| **Media** | **Cloudflare R2 free** | 10 GB storage, 10M reads/mo, **$0 egress** |
+| **Email** | **Resend free** (3k/mo) or **Amazon SES** ($0.10/1k) | 3k emails/mo covers signups/resets at this scale |
+
+**Realistic bill:** Vercel $0 + Neon $0 + Upstash $0 + R2 $0 + Resend $0 + backend $0–5.
+→ **~$0–5/month until you're well past 5k users.**
+
+### Why it stays cheap (and what to NOT do yet)
+- **One backend instance** handles thousands of concurrent users — the app is efficient (indexes, Redis cache, cursor pagination). No replicas needed.
+- **Neon/Upstash scale to zero** when idle — you pay for use, not for a reserved server.
+- **R2 zero-egress** means image bandwidth (usually the biggest surprise bill) is free.
+- **Don't** enable read replicas, PgBouncer, multi-instance, or a search cluster yet — revisit only when you approach ~20–30k users (see `SCALING.md`).
+- Keep the app on the **free Vercel/Neon/Upstash tiers**; upgrade a single service only when *that* service's dashboard shows you're near its limit.
+
+**When to spend more:** watch three dials — Neon storage/compute, Upstash daily commands,
+and backend CPU/RAM. Upgrade whichever one turns red first (usually the backend around 10–20k
+active users). Everything else stays free far longer.
+
+---
+
 ## Costs (rough, at 20–50k users, few-thousand DAU)
 - Railway (backend + Postgres + Redis, small): ~$10–25/mo to start; scales with usage.
 - Vercel: Hobby free / Pro $20 if you need team features.
