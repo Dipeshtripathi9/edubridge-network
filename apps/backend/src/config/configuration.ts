@@ -50,10 +50,13 @@ export default () => ({
   },
 
   s3: {
-    region: process.env.AWS_REGION ?? 'ap-south-1',
+    region: process.env.AWS_REGION ?? 'auto',
     bucket: process.env.AWS_S3_BUCKET ?? '',
     accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? '',
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? '',
+    // Set to the Cloudflare R2 S3 API endpoint to use R2 instead of AWS S3, e.g.
+    // https://<account_id>.r2.cloudflarestorage.com — leave empty for AWS S3.
+    endpoint: process.env.S3_ENDPOINT || undefined,
     signedUrlTtl: parseInt(process.env.S3_SIGNED_URL_TTL ?? '3600', 10),
   },
 
