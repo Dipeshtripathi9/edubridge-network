@@ -105,6 +105,8 @@ async function main() {
     // upsert() returns the record; detect "created" by comparing timestamps
     if (college.createdAt.getTime() === college.updatedAt.getTime()) collegesCreated++;
 
+    const description = `Only verified students of ${name} can join this community to post reviews, opportunities, discussions and resources. Anyone can browse.`;
+
     const existing = await prisma.community.findUnique({ where: { slug: communitySlug } });
     if (!existing) {
       await prisma.community.create({
@@ -114,14 +116,17 @@ async function main() {
           type: 'COLLEGE',
           visibility: 'PUBLIC',
           collegeId: college.id,
-          description: `Official community for ${name} — connect with verified students, read reviews, share opportunities and join campus discussions.`,
+          description,
           memberCount: 0,
         },
       });
       communitiesCreated++;
-    } else if (!existing.collegeId) {
-      // link an existing same-named community to the college if it wasn't linked
-      await prisma.community.update({ where: { id: existing.id }, data: { collegeId: college.id } });
+    } else {
+      // keep description + college link current on re-run
+      await prisma.community.update({
+        where: { id: existing.id },
+        data: { description, collegeId: existing.collegeId ?? college.id },
+      });
     }
   }
 
