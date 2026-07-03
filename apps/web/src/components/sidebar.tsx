@@ -76,7 +76,7 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <p className="px-6 py-4 text-xs text-muted-foreground">Your Future, Our Network</p>
+      <p className="px-6 py-4 text-xs text-muted-foreground">Your Future, EduBridge Network</p>
     </aside>
   );
 }
