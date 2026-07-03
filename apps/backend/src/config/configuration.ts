@@ -3,6 +3,11 @@ export default () => ({
   port: parseInt(process.env.API_PORT ?? '4000', 10),
   globalPrefix: process.env.API_GLOBAL_PREFIX ?? 'api/v1',
   corsOrigins: (process.env.CORS_ORIGINS ?? 'http://localhost:3000').split(','),
+  // Public URL of the web app — used to build the links inside verification /
+  // reset / sign-in emails. Falls back to the first CORS origin, then localhost.
+  appUrl:
+    process.env.APP_URL ??
+    (process.env.CORS_ORIGINS ?? 'http://localhost:3000').split(',')[0],
 
   database: {
     url: process.env.DATABASE_URL,

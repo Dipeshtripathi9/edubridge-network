@@ -13,12 +13,22 @@ export class MailService {
       this.transporter = nodemailer.createTransport({
         host,
         port: this.config.get<number>('smtp.port'),
+        secure: this.config.get<number>('smtp.port') === 465,
         auth: {
           user: this.config.get<string>('smtp.user'),
           pass: this.config.get<string>('smtp.pass'),
         },
+        // Pooled connections so bursts of signups don't open a socket each.
+        pool: true,
+        maxConnections: 5,
+        maxMessages: 100,
       });
     }
+  }
+
+  /** Public URL of the web app for building the links inside emails. */
+  private get appUrl(): string {
+    return this.config.get<string>('appUrl') ?? 'http://localhost:3000';
   }
 
   private async send(to: string, subject: string, html: string): Promise<void> {
@@ -27,8 +37,8 @@ export class MailService {
       this.logger.warn(`[DEV MAIL] to=${to} subject="${subject}"\n${html}`);
       return;
     }
-    // Email delivery is best-effort: a transient SMTP failure must not break the
-    // calling flow (e.g. signup). In production a queue/worker would retry.
+    // Delivery is best-effort: a transient SMTP failure must not break the calling
+    // flow (signup, reset, verify). Errors are logged; a queue/worker retries in prod.
     try {
       await this.transporter.sendMail({
         from: this.config.get<string>('smtp.from'),
@@ -42,7 +52,7 @@ export class MailService {
   }
 
   async sendVerificationEmail(to: string, token: string): Promise<void> {
-    const url = `${this.config.get('corsOrigins')[0]}/verify-email?token=${token}`;
+    const url = `${this.appUrl}/verify-email?token=${token}`;
     await this.send(
       to,
       'Verify your EduBridge account',
@@ -54,7 +64,7 @@ export class MailService {
   }
 
   async sendMagicLink(to: string, token: string): Promise<void> {
-    const url = `${this.config.get('corsOrigins')[0]}/auth/callback?token=${token}`;
+    const url = `${this.appUrl}/auth/callback?token=${token}`;
     await this.send(
       to,
       'Your EduBridge sign-in link',
@@ -66,13 +76,27 @@ export class MailService {
   }
 
   async sendPasswordReset(to: string, token: string): Promise<void> {
-    const url = `${this.config.get('corsOrigins')[0]}/reset-password?token=${token}`;
+    const url = `${this.appUrl}/reset-password?token=${token}`;
     await this.send(
       to,
       'Reset your EduBridge password',
       `<h2>Password reset requested</h2>
        <p><a href="${url}">Reset Password</a></p>
        <p>If you didn't request this, you can ignore this email. Link expires in 1 hour.</p>`,
+    );
+  }
+
+  /** College-email authentication: the student clicks this to prove their .edu address. */
+  async sendCollegeEmailVerification(to: string, token: string): Promise<void> {
+    const url = `${this.appUrl}/verify/college-email?token=${token}`;
+    await this.send(
+      to,
+      'Verify your college email — EduBridge',
+      `<h2>Confirm your college email</h2>
+       <p>Click below to verify this is your official college/university email and
+          get your verified-student badge on EduBridge Network.</p>
+       <p><a href="${url}">Verify College Email</a></p>
+       <p>This link expires in 15 minutes. If you didn't request it, you can ignore this email.</p>`,
     );
   }
 }

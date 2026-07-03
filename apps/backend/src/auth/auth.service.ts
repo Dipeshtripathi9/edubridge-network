@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthProvider, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { TokenService, TokenPair } from './services/token.service';
-import { MailService } from './services/mail.service';
+import { MailService } from '../mail/mail.service';
 import { OtpService } from './services/otp.service';
 import { GoogleService } from './services/google.service';
 import {
@@ -212,7 +212,9 @@ export class AuthService {
           expiresAt: new Date(Date.now() + 60 * 60 * 1000),
         },
       });
-      await this.mail.sendPasswordReset(user.email!, token);
+      // Best-effort, non-blocking — don't let SMTP latency slow the response or
+      // leak whether the email exists via timing.
+      void this.mail.sendPasswordReset(user.email!, token).catch(() => undefined);
     }
     return { message: 'If that email exists, a reset link has been sent' };
   }
