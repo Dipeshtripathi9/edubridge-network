@@ -26,13 +26,6 @@ import { ExpertGuidance } from '@/components/expert-guidance';
 import { useMySavedPosts } from '@/hooks/use-posts';
 import { useMyResourceBookmarks } from '@/hooks/use-resources';
 
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  return 'Good evening';
-}
-
 // Type → colored tile, so lists read at a glance.
 function communityVisual(type: Community['type']) {
   if (type === 'COLLEGE')
@@ -170,7 +163,7 @@ export default function HomePage() {
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             {loggedIn && firstName ? (
               <>
-                {greeting()}, <span className="text-gradient">{firstName}</span> 👋
+                Welcome, <span className="text-gradient">{firstName}</span> 👋
               </>
             ) : (
               <>
