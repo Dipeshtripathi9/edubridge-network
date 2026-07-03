@@ -87,7 +87,7 @@ function RequestCard({ r }: { r: ManagerSupportRequest }) {
 export default function ManageSupportPage() {
   const role = useAuthStore((s) => s.user?.role);
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
-  const { data, isLoading } = useManagerSupportRequests();
+  const { data, isLoading, isError, error, refetch } = useManagerSupportRequests();
 
   if (!isAdmin) return <p className="py-16 text-center text-muted-foreground">Admins only.</p>;
 
@@ -111,6 +111,17 @@ export default function ManageSupportPage() {
             <Skeleton key={i} className="h-32 w-full" />
           ))}
         </div>
+      ) : isError ? (
+        <Card className="border-destructive/40">
+          <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              Couldn&apos;t load requests: {(error as Error)?.message ?? 'unknown error'}
+            </p>
+            <Button size="sm" variant="outline" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
       ) : rows.length === 0 ? (
         <p className="py-16 text-center text-muted-foreground">No manager requests yet.</p>
       ) : (

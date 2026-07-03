@@ -38,6 +38,10 @@ export function useManagerSupportRequests() {
   return useQuery({
     queryKey: ['manager-support'],
     queryFn: () => api.get<ManagerSupportRequest[]>('/leadership/support'),
+    // New requests arrive continuously — always show fresh data when the admin
+    // opens the inbox (don't serve a stale/empty persisted result).
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 }
 
