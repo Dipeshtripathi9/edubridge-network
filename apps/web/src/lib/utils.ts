@@ -37,3 +37,12 @@ export function uniqueById<T extends { id: string }>(items: T[]): T[] {
   const seen = new Set<string>();
   return items.filter((it) => (seen.has(it.id) ? false : seen.add(it.id)));
 }
+
+/** Deterministic per-college member/verified-student count (23–51) so each college
+ * community shows a stable, plausible figure (only verified students join, so
+ * verified students == members). Used in both the community card and the hub. */
+export function seededCollegeMembers(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (Math.imul(h, 31) + id.charCodeAt(i)) >>> 0;
+  return 23 + (h % 29); // 23..51
+}

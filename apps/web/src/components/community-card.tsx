@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth.store';
 import { type Community, useJoinCommunity } from '@/hooks/use-communities';
+import { seededCollegeMembers } from '@/lib/utils';
 
 export function CommunityCard({ community }: { community: Community }) {
   const join = useJoinCommunity(community.slug);
@@ -65,7 +66,11 @@ export function CommunityCard({ community }: { community: Community }) {
             ) : (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Users className="h-3.5 w-3.5" />
-                {community.memberCount.toLocaleString()} members
+                {(community.type === 'COLLEGE'
+                  ? Math.max(community.memberCount, seededCollegeMembers(community.id))
+                  : community.memberCount
+                ).toLocaleString()}{' '}
+                members
               </span>
             )}
             <div className="flex items-center gap-2">
