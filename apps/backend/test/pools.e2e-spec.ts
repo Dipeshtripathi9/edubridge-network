@@ -227,4 +227,32 @@ describe('Pools — private capped group chats (e2e)', () => {
       .expect(200);
     expect(miss.body.data.length).toBe(0);
   });
+
+  it('lets a platform admin delete any pool; blocks a non-creator non-admin', async () => {
+    const admin = await registerVerifiedUser(app, { role: 'ADMIN', fullName: 'Platform Admin' });
+    const created = await request(app.getHttpServer())
+      .post(`${API}/communities/${slug}/pools`)
+      .set(auth(creator.token))
+      .send({ title: 'Deletable Pool', maxMembers: 5 })
+      .expect(201);
+    const id = created.body.data.id;
+
+    // a non-creator, non-admin member cannot delete
+    await request(app.getHttpServer())
+      .delete(`${API}/pools/${id}`)
+      .set(auth(member2.token))
+      .expect(403);
+
+    // the platform admin can delete any pool
+    await request(app.getHttpServer())
+      .delete(`${API}/pools/${id}`)
+      .set(auth(admin.token))
+      .expect(200);
+
+    // it's gone
+    await request(app.getHttpServer())
+      .get(`${API}/pools/${id}`)
+      .set(auth(creator.token))
+      .expect(404);
+  });
 });

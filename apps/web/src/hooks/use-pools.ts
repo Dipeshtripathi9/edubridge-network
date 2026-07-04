@@ -79,6 +79,19 @@ export function useLeavePool(slug: string) {
   });
 }
 
+/** Delete a pool entirely — platform admins (any pool) or the pool creator. */
+export function useDeletePool(slug?: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (poolId: string) => api.delete(`/pools/${poolId}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pools', slug] });
+      qc.invalidateQueries({ queryKey: ['pools'] });
+      qc.invalidateQueries({ queryKey: ['my-pools'] });
+    },
+  });
+}
+
 export function useLikePool() {
   const qc = useQueryClient();
   return useMutation({

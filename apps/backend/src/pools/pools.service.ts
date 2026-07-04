@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePoolDto } from './dto/pool.dto';
+import { isPlatformAdmin } from '../communities/community-permissions';
 
 @Injectable()
 export class PoolsService {
@@ -282,5 +283,21 @@ export class PoolsService {
     await this.prisma.poolMember.deleteMany({ where: { poolId: id, userId } });
     await this.prisma.chatParticipant.deleteMany({ where: { chatId: pool.chatId, userId } });
     return { left: true };
+  }
+
+  /** Delete a pool entirely — platform admins can delete any pool; the creator
+   *  can delete their own. Deleting the chat cascades to the pool, its members,
+   *  likes, messages and chat participants. */
+  async deletePool(id: string, userId: string, role: string) {
+    const pool = await this.prisma.pool.findUnique({
+      where: { id },
+      select: { chatId: true, createdById: true },
+    });
+    if (!pool) throw new NotFoundException('Pool not found');
+    if (!isPlatformAdmin(role) && pool.createdById !== userId) {
+      throw new ForbiddenException('Only an admin or the pool creator can delete this pool');
+    }
+    await this.prisma.chat.delete({ where: { id: pool.chatId } });
+    return { deleted: true };
   }
 }
