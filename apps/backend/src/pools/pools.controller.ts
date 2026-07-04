@@ -71,4 +71,14 @@ export class PoolsController {
   leave(@Param('id') id: string, @CurrentUser('sub') userId: string) {
     return this.pools.leave(id, userId);
   }
+
+  @Delete('pools/:id')
+  @ApiOperation({ summary: 'Delete a pool (platform admin, or the pool creator)' })
+  remove(
+    @Param('id') id: string,
+    @CurrentUser('sub') userId: string,
+    @CurrentUser('role') role: string,
+  ) {
+    return this.pools.deletePool(id, userId, role);
+  }
 }

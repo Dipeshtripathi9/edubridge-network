@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Heart, Lock, LogOut, Send, Share2, Users } from 'lucide-react';
+import { ArrowLeft, Heart, Lock, LogOut, Send, Share2, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { useChatSocket, useMessages, useSendMessage } from '@/hooks/use-messagin
 import {
   Pool,
   useCreatePool,
+  useDeletePool,
   useJoinPool,
   useLeavePool,
   useLikePool,
@@ -144,6 +145,10 @@ export function PoolsSection({ slug }: { slug: string }) {
   const create = useCreatePool(slug);
   const join = useJoinPool(slug);
   const leave = useLeavePool(slug);
+  const del = useDeletePool(slug);
+  const myId = useAuthStore((s) => s.user?.id);
+  const role = useAuthStore((s) => s.user?.role);
+  const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
   const [openId, setOpenId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
@@ -285,10 +290,28 @@ export function PoolsSection({ slug }: { slug: string }) {
                       </span>
                     )}
                   </p>
-                  <Badge variant={p.isFull ? 'outline' : 'secondary'}>
-                    <Users className="mr-1 h-3 w-3" />
-                    {p.memberCount}/{p.maxMembers}
-                  </Badge>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Badge variant={p.isFull ? 'outline' : 'secondary'}>
+                      <Users className="mr-1 h-3 w-3" />
+                      {p.memberCount}/{p.maxMembers}
+                    </Badge>
+                    {(isAdmin || p.createdById === myId) && (
+                      <button
+                        title={isAdmin ? 'Delete pool (admin)' : 'Delete pool'}
+                        className="text-muted-foreground hover:text-destructive"
+                        onClick={() => {
+                          if (window.confirm(`Delete the pool “${p.title}”? This can't be undone.`)) {
+                            del.mutate(p.id, {
+                              onSuccess: () => toast.success('Pool deleted'),
+                              onError: (e) => toast.error((e as Error).message),
+                            });
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 {p.isMember ? (
                   <div className="flex gap-2">
