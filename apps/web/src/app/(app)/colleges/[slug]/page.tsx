@@ -118,20 +118,6 @@ function Reviews({ collegeId, collegeSlug }: { collegeId: string; collegeSlug: s
           <Link href={`/reviews/${collegeSlug}`}>Write / view all reviews</Link>
         </Button>
       </div>
-      {summary && summary.categories.length > 0 && (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {summary.categories.map((c) => (
-            <Card key={c.category}>
-              <CardContent className="p-3 text-center">
-                <p className="text-xs capitalize text-muted-foreground">
-                  {c.category.replace('_', ' ').toLowerCase()}
-                </p>
-                <p className="text-lg font-bold">{c.avgRating.toFixed(1)}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
       {isLoading ? (
         <Skeleton className="h-32 w-full" />
       ) : reviews.length === 0 ? (
