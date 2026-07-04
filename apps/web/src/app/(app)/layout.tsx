@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
 import { Sidebar } from '@/components/sidebar';
 import { Topbar } from '@/components/topbar';
+import { VerifyBanner } from '@/components/verify-banner';
 import { useNotificationStream } from '@/hooks/use-notifications';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -21,6 +22,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
+        <VerifyBanner />
         <main key={pathname} className="animate-page flex-1 p-4 md:p-6">
           {children}
         </main>
