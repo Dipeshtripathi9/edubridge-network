@@ -10,7 +10,7 @@ import { CommunityMonitor } from '@/components/community-monitor';
 import { CommunitySections } from '@/components/community-sections';
 import { ApplyHead } from '@/components/apply-head';
 import { isCommunityManager, useCommunity, useJoinCommunity } from '@/hooks/use-communities';
-import { seededCollegeMembers, seededInterestMembers } from '@/lib/utils';
+import { seededCollegeMembers, seededInterestMembers, seededStartupMembers } from '@/lib/utils';
 import { useMe } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -64,7 +64,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                 ? Math.max(community.memberCount, seededCollegeMembers(community.id))
                 : community.type === 'TOPIC'
                   ? Math.max(community.memberCount, seededInterestMembers(community.id))
-                  : community.memberCount
+                  : Math.max(community.memberCount, seededStartupMembers(community.id))
               ).toLocaleString()}{' '}
               members · {community.postCount} posts
             </span>
