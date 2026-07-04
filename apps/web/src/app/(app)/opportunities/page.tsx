@@ -23,6 +23,7 @@ const TYPES = [
   { value: 'COMPETITION', label: 'Competitions' },
   { value: 'FELLOWSHIP', label: 'Fellowships' },
   { value: 'RESEARCH', label: 'Research' },
+  { value: 'CERTIFICATION', label: 'Certifications' },
 ];
 
 function CardGrid({ loading, children }: { loading: boolean; children: React.ReactNode }) {

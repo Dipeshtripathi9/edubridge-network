@@ -14,7 +14,8 @@ export type OpportunityType =
   | 'SCHOLARSHIP'
   | 'COMPETITION'
   | 'FELLOWSHIP'
-  | 'RESEARCH';
+  | 'RESEARCH'
+  | 'CERTIFICATION';
 
 export type ApplicationStatus = 'SAVED' | 'APPLIED' | 'IN_PROGRESS' | 'ACCEPTED' | 'REJECTED';
 

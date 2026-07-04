@@ -101,6 +101,7 @@ enum OpportunityType {
   COMPETITION
   FELLOWSHIP
   RESEARCH
+  CERTIFICATION
 }
 
 enum ApplicationStatus {
