@@ -11,7 +11,7 @@
    - Cross-origin (the API) and everything else → passthrough (the app's persisted
      React Query cache handles API data offline). */
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const STATIC_CACHE = `ebd-static-${VERSION}`;
 const PAGE_CACHE = `ebd-pages-${VERSION}`;
 const IMG_CACHE = `ebd-img-${VERSION}`;
@@ -92,11 +92,10 @@ async function networkFirst(req, cacheName) {
     if (res.ok) cache.put(req, res.clone());
     return res;
   } catch {
+    // Offline: serve THIS page from cache if we have it. Never substitute a
+    // different page (e.g. /home) — that made nav links look like they redirected home.
     const hit = await cache.match(req);
     if (hit) return hit;
-    // Last resort: the dashboard shell, which the app hydrates from cached data.
-    const home = await cache.match('/home');
-    if (home) return home;
     throw new Error('offline: no cached page');
   }
 }
