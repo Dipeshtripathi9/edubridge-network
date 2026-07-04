@@ -77,11 +77,18 @@ export class OpportunitiesService {
     }
     if (!scoped) and.push(scopeWhere);
 
+    // A college hub shows THIS college's opportunities plus the truly-global ones
+    // (e.g. the Opportunity Playbook), so every college community surfaces them.
+    if (query.collegeId) {
+      and.push({
+        OR: [{ collegeId: query.collegeId }, { collegeId: null, communityId: null }],
+      });
+    }
+
     const where: Prisma.OpportunityWhereInput = {
       isActive: true,
       approvalStatus: 'APPROVED', // only approved opportunities are public
       ...(query.type ? { type: query.type } : {}),
-      ...(query.collegeId ? { collegeId: query.collegeId } : {}),
       ...(query.communityId ? { communityId: query.communityId } : {}),
       ...(query.isRemote !== undefined ? { isRemote: query.isRemote } : {}),
       ...(query.tag ? { tags: { has: query.tag } } : {}),
