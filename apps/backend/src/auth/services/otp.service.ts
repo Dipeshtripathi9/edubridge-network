@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createHash } from 'crypto';
+import { createHash, randomInt } from 'crypto';
 
 @Injectable()
 export class OtpService {
@@ -9,8 +9,8 @@ export class OtpService {
   constructor(private readonly config: ConfigService) {}
 
   generateCode(): string {
-    // 6-digit numeric OTP
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    // 6-digit numeric OTP from a cryptographically-secure source (not Math.random).
+    return randomInt(100000, 1000000).toString();
   }
 
   hashCode(code: string): string {

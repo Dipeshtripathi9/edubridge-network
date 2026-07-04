@@ -84,11 +84,15 @@ export class TokenService {
       throw new Error('INVALID_REFRESH_TOKEN');
     }
 
-    // Revoke old session (rotation).
-    await this.prisma.session.update({
-      where: { id: session.id },
+    // Atomically claim the rotation: only one caller can flip revokedAt from
+    // null → now. If we didn't flip it, another request already rotated this
+    // token (or this is a replay of a revoked token), so reject instead of
+    // minting a second valid pair from the same token.
+    const claimed = await this.prisma.session.updateMany({
+      where: { id: session.id, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+    if (claimed.count === 0) throw new Error('INVALID_REFRESH_TOKEN');
 
     return this.issueTokens(session.user, {
       rememberMe: session.rememberMe,

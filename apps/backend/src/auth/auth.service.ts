@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AuthProvider, User } from '@prisma/client';
+import { AuthProvider, Prisma, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { TokenService, TokenPair } from './services/token.service';
 import { MailService } from '../mail/mail.service';
@@ -257,21 +257,35 @@ export class AuthService {
 
     let user = account?.user;
     if (!user) {
-      // Link to an existing email account or create a new one.
+      // Link to an existing email account or create a new one. Two concurrent
+      // first-time logins can both see "no user" and race to create — the loser
+      // gets a P2002 unique violation, so fall back to re-fetching by email.
       user = (await this.prisma.user.findUnique({ where: { email: profile.email } })) ?? undefined;
       if (!user) {
-        user = await this.prisma.user.create({
-          data: {
-            email: profile.email,
-            authProvider: AuthProvider.GOOGLE,
-            status: 'ACTIVE',
-            emailVerifiedAt: profile.emailVerified ? new Date() : null,
-            profile: { create: { fullName: profile.name ?? 'Student', avatarUrl: profile.picture } },
-          },
-        });
+        try {
+          user = await this.prisma.user.create({
+            data: {
+              email: profile.email,
+              authProvider: AuthProvider.GOOGLE,
+              status: 'ACTIVE',
+              emailVerifiedAt: profile.emailVerified ? new Date() : null,
+              profile: { create: { fullName: profile.name ?? 'Student', avatarUrl: profile.picture } },
+            },
+          });
+        } catch (err) {
+          if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+            user = (await this.prisma.user.findUnique({ where: { email: profile.email } })) ?? undefined;
+          } else throw err;
+        }
       }
-      await this.prisma.oAuthAccount.create({
-        data: { userId: user.id, provider: 'GOOGLE', providerUserId: profile.providerUserId },
+      if (!user) throw new BadRequestException('Could not sign in with Google');
+      // upsert so a concurrent link of the same Google account can't 500.
+      await this.prisma.oAuthAccount.upsert({
+        where: {
+          provider_providerUserId: { provider: 'GOOGLE', providerUserId: profile.providerUserId },
+        },
+        update: {},
+        create: { userId: user.id, provider: 'GOOGLE', providerUserId: profile.providerUserId },
       });
     }
 
@@ -317,18 +331,26 @@ export class AuthService {
       data: { usedAt: new Date() },
     });
 
-    // Find or create user by phone.
+    // Find or create user by phone. Guard the create against a concurrent
+    // first-login race (P2002) by re-fetching on conflict.
     let user = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
     if (!user) {
-      user = await this.prisma.user.create({
-        data: {
-          phone: dto.phone,
-          authProvider: AuthProvider.PHONE,
-          status: 'ACTIVE',
-          phoneVerifiedAt: new Date(),
-          profile: { create: { fullName: 'Student' } },
-        },
-      });
+      try {
+        user = await this.prisma.user.create({
+          data: {
+            phone: dto.phone,
+            authProvider: AuthProvider.PHONE,
+            status: 'ACTIVE',
+            phoneVerifiedAt: new Date(),
+            profile: { create: { fullName: 'Student' } },
+          },
+        });
+      } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+          user = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
+        } else throw err;
+      }
+      if (!user) throw new BadRequestException('Could not sign in');
     } else if (!user.phoneVerifiedAt) {
       user = await this.prisma.user.update({
         where: { id: user.id },
@@ -345,14 +367,21 @@ export class AuthService {
     const email = dto.email.toLowerCase();
     let user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) {
-      user = await this.prisma.user.create({
-        data: {
-          email,
-          authProvider: AuthProvider.EMAIL,
-          status: 'ACTIVE',
-          profile: { create: { fullName: dto.fullName?.trim() || 'Student' } },
-        },
-      });
+      try {
+        user = await this.prisma.user.create({
+          data: {
+            email,
+            authProvider: AuthProvider.EMAIL,
+            status: 'ACTIVE',
+            profile: { create: { fullName: dto.fullName?.trim() || 'Student' } },
+          },
+        });
+      } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+          user = await this.prisma.user.findUnique({ where: { email } });
+        } else throw err;
+      }
+      if (!user) throw new BadRequestException('Could not send a sign-in link');
     }
     const token = this.tokens.generateOpaqueToken(32);
     await this.prisma.emailVerification.create({

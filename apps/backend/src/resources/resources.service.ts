@@ -220,12 +220,18 @@ export class ResourcesService {
 
   /** Bump the share counter (called when a user copies/shares the link). */
   async share(id: string) {
-    const updated = await this.prisma.resource.update({
-      where: { id },
-      data: { shareCount: { increment: 1 } },
-      select: { shareCount: true },
-    });
-    return updated;
+    try {
+      return await this.prisma.resource.update({
+        where: { id },
+        data: { shareCount: { increment: 1 } },
+        select: { shareCount: true },
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+        throw new NotFoundException('Resource not found');
+      }
+      throw err;
+    }
   }
 
   /** Record a download and return a (presigned) download URL. */

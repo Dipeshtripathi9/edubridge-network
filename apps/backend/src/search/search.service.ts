@@ -188,7 +188,12 @@ export class SearchService {
         };
       }
       case 'user': {
-        const where = { OR: [{ fullName: like }, { username: like }] };
+        // Only surface active users — don't keep banned/suspended/unverified
+        // accounts discoverable through search.
+        const where = {
+          user: { status: 'ACTIVE' as const },
+          OR: [{ fullName: like }, { username: like }],
+        };
         const [rows, total] = await Promise.all([
           this.prisma.profile.findMany({
             where,
