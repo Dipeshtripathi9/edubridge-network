@@ -3,6 +3,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { disconnectSocket } from '@/lib/socket';
 import { useAuthStore, type AuthUser } from '@/stores/auth.store';
 
 interface AuthResult {
@@ -117,6 +118,9 @@ export function useLogout() {
       /* ignore */
     }
     logout();
+    // Tear down the authenticated realtime socket so it doesn't linger with the
+    // old identity after logout.
+    disconnectSocket();
     router.push('/login');
   };
 }

@@ -42,17 +42,28 @@ export class VerificationService {
     return { message: 'Verification link sent to your college email.', ...(isProd ? {} : { devLink: link }) };
   }
 
-  async confirmCollegeEmail(userId: string, dto: ConfirmCollegeEmailDto) {
+  /**
+   * Verify a signed college-email token belongs to this user. Returns the
+   * confirmed (lowercased) email, or null if the token is missing/invalid/expired
+   * or doesn't match the user. This is the ONLY source of truth for college-email
+   * verification — the client can never self-assert it.
+   */
+  private async verifyCollegeEmailToken(userId: string, token?: string): Promise<string | null> {
+    if (!token) return null;
     try {
       const secret = this.config.get<string>('jwt.accessSecret');
-      const payload = await this.jwt.verifyAsync<{ sub: string; email: string; typ: string }>(dto.token, { secret });
-      if (payload.typ !== 'college-email' || payload.sub !== userId) {
-        throw new BadRequestException('Invalid verification link');
-      }
-      return { verified: true, email: payload.email };
+      const payload = await this.jwt.verifyAsync<{ sub: string; email: string; typ: string }>(token, { secret });
+      if (payload.typ !== 'college-email' || payload.sub !== userId) return null;
+      return payload.email.toLowerCase();
     } catch {
-      throw new BadRequestException('This verification link is invalid or has expired.');
+      return null;
     }
+  }
+
+  async confirmCollegeEmail(userId: string, dto: ConfirmCollegeEmailDto) {
+    const email = await this.verifyCollegeEmailToken(userId, dto.token);
+    if (!email) throw new BadRequestException('This verification link is invalid or has expired.');
+    return { verified: true, email };
   }
 
   getUploadUrl(dto: VerificationUploadUrlDto) {
@@ -69,6 +80,15 @@ export class VerificationService {
       throw new BadRequestException('Upload evidence before submitting this method');
     }
 
+    // Re-verify the college-email confirmation server-side from the signed token —
+    // never trust a client-supplied "verified" flag. Only counts when the token's
+    // email matches the college email being submitted.
+    const confirmedEmail = await this.verifyCollegeEmailToken(userId, dto.collegeEmailToken);
+    const collegeEmailVerified =
+      dto.method === VerificationMethod.COLLEGE_EMAIL &&
+      !!confirmedEmail &&
+      confirmedEmail === dto.collegeEmail?.toLowerCase();
+
     // Replace any pending request rather than stacking duplicates.
     const pending = await this.prisma.verificationRequest.findFirst({
       where: { userId, status: 'PENDING' },
@@ -79,7 +99,7 @@ export class VerificationService {
       collegeId: dto.collegeId,
       collegeName: dto.collegeName?.trim() || null,
       collegeEmail: dto.collegeEmail,
-      collegeEmailVerified: dto.collegeEmailVerified ?? false,
+      collegeEmailVerified,
       feedback: dto.feedback ?? undefined,
       evidenceKey: dto.evidenceKey,
       status: 'PENDING' as const,

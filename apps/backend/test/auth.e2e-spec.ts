@@ -99,6 +99,34 @@ describe('Auth (e2e)', () => {
     expect(me.body.data.sub).toBe(user.userId);
   });
 
+  it('normalizes email case — signup and login resolve to the same account', async () => {
+    const base = uniqueEmail(); // lowercase
+    const mixed = base.replace(/^./, (c) => c.toUpperCase()); // e.g. E2e_...@example.com
+    const password = 'Str0ngPass';
+
+    await request(app.getHttpServer())
+      .post(`${API}/auth/signup`)
+      .send({ email: mixed, password, fullName: 'Case User' })
+      .expect(201);
+
+    // Stored lowercased → no duplicate for the same mailbox.
+    await request(app.getHttpServer())
+      .post(`${API}/auth/signup`)
+      .send({ email: base, password, fullName: 'Dup' })
+      .expect(400);
+
+    await prisma.user.update({
+      where: { email: base },
+      data: { status: 'ACTIVE', emailVerifiedAt: new Date() },
+    });
+
+    // Login with a different casing still resolves to the same account.
+    await request(app.getHttpServer())
+      .post(`${API}/auth/login`)
+      .send({ email: mixed.toUpperCase(), password })
+      .expect(201);
+  });
+
   it('forgot-password never reveals whether an email exists', async () => {
     const res = await request(app.getHttpServer())
       .post(`${API}/auth/forgot-password`)

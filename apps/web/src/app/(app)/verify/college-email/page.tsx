@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useConfirmCollegeEmail } from '@/hooks/use-verification';
 
 const LS_KEY = 'ebd_college_email_verified';
+const LS_TOKEN_KEY = 'ebd_college_email_token';
 
 function Confirm() {
   const token = useSearchParams().get('token');
@@ -24,6 +25,9 @@ function Confirm() {
       onSuccess: (res) => {
         setEmail(res.email);
         localStorage.setItem(LS_KEY, res.email);
+        // Keep the signed token so the verification form can hand it back to the
+        // server, which re-verifies it (the email flag itself is never trusted).
+        localStorage.setItem(LS_TOKEN_KEY, token);
       },
     });
   }, [token, confirm]);

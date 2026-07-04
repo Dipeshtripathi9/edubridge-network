@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { uniqueById } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { Search, Sparkles, Target } from 'lucide-react';
@@ -146,7 +146,7 @@ function Saved() {
   );
 }
 
-export default function OpportunitiesPage() {
+function OpportunitiesContent() {
   const params = useSearchParams();
   const tab = params.get('tab') === 'recommended' || params.get('tab') === 'saved'
     ? params.get('tab')!
@@ -180,5 +180,15 @@ export default function OpportunitiesPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+// useSearchParams must sit under a Suspense boundary, otherwise the whole route
+// bails out of server rendering (blank initial HTML).
+export default function OpportunitiesPage() {
+  return (
+    <Suspense fallback={null}>
+      <OpportunitiesContent />
+    </Suspense>
   );
 }

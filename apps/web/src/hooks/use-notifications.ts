@@ -59,6 +59,10 @@ export function useMarkAllRead() {
  */
 export function useNotificationStream() {
   const qc = useQueryClient();
+  // Re-run when auth changes: the app shell mounts this for guests too (socket
+  // is null then), so without `token` in the deps a user who logs in mid-session
+  // would get no live notifications until a full page reload.
+  const token = useAuthStore((s) => s.accessToken);
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
@@ -75,7 +79,7 @@ export function useNotificationStream() {
       socket.off('notification:new', onNew);
       socket.off('notifications:refresh', onRefresh);
     };
-  }, [qc]);
+  }, [qc, token]);
 }
 
 /** A community manager broadcasts a message to that community's members. */

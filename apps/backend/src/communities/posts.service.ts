@@ -45,6 +45,28 @@ export class PostsService {
     }
   }
 
+  /**
+   * Read gate for a community's content. PUBLIC communities are open; PRIVATE /
+   * RESTRICTED ones are readable only by their (non-banned) members or a platform
+   * admin. These feed/post endpoints are @Public (optional auth), so this must be
+   * enforced here rather than by a guard.
+   */
+  async assertCanViewCommunity(
+    community: { id: string; visibility: string },
+    userId?: string,
+    role?: string,
+  ) {
+    if (community.visibility === 'PUBLIC') return;
+    if (role && isPlatformAdmin(role)) return;
+    if (userId) {
+      const member = await this.prisma.communityMember.findUnique({
+        where: { communityId_userId: { communityId: community.id, userId } },
+      });
+      if (member && !member.bannedAt) return;
+    }
+    throw new ForbiddenException('This community is private');
+  }
+
   private async actorName(userId: string): Promise<string> {
     const profile = await this.prisma.profile.findUnique({
       where: { userId },
@@ -117,9 +139,10 @@ export class PostsService {
     return post;
   }
 
-  async getFeed(slug: string, query: FeedQueryDto, userId?: string) {
+  async getFeed(slug: string, query: FeedQueryDto, userId?: string, role?: string) {
     const community = await this.prisma.community.findUnique({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
+    await this.assertCanViewCommunity(community, userId, role);
 
     const sortBy: Prisma.PostOrderByWithRelationInput =
       query.sort === 'top' ? { likeCount: 'desc' } : { createdAt: 'desc' };
@@ -165,18 +188,19 @@ export class PostsService {
     return buildPaginatedResult(shaped, query);
   }
 
-  async getPost(id: string, userId?: string) {
+  async getPost(id: string, userId?: string, role?: string) {
     const post = await this.prisma.post.findFirst({
       where: { id, deletedAt: null },
       include: {
         author: POST_AUTHOR_SELECT,
         poll: { include: { options: true } },
-        community: { select: { id: true, name: true, slug: true } },
+        community: { select: { id: true, name: true, slug: true, visibility: true } },
         reactions: userId ? { where: { userId }, select: { id: true } } : false,
         bookmarks: userId ? { where: { userId }, select: { id: true } } : false,
       },
     });
     if (!post) throw new NotFoundException('Post not found');
+    await this.assertCanViewCommunity(post.community, userId, role);
     const { reactions, bookmarks, ...rest } = post as typeof post & {
       reactions?: unknown[];
       bookmarks?: unknown[];

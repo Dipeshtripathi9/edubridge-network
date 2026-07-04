@@ -16,17 +16,22 @@ export class CommentsController {
   @ApiOperation({ summary: 'Add a comment / reply' })
   create(
     @Param('postId') postId: string,
-    @CurrentUser('sub') userId: string,
+    @CurrentUser() user: JwtUser,
     @Body() dto: CreateCommentDto,
   ) {
-    return this.comments.createComment(postId, userId, dto);
+    return this.comments.createComment(postId, user.sub, dto, user.role);
   }
 
   @Public()
   @Get('posts/:postId/comments')
   @ApiOperation({ summary: 'List threaded comments for a post' })
-  list(@Param('postId') postId: string, @Query() query: PaginationDto) {
-    return this.comments.listComments(postId, query);
+  list(
+    @Param('postId') postId: string,
+    @Query() query: PaginationDto,
+    @CurrentUser('sub') userId?: string,
+    @CurrentUser('role') role?: string,
+  ) {
+    return this.comments.listComments(postId, query, userId, role);
   }
 
   @Delete('comments/:id')

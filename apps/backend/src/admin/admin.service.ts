@@ -148,8 +148,12 @@ export class AdminService {
   }
 
   async setUserRole(adminId: string, userId: string, dto: SetUserRoleDto) {
+    // Same guards as setUserStatus: an admin cannot change their own role
+    // (self-escalation/lockout) nor alter an existing super admin.
+    if (userId === adminId) throw new ForbiddenException('You cannot change your own role');
     const target = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!target) throw new NotFoundException('User not found');
+    if (target.role === 'SUPER_ADMIN') throw new ForbiddenException('Cannot change a super admin’s role');
     const user = await this.prisma.user.update({ where: { id: userId }, data: { role: dto.role } });
     await this.audit.log(adminId, 'user.role', {
       entity: 'user',

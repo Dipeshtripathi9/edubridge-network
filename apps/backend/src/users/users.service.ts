@@ -43,9 +43,22 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
+    // If the student changes which college they belong to, any prior college
+    // verification no longer applies — reset it. Otherwise a VERIFIED student
+    // could switch colleges and keep the badge (and post "verified" reviews)
+    // for a college they never attended.
+    let resetVerification = false;
+    if (dto.collegeId !== undefined) {
+      const current = await this.prisma.profile.findUnique({
+        where: { userId },
+        select: { collegeId: true },
+      });
+      if (current && current.collegeId !== dto.collegeId) resetVerification = true;
+    }
+
     const profile = await this.prisma.profile.update({
       where: { userId },
-      data: { ...dto },
+      data: { ...dto, ...(resetVerification ? { collegeVerification: 'UNVERIFIED' as const } : {}) },
       include: { college: true, university: true },
     });
     await this.redis.del(this.profileCacheKey(userId));

@@ -303,9 +303,12 @@ export class OpportunitiesService {
     });
     const interests = (profile?.interests ?? []).map((i) => i.toLowerCase());
 
-    // Candidate pool: active, not-yet-passed deadlines (or no deadline).
+    // Candidate pool: approved + active, not-yet-passed deadlines (or no deadline).
+    // approvalStatus is essential — without it, PENDING/unapproved submissions
+    // (which keep isActive:true) leak into every student's recommended feed.
     const candidates = await this.prisma.opportunity.findMany({
       where: {
+        approvalStatus: 'APPROVED',
         isActive: true,
         OR: [{ deadline: null }, { deadline: { gte: new Date() } }],
       },
