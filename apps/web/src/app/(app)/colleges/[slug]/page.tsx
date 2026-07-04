@@ -325,11 +325,11 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
       </div>
 
       {/* Sections — same style as every community, plus college-only Transfers & FAQs */}
-      <Tabs defaultValue="announcements">
+      <Tabs defaultValue="opportunities">
         <TabsList className="flex-wrap">
+          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
           <TabsTrigger value="announcements">Announcements</TabsTrigger>
           <TabsTrigger value="resources">Resources ({hub.counts.resources})</TabsTrigger>
-          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
           <TabsTrigger value="discussion">Discussion</TabsTrigger>
           <TabsTrigger value="polls">Polls</TabsTrigger>
           <TabsTrigger value="pools">Pools</TabsTrigger>

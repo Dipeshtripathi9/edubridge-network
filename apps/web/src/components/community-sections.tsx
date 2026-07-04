@@ -395,10 +395,10 @@ export function CommunitySections({
     return (
       <div className="space-y-4">
       <CommunityAds slug={slug} canModerate={canModerate} />
-      <Tabs defaultValue="announcements">
+      <Tabs defaultValue="opportunities">
         <TabsList className="flex-wrap">
-          <TabsTrigger value="announcements">Announcements</TabsTrigger>
           <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+          <TabsTrigger value="announcements">Announcements</TabsTrigger>
           <TabsTrigger value="discussion">Discussion</TabsTrigger>
           <TabsTrigger value="pools">Pools</TabsTrigger>
           <TabsTrigger value="reviews">Reviews</TabsTrigger>
@@ -422,11 +422,11 @@ export function CommunitySections({
   return (
     <div className="space-y-4">
     <CommunityAds slug={slug} canModerate={canModerate} />
-    <Tabs defaultValue="announcements">
+    <Tabs defaultValue="opportunities">
       <TabsList className="flex-wrap">
+        <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
         <TabsTrigger value="announcements">Announcements</TabsTrigger>
         <TabsTrigger value="resources">Resources</TabsTrigger>
-        <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
         <TabsTrigger value="discussion">Discussion</TabsTrigger>
         <TabsTrigger value="polls">Polls</TabsTrigger>
         <TabsTrigger value="pools">Pools</TabsTrigger>
