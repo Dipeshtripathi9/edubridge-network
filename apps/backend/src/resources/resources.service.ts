@@ -91,25 +91,35 @@ export class ResourcesService {
       collegeId: null,
       OR: [{ communityId: null }, { community: { type: { not: 'COLLEGE' } } }],
     };
-    const unscopedWhere: Prisma.ResourceWhereInput = verifiedCollegeId
-      ? {
-          OR: [
-            globalOnly,
-            { collegeId: verifiedCollegeId },
-            { community: { type: 'COLLEGE', collegeId: verifiedCollegeId } },
-          ],
-        }
-      : globalOnly;
-
     const where: Prisma.ResourceWhereInput = {
       deletedAt: null,
       ...(query.type ? { type: query.type } : {}),
-      ...(query.collegeId ? { collegeId: query.collegeId } : {}),
-      ...(query.communityId ? { communityId: query.communityId } : {}),
       ...(query.tag ? { tags: { has: query.tag } } : {}),
       ...(query.q ? { title: { contains: query.q, mode: 'insensitive' } } : {}),
-      ...(scoped ? {} : unscopedWhere),
     };
+
+    // Scoping: a COLLEGE community/college hub shows its own resources PLUS everything
+    // globally visible; an interest/startup community shows only its own.
+    if (query.collegeId) {
+      where.OR = [{ collegeId: query.collegeId }, globalOnly];
+    } else if (query.communityId) {
+      const comm = await this.prisma.community.findUnique({
+        where: { id: query.communityId },
+        select: { type: true },
+      });
+      where.OR =
+        comm?.type === 'COLLEGE'
+          ? [{ communityId: query.communityId }, globalOnly]
+          : [{ communityId: query.communityId }];
+    } else if (verifiedCollegeId) {
+      where.OR = [
+        globalOnly,
+        { collegeId: verifiedCollegeId },
+        { community: { type: 'COLLEGE', collegeId: verifiedCollegeId } },
+      ];
+    } else {
+      where.OR = [globalOnly];
+    }
     const sortBy: Prisma.ResourceOrderByWithRelationInput =
       query.sort === 'top'
         ? { avgRating: 'desc' }
