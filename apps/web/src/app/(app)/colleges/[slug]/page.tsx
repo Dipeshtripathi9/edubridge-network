@@ -17,7 +17,6 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar } from '@/components/ui/avatar';
-import { Stars } from '@/components/stars';
 import { Megaphone } from 'lucide-react';
 import { Composer } from '@/components/composer';
 import { PostCard } from '@/components/post-card';
@@ -25,11 +24,9 @@ import { OpportunityCard } from '@/components/opportunity-card';
 import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
 import { PoolsSection } from '@/components/pools-section';
-import { CommunityReviews } from '@/components/community-reviews';
 import { OpportunitiesSection } from '@/components/community-sections';
 import { isCommunityManager, useCommunity, useJoinCommunity } from '@/hooks/use-communities';
 import { useFeed } from '@/hooks/use-posts';
-import { useReviews, useReviewSummary } from '@/hooks/use-reviews';
 import { useOpportunities } from '@/hooks/use-opportunities';
 import { useResources } from '@/hooks/use-resources';
 import {
@@ -95,53 +92,6 @@ function SectionFeed({
             {isFetchingNextPage ? 'Loading…' : 'Load more'}
           </Button>
         </div>
-      )}
-    </div>
-  );
-}
-
-function Reviews({ collegeId, collegeSlug }: { collegeId: string; collegeSlug: string }) {
-  const { data: summary } = useReviewSummary(collegeId);
-  const { data, isLoading } = useReviews(collegeId, { sort: 'top' });
-  const reviews = data?.data ?? [];
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        {summary && (
-          <div className="flex items-center gap-2">
-            <Stars value={summary.overall.avgRating} />
-            <span className="font-semibold">{summary.overall.avgRating.toFixed(1)}</span>
-            <span className="text-sm text-muted-foreground">({summary.overall.count})</span>
-          </div>
-        )}
-        <Button asChild size="sm">
-          <Link href={`/reviews/${collegeSlug}`}>Write / view all reviews</Link>
-        </Button>
-      </div>
-      {isLoading ? (
-        <Skeleton className="h-32 w-full" />
-      ) : reviews.length === 0 ? (
-        <p className="py-10 text-center text-muted-foreground">No reviews yet.</p>
-      ) : (
-        reviews.map((r) => (
-          <Card key={r.id}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Stars value={r.rating} />
-                <Badge variant="secondary" className="capitalize">
-                  {r.category.replace('_', ' ').toLowerCase()}
-                </Badge>
-                {r.isVerified && (
-                  <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
-                    <BadgeCheck className="h-3.5 w-3.5" /> Verified
-                  </span>
-                )}
-              </div>
-              {r.title && <p className="mt-1 font-medium">{r.title}</p>}
-              <p className="mt-1 text-sm text-muted-foreground">{r.body}</p>
-            </CardContent>
-          </Card>
-        ))
       )}
     </div>
   );
@@ -320,7 +270,6 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
           <TabsTrigger value="discussion">Discussion</TabsTrigger>
           <TabsTrigger value="polls">Polls</TabsTrigger>
           <TabsTrigger value="pools">Pools</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews ({hub.counts.reviews})</TabsTrigger>
           <TabsTrigger value="transfers">Transfers</TabsTrigger>
           <TabsTrigger value="faqs">FAQs ({hub.counts.faqs})</TabsTrigger>
         </TabsList>
@@ -369,12 +318,6 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
             />
           ) : (
             <Opportunities collegeId={c.id} />
-          )}
-        </TabsContent>
-        <TabsContent value="reviews" className="space-y-6">
-          <Reviews collegeId={c.id} collegeSlug={c.slug} />
-          {communitySlug && (
-            <CommunityReviews slug={communitySlug} canReview={!!community?.isMember} />
           )}
         </TabsContent>
         <TabsContent value="transfers">
