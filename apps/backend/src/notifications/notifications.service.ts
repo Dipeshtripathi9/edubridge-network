@@ -111,8 +111,10 @@ export class NotificationsService {
    * would run as a BullMQ job rather than inline.
    */
   /**
-   * A community manager (or platform admin) broadcasts to their own community's
-   * members. Any managing role (VIEW capability) of that community may do this.
+   * The Campus Lead (or platform admin) broadcasts to their own community's
+   * members. Pushing a notification to every member is an announcement, so it
+   * requires ANNOUNCE — not the dashboard-VIEW capability that Opportunity /
+   * Student-Relations heads and moderators also hold.
    */
   async broadcastToCommunity(
     communityId: string,
@@ -125,8 +127,8 @@ export class NotificationsService {
       const member = await this.prisma.communityMember.findUnique({
         where: { communityId_userId: { communityId, userId: actor.sub } },
       });
-      if (!roleHasCapability(member?.role, 'VIEW')) {
-        throw new ForbiddenException('Only this community’s managers can broadcast to it');
+      if (!roleHasCapability(member?.role, 'ANNOUNCE')) {
+        throw new ForbiddenException('Only this community’s Campus Lead can broadcast to it');
       }
     }
     return this.broadcast({

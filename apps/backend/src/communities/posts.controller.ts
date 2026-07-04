@@ -34,15 +34,20 @@ export class PostsController {
     @Param('slug') slug: string,
     @Query() query: FeedQueryDto,
     @CurrentUser('sub') userId?: string,
+    @CurrentUser('role') role?: string,
   ) {
-    return this.posts.getFeed(slug, query, userId);
+    return this.posts.getFeed(slug, query, userId, role);
   }
 
   @Public()
   @Get('posts/:id')
   @ApiOperation({ summary: 'Get a single post' })
-  getOne(@Param('id') id: string, @CurrentUser('sub') userId?: string) {
-    return this.posts.getPost(id, userId);
+  getOne(
+    @Param('id') id: string,
+    @CurrentUser('sub') userId?: string,
+    @CurrentUser('role') role?: string,
+  ) {
+    return this.posts.getPost(id, userId, role);
   }
 
   @Delete('posts/:id')

@@ -124,7 +124,10 @@ export default function VerifyPage() {
         collegeId: college?.collegeId,
         collegeName: college?.collegeName,
         collegeEmail: method === 'COLLEGE_EMAIL' ? collegeEmail : undefined,
-        collegeEmailVerified: emailVerified,
+        collegeEmailToken:
+          method === 'COLLEGE_EMAIL' && emailVerified
+            ? localStorage.getItem('ebd_college_email_token') ?? undefined
+            : undefined,
         feedback,
         course: course.trim(),
         year: Number(year) || undefined,

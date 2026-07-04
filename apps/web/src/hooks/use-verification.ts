@@ -69,7 +69,7 @@ export function useSubmitVerification() {
       collegeId?: string;
       collegeName?: string;
       collegeEmail?: string;
-      collegeEmailVerified?: boolean;
+      collegeEmailToken?: string;
       feedback?: Record<string, string>;
       course?: string;
       year?: number;
@@ -80,7 +80,7 @@ export function useSubmitVerification() {
         collegeId: input.collegeId,
         collegeName: input.collegeName,
         collegeEmail: input.collegeEmail,
-        collegeEmailVerified: input.collegeEmailVerified,
+        collegeEmailToken: input.collegeEmailToken,
         feedback: input.feedback,
         course: input.course,
         year: input.year,

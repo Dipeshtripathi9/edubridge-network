@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { getSocket } from '@/lib/socket';
+import { useAuthStore } from '@/stores/auth.store';
 
 export interface ChatSummary {
   id: string;
@@ -122,6 +123,9 @@ export function useSendMessage(chatId: string | null) {
 /** Presence updates across the app (online/offline dots). */
 export function usePresence() {
   const [online, setOnline] = useState<Record<string, boolean>>({});
+  // Re-subscribe when auth changes so presence starts working right after login
+  // (not only after a full reload).
+  const token = useAuthStore((s) => s.accessToken);
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
@@ -131,6 +135,6 @@ export function usePresence() {
     return () => {
       socket.off('presence:update', handler);
     };
-  }, []);
+  }, [token]);
   return online;
 }

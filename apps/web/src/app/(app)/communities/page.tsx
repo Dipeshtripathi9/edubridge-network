@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ import { useCommunities } from '@/hooks/use-communities';
 
 const TYPES = ['COLLEGE', 'TOPIC', 'STARTUP'];
 
-export default function CommunitiesPage() {
+function CommunitiesContent() {
   const params = useSearchParams();
   const initialType = TYPES.includes(params.get('type') ?? '') ? params.get('type')! : undefined;
   const [type, setType] = useState<string | undefined>(initialType);
@@ -88,5 +88,15 @@ export default function CommunitiesPage() {
         </>
       )}
     </div>
+  );
+}
+
+// useSearchParams must sit under a Suspense boundary, otherwise the whole route
+// bails out of server rendering (blank initial HTML).
+export default function CommunitiesPage() {
+  return (
+    <Suspense fallback={null}>
+      <CommunitiesContent />
+    </Suspense>
   );
 }

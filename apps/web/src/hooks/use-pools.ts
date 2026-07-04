@@ -67,7 +67,13 @@ export function useJoinPool(slug: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (poolId: string) => api.post(`/pools/${poolId}/join`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['pools'] }),
+    // Also refresh the pool DETAIL key (['pool', id]) — ['pools'] doesn't
+    // prefix-match it, so without this the detail view stays on the locked
+    // "join" card until a manual refresh.
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pool'] });
+      qc.invalidateQueries({ queryKey: ['pools'] });
+    },
   });
 }
 
@@ -75,7 +81,10 @@ export function useLeavePool(slug: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (poolId: string) => api.delete(`/pools/${poolId}/leave`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['pools'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pool'] });
+      qc.invalidateQueries({ queryKey: ['pools'] });
+    },
   });
 }
 

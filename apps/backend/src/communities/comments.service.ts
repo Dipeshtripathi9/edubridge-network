@@ -4,6 +4,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { buildPaginatedResult, PaginationDto } from '../common/dto/pagination.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { isPlatformAdmin, roleHasCapability } from './community-permissions';
 
 const COMMENT_AUTHOR_SELECT = {
   select: {
@@ -28,9 +29,33 @@ export class CommentsService {
     private readonly reputation: ReputationService,
   ) {}
 
-  async createComment(postId: string, userId: string, dto: CreateCommentDto) {
+  /** Moderation gate — Moderator / Campus Lead / community admin, or platform admin/mod. */
+  private async assertCanModerate(communityId: string, userId: string, role: string) {
+    if (isPlatformAdmin(role) || role === 'MODERATOR') return;
+    const member = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId, userId } },
+    });
+    if (!roleHasCapability(member?.role, 'MODERATE')) {
+      throw new ForbiddenException('Moderator privileges required');
+    }
+  }
+
+  async createComment(postId: string, userId: string, dto: CreateCommentDto, role = 'STUDENT') {
     const post = await this.prisma.post.findFirst({ where: { id: postId, deletedAt: null } });
     if (!post) throw new NotFoundException('Post not found');
+
+    // Same gate as posting: must be a member and not banned/muted (platform
+    // admins exempt). Otherwise banned/muted users kept participating via comments.
+    const member = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId: post.communityId, userId } },
+    });
+    if (!member && !isPlatformAdmin(role)) {
+      throw new ForbiddenException('Join the community to comment');
+    }
+    if (member?.bannedAt) throw new ForbiddenException('You are banned from this community');
+    if (member?.mutedUntil && member.mutedUntil > new Date()) {
+      throw new ForbiddenException('You are muted in this community');
+    }
 
     if (dto.parentId) {
       const parent = await this.prisma.comment.findFirst({
@@ -82,7 +107,22 @@ export class CommentsService {
     return comment;
   }
 
-  async listComments(postId: string, query: PaginationDto) {
+  async listComments(postId: string, query: PaginationDto, userId?: string, role?: string) {
+    // Don't expose a private community's discussion to non-members via comments.
+    const post = await this.prisma.post.findFirst({
+      where: { id: postId, deletedAt: null },
+      select: { community: { select: { id: true, visibility: true } } },
+    });
+    if (!post) throw new NotFoundException('Post not found');
+    if (post.community.visibility !== 'PUBLIC' && !(role && isPlatformAdmin(role))) {
+      const member = userId
+        ? await this.prisma.communityMember.findUnique({
+            where: { communityId_userId: { communityId: post.community.id, userId } },
+          })
+        : null;
+      if (!member || member.bannedAt) throw new ForbiddenException('This community is private');
+    }
+
     const comments = await this.prisma.comment.findMany({
       where: { postId, parentId: null, deletedAt: null },
       orderBy: { createdAt: 'asc' },
@@ -102,11 +142,15 @@ export class CommentsService {
   }
 
   async deleteComment(id: string, userId: string, role: string) {
-    const comment = await this.prisma.comment.findUnique({ where: { id } });
+    const comment = await this.prisma.comment.findUnique({
+      where: { id },
+      include: { post: { select: { communityId: true } } },
+    });
     if (!comment || comment.deletedAt) throw new NotFoundException('Comment not found');
-    const isPrivileged = role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'MODERATOR';
-    if (comment.authorId !== userId && !isPrivileged) {
-      throw new ForbiddenException('Cannot delete this comment');
+    // Authors delete their own; otherwise it's a moderation action scoped to the
+    // comment's community (Campus Lead / community moderator), not any platform role.
+    if (comment.authorId !== userId) {
+      await this.assertCanModerate(comment.post.communityId, userId, role);
     }
     await this.prisma.$transaction([
       this.prisma.comment.update({ where: { id }, data: { deletedAt: new Date() } }),
@@ -151,12 +195,12 @@ export class CommentsService {
   async markHelpful(commentId: string, userId: string, role: string) {
     const comment = await this.prisma.comment.findFirst({
       where: { id: commentId, deletedAt: null },
-      include: { post: { select: { authorId: true } } },
+      include: { post: { select: { authorId: true, communityId: true } } },
     });
     if (!comment) throw new NotFoundException('Comment not found');
-    const isPrivileged = role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'MODERATOR';
-    if (comment.post.authorId !== userId && !isPrivileged) {
-      throw new ForbiddenException('Only the post author can mark a helpful answer');
+    // The post author or a community moderator (not merely any platform role).
+    if (comment.post.authorId !== userId) {
+      await this.assertCanModerate(comment.post.communityId, userId, role);
     }
     const updated = await this.prisma.comment.update({
       where: { id: commentId },

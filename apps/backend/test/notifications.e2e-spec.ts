@@ -29,6 +29,9 @@ describe('Notification fan-out (e2e)', () => {
       .expect(201);
     slug = community.body.data.slug;
 
+    // Bob comments below, so he must be a member of the community.
+    await request(app.getHttpServer()).post(`${API}/communities/${slug}/join`).set(auth(bob.token));
+
     const post = await request(app.getHttpServer())
       .post(`${API}/communities/${slug}/posts`)
       .set(auth(alice.token))

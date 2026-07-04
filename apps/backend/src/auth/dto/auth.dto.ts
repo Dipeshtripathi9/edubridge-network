@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
@@ -14,8 +15,16 @@ import {
 const STRONG_PASSWORD =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
+// Emails are case-insensitive; normalize once at the edge so signup, login,
+// reset and magic-link all resolve to the same stored identity (Postgres
+// @unique is case-sensitive, so mixed-case would otherwise create duplicate
+// accounts and break login).
+const NormalizeEmail = () =>
+  Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value));
+
 export class SignupDto {
   @ApiProperty({ example: 'student@college.edu' })
+  @NormalizeEmail()
   @IsEmail()
   email!: string;
 
@@ -41,6 +50,7 @@ export class SignupDto {
 
 export class LoginDto {
   @ApiProperty({ example: 'student@college.edu' })
+  @NormalizeEmail()
   @IsEmail()
   email!: string;
 
@@ -64,6 +74,7 @@ export class RefreshDto {
 
 export class ForgotPasswordDto {
   @ApiProperty()
+  @NormalizeEmail()
   @IsEmail()
   email!: string;
 }
@@ -99,6 +110,7 @@ export class GoogleAuthDto {
 
 export class MagicLinkRequestDto {
   @ApiProperty()
+  @NormalizeEmail()
   @IsEmail()
   email!: string;
 

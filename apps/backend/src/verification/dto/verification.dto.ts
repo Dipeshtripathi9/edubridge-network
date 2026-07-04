@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { VerificationMethod } from '@prisma/client';
-import { IsBoolean, IsEmail, IsEnum, IsInt, IsNotEmpty, IsObject, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsEmail, IsEnum, IsInt, IsNotEmpty, IsObject, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class VerificationUploadUrlDto {
@@ -40,10 +40,14 @@ export class CreateVerificationRequestDto {
   @IsString()
   evidenceKey?: string;
 
-  @ApiPropertyOptional({ description: 'Whether the student confirmed the college-email link' })
+  @ApiPropertyOptional({
+    description:
+      'Signed college-email confirmation token (from the emailed link). The server ' +
+      're-verifies it — the client cannot self-assert email verification.',
+  })
   @IsOptional()
-  @IsBoolean()
-  collegeEmailVerified?: boolean;
+  @IsString()
+  collegeEmailToken?: string;
 
   @ApiPropertyOptional({ description: 'Honest per-category thoughts about the college' })
   @IsOptional()
