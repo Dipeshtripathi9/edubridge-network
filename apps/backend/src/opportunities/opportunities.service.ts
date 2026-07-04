@@ -77,11 +77,16 @@ export class OpportunitiesService {
     }
     if (!scoped) and.push(scopeWhere);
 
-    // A college hub shows THIS college's opportunities plus the truly-global ones
-    // (e.g. the Opportunity Playbook), so every college community surfaces them.
+    // A college hub / community shows ITS OWN opportunities plus the truly-global
+    // ones (e.g. the Opportunity Playbook), so every community surfaces them.
     if (query.collegeId) {
       and.push({
         OR: [{ collegeId: query.collegeId }, { collegeId: null, communityId: null }],
+      });
+    }
+    if (query.communityId) {
+      and.push({
+        OR: [{ communityId: query.communityId }, { collegeId: null, communityId: null }],
       });
     }
 
@@ -89,7 +94,6 @@ export class OpportunitiesService {
       isActive: true,
       approvalStatus: 'APPROVED', // only approved opportunities are public
       ...(query.type ? { type: query.type } : {}),
-      ...(query.communityId ? { communityId: query.communityId } : {}),
       ...(query.isRemote !== undefined ? { isRemote: query.isRemote } : {}),
       ...(query.tag ? { tags: { has: query.tag } } : {}),
       ...(and.length ? { AND: and } : {}),
