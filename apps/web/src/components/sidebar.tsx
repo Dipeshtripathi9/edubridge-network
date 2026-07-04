@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Headset,
   Home,
+  Info,
   LayoutGrid,
   LifeBuoy,
   Repeat,
@@ -30,6 +31,7 @@ export const NAV = [
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
   { href: '/network', label: 'Network', icon: Users },
   { href: '/leadership', label: 'Leadership', icon: Crown },
+  { href: '/about', label: 'About', icon: Info },
 ];
 
 // Admin-only nav items, appended after the shared nav.
