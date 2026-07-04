@@ -64,6 +64,10 @@ export function useResources(
       return api.paginated<Resource>(`/resources?${params.toString()}`);
     },
     getNextPageParam: (last) => (last.meta.hasMore ? last.meta.nextCursor ?? undefined : undefined),
+    // Always fetch fresh on mount so newly-added resources appear immediately
+    // (don't serve a stale/empty persisted list).
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 }
 
