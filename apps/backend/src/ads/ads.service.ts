@@ -29,16 +29,20 @@ const AD_SELECT = {
 export class AdsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // All ad-card "days" are defined in UTC so booking is deterministic regardless
+  // of the server's timezone. Date-only inputs ("YYYY-MM-DD") already parse to
+  // UTC midnight, so the day math here must be UTC too — otherwise a server in a
+  // different zone than the client shifts "today"/"tomorrow" by a day.
   private startOfDay(d: Date): Date {
     const x = new Date(d);
-    x.setHours(0, 0, 0, 0);
+    x.setUTCHours(0, 0, 0, 0);
     return x;
   }
 
   /** Start of the day 7 days from today — the end of the rolling weekly window. */
   private weekEnd(): Date {
     const x = this.startOfDay(new Date());
-    x.setDate(x.getDate() + WEEK_DAYS);
+    x.setUTCDate(x.getUTCDate() + WEEK_DAYS);
     return x;
   }
 
@@ -65,7 +69,7 @@ export class AdsService {
     // Leaders must book before 12am of the run day (a future day). Admins may book
     // same-day (today) — they can fill a day after midnight if the leader didn't.
     const earliest = this.startOfDay(new Date());
-    if (!admin) earliest.setDate(earliest.getDate() + 1);
+    if (!admin) earliest.setUTCDate(earliest.getUTCDate() + 1);
     if (scheduledFor < earliest) {
       throw new BadRequestException(
         admin
@@ -96,7 +100,7 @@ export class AdsService {
     }
 
     const expiresAt = new Date(scheduledFor);
-    expiresAt.setDate(expiresAt.getDate() + RUN_DAYS);
+    expiresAt.setUTCDate(expiresAt.getUTCDate() + RUN_DAYS);
 
     return this.prisma.adCard.create({
       data: {
