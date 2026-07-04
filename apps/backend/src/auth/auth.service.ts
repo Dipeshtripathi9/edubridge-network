@@ -69,7 +69,7 @@ export class AuthService {
     if (autoVerify) {
       return { user: this.sanitize(user), autoVerified: true, message: 'Account ready' };
     }
-    const token = await this.issueEmailVerification(user.id, user.email!);
+    const token = await this.issueEmailVerification(user.id, user.email!, dto.fullName);
     return {
       user: this.sanitize(user),
       autoVerified: false,
@@ -95,29 +95,34 @@ export class AuthService {
     return { devLink: `${webUrl}/verify-email?token=${token}` };
   }
 
-  private async issueEmailVerification(userId: string, email: string): Promise<string> {
+  private async issueEmailVerification(
+    userId: string,
+    email: string,
+    name?: string,
+  ): Promise<string> {
     const token = this.tokens.generateOpaqueToken(32);
     await this.prisma.emailVerification.create({
       data: {
         userId,
         tokenHash: this.tokens.hashToken(token),
         purpose: 'EMAIL_VERIFY',
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
       },
     });
     // Fire-and-forget — never block signup on the SMTP send (it can hang/fail).
-    void this.mail.sendVerificationEmail(email, token).catch(() => undefined);
+    void this.mail.sendVerificationEmail(email, token, name).catch(() => undefined);
     return token;
   }
 
-  async verifyEmail(dto: VerifyEmailDto) {
+  async verifyEmail(dto: VerifyEmailDto, meta: RequestMeta) {
     const record = await this.prisma.emailVerification.findFirst({
       where: { tokenHash: this.tokens.hashToken(dto.token), purpose: 'EMAIL_VERIFY' },
     });
     if (!record || record.usedAt || record.expiresAt < new Date()) {
-      throw new BadRequestException('Invalid or expired verification token');
+      throw new BadRequestException('Verification link invalid or expired');
     }
-    await this.prisma.$transaction([
+    // Activate the account and consume the single-use token in one transaction.
+    const [, user] = await this.prisma.$transaction([
       this.prisma.emailVerification.update({
         where: { id: record.id },
         data: { usedAt: new Date() },
@@ -127,7 +132,9 @@ export class AuthService {
         data: { emailVerifiedAt: new Date(), status: 'ACTIVE' },
       }),
     ]);
-    return { message: 'Email verified' };
+    // Auto-login: issue a session immediately so the user never logs in manually.
+    const tokens = await this.tokens.issueTokens(user, { userAgent: meta.userAgent, ip: meta.ip });
+    return { tokens, user: this.sanitize(user) };
   }
 
   // ---------------- EMAIL LOGIN (brute-force protected) ----------------
@@ -209,7 +216,7 @@ export class AuthService {
           userId: user.id,
           tokenHash: this.tokens.hashToken(token),
           purpose: 'PASSWORD_RESET',
-          expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
         },
       });
       // Best-effort, non-blocking — don't let SMTP latency slow the response or

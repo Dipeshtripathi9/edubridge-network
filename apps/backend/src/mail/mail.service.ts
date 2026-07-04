@@ -65,15 +65,66 @@ export class MailService {
     }
   }
 
-  async sendVerificationEmail(to: string, token: string): Promise<void> {
+  /**
+   * Shared, production-grade responsive email shell — inline styles only (email
+   * clients strip <style>), safe fallbacks, dark background, branded gradient
+   * header and a single prominent call-to-action button.
+   */
+  private branded(opts: {
+    heading: string;
+    greeting?: string;
+    intro: string;
+    ctaLabel: string;
+    ctaUrl: string;
+    note: string;
+  }): string {
+    const { heading, greeting, intro, ctaLabel, ctaUrl, note } = opts;
+    return `<!doctype html>
+<html>
+  <body style="margin:0;padding:0;background:#f4f4f7;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${heading} — EduBridge Network</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:32px 12px;">
+      <tr><td align="center">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #eaeaef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+          <tr><td style="background:linear-gradient(120deg,#4f46e5,#7c3aed);padding:26px 32px;text-align:center;">
+            <span style="color:#ffffff;font-size:19px;font-weight:700;letter-spacing:-0.3px;">🎓 EduBridge Network</span>
+          </td></tr>
+          <tr><td style="padding:34px 32px;">
+            <h1 style="margin:0 0 14px;font-size:22px;line-height:1.3;color:#18181b;">${heading}</h1>
+            <p style="margin:0 0 10px;font-size:15px;color:#3f3f46;line-height:1.6;">${greeting ?? 'Hello,'}</p>
+            <p style="margin:0 0 26px;font-size:15px;color:#3f3f46;line-height:1.6;">${intro}</p>
+            <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 26px;"><tr><td style="border-radius:10px;background:#4f46e5;">
+              <a href="${ctaUrl}" style="display:inline-block;padding:14px 34px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;">${ctaLabel}</a>
+            </td></tr></table>
+            <p style="margin:0 0 4px;font-size:13px;color:#71717a;">Or paste this link into your browser:</p>
+            <p style="margin:0 0 26px;font-size:13px;word-break:break-all;"><a href="${ctaUrl}" style="color:#4f46e5;">${ctaUrl}</a></p>
+            <hr style="border:none;border-top:1px solid #eaeaef;margin:0 0 20px;" />
+            <p style="margin:0;font-size:12px;color:#a1a1aa;line-height:1.6;">${note}</p>
+          </td></tr>
+          <tr><td style="padding:16px 32px;background:#fafafa;text-align:center;border-top:1px solid #eaeaef;">
+            <p style="margin:0;font-size:12px;color:#a1a1aa;">EduBridge Network — connecting students, colleges &amp; opportunities.</p>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </body>
+</html>`;
+  }
+
+  async sendVerificationEmail(to: string, token: string, name?: string): Promise<void> {
     const url = `${this.appUrl}/verify-email?token=${token}`;
     await this.send(
       to,
-      'Verify your EduBridge account',
-      `<h2>Welcome to EduBridge Network</h2>
-       <p>Confirm your email to activate your account.</p>
-       <p><a href="${url}">Verify Email</a></p>
-       <p>This link expires in 24 hours.</p>`,
+      'Verify your EduBridge Network account',
+      this.branded({
+        heading: 'Verify your email',
+        greeting: `Hello ${name?.trim() || 'there'},`,
+        intro:
+          'Welcome to EduBridge Network! Confirm your email address to activate your account and get started.',
+        ctaLabel: 'Verify Email',
+        ctaUrl: url,
+        note: 'This link expires in 15 minutes. If you didn’t create this account, you can safely ignore this email.',
+      }),
       'VERIFY',
     );
   }
@@ -82,11 +133,14 @@ export class MailService {
     const url = `${this.appUrl}/auth/callback?token=${token}`;
     await this.send(
       to,
-      'Your EduBridge sign-in link',
-      `<h2>Sign in to EduBridge Network</h2>
-       <p>Click the button below to sign in — no password needed.</p>
-       <p><a href="${url}">Sign in to EduBridge</a></p>
-       <p>This link expires in 15 minutes. If you didn't request it, you can ignore this email.</p>`,
+      'Your EduBridge Network sign-in link',
+      this.branded({
+        heading: 'Sign in to EduBridge Network',
+        intro: 'Click the button below to sign in securely — no password needed.',
+        ctaLabel: 'Sign in to EduBridge',
+        ctaUrl: url,
+        note: 'This link expires in 15 minutes and can be used once. If you didn’t request it, you can ignore this email.',
+      }),
       'MAGIC_LINK',
     );
   }
@@ -95,10 +149,15 @@ export class MailService {
     const url = `${this.appUrl}/reset-password?token=${token}`;
     await this.send(
       to,
-      'Reset your EduBridge password',
-      `<h2>Password reset requested</h2>
-       <p><a href="${url}">Reset Password</a></p>
-       <p>If you didn't request this, you can ignore this email. Link expires in 1 hour.</p>`,
+      'Reset your EduBridge Network password',
+      this.branded({
+        heading: 'Reset your password',
+        intro:
+          'We received a request to reset your password. Click the button below to choose a new one.',
+        ctaLabel: 'Reset Password',
+        ctaUrl: url,
+        note: 'This link expires in 10 minutes. If you didn’t request a reset, you can safely ignore this email — your password won’t change.',
+      }),
       'RESET',
     );
   }
@@ -108,12 +167,15 @@ export class MailService {
     const url = `${this.appUrl}/verify/college-email?token=${token}`;
     await this.send(
       to,
-      'Verify your college email — EduBridge',
-      `<h2>Confirm your college email</h2>
-       <p>Click below to verify this is your official college/university email and
-          get your verified-student badge on EduBridge Network.</p>
-       <p><a href="${url}">Verify College Email</a></p>
-       <p>This link expires in 15 minutes. If you didn't request it, you can ignore this email.</p>`,
+      'Verify your college email — EduBridge Network',
+      this.branded({
+        heading: 'Confirm your college email',
+        intro:
+          'Verify this is your official college / university email to earn your Verified Student badge on EduBridge Network.',
+        ctaLabel: 'Verify College Email',
+        ctaUrl: url,
+        note: 'This link expires in 15 minutes. If you didn’t request it, you can ignore this email.',
+      }),
       'COLLEGE_VERIFY',
     );
   }
