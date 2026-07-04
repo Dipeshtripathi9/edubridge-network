@@ -1,7 +1,7 @@
 'use client';
 
 import { use } from 'react';
-import { uniqueById } from '@/lib/utils';
+import { uniqueById, seededCollegeMembers } from '@/lib/utils';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -34,14 +34,6 @@ import {
   useFaqs,
 } from '@/hooks/use-college-hub';
 import { useAuthStore } from '@/stores/auth.store';
-
-// Deterministic per-college count (23–51) — the community's verified students,
-// which are also its total members (only verified students join a college community).
-function seededVerified(id: string): number {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (Math.imul(h, 31) + id.charCodeAt(i)) >>> 0;
-  return 23 + (h % 29); // 23..51
-}
 
 function Stat({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: number }) {
   return (
@@ -265,7 +257,7 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
           <Stat
             icon={BadgeCheck}
             label="Verified Students"
-            value={Math.max(hub.counts.verifiedStudents, seededVerified(c.id))}
+            value={Math.max(hub.counts.verifiedStudents, seededCollegeMembers(c.id))}
           />
         </div>
       </div>
