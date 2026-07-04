@@ -51,6 +51,9 @@ export function useOpportunities(
       return api.paginated<Opportunity>(`/opportunities?${params.toString()}`);
     },
     getNextPageParam: (last) => (last.meta.hasMore ? last.meta.nextCursor ?? undefined : undefined),
+    // Always fetch fresh on mount so newly-added opportunities appear immediately.
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 }
 
