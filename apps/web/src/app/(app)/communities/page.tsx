@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CommunityCard } from '@/components/community-card';
+import { FeaturedStartups } from '@/components/featured-startups';
 import { uniqueById } from '@/lib/utils';
 import { useCommunities } from '@/hooks/use-communities';
 
@@ -28,6 +29,9 @@ export default function CommunitiesPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      {/* Featured startups pinned above the community browser */}
+      <FeaturedStartups />
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Communities</h1>
