@@ -255,74 +255,10 @@ async function main() {
   console.log('✓ posts, poll, comments, reactions');
 
   // ---------- Opportunities ----------
-  await prisma.opportunity.createMany({
-    data: [
-      {
-        type: 'INTERNSHIP',
-        title: 'Software Engineering Intern',
-        organization: 'Razorpay',
-        description: 'Summer internship for pre-final year students. Backend focus.',
-        location: 'Bangalore',
-        applyUrl: 'https://razorpay.com/jobs',
-        tags: ['backend', 'internship', 'sde'],
-        stipend: '₹60,000/month',
-        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        createdById: admin.id,
-        collegeId: colleges[0].id,
-        sourceSystem: 'manual',
-      },
-      {
-        type: 'SCHOLARSHIP',
-        title: 'Reliance Foundation Scholarship',
-        organization: 'Reliance Foundation',
-        description: 'Merit-cum-means scholarship for undergraduate students.',
-        applyUrl: 'https://scholarships.reliancefoundation.org',
-        tags: ['scholarship', 'merit', 'higher studies'],
-        deadline: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
-        createdById: admin.id,
-        sourceSystem: 'manual',
-      },
-      {
-        type: 'COMPETITION',
-        title: 'Smart India Hackathon 2026',
-        organization: 'Government of India',
-        description: 'National hackathon to solve real-world problem statements.',
-        location: 'Pan India',
-        applyUrl: 'https://sih.gov.in',
-        tags: ['hackathon', 'startups', 'dsa'],
-        deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
-        createdById: admin.id,
-        sourceSystem: 'manual',
-      },
-      {
-        type: 'RESEARCH',
-        title: 'Summer Research Fellowship',
-        organization: 'Indian Academy of Sciences',
-        description: 'Two-month research internship under leading scientists.',
-        applyUrl: 'https://www.ias.ac.in/fellowship',
-        tags: ['research', 'ai', 'higher studies'],
-        stipend: '₹20,000 total',
-        deadline: new Date(Date.now() + 50 * 24 * 60 * 60 * 1000),
-        createdById: admin.id,
-        sourceSystem: 'manual',
-      },
-      {
-        type: 'FELLOWSHIP',
-        title: 'AI Residency Program',
-        organization: 'Microsoft Research India',
-        description: 'One-year fellowship working on applied AI research.',
-        location: 'Bangalore',
-        applyUrl: 'https://www.microsoft.com/en-us/research/academic-program',
-        tags: ['ai', 'research', 'data science'],
-        stipend: 'Competitive',
-        deadline: new Date(Date.now() + 40 * 24 * 60 * 60 * 1000),
-        createdById: admin.id,
-        sourceSystem: 'manual',
-      },
-    ],
-    skipDuplicates: true,
-  });
-  console.log('✓ opportunities');
+  // Intentionally NOT seeded here. Opportunities are added MANUALLY (admins/community
+  // heads via the UI), plus the curated batch in seed-opportunity-playbook.mjs.
+  // Do not re-add demo opportunities — per product decision they must not reappear.
+  console.log('✓ opportunities (none seeded — added manually / via playbook)');
 
   // ---------- Reviews (by verified students of each college) ----------
   // students[0]=Bennett(0), students[1]=VIT(2), students[2]=Thapar(4)
