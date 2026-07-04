@@ -54,3 +54,11 @@ export function seededInterestMembers(id: string): number {
   for (let i = 0; i < id.length; i++) h = (Math.imul(h, 37) + id.charCodeAt(i)) >>> 0;
   return 2 + (h % 47); // 2..48
 }
+
+/** Deterministic per-startup-community member count (8–18) so each startup
+ * community shows a stable, plausible small figure. */
+export function seededStartupMembers(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (Math.imul(h, 41) + id.charCodeAt(i)) >>> 0;
+  return 8 + (h % 11); // 8..18
+}

@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth.store';
 import { type Community, useJoinCommunity } from '@/hooks/use-communities';
-import { seededCollegeMembers, seededInterestMembers } from '@/lib/utils';
+import { seededCollegeMembers, seededInterestMembers, seededStartupMembers } from '@/lib/utils';
 
 export function CommunityCard({ community }: { community: Community }) {
   const join = useJoinCommunity(community.slug);
@@ -70,7 +70,7 @@ export function CommunityCard({ community }: { community: Community }) {
                   ? Math.max(community.memberCount, seededCollegeMembers(community.id))
                   : community.type === 'TOPIC'
                     ? Math.max(community.memberCount, seededInterestMembers(community.id))
-                    : community.memberCount
+                    : Math.max(community.memberCount, seededStartupMembers(community.id))
                 ).toLocaleString()}{' '}
                 members
               </span>
