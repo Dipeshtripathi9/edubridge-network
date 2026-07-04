@@ -10,6 +10,7 @@ import { CommunityMonitor } from '@/components/community-monitor';
 import { CommunitySections } from '@/components/community-sections';
 import { ApplyHead } from '@/components/apply-head';
 import { isCommunityManager, useCommunity, useJoinCommunity } from '@/hooks/use-communities';
+import { seededCollegeMembers, seededInterestMembers } from '@/lib/utils';
 import { useMe } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -59,7 +60,13 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
             <p className="mt-1 text-sm text-muted-foreground">{community.description}</p>
             <span className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
               <Users className="h-3.5 w-3.5" />
-              {community.memberCount.toLocaleString()} members · {community.postCount} posts
+              {(community.type === 'COLLEGE'
+                ? Math.max(community.memberCount, seededCollegeMembers(community.id))
+                : community.type === 'TOPIC'
+                  ? Math.max(community.memberCount, seededInterestMembers(community.id))
+                  : community.memberCount
+              ).toLocaleString()}{' '}
+              members · {community.postCount} posts
             </span>
           </div>
           <div className="flex gap-2">
