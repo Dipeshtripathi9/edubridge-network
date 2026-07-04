@@ -46,3 +46,11 @@ export function seededCollegeMembers(id: string): number {
   for (let i = 0; i < id.length; i++) h = (Math.imul(h, 31) + id.charCodeAt(i)) >>> 0;
   return 23 + (h % 29); // 23..51
 }
+
+/** Deterministic per-interest-community member count (2–48) so each interest
+ * community shows a stable, plausible figure. */
+export function seededInterestMembers(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (Math.imul(h, 37) + id.charCodeAt(i)) >>> 0;
+  return 2 + (h % 47); // 2..48
+}
