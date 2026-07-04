@@ -35,12 +35,12 @@ import {
 } from '@/hooks/use-college-hub';
 import { useAuthStore } from '@/stores/auth.store';
 
-// Deterministic per-college count (34–138) so each community shows a stable,
-// plausible verified-student number.
+// Deterministic per-college count (23–51) — the community's verified students,
+// which are also its total members (only verified students join a college community).
 function seededVerified(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (Math.imul(h, 31) + id.charCodeAt(i)) >>> 0;
-  return 34 + (h % 105); // 34..138
+  return 23 + (h % 29); // 23..51
 }
 
 function Stat({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: number }) {
