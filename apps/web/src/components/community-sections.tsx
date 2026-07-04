@@ -98,7 +98,7 @@ function ResourcesSection({
   );
 }
 
-function OpportunitiesSection({
+export function OpportunitiesSection({
   communityId,
   canModerate,
   isMember = false,

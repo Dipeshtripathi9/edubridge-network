@@ -26,6 +26,7 @@ import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
 import { PoolsSection } from '@/components/pools-section';
 import { CommunityReviews } from '@/components/community-reviews';
+import { OpportunitiesSection } from '@/components/community-sections';
 import { isCommunityManager, useCommunity, useJoinCommunity } from '@/hooks/use-communities';
 import { useFeed } from '@/hooks/use-posts';
 import { useReviews, useReviewSummary } from '@/hooks/use-reviews';
@@ -374,7 +375,15 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
           <Resources collegeId={c.id} />
         </TabsContent>
         <TabsContent value="opportunities">
-          <Opportunities collegeId={c.id} />
+          {hub.community ? (
+            <OpportunitiesSection
+              communityId={hub.community.id}
+              canModerate={canModerate}
+              isMember={!!community?.isMember}
+            />
+          ) : (
+            <Opportunities collegeId={c.id} />
+          )}
         </TabsContent>
         <TabsContent value="reviews" className="space-y-6">
           <Reviews collegeId={c.id} collegeSlug={c.slug} />
