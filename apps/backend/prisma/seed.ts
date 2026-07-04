@@ -387,7 +387,7 @@ async function main() {
         status: 'COMPLETED',
         story:
           'I transferred in my second year after keeping my CGPA above 8.5. The credit transfer covered most of my first-year courses. Tip: start the paperwork early and talk to current students before applying.',
-        isStoryPublic: true,
+        isStoryPublic: false,
       },
     });
   }
@@ -611,10 +611,10 @@ async function main() {
 
     // More public transfer stories (so college hubs show them)
     await prisma.transfer.create({
-      data: { userId: students[0].id, fromCollegeId: colleges[1].id, toCollegeId: colleges[0].id, currentYear: 2, cgpa: 8.1, branch: 'Computer Science and Engineering', status: 'COMPLETED', story: 'Transferred into Bennett in 2nd year — credit transfer was smooth and the CSE peer group is strong.', isStoryPublic: true },
+      data: { userId: students[0].id, fromCollegeId: colleges[1].id, toCollegeId: colleges[0].id, currentYear: 2, cgpa: 8.1, branch: 'Computer Science and Engineering', status: 'COMPLETED', story: 'Transferred into Bennett in 2nd year — credit transfer was smooth and the CSE peer group is strong.', isStoryPublic: false },
     });
     await prisma.transfer.create({
-      data: { userId: students[1].id, fromCollegeId: colleges[0].id, toCollegeId: colleges[3].id, currentYear: 2, cgpa: 8.7, branch: 'Computer Science and Engineering', status: 'COMPLETED', story: 'Moved to SRM for research opportunities. Apply early and keep your CGPA above 8.', isStoryPublic: true },
+      data: { userId: students[1].id, fromCollegeId: colleges[0].id, toCollegeId: colleges[3].id, currentYear: 2, cgpa: 8.7, branch: 'Computer Science and Engineering', status: 'COMPLETED', story: 'Moved to SRM for research opportunities. Apply early and keep your CGPA above 8.', isStoryPublic: false },
     });
 
     // FAQs for more colleges
