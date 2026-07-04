@@ -67,8 +67,8 @@ export class AuthController {
 
   @Public()
   @Post('verify-email')
-  verifyEmail(@Body() dto: VerifyEmailDto) {
-    return this.auth.verifyEmail(dto);
+  verifyEmail(@Body() dto: VerifyEmailDto, @Req() req: Request) {
+    return this.auth.verifyEmail(dto, this.meta(req));
   }
 
   @Public()
