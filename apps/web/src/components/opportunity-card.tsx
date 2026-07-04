@@ -19,6 +19,7 @@ const TYPE_COLORS: Record<string, string> = {
   COMPETITION: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
   FELLOWSHIP: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
   RESEARCH: 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+  CERTIFICATION: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
 };
 
 function deadlineLabel(deadline?: string | null) {
