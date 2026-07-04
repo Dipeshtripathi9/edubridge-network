@@ -77,17 +77,23 @@ export class OpportunitiesService {
     }
     if (!scoped) and.push(scopeWhere);
 
-    // A college hub / community shows ITS OWN opportunities plus the truly-global
-    // ones (e.g. the Opportunity Playbook), so every community surfaces them.
+    // Scoping rules:
+    //  - A COLLEGE community / college hub shows its own opportunities PLUS everything
+    //    globally visible (truly-global + interest/startup-community opportunities).
+    //  - An interest/startup community shows ONLY its own (category-specific) ones.
     if (query.collegeId) {
-      and.push({
-        OR: [{ collegeId: query.collegeId }, { collegeId: null, communityId: null }],
-      });
+      and.push({ OR: [{ collegeId: query.collegeId }, globalOnly] });
     }
     if (query.communityId) {
-      and.push({
-        OR: [{ communityId: query.communityId }, { collegeId: null, communityId: null }],
+      const comm = await this.prisma.community.findUnique({
+        where: { id: query.communityId },
+        select: { type: true },
       });
+      and.push(
+        comm?.type === 'COLLEGE'
+          ? { OR: [{ communityId: query.communityId }, globalOnly] }
+          : { communityId: query.communityId },
+      );
     }
 
     const where: Prisma.OpportunityWhereInput = {
