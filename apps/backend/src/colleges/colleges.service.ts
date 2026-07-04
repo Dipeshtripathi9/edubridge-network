@@ -18,12 +18,16 @@ export class CollegesService {
       ...(query.state ? { state: { equals: query.state, mode: 'insensitive' } } : {}),
     };
 
-    const orderBy: Prisma.CollegeOrderByWithRelationInput =
+    // Sort keys (rating / name / nirfRank) are non-unique, so cursor pagination
+    // needs a unique tiebreaker (id) — otherwise rows with equal values get
+    // duplicated or skipped across pages.
+    const primarySort: Prisma.CollegeOrderByWithRelationInput =
       query.sort === 'rating'
         ? { avgRating: 'desc' }
         : query.sort === 'name'
           ? { name: 'asc' }
           : { nirfRank: 'asc' };
+    const orderBy: Prisma.CollegeOrderByWithRelationInput[] = [primarySort, { id: 'asc' }];
 
     const cacheable = !query.q;
     const cacheKey = `college:list:${JSON.stringify(query)}`;

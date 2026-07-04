@@ -181,23 +181,20 @@ export class AdminService {
   // ---------------- Content moderation (soft delete) ----------------
   async moderateContent(adminId: string, dto: ModerateContentDto) {
     const now = new Date();
-    switch (dto.type) {
-      case 'post':
-        await this.prisma.post.update({
-          where: { id: dto.id },
-          data: { deletedAt: now, status: 'REMOVED' },
-        });
-        break;
-      case 'comment':
-        await this.prisma.comment.update({ where: { id: dto.id }, data: { deletedAt: now } });
-        break;
-      case 'review':
-        await this.prisma.review.update({ where: { id: dto.id }, data: { deletedAt: now } });
-        break;
-      case 'resource':
-        await this.prisma.resource.update({ where: { id: dto.id }, data: { deletedAt: now } });
-        break;
-    }
+    // updateMany (not update) so a missing id yields a clean 404 rather than a
+    // raw Prisma P2025 surfacing as a 500.
+    const result =
+      dto.type === 'post'
+        ? await this.prisma.post.updateMany({
+            where: { id: dto.id },
+            data: { deletedAt: now, status: 'REMOVED' },
+          })
+        : dto.type === 'comment'
+          ? await this.prisma.comment.updateMany({ where: { id: dto.id }, data: { deletedAt: now } })
+          : dto.type === 'review'
+            ? await this.prisma.review.updateMany({ where: { id: dto.id }, data: { deletedAt: now } })
+            : await this.prisma.resource.updateMany({ where: { id: dto.id }, data: { deletedAt: now } });
+    if (result.count === 0) throw new NotFoundException('Content not found');
     await this.audit.log(adminId, 'content.remove', { entity: dto.type, entityId: dto.id });
     return { removed: true };
   }
@@ -229,8 +226,10 @@ export class AdminService {
     const dayAgo = new Date(now - 24 * 60 * 60 * 1000);
     const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
     const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+    // Define "today" in UTC so the dashboard count is consistent regardless of
+    // the server's timezone (matches the rest of the app's date handling).
     const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+    startOfToday.setUTCHours(0, 0, 0, 0);
 
     const [
       totalUsers,

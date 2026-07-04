@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePoolDto } from './dto/pool.dto';
 import { isPlatformAdmin } from '../communities/community-permissions';
@@ -243,12 +244,18 @@ export class PoolsService {
   }
 
   async share(id: string) {
-    const updated = await this.prisma.pool.update({
-      where: { id },
-      data: { shareCount: { increment: 1 } },
-      select: { shareCount: true },
-    });
-    return updated;
+    try {
+      return await this.prisma.pool.update({
+        where: { id },
+        data: { shareCount: { increment: 1 } },
+        select: { shareCount: true },
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+        throw new NotFoundException('Pool not found');
+      }
+      throw err;
+    }
   }
 
   async join(id: string, userId: string) {
@@ -263,17 +270,32 @@ export class PoolsService {
       where: { poolId_userId: { poolId: id, userId } },
     });
     if (existing) return { joined: true };
-    if (pool._count.members >= pool.maxMembers) {
-      throw new BadRequestException('This pool is full');
+
+    // Capacity must be checked and enforced atomically — a plain count-then-create
+    // lets concurrent joins both pass the check and overflow maxMembers. Serializable
+    // isolation makes the re-count + insert conflict-safe; a write conflict (P2034)
+    // means another join raced us, which we surface as "full, try again".
+    try {
+      await this.prisma.$transaction(
+        async (tx) => {
+          const count = await tx.poolMember.count({ where: { poolId: id } });
+          if (count >= pool.maxMembers) throw new BadRequestException('This pool is full');
+          await tx.poolMember.create({ data: { poolId: id, userId } });
+          await tx.chatParticipant.upsert({
+            where: { chatId_userId: { chatId: pool.chatId, userId } },
+            update: {},
+            create: { chatId: pool.chatId, userId },
+          });
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
+    } catch (err) {
+      if (err instanceof BadRequestException) throw err;
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2034') {
+        throw new BadRequestException('This pool just filled up — please try again');
+      }
+      throw err;
     }
-    await this.prisma.$transaction([
-      this.prisma.poolMember.create({ data: { poolId: id, userId } }),
-      this.prisma.chatParticipant.upsert({
-        where: { chatId_userId: { chatId: pool.chatId, userId } },
-        update: {},
-        create: { chatId: pool.chatId, userId },
-      }),
-    ]);
     return { joined: true };
   }
 
