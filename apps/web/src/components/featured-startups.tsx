@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Code2, Home as HomeIcon } from 'lucide-react';
+import { ArrowRight, Code2, Home as HomeIcon, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -40,11 +41,25 @@ export function FeaturedStartups() {
               <div className="flex-1">
                 <p className="font-semibold">{s.name}</p>
                 <p className="text-sm text-muted-foreground">{s.desc}</p>
-                <Button asChild size="sm" variant="outline" className="mt-2">
-                  <Link href={s.href}>
-                    Visit <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
+                <div className="mt-2 flex items-center gap-2">
+                  <Button asChild size="sm" variant="outline">
+                    <Link href={s.href}>
+                      Visit <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      navigator.clipboard
+                        ?.writeText(`${window.location.origin}${s.href}`)
+                        .catch(() => {});
+                      toast.success(`${s.name} link copied to clipboard`);
+                    }}
+                  >
+                    <Share2 className="h-4 w-4" /> Share
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
