@@ -513,7 +513,11 @@ export class CommunitiesService {
     }
     const community = await this.prisma.community.findUnique({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    // Match the email case-insensitively (and ignore stray whitespace) so appointing
+    // works regardless of how the appointee typed their email at sign-up.
+    const user = await this.prisma.user.findFirst({
+      where: { email: { equals: email.trim(), mode: 'insensitive' } },
+    });
     if (!user) throw new NotFoundException('No user with that email');
 
     await this.prisma.communityMember.upsert({
