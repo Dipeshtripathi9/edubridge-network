@@ -245,14 +245,25 @@ function Faqs({ collegeId }: { collegeId: string }) {
   if (!data?.length) return <p className="py-10 text-center text-muted-foreground">No FAQs yet.</p>;
   return (
     <div className="space-y-3">
-      {data.map((f) => (
-        <Card key={f.id}>
-          <CardContent className="p-4">
-            <p className="font-medium">{f.question}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{f.answer}</p>
-          </CardContent>
-        </Card>
-      ))}
+      {data.map((f) => {
+        // FAQs that route to expert guidance get a clickable CTA to the guidance page.
+        const isGuidance = f.answer.includes('Get Expert Guidance');
+        return (
+          <Card key={f.id}>
+            <CardContent className="p-4">
+              <p className="font-medium">{f.question}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{f.answer}</p>
+              {isGuidance && (
+                <Button asChild size="sm" className="mt-3">
+                  <Link href="/home#get-expert-guidance">
+                    Get Expert Guidance <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }
