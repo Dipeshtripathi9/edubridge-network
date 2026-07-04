@@ -108,11 +108,12 @@ describe('Community heads & governance (e2e)', () => {
     expect(pinned.body.data.isPinned).toBe(true);
   });
 
-  it('admin appoints a head by email', async () => {
+  it('admin appoints a head by email (case-insensitive)', async () => {
     const res = await request(app.getHttpServer())
       .post(`${API}/communities/${slug}/appoint-head`)
       .set(auth(admin.token))
-      .send({ email: plain.email, role: 'OPPORTUNITY_HEAD' })
+      // uppercased email must still resolve the user
+      .send({ email: plain.email.toUpperCase(), role: 'OPPORTUNITY_HEAD' })
       .expect(201);
     expect(res.body.data.role).toBe('OPPORTUNITY_HEAD');
   });
