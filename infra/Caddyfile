@@ -1,0 +1,16 @@
+# Auto-HTTPS reverse proxy. {$DOMAIN} is injected from the environment.
+# Caddy obtains + renews Let's Encrypt certs automatically once the domain's
+# DNS points at this server and ports 80/443 are open.
+
+# Frontend (Next.js) — root + www
+{$DOMAIN}, www.{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:3000
+}
+
+# Backend API + WebSockets — api.<domain>
+api.{$DOMAIN} {
+	encode zstd gzip
+	# Socket.IO/WebSocket upgrades are proxied transparently by reverse_proxy.
+	reverse_proxy backend:4000
+}
