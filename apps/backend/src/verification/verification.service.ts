@@ -90,11 +90,23 @@ export class VerificationService {
     let collegeEmail = dto.collegeEmail?.toLowerCase() ?? null;
 
     if (dto.method === VerificationMethod.COLLEGE_EMAIL) {
+      // Must pick a real college from the directory (not just a free-typed name).
+      if (!dto.collegeId) {
+        throw new BadRequestException('Select your college from the list to verify by college email');
+      }
       if (dto.collegeEmailGoogleToken) {
         const profile = await this.google
           .verifyIdToken(dto.collegeEmailGoogleToken)
           .catch(() => null);
         if (profile?.emailVerified) {
+          // Reject personal Google accounts — only official (Workspace) college
+          // domains count as a college email.
+          const domain = profile.email.split('@')[1]?.toLowerCase() ?? '';
+          if (domain === 'gmail.com' || domain === 'googlemail.com') {
+            throw new BadRequestException(
+              'Use your official college email — personal Gmail addresses are not accepted',
+            );
+          }
           collegeEmailVerified = true;
           collegeEmail = profile.email.toLowerCase(); // Google email is authoritative
         }
