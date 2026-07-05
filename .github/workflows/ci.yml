@@ -42,15 +42,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        # Fresh resolve: the committed lock is intentionally stale on this branch
-        # (NestJS 11 upgrade), so drop it and let npm build a clean, hoisted tree.
-        run: rm -f package-lock.json && npm install
-
-      - name: Upload resolved lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-lock
-          path: package-lock.json
+        run: npm ci || npm install
 
       - name: Generate Prisma client
         run: npm run db:generate -w @edubridge/backend
