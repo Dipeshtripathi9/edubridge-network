@@ -120,16 +120,19 @@ function ProposalForm() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [services, setServices] = useState<string[]>([]);
+  const [otherService, setOtherService] = useState('');
   const [message, setMessage] = useState('');
   const { send, pending } = useLead(() => {
     setName('');
     setEmail('');
     setPhone('');
     setServices([]);
+    setOtherService('');
     setMessage('');
   });
   const toggle = (s: string) =>
     setServices((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s]));
+  const wantsOther = services.includes('Other Services');
 
   return (
     <Card className="border-primary/30 shadow-sm">
@@ -152,6 +155,13 @@ function ProposalForm() {
             </button>
           ))}
         </div>
+        {wantsOther && (
+          <Input
+            placeholder="Which other service do you need?"
+            value={otherService}
+            onChange={(e) => setOtherService(e.target.value)}
+          />
+        )}
         <Textarea
           placeholder="Tell us your requirements — what are you building?"
           value={message}
@@ -167,7 +177,13 @@ function ProposalForm() {
               email: email.trim(),
               phone: phone.trim() || undefined,
               services,
-              message: message.trim() || undefined,
+              message:
+                [
+                  message.trim(),
+                  wantsOther && otherService.trim() ? `Other service: ${otherService.trim()}` : '',
+                ]
+                  .filter(Boolean)
+                  .join('\n\n') || undefined,
             })
           }
         >
