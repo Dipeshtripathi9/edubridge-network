@@ -8,6 +8,7 @@ import {
   Code2,
   GraduationCap,
   Megaphone,
+  MoreHorizontal,
   Palette,
   Search,
   Share2,
@@ -37,6 +38,7 @@ const SERVICES = [
   { icon: Sparkles, name: 'Branding' },
   { icon: Megaphone, name: 'Content Marketing' },
   { icon: Code2, name: 'CRM Development' },
+  { icon: MoreHorizontal, name: 'Other Services' },
 ];
 
 const WHY = [
