@@ -31,10 +31,12 @@ export function GoogleVerifyButton({
             if (!cred.credential) return toast.error('Google verification failed');
             let profile: { email?: string; name?: string } = {};
             try {
-              const payload = JSON.parse(atob(cred.credential.split('.')[1]));
+              // Google ID tokens are base64url — normalize before decoding.
+              const part = cred.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+              const payload = JSON.parse(atob(part.padEnd(part.length + ((4 - (part.length % 4)) % 4), '=')));
               profile = { email: payload.email, name: payload.name };
             } catch {
-              /* fall back to server-side decode */
+              /* server re-verifies the token regardless */
             }
             onVerified(cred.credential, profile);
           }}

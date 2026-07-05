@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { BadgeCheck } from 'lucide-react';
+import { BadgeCheck, Lock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -105,12 +105,17 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 readOnly={!!googleToken}
+                className={googleToken ? 'cursor-not-allowed bg-muted text-muted-foreground' : undefined}
               />
-              {!googleToken && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  You may receive a verification link from us.
-                </p>
-              )}
+              <p className="mt-1 text-xs text-muted-foreground">
+                {googleToken ? (
+                  <span className="inline-flex items-center gap-1">
+                    <Lock className="h-3 w-3" /> From your Google account — can’t be changed.
+                  </span>
+                ) : (
+                  'You may receive a verification link from us.'
+                )}
+              </p>
             </div>
 
             <div>
