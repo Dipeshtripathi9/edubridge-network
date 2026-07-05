@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { MobileNav } from '@/components/mobile-nav';
+import { GlobalSearch } from '@/components/global-search';
 import { NotificationBell } from '@/components/notification-bell';
 import { VerifiedBadge } from '@/components/verified-badge';
 import { useAuthStore } from '@/stores/auth.store';
@@ -21,6 +22,7 @@ export function Topbar() {
   return (
     <header className="glass sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/70 px-4 md:px-6">
       <MobileNav />
+      <GlobalSearch />
       <div className="ml-auto flex items-center gap-1">
         <ThemeToggle />
         {loggedIn ? (
