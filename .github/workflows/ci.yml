@@ -46,6 +46,12 @@ jobs:
         # (NestJS 11 upgrade), so drop it and let npm build a clean, hoisted tree.
         run: rm -f package-lock.json && npm install
 
+      - name: Upload resolved lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-lock
+          path: package-lock.json
+
       - name: Generate Prisma client
         run: npm run db:generate -w @edubridge/backend
 
