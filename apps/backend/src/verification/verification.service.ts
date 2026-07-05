@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { StorageService } from '../storage/storage.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { GoogleService } from '../auth/services/google.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
 import {
   CreateVerificationRequestDto,
@@ -24,6 +25,7 @@ export class VerificationService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly redis: RedisService,
+    private readonly google: GoogleService,
   ) {}
 
   /** Bust the cached profile so verification-status changes are seen immediately. */
@@ -77,21 +79,33 @@ export class VerificationService {
 
   /** Student submits (or re-submits) a verification request. */
   async submit(userId: string, dto: CreateVerificationRequestDto) {
-    if (dto.method === VerificationMethod.COLLEGE_EMAIL && !dto.collegeEmail) {
-      throw new BadRequestException('collegeEmail is required for the COLLEGE_EMAIL method');
-    }
     if (dto.method !== VerificationMethod.COLLEGE_EMAIL && !dto.evidenceKey) {
       throw new BadRequestException('Upload evidence before submitting this method');
     }
 
-    // Re-verify the college-email confirmation server-side from the signed token —
-    // never trust a client-supplied "verified" flag. Only counts when the token's
-    // email matches the college email being submitted.
-    const confirmedEmail = await this.verifyCollegeEmailToken(userId, dto.collegeEmailToken);
-    const collegeEmailVerified =
-      dto.method === VerificationMethod.COLLEGE_EMAIL &&
-      !!confirmedEmail &&
-      confirmedEmail === dto.collegeEmail?.toLowerCase();
+    // Resolve + verify the college email server-side; never trust a client flag.
+    // Preferred path: a Google ID token (the email it proves becomes the locked,
+    // verified college email). Fallback: the signed email-link token.
+    let collegeEmailVerified = false;
+    let collegeEmail = dto.collegeEmail?.toLowerCase() ?? null;
+
+    if (dto.method === VerificationMethod.COLLEGE_EMAIL) {
+      if (dto.collegeEmailGoogleToken) {
+        const profile = await this.google
+          .verifyIdToken(dto.collegeEmailGoogleToken)
+          .catch(() => null);
+        if (profile?.emailVerified) {
+          collegeEmailVerified = true;
+          collegeEmail = profile.email.toLowerCase(); // Google email is authoritative
+        }
+      } else {
+        const confirmedEmail = await this.verifyCollegeEmailToken(userId, dto.collegeEmailToken);
+        collegeEmailVerified = !!confirmedEmail && confirmedEmail === collegeEmail;
+      }
+      if (!collegeEmail) {
+        throw new BadRequestException('A verified college email is required for this method');
+      }
+    }
 
     // Replace any pending request rather than stacking duplicates.
     const pending = await this.prisma.verificationRequest.findFirst({
@@ -102,7 +116,7 @@ export class VerificationService {
       method: dto.method,
       collegeId: dto.collegeId,
       collegeName: dto.collegeName?.trim() || null,
-      collegeEmail: dto.collegeEmail,
+      collegeEmail,
       collegeEmailVerified,
       feedback: dto.feedback ?? undefined,
       evidenceKey: dto.evidenceKey,
