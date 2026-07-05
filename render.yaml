@@ -1,0 +1,37 @@
+# Render Blueprint — EduBridge Network backend (NestJS API + WebSockets).
+# Free tier. Postgres → Neon, Redis → Upstash (both external; set as secret env
+# vars in the Render dashboard). The frontend runs on Vercel, not here.
+#
+# Deploy: Render Dashboard → New → Blueprint → connect this repo → apply.
+# Then fill the `sync: false` secrets under the service's Environment tab.
+services:
+  - type: web
+    name: edubridge-api
+    runtime: docker
+    plan: free
+    region: singapore # closest to India; pick oregon/frankfurt if you prefer
+    dockerfilePath: ./apps/backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # No SMTP in this free stack → activate email/password signups instantly.
+      - key: AUTO_VERIFY_EMAIL
+        value: "true"
+      # ---- Secrets: set these in the dashboard (never committed) ----
+      - key: DATABASE_URL # Neon connection string (include ?sslmode=require)
+        sync: false
+      - key: REDIS_URL # Upstash rediss:// URL (ioredis-compatible)
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: CORS_ORIGINS # https://edubridgenetwork.in,https://www.edubridgenetwork.in
+        sync: false
+      - key: APP_URL # https://edubridgenetwork.in
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
