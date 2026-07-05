@@ -26,4 +26,6 @@ COPY --from=build /app/apps/backend/package.json ./apps/backend/package.json
 COPY --from=build /app/apps/backend/prisma ./apps/backend/prisma
 WORKDIR /app/apps/backend
 EXPOSE 4000
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
+# Entry compiles to dist/src/main.js (tsconfig includes both src/ and prisma/,
+# so TS roots output at the package dir → dist/src/…).
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main"]
