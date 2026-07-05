@@ -57,6 +57,46 @@ describe('Reputation & Badges (e2e)', () => {
     expect(after).toBe(before + 7);
   });
 
+  it('nets zero reputation on a like→unlike loop (no farming)', async () => {
+    const liker = await registerVerifiedUser(app, { fullName: 'Liker' });
+    const post = await request(app.getHttpServer())
+      .post(`${API}/communities/${slug}/posts`)
+      .set(auth(user.token))
+      .send({ body: 'like me' })
+      .expect(201);
+    const before = (await myRep()).body.data.points;
+
+    // Like grants the author +1...
+    await request(app.getHttpServer())
+      .post(`${API}/posts/${post.body.data.id}/like`)
+      .set(auth(liker.token))
+      .expect(201);
+    expect((await myRep()).body.data.points).toBe(before + 1);
+
+    // ...unlike reverses it, so a like/unlike loop can't farm points.
+    await request(app.getHttpServer())
+      .post(`${API}/posts/${post.body.data.id}/like`)
+      .set(auth(liker.token))
+      .expect(201);
+    expect((await myRep()).body.data.points).toBe(before);
+  });
+
+  it('nets zero reputation on a create→delete loop', async () => {
+    const before = (await myRep()).body.data.points;
+    const post = await request(app.getHttpServer())
+      .post(`${API}/communities/${slug}/posts`)
+      .set(auth(user.token))
+      .send({ body: 'delete me' })
+      .expect(201);
+    expect((await myRep()).body.data.points).toBe(before + 5);
+
+    await request(app.getHttpServer())
+      .delete(`${API}/posts/${post.body.data.id}`)
+      .set(auth(user.token))
+      .expect(200);
+    expect((await myRep()).body.data.points).toBe(before);
+  });
+
   it('grants the Contributor badge when crossing the 50-point threshold', async () => {
     // Nudge just below the threshold, then a post (+5) crosses it.
     await prisma.user.update({ where: { id: user.userId }, data: { reputationPoints: 48 } });

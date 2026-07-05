@@ -471,11 +471,42 @@ export class CommunitiesService {
     return buildPaginatedResult(items, query);
   }
 
+  /** Is this user still eligible to lead this community (checked at apply AND approve time)? */
+  private async isHeadEligible(
+    userId: string,
+    community: { id: string; type: string; collegeId: string | null },
+  ): Promise<boolean> {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+      select: { collegeVerification: true, collegeId: true },
+    });
+    if (profile?.collegeVerification !== 'VERIFIED') return false;
+    if (community.type === 'COLLEGE' && community.collegeId && profile.collegeId !== community.collegeId) {
+      return false;
+    }
+    const membership = await this.prisma.communityMember.findUnique({
+      where: { communityId_userId: { communityId: community.id, userId } },
+    });
+    return !!membership;
+  }
+
   /** Admin approves a head application → assigns the requested community role. */
   async decideHeadApplication(adminId: string, id: string, approve: boolean, note?: string) {
     const appRow = await this.prisma.communityHeadApplication.findUnique({ where: { id } });
     if (!appRow) throw new NotFoundException('Application not found');
     if (appRow.status !== 'PENDING') throw new ForbiddenException('Already reviewed');
+
+    // Re-verify eligibility at decision time — the applicant may have lost
+    // verification or changed college since applying. Check BEFORE any state
+    // change so a stale approval can't grant a lead role for a campus they left.
+    if (approve) {
+      const community = await this.prisma.community.findUnique({ where: { id: appRow.communityId } });
+      if (!community || !(await this.isHeadEligible(appRow.userId, community))) {
+        throw new BadRequestException(
+          'Applicant no longer meets the eligibility requirements (verification or college changed). Reject the application or ask them to re-verify.',
+        );
+      }
+    }
 
     await this.prisma.communityHeadApplication.update({
       where: { id },

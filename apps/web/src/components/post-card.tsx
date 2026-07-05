@@ -206,7 +206,7 @@ export function PostCard({
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && commentText.trim()) {
+                    if (e.key === 'Enter' && commentText.trim() && !addComment.isPending) {
                       addComment.mutate(
                         { body: commentText.trim() },
                         { onSuccess: () => setCommentText('') },

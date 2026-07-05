@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { UserRole } from '@prisma/client';
 import { VerificationService } from './verification.service';
 import {
@@ -25,6 +26,9 @@ export class VerificationController {
     return this.verification.getUploadUrl(dto);
   }
 
+  // Mints an email to a client-supplied address — throttle it like the other
+  // email/SMS endpoints so it can't be used to email-bomb arbitrary addresses.
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @Post('college-email/request')
   @ApiOperation({ summary: 'Send a verification link to a college email' })
   requestCollegeEmail(@CurrentUser('sub') userId: string, @Body() dto: RequestCollegeEmailDto) {

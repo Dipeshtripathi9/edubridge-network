@@ -13,6 +13,13 @@ import {
 import { Server, Socket } from 'socket.io';
 import { MessagingService } from './messaging.service';
 
+/** A validated chat-id from an untrusted socket payload, or null if malformed. */
+function chatIdOf(data: unknown): string | null {
+  if (!data || typeof data !== 'object') return null;
+  const id = (data as { chatId?: unknown }).chatId;
+  return typeof id === 'string' && id.length > 0 && id.length <= 64 ? id : null;
+}
+
 interface AuthedSocket extends Socket {
   data: { userId?: string };
 }
@@ -48,13 +55,23 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         secret: this.config.get<string>('jwt.accessSecret'),
       });
       const userId = payload.sub as string;
+      // Set identity synchronously (before any await) so message handlers that
+      // race the rest of connection setup always see a userId.
       client.data.userId = userId;
       client.join(this.userRoom(userId));
+      // Mirror the HTTP JwtStrategy: a banned/suspended/deleted account with a
+      // still-valid token must not get a live socket.
+      if (!(await this.messaging.isActiveUser(userId))) {
+        this.logger.warn('Rejected socket for inactive account');
+        client.disconnect(true);
+        return;
+      }
 
       const count = await this.messaging.addPresence(userId);
       if (count === 1) {
-        // First connection — announce online.
-        this.server.emit('presence:update', { userId, online: true });
+        // First connection — announce online only to this user's contacts, not
+        // to every connected client.
+        await this.emitPresence(userId, true);
       }
     } catch {
       this.logger.warn('Rejected unauthenticated socket connection');
@@ -67,60 +84,89 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
     if (!userId) return;
     const remaining = await this.messaging.removePresence(userId);
     if (remaining === 0) {
-      this.server.emit('presence:update', { userId, online: false });
+      await this.emitPresence(userId, false);
+    }
+  }
+
+  /** Presence is only visible to users who share a chat with this user. */
+  private async emitPresence(userId: string, online: boolean) {
+    const contacts = await this.messaging.contactIds(userId);
+    for (const contactId of contacts) {
+      this.server.to(this.userRoom(contactId)).emit('presence:update', { userId, online });
     }
   }
 
   @SubscribeMessage('chat:join')
-  async onJoin(@ConnectedSocket() client: AuthedSocket, @MessageBody() data: { chatId: string }) {
+  async onJoin(@ConnectedSocket() client: AuthedSocket, @MessageBody() data: unknown) {
+    const chatId = chatIdOf(data);
+    if (!chatId) return { ok: false, error: 'Invalid payload' };
     const userId = client.data.userId!;
-    await this.messaging.assertParticipant(data.chatId, userId);
-    client.join(this.chatRoom(data.chatId));
-    return { ok: true };
+    try {
+      await this.messaging.assertParticipant(chatId, userId);
+      client.join(this.chatRoom(chatId));
+      return { ok: true };
+    } catch {
+      return { ok: false, error: 'Cannot join this chat' };
+    }
   }
 
   @SubscribeMessage('chat:leave')
-  onLeave(@ConnectedSocket() client: AuthedSocket, @MessageBody() data: { chatId: string }) {
-    client.leave(this.chatRoom(data.chatId));
+  onLeave(@ConnectedSocket() client: AuthedSocket, @MessageBody() data: unknown) {
+    const chatId = chatIdOf(data);
+    if (!chatId) return { ok: false, error: 'Invalid payload' };
+    client.leave(this.chatRoom(chatId));
     return { ok: true };
   }
 
   @SubscribeMessage('message:send')
-  async onMessage(
-    @ConnectedSocket() client: AuthedSocket,
-    @MessageBody() data: { chatId: string; body: string; attachments?: string[] },
-  ) {
+  async onMessage(@ConnectedSocket() client: AuthedSocket, @MessageBody() data: unknown) {
+    const chatId = chatIdOf(data);
+    const body = (data as { body?: unknown })?.body;
+    const attachments = (data as { attachments?: unknown })?.attachments;
+    // Validate the untrusted payload before doing any work.
+    if (!chatId || typeof body !== 'string' || !body.trim() || body.length > 5000) {
+      return { ok: false, error: 'Invalid message' };
+    }
     const userId = client.data.userId!;
-    const message = await this.messaging.sendMessage(data.chatId, userId, {
-      body: data.body,
-      attachments: data.attachments,
-    });
-    this.broadcastMessage(data.chatId, message, userId);
-    return message;
+    try {
+      const message = await this.messaging.sendMessage(chatId, userId, {
+        body,
+        attachments: Array.isArray(attachments) ? (attachments as string[]) : undefined,
+      });
+      this.broadcastMessage(chatId, message, userId);
+      return message;
+    } catch {
+      return { ok: false, error: 'Message could not be sent' };
+    }
   }
 
   @SubscribeMessage('typing')
-  onTyping(
-    @ConnectedSocket() client: AuthedSocket,
-    @MessageBody() data: { chatId: string; isTyping: boolean },
-  ) {
+  async onTyping(@ConnectedSocket() client: AuthedSocket, @MessageBody() data: unknown) {
+    const chatId = chatIdOf(data);
+    if (!chatId) return;
+    const isTyping = !!(data as { isTyping?: unknown }).isTyping;
     const userId = client.data.userId!;
-    client.to(this.chatRoom(data.chatId)).emit('typing', {
-      chatId: data.chatId,
-      userId,
-      isTyping: data.isTyping,
-    });
+    // Only relay typing to a chat the user actually belongs to.
+    try {
+      await this.messaging.assertParticipant(chatId, userId);
+    } catch {
+      return;
+    }
+    client.to(this.chatRoom(chatId)).emit('typing', { chatId, userId, isTyping });
   }
 
   @SubscribeMessage('message:read')
-  async onRead(
-    @ConnectedSocket() client: AuthedSocket,
-    @MessageBody() data: { chatId: string },
-  ) {
+  async onRead(@ConnectedSocket() client: AuthedSocket, @MessageBody() data: unknown) {
+    const chatId = chatIdOf(data);
+    if (!chatId) return { ok: false, error: 'Invalid payload' };
     const userId = client.data.userId!;
-    await this.messaging.markRead(data.chatId, userId);
-    client.to(this.chatRoom(data.chatId)).emit('message:read', { chatId: data.chatId, userId });
-    return { ok: true };
+    try {
+      await this.messaging.markRead(chatId, userId);
+      client.to(this.chatRoom(chatId)).emit('message:read', { chatId, userId });
+      return { ok: true };
+    } catch {
+      return { ok: false, error: 'Cannot mark read' };
+    }
   }
 
   /** Emit an event to a single user's personal room (used by Notifications too). */

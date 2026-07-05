@@ -159,6 +159,8 @@ export class CommentsService {
         data: { commentCount: { decrement: 1 } },
       }),
     ]);
+    // Reverse the create reward so create→delete can't farm reputation.
+    await this.reputation.deduct(comment.authorId, 'COMMENT_CREATED', { refType: 'comment', refId: id });
     return { deleted: true };
   }
 
@@ -206,9 +208,15 @@ export class CommentsService {
       where: { id: commentId },
       data: { isHelpful: !comment.isHelpful },
     });
-    // Reward the comment author when their answer is newly marked helpful.
+    // Reward when newly marked helpful; reverse it when unmarked, so repeated
+    // toggling can't farm reputation for the comment author.
     if (updated.isHelpful) {
       await this.reputation.award(comment.authorId, 'HELPFUL_ANSWER', {
+        refType: 'comment',
+        refId: comment.id,
+      });
+    } else {
+      await this.reputation.deduct(comment.authorId, 'HELPFUL_ANSWER', {
         refType: 'comment',
         refId: comment.id,
       });

@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { isSafeHttpUrl } from '@/lib/utils';
 import {
   useClaimDiscount,
   useCreateReferral,
@@ -120,7 +121,11 @@ export function ReferralsSection({ enabled, isAdmin }: { enabled: boolean; isAdm
             <Button
               size="sm"
               disabled={!role.trim() || !company.trim() || create.isPending}
-              onClick={() =>
+              onClick={() => {
+                if (link.trim() && !isSafeHttpUrl(link.trim())) {
+                  toast.error('Link must start with http:// or https://');
+                  return;
+                }
                 create.mutate(
                   { role: role.trim(), company: company.trim(), description: desc.trim() || undefined, link: link.trim() || undefined },
                   {
@@ -134,8 +139,8 @@ export function ReferralsSection({ enabled, isAdmin }: { enabled: boolean; isAdm
                     },
                     onError: (e) => toast.error((e as Error).message),
                   },
-                )
-              }
+                );
+              }}
             >
               Post referral
             </Button>

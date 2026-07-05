@@ -5,6 +5,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * True only for http(s) URLs. Used to validate user-supplied links before they
+ * are stored and later rendered into href/src, blocking javascript:/data: URLs.
+ */
+export function isSafeHttpUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export function timeAgo(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   const seconds = Math.floor((Date.now() - d.getTime()) / 1000);

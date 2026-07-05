@@ -37,6 +37,12 @@ export class ResourcesService {
     if (!dto.externalUrl && !dto.fileKey) {
       throw new BadRequestException('Provide a link (externalUrl) or an uploaded file');
     }
+    // Bind the stored key to the resources namespace. Without this a client could
+    // set fileKey to any object (e.g. another user's verification/…-id.jpg) and
+    // then presign a download for it via GET /resources/:id/download.
+    if (dto.fileKey && !dto.fileKey.startsWith('resources/')) {
+      throw new BadRequestException('Invalid file key');
+    }
     // Must be a member to share a resource in a community (platform admins exempt).
     if (dto.communityId && !isPlatformAdmin(role)) {
       const member = await this.prisma.communityMember.findUnique({
@@ -326,6 +332,11 @@ export class ResourcesService {
       throw new ForbiddenException('Cannot delete this resource');
     }
     await this.prisma.resource.update({ where: { id }, data: { deletedAt: new Date() } });
+    // Reverse the upload reward so upload→delete can't farm reputation.
+    await this.reputation.deduct(resource.uploaderId, 'RESOURCE_UPLOADED', {
+      refType: 'resource',
+      refId: id,
+    });
     return { deleted: true };
   }
 
