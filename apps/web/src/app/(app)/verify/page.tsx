@@ -73,6 +73,11 @@ export default function VerifyPage() {
       toast.error('Could not read your Google email — try again');
       return;
     }
+    const domain = profile.email.split('@')[1]?.toLowerCase() ?? '';
+    if (domain === 'gmail.com' || domain === 'googlemail.com') {
+      toast.error('Use your official college email — personal Gmail isn’t accepted');
+      return;
+    }
     setCollegeEmail(profile.email);
     setCollegeGoogleToken(credential);
     setEmailVerified(true);
@@ -81,6 +86,8 @@ export default function VerifyPage() {
 
   const goToStep2 = () => {
     if (!college) return toast.error('Select your college');
+    if (method === 'COLLEGE_EMAIL' && !college.collegeId)
+      return toast.error('Pick your college from the list — required for email verification');
     if (!course.trim()) return toast.error('Enter your course / branch');
     if (!year) return toast.error('Select your year');
     if (method === 'COLLEGE_EMAIL' && !emailVerified) return toast.error('Verify your college email with Google first');
@@ -235,8 +242,9 @@ export default function VerifyPage() {
                   <>
                     <GoogleVerifyButton onVerified={onCollegeVerified} />
                     <p className="text-xs text-muted-foreground">
-                      Sign in with your official college Google account to verify. The verified
-                      email is saved automatically and can’t be changed manually.
+                      Sign in with your <strong>official college email</strong> (personal Gmail isn’t
+                      accepted). The verified email is saved automatically and can’t be changed
+                      manually. Pick your college from the list above first.
                     </p>
                   </>
                 )}
