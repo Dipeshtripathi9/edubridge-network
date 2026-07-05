@@ -82,22 +82,31 @@ export class ReviewsService {
       throw new BadRequestException(`You already reviewed this college's ${dto.category}`);
     }
 
-    const review = existing
-      ? await this.prisma.review.update({
-          where: { id: existing.id },
-          data: { rating: dto.rating, title: dto.title, body: dto.body, deletedAt: null },
-        })
-      : await this.prisma.review.create({
-          data: {
-            collegeId,
-            authorId: userId,
-            category: dto.category,
-            rating: dto.rating,
-            title: dto.title,
-            body: dto.body,
-            isVerified: true,
-          },
-        });
+    let review;
+    try {
+      review = existing
+        ? await this.prisma.review.update({
+            where: { id: existing.id },
+            data: { rating: dto.rating, title: dto.title, body: dto.body, deletedAt: null },
+          })
+        : await this.prisma.review.create({
+            data: {
+              collegeId,
+              authorId: userId,
+              category: dto.category,
+              rating: dto.rating,
+              title: dto.title,
+              body: dto.body,
+              isVerified: true,
+            },
+          });
+    } catch (err) {
+      // Concurrent duplicate submit — surface the intended 400, not a raw P2002 500.
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        throw new BadRequestException(`You already reviewed this college's ${dto.category}`);
+      }
+      throw err;
+    }
 
     await this.recomputeCollegeAggregates(collegeId);
     // Reward only the first time a review is created (not edits/restores).
@@ -238,6 +247,11 @@ export class ReviewsService {
       where: { id: reviewId, deletedAt: null },
     });
     if (!review) throw new NotFoundException('Review not found');
+    // No self-boosting: the list sorts by upvotes, so an author upvoting their
+    // own review would let them climb the college's ranking.
+    if (review.authorId === userId) {
+      throw new ForbiddenException('You cannot vote on your own review');
+    }
 
     await this.prisma.reviewVote.upsert({
       where: { reviewId_userId: { reviewId, userId } },
@@ -278,6 +292,8 @@ export class ReviewsService {
     }
     await this.prisma.review.update({ where: { id }, data: { deletedAt: new Date() } });
     if (review.collegeId) await this.recomputeCollegeAggregates(review.collegeId);
+    // Reverse the create reward so create→delete can't farm reputation.
+    await this.reputation.deduct(review.authorId, 'REVIEW_CREATED', { refType: 'review', refId: id });
     return { deleted: true };
   }
 }

@@ -108,7 +108,20 @@ export class TransferService {
 
   // ---------------- Transfer journey ----------------
   async createOrUpdateJourney(userId: string, dto: CreateTransferDto) {
-    // A student has one active journey per destination; keep it simple — upsert latest.
+    // One journey per destination — update the existing one instead of stacking
+    // duplicates every time the form is submitted.
+    if (dto.toCollegeId) {
+      const existing = await this.prisma.transfer.findFirst({
+        where: { userId, toCollegeId: dto.toCollegeId },
+      });
+      if (existing) {
+        return this.prisma.transfer.update({
+          where: { id: existing.id },
+          data: { ...dto },
+          include: { fromCollege: true, toCollege: true },
+        });
+      }
+    }
     return this.prisma.transfer.create({
       data: { userId, ...dto, status: 'EXPLORING' },
       include: { fromCollege: true, toCollege: true },

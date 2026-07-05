@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSupportRequestDto } from './dto/support.dto';
 
@@ -50,7 +50,10 @@ export class LeadershipService {
     });
   }
 
-  resolveSupport(id: string) {
+  async resolveSupport(id: string) {
+    const req = await this.prisma.managerSupportRequest.findUnique({ where: { id } });
+    if (!req) throw new NotFoundException('Support request not found');
+    if (req.status === 'RESOLVED') return req; // idempotent — don't re-stamp
     return this.prisma.managerSupportRequest.update({
       where: { id },
       data: { status: 'RESOLVED' },

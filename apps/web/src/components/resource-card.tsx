@@ -166,7 +166,7 @@ export function ResourceCard({
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && commentText.trim()) {
+                  if (e.key === 'Enter' && commentText.trim() && !addComment.isPending) {
                     addComment.mutate(commentText.trim(), { onSuccess: () => setCommentText('') });
                   }
                 }}

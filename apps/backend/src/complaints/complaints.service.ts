@@ -7,7 +7,16 @@ export class ComplaintsService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Any authenticated user (typically a community manager) raises an issue to admins. */
-  submit(userId: string, body: string, communityId?: string) {
+  async submit(userId: string, body: string, communityId?: string) {
+    // Validate the referenced community up front so a bad id is a clean 404,
+    // not a raw foreign-key 500.
+    if (communityId) {
+      const community = await this.prisma.community.findUnique({
+        where: { id: communityId },
+        select: { id: true },
+      });
+      if (!community) throw new NotFoundException('Community not found');
+    }
     return this.prisma.complaint.create({
       data: { userId, body, communityId: communityId ?? null },
     });
@@ -30,6 +39,8 @@ export class ComplaintsService {
   async resolve(adminId: string, id: string) {
     const complaint = await this.prisma.complaint.findUnique({ where: { id } });
     if (!complaint) throw new NotFoundException('Complaint not found');
+    // Don't overwrite the original resolver/timestamp on a re-resolve.
+    if (complaint.status === 'RESOLVED') return { id, status: 'RESOLVED' };
     await this.prisma.complaint.update({
       where: { id },
       data: { status: 'RESOLVED', resolvedById: adminId, resolvedAt: new Date() },

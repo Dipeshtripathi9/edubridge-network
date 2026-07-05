@@ -48,7 +48,15 @@ describe('Resource Hub (e2e)', () => {
     await request(app.getHttpServer())
       .post(`${API}/resources`)
       .set(auth(owner.token))
-      .send({ type: 'BOGUS', title: 'x', fileKey: 'k' })
+      .send({ type: 'BOGUS', title: 'x', fileKey: 'resources/k.pdf' })
+      .expect(400);
+  });
+
+  it('rejects a fileKey outside the resources namespace (no arbitrary-object read)', async () => {
+    await request(app.getHttpServer())
+      .post(`${API}/resources`)
+      .set(auth(owner.token))
+      .send({ type: 'NOTES', title: 'sneaky', fileKey: 'verification/someone-id.jpg' })
       .expect(400);
   });
 

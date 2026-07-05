@@ -31,6 +31,31 @@ export class MessagingService {
     return !!v && parseInt(v, 10) > 0;
   }
 
+  /** Account still allowed to use realtime (mirrors the HTTP JwtStrategy check). */
+  async isActiveUser(userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { status: true, deletedAt: true },
+    });
+    return !!user && user.status !== 'BANNED' && user.status !== 'SUSPENDED' && !user.deletedAt;
+  }
+
+  /** Distinct users who share at least one chat with this user (their "contacts"). */
+  async contactIds(userId: string): Promise<string[]> {
+    const mine = await this.prisma.chatParticipant.findMany({
+      where: { userId },
+      select: { chatId: true },
+    });
+    const chatIds = mine.map((c) => c.chatId);
+    if (!chatIds.length) return [];
+    const others = await this.prisma.chatParticipant.findMany({
+      where: { chatId: { in: chatIds }, userId: { not: userId } },
+      select: { userId: true },
+      distinct: ['userId'],
+    });
+    return others.map((o) => o.userId);
+  }
+
   // ---------------- Chats ----------------
   async getOrCreateDirectChat(userId: string, otherUserId: string) {
     if (userId === otherUserId) throw new ForbiddenException('Cannot chat with yourself');

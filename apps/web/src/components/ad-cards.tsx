@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuthStore } from '@/stores/auth.store';
+import { isSafeHttpUrl } from '@/lib/utils';
 import { useAdQuota, useBookAd, useCommunityAds, useDeleteAd } from '@/hooks/use-ads';
 
 function daysLeft(expiresAt: string): number {
@@ -86,6 +87,14 @@ export function BookAdCard({ slug }: { slug: string }) {
   const submit = () => {
     if (!title.trim() || !date) {
       toast.error('Add a title and pick a run date');
+      return;
+    }
+    if (imageUrl.trim() && !isSafeHttpUrl(imageUrl.trim())) {
+      toast.error('Image URL must start with http:// or https://');
+      return;
+    }
+    if (linkUrl.trim() && !isSafeHttpUrl(linkUrl.trim())) {
+      toast.error('Link URL must start with http:// or https://');
       return;
     }
     book.mutate(

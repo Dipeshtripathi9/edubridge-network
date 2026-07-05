@@ -229,6 +229,8 @@ export class PostsService {
         data: { postCount: { decrement: 1 } },
       }),
     ]);
+    // Reverse the create reward so create→delete can't farm reputation.
+    await this.reputation.deduct(post.authorId, 'POST_CREATED', { refType: 'post', refId: id });
     return { deleted: true };
   }
 
@@ -258,6 +260,10 @@ export class PostsService {
         this.prisma.reaction.delete({ where: { id: existing.id } }),
         this.prisma.post.update({ where: { id: postId }, data: { likeCount: { decrement: 1 } } }),
       ]);
+      // Reverse the author's like reputation so a like/unlike loop nets zero.
+      if (post.authorId !== userId) {
+        await this.reputation.deduct(post.authorId, 'RECEIVED_LIKE', { refType: 'post', refId: postId });
+      }
       return { liked: false };
     }
     await this.prisma.$transaction([

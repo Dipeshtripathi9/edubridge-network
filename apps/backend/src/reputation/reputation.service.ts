@@ -52,6 +52,40 @@ export class ReputationService {
     }
   }
 
+  /**
+   * Reverse a single previously-awarded action (unlike, unmark-helpful, delete).
+   * Removes one matching reputation event and decrements the user's total by that
+   * event's points (floored at 0). Symmetric with award() so like/unlike and
+   * create/delete loops net zero — closing the reputation-farming vectors.
+   */
+  async deduct(
+    userId: string,
+    action: ReputationAction,
+    ref?: { refType?: string; refId?: string },
+  ): Promise<void> {
+    try {
+      const event = await this.prisma.reputationEvent.findFirst({
+        where: { userId, action, refType: ref?.refType, refId: ref?.refId },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (!event) return; // nothing to reverse (already reversed / never awarded)
+      await this.prisma.$transaction([
+        this.prisma.reputationEvent.delete({ where: { id: event.id } }),
+        this.prisma.user.update({
+          where: { id: userId },
+          // Never let the denormalized total go negative.
+          data: { reputationPoints: { decrement: Math.min(event.points, Number.MAX_SAFE_INTEGER) } },
+        }),
+        this.prisma.user.updateMany({
+          where: { id: userId, reputationPoints: { lt: 0 } },
+          data: { reputationPoints: 0 },
+        }),
+      ]);
+    } catch (e) {
+      this.logger.warn(`Failed to deduct ${action} from ${userId}: ${(e as Error).message}`);
+    }
+  }
+
   /** Award any newly-qualified badges and notify the user. */
   async evaluateBadges(userId: string): Promise<void> {
     const user = await this.prisma.user.findUnique({

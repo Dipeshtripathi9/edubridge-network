@@ -164,6 +164,11 @@ export function useAddComment(postId: string) {
   return useMutation({
     mutationFn: (input: { body: string; parentId?: string }) =>
       api.post<Comment>(`/posts/${postId}/comments`, input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['comments', postId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['comments', postId] });
+      // Also refresh feeds so the post card's commentCount updates right away
+      // (['feed'] prefix-matches every ['feed', slug, section] query).
+      qc.invalidateQueries({ queryKey: ['feed'] });
+    },
   });
 }

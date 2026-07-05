@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, VerificationMethod } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 import { StorageService } from '../storage/storage.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { MailService } from '../mail/mail.service';
@@ -24,7 +25,13 @@ export class VerificationService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly mail: MailService,
+    private readonly redis: RedisService,
   ) {}
+
+  /** Bust the cached profile so verification-status changes are seen immediately. */
+  private async invalidateProfile(userId: string) {
+    await this.redis.del(`user:profile:${userId}`);
+  }
 
   // ---------- College-email authentication (send link → click → verified) ----------
   async requestCollegeEmail(userId: string, dto: RequestCollegeEmailDto) {
@@ -121,6 +128,7 @@ export class VerificationService {
         ...(dto.year ? { year: dto.year } : {}),
       },
     });
+    await this.invalidateProfile(userId);
     return requestRow;
   }
 
@@ -202,6 +210,9 @@ export class VerificationService {
         },
       }),
     ]);
+    // The admin changed the user's verification status — drop their cached profile
+    // so they don't see stale PENDING/unverified state for up to the cache TTL.
+    await this.invalidateProfile(reqRow.userId);
 
     await this.notifications.create({
       recipientId: reqRow.userId,

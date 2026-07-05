@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Composer } from '@/components/composer';
-import { uniqueById } from '@/lib/utils';
+import { isSafeHttpUrl, uniqueById } from '@/lib/utils';
 import { PostCard } from '@/components/post-card';
 import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
@@ -126,6 +126,10 @@ export function OpportunitiesSection({
   const onSubmit = () => {
     if (!title.trim() || !desc.trim()) {
       toast.error('Add a title and description');
+      return;
+    }
+    if (url.trim() && !isSafeHttpUrl(url.trim())) {
+      toast.error('Apply link must start with http:// or https://');
       return;
     }
     submit.mutate(

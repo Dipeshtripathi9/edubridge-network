@@ -100,7 +100,7 @@ describe('College Community Hub (e2e)', () => {
     const created = await request(app.getHttpServer())
       .post(`${API}/resources`)
       .set(auth(student.token))
-      .send({ type: 'NOTES', title: `College Notes ${Date.now()}`, fileKey: 'k.pdf', collegeId })
+      .send({ type: 'NOTES', title: `College Notes ${Date.now()}`, fileKey: 'resources/k.pdf', collegeId })
       .expect(201);
     const resourceId = created.body.data.id;
 
