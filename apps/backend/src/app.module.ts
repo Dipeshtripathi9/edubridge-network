@@ -7,7 +7,6 @@ import { LoggerModule } from 'nestjs-pino';
 import configuration from './config/configuration';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
-import { MailModule } from './mail/mail.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CommunitiesModule } from './communities/communities.module';
@@ -73,7 +72,6 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     }),
     PrismaModule,
     RedisModule,
-    MailModule,
     AuthModule,
     UsersModule,
     CommunitiesModule,

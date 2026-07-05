@@ -8,7 +8,6 @@ import { ConfigService } from '@nestjs/config';
 import { AuthProvider, Prisma, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { TokenService, TokenPair } from './services/token.service';
-import { MailService } from '../mail/mail.service';
 import { OtpService } from './services/otp.service';
 import { GoogleService } from './services/google.service';
 import {
@@ -34,7 +33,6 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokens: TokenService,
-    private readonly mail: MailService,
     private readonly otp: OtpService,
     private readonly google: GoogleService,
     private readonly config: ConfigService,
@@ -69,7 +67,7 @@ export class AuthService {
     if (autoVerify) {
       return { user: this.sanitize(user), autoVerified: true, message: 'Account ready' };
     }
-    const token = await this.issueEmailVerification(user.id, user.email!, dto.fullName);
+    const token = await this.issueEmailVerification(user.id);
     return {
       user: this.sanitize(user),
       autoVerified: false,
@@ -82,7 +80,7 @@ export class AuthService {
   async resendVerification(dto: ForgotPasswordDto) {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email.toLowerCase() } });
     if (user && user.status === 'PENDING_VERIFICATION' && user.email) {
-      const token = await this.issueEmailVerification(user.id, user.email);
+      const token = await this.issueEmailVerification(user.id);
       return { message: 'Verification email resent.', ...this.devVerifyLink(token) };
     }
     return { message: 'If that account needs verification, a link has been sent.' };
@@ -95,11 +93,7 @@ export class AuthService {
     return { devLink: `${webUrl}/verify-email?token=${token}` };
   }
 
-  private async issueEmailVerification(
-    userId: string,
-    email: string,
-    name?: string,
-  ): Promise<string> {
+  private async issueEmailVerification(userId: string): Promise<string> {
     const token = this.tokens.generateOpaqueToken(32);
     await this.prisma.emailVerification.create({
       data: {
@@ -109,8 +103,6 @@ export class AuthService {
         expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
       },
     });
-    // Fire-and-forget — never block signup on the SMTP send (it can hang/fail).
-    void this.mail.sendVerificationEmail(email, token, name).catch(() => undefined);
     return token;
   }
 
@@ -219,9 +211,6 @@ export class AuthService {
           expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
         },
       });
-      // Best-effort, non-blocking — don't let SMTP latency slow the response or
-      // leak whether the email exists via timing.
-      void this.mail.sendPasswordReset(user.email!, token).catch(() => undefined);
     }
     return { message: 'If that email exists, a reset link has been sent' };
   }
@@ -392,10 +381,9 @@ export class AuthService {
         expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 min
       },
     });
-    void this.mail.sendMagicLink(email, token).catch(() => undefined);
 
-    // In non-production (or when SMTP isn't set up) email won't arrive, so return
-    // the link directly so it remains usable. Never leak it in production.
+    // Email isn't sent by the server, so return the link directly so it remains
+    // usable in non-production. Never leak it in production.
     const isProd = process.env.NODE_ENV === 'production';
     const webUrl = this.config.get<string>('appUrl') ?? 'http://localhost:3000';
     return {
