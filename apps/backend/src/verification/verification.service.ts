@@ -6,7 +6,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { StorageService } from '../storage/storage.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { MailService } from '../mail/mail.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
 import {
   CreateVerificationRequestDto,
@@ -24,7 +23,6 @@ export class VerificationService {
     private readonly notifications: NotificationsService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
-    private readonly mail: MailService,
     private readonly redis: RedisService,
   ) {}
 
@@ -42,9 +40,8 @@ export class VerificationService {
     );
     const webUrl = this.config.get<string>('appUrl') ?? 'http://localhost:3000';
     const link = `${webUrl}/verify/college-email?token=${token}`;
-    // Email the verification link (best-effort — never blocks the request). In
-    // non-production the link is also returned so the flow stays testable without SMTP.
-    void this.mail.sendCollegeEmailVerification(dto.email.toLowerCase(), token).catch(() => undefined);
+    // The server doesn't send email; in non-production return the link so the
+    // flow stays usable. Never leak it in production.
     const isProd = process.env.NODE_ENV === 'production';
     return { message: 'Verification link sent to your college email.', ...(isProd ? {} : { devLink: link }) };
   }

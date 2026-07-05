@@ -62,14 +62,6 @@ export default () => {
     callbackUrl: process.env.GOOGLE_CALLBACK_URL ?? '',
   },
 
-  smtp: {
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT ?? '587', 10),
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-    from: process.env.SMTP_FROM ?? 'EduBridge <no-reply@edubridge.network>',
-  },
-
   twilio: {
     accountSid: process.env.TWILIO_ACCOUNT_SID ?? '',
     authToken: process.env.TWILIO_AUTH_TOKEN ?? '',
