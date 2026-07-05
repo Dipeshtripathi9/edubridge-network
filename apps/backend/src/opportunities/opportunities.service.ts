@@ -105,8 +105,11 @@ export class OpportunitiesService {
       ...(and.length ? { AND: and } : {}),
     };
 
-    const orderBy: Prisma.OpportunityOrderByWithRelationInput =
-      query.sort === 'deadline' ? { deadline: 'asc' } : { createdAt: 'desc' };
+    // id tiebreaker keeps cursor pagination stable when deadline/createdAt tie.
+    const orderBy: Prisma.OpportunityOrderByWithRelationInput[] =
+      query.sort === 'deadline'
+        ? [{ deadline: 'asc' }, { id: 'desc' }]
+        : [{ createdAt: 'desc' }, { id: 'desc' }];
 
     const items = await this.prisma.opportunity.findMany({
       where,

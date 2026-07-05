@@ -249,11 +249,11 @@ export class AdminService {
       topColleges,
       topContributors,
     ] = await Promise.all([
-      this.prisma.user.count(),
-      this.prisma.user.count({ where: { lastLoginAt: { gte: dayAgo } } }),
-      this.prisma.user.count({ where: { lastLoginAt: { gte: monthAgo } } }),
-      this.prisma.user.count({ where: { createdAt: { gte: startOfToday } } }),
-      this.prisma.user.count({ where: { createdAt: { gte: weekAgo } } }),
+      this.prisma.user.count({ where: { deletedAt: null } }),
+      this.prisma.user.count({ where: { deletedAt: null, lastLoginAt: { gte: dayAgo } } }),
+      this.prisma.user.count({ where: { deletedAt: null, lastLoginAt: { gte: monthAgo } } }),
+      this.prisma.user.count({ where: { deletedAt: null, createdAt: { gte: startOfToday } } }),
+      this.prisma.user.count({ where: { deletedAt: null, createdAt: { gte: weekAgo } } }),
       this.prisma.post.count({ where: { deletedAt: null } }),
       this.prisma.post.count({ where: { deletedAt: null, createdAt: { gte: weekAgo } } }),
       this.prisma.comment.count({ where: { deletedAt: null } }),
@@ -275,7 +275,7 @@ export class AdminService {
       this.prisma.user.findMany({
         orderBy: { reputationPoints: 'desc' },
         take: 5,
-        where: { reputationPoints: { gt: 0 } },
+        where: { reputationPoints: { gt: 0 }, deletedAt: null },
         select: { id: true, reputationPoints: true, profile: { select: { fullName: true } } },
       }),
     ]);

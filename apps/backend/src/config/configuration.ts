@@ -1,4 +1,32 @@
-export default () => ({
+const DEV_ACCESS_SECRET = 'dev-access-secret-change-me';
+const DEV_REFRESH_SECRET = 'dev-refresh-secret-change-me';
+
+/**
+ * Fail fast in production rather than boot with insecure defaults. A missing or
+ * placeholder JWT secret would let anyone forge tokens for any user/role, and a
+ * missing DATABASE_URL means a half-configured app. Dev keeps the fallbacks so
+ * local setup stays zero-config.
+ */
+function assertProductionConfig() {
+  if (process.env.NODE_ENV !== 'production') return;
+  const problems: string[] = [];
+  const access = process.env.JWT_ACCESS_SECRET;
+  const refresh = process.env.JWT_REFRESH_SECRET;
+  if (!access || access === DEV_ACCESS_SECRET) problems.push('JWT_ACCESS_SECRET');
+  if (!refresh || refresh === DEV_REFRESH_SECRET) problems.push('JWT_REFRESH_SECRET');
+  if (access && refresh && access === refresh) problems.push('JWT secrets must differ');
+  if (!process.env.DATABASE_URL) problems.push('DATABASE_URL');
+  if (problems.length) {
+    throw new Error(
+      `Refusing to start in production with insecure/missing config: ${problems.join(', ')}. ` +
+        'Set strong, unique secrets and a database URL.',
+    );
+  }
+}
+
+export default () => {
+  assertProductionConfig();
+  return {
   env: process.env.NODE_ENV ?? 'development',
   port: parseInt(process.env.API_PORT ?? '4000', 10),
   globalPrefix: process.env.API_GLOBAL_PREFIX ?? 'api/v1',
@@ -22,8 +50,8 @@ export default () => ({
   },
 
   jwt: {
-    accessSecret: process.env.JWT_ACCESS_SECRET ?? 'dev-access-secret-change-me',
-    refreshSecret: process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret-change-me',
+    accessSecret: process.env.JWT_ACCESS_SECRET ?? DEV_ACCESS_SECRET,
+    refreshSecret: process.env.JWT_REFRESH_SECRET ?? DEV_REFRESH_SECRET,
     accessTtl: parseInt(process.env.JWT_ACCESS_TTL ?? '900', 10),
     refreshTtl: parseInt(process.env.JWT_REFRESH_TTL ?? '2592000', 10),
   },
@@ -75,4 +103,5 @@ export default () => ({
     // link needed). Intended for local/dev where SMTP isn't deliverable.
     autoVerifyEmail: process.env.AUTO_VERIFY_EMAIL === 'true',
   },
-});
+  };
+};

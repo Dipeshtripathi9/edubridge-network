@@ -163,7 +163,7 @@ export class MessagingService {
     await this.assertParticipant(chatId, userId);
     const messages = await this.prisma.message.findMany({
       where: { chatId, deletedAt: null },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: query.limit,
       ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
       include: { sender: SENDER_SELECT },

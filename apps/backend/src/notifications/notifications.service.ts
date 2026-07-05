@@ -145,13 +145,13 @@ export class NotificationsService {
     if (dto.communityId) {
       // Members of a single community.
       const members = await this.prisma.communityMember.findMany({
-        where: { communityId: dto.communityId, user: { status: 'ACTIVE' } },
+        where: { communityId: dto.communityId, user: { status: 'ACTIVE', deletedAt: null } },
         select: { userId: true },
       });
       ids = members.map((m) => m.userId);
     } else {
       const users = await this.prisma.user.findMany({
-        where: { status: 'ACTIVE' },
+        where: { status: 'ACTIVE', deletedAt: null },
         select: { id: true },
       });
       ids = users.map((u) => u.id);

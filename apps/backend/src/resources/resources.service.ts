@@ -133,7 +133,8 @@ export class ResourcesService {
           ? { downloadCount: 'desc' }
           : { createdAt: 'desc' };
     // Featured resources surface first.
-    const orderBy: Prisma.ResourceOrderByWithRelationInput[] = [{ isFeatured: 'desc' }, sortBy];
+    // Trailing id keeps cursor pagination stable when isFeatured/rating/downloads tie.
+    const orderBy: Prisma.ResourceOrderByWithRelationInput[] = [{ isFeatured: 'desc' }, sortBy, { id: 'desc' }];
 
     const items = await this.prisma.resource.findMany({
       where,
@@ -183,6 +184,13 @@ export class ResourcesService {
 
   /** Toggle a like on a resource. */
   async toggleLike(id: string, userId: string) {
+    // Guard existence + soft-delete like every other resource mutation: a bad id
+    // should 404 (not a raw 500), and a removed resource shouldn't be likeable.
+    const resource = await this.prisma.resource.findFirst({
+      where: { id, deletedAt: null },
+      select: { id: true },
+    });
+    if (!resource) throw new NotFoundException('Resource not found');
     const existing = await this.prisma.resourceLike.findUnique({
       where: { resourceId_userId: { resourceId: id, userId } },
     });
@@ -203,7 +211,7 @@ export class ResourcesService {
   async listComments(id: string, query: PaginationDto) {
     const items = await this.prisma.resourceComment.findMany({
       where: { resourceId: id },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
       take: query.limit,
       include: { user: UPLOADER_SELECT },
