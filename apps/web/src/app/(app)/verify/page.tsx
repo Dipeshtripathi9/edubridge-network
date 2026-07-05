@@ -12,10 +12,9 @@ import { cn } from '@/lib/utils';
 import { CollegePicker, type CollegeSelection } from '@/components/college-picker';
 import { useAuthStore } from '@/stores/auth.store';
 import { useMe } from '@/hooks/use-profile';
+import { GoogleVerifyButton } from '@/components/social-auth';
 import {
-  useConfirmCollegeEmail,
   useMyVerification,
-  useRequestCollegeEmail,
   useSubmitVerification,
   type VerificationMethod,
 } from '@/hooks/use-verification';
@@ -34,8 +33,6 @@ const FEEDBACK_FIELDS: { key: string; label: string }[] = [
   { key: 'location', label: 'Location & industry exposure' },
 ];
 
-const LS_KEY = 'ebd_college_email_verified';
-
 export default function VerifyPage() {
   const loggedIn = useAuthStore((s) => !!s.accessToken);
   const { data: me, refetch: refetchMe } = useMe();
@@ -53,8 +50,6 @@ export default function VerifyPage() {
     return () => window.removeEventListener('focus', refresh);
   }, [refetchMe, refetchCurrent]);
   const submit = useSubmitVerification();
-  const requestEmail = useRequestCollegeEmail();
-  const confirmEmail = useConfirmCollegeEmail();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [method, setMethod] = useState<VerificationMethod>('COLLEGE_EMAIL');
@@ -64,49 +59,31 @@ export default function VerifyPage() {
   const [course, setCourse] = useState(me?.profile?.branch ?? '');
   const [year, setYear] = useState<string>(me?.profile?.year ? String(me.profile.year) : '');
   const [collegeEmail, setCollegeEmail] = useState('');
+  const [collegeGoogleToken, setCollegeGoogleToken] = useState<string | null>(null);
   const [emailVerified, setEmailVerified] = useState(false);
-  const [linkSent, setLinkSent] = useState<{ devLink?: string } | null>(null);
   const [driveUrl, setDriveUrl] = useState('');
   const [feedback, setFeedback] = useState<Record<string, string>>({});
 
   const verified = me?.profile && (me.profile as { collegeVerification?: string }).collegeVerification === 'VERIFIED';
 
-  // Pick up email confirmation done in the /verify/college-email tab.
-  useEffect(() => {
-    const check = () => {
-      const v = localStorage.getItem(LS_KEY);
-      if (v && collegeEmail && v.toLowerCase() === collegeEmail.toLowerCase()) setEmailVerified(true);
-    };
-    check();
-    window.addEventListener('focus', check);
-    document.addEventListener('visibilitychange', check);
-    return () => {
-      window.removeEventListener('focus', check);
-      document.removeEventListener('visibilitychange', check);
-    };
-  }, [collegeEmail]);
-
-  const authenticate = () => {
-    if (!collegeEmail.trim()) {
-      toast.error('Enter your college email first');
+  // College email is verified via Google — the verified email is captured from
+  // the Google account and locked (the user can't type/change it manually).
+  const onCollegeVerified = (credential: string, profile: { email?: string; name?: string }) => {
+    if (!profile.email) {
+      toast.error('Could not read your Google email — try again');
       return;
     }
-    localStorage.removeItem(LS_KEY);
-    setEmailVerified(false);
-    requestEmail.mutate(collegeEmail.trim(), {
-      onSuccess: (res) => {
-        setLinkSent({ devLink: res.devLink });
-        toast.success('Verification link sent to your college email.');
-      },
-      onError: (e) => toast.error((e as Error).message),
-    });
+    setCollegeEmail(profile.email);
+    setCollegeGoogleToken(credential);
+    setEmailVerified(true);
+    toast.success('College email verified with Google ✓');
   };
 
   const goToStep2 = () => {
     if (!college) return toast.error('Select your college');
     if (!course.trim()) return toast.error('Enter your course / branch');
     if (!year) return toast.error('Select your year');
-    if (method === 'COLLEGE_EMAIL' && !emailVerified) return toast.error('Authenticate your college email first');
+    if (method === 'COLLEGE_EMAIL' && !emailVerified) return toast.error('Verify your college email with Google first');
     if (method !== 'COLLEGE_EMAIL' && !/^https?:\/\//i.test(driveUrl.trim()))
       return toast.error('Paste a valid Google Drive link');
     setStep(2);
@@ -124,10 +101,8 @@ export default function VerifyPage() {
         collegeId: college?.collegeId,
         collegeName: college?.collegeName,
         collegeEmail: method === 'COLLEGE_EMAIL' ? collegeEmail : undefined,
-        collegeEmailToken:
-          method === 'COLLEGE_EMAIL' && emailVerified
-            ? localStorage.getItem('ebd_college_email_token') ?? undefined
-            : undefined,
+        collegeEmailGoogleToken:
+          method === 'COLLEGE_EMAIL' && emailVerified ? collegeGoogleToken ?? undefined : undefined,
         feedback,
         course: course.trim(),
         year: Number(year) || undefined,
@@ -249,52 +224,21 @@ export default function VerifyPage() {
 
             {method === 'COLLEGE_EMAIL' ? (
               <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    type="email"
-                    placeholder="you@college.edu"
-                    value={collegeEmail}
-                    disabled={emailVerified}
-                    onChange={(e) => {
-                      setCollegeEmail(e.target.value);
-                      setEmailVerified(false);
-                      setLinkSent(null);
-                    }}
-                  />
-                  {emailVerified ? (
-                    <span className="flex shrink-0 items-center gap-1 rounded-md bg-green-500/15 px-3 text-sm font-medium text-green-600">
-                      <CheckCircle2 className="h-4 w-4" /> Verified
+                {emailVerified ? (
+                  <div className="flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 text-sm text-green-700 dark:text-green-300">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>
+                      Verified: <strong>{collegeEmail}</strong>
                     </span>
-                  ) : (
-                    <Button variant="outline" className="shrink-0" onClick={authenticate} disabled={requestEmail.isPending}>
-                      Authenticate
-                    </Button>
-                  )}
-                </div>
-                {linkSent && !emailVerified && (
-                  <div className="rounded-lg border border-amber-400/50 bg-amber-50 p-3 text-sm dark:bg-amber-500/10">
-                    <p>📧 We sent a verification link to <strong>{collegeEmail}</strong>. Open it to confirm.</p>
-                    {linkSent.devLink && (
-                      <Button
-                        size="sm"
-                        className="mt-2"
-                        disabled={confirmEmail.isPending}
-                        onClick={() => {
-                          const token = linkSent.devLink!.split('token=')[1] ?? '';
-                          confirmEmail.mutate(token, {
-                            onSuccess: () => {
-                              setEmailVerified(true);
-                              setLinkSent(null);
-                              toast.success('College email verified ✓');
-                            },
-                            onError: (e) => toast.error((e as Error).message),
-                          });
-                        }}
-                      >
-                        {confirmEmail.isPending ? 'Verifying…' : 'Open verification link (dev)'}
-                      </Button>
-                    )}
                   </div>
+                ) : (
+                  <>
+                    <GoogleVerifyButton onVerified={onCollegeVerified} />
+                    <p className="text-xs text-muted-foreground">
+                      Sign in with your official college Google account to verify. The verified
+                      email is saved automatically and can’t be changed manually.
+                    </p>
+                  </>
                 )}
               </div>
             ) : (

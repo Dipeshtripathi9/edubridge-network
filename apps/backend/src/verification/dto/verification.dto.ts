@@ -49,6 +49,15 @@ export class CreateVerificationRequestDto {
   @IsString()
   collegeEmailToken?: string;
 
+  @ApiPropertyOptional({
+    description:
+      'Google ID token proving the college email. Server-verified; the token’s ' +
+      'email becomes the (locked) verified college email.',
+  })
+  @IsOptional()
+  @IsString()
+  collegeEmailGoogleToken?: string;
+
   @ApiPropertyOptional({ description: 'Honest per-category thoughts about the college' })
   @IsOptional()
   @IsObject()
