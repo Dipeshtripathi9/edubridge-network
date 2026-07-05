@@ -50,6 +50,9 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS}
       APP_URL: ${APP_URL}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      # No SMTP in this $0 bundle → activate email/password signups immediately
+      # so signup→login works. Set to false once you wire a real email provider.
+      AUTO_VERIFY_EMAIL: ${AUTO_VERIFY_EMAIL:-true}
     depends_on:
       postgres:
         condition: service_healthy
