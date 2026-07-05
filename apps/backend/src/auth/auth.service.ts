@@ -44,13 +44,27 @@ export class AuthService {
   }
 
   // ---------------- EMAIL SIGNUP ----------------
-  async signup(dto: SignupDto) {
+  async signup(dto: SignupDto, meta?: RequestMeta) {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) throw new BadRequestException('Email already registered');
 
+    // A Google ID token proves the email — verify it server-side. When valid (and
+    // it matches the email being registered), the account is created verified and
+    // the user is signed in immediately.
+    let googleVerified = false;
+    let googleProviderId: string | undefined;
+    if (dto.googleIdToken) {
+      const profile = await this.google.verifyIdToken(dto.googleIdToken);
+      if (!profile.emailVerified || profile.email.toLowerCase() !== dto.email.toLowerCase()) {
+        throw new BadRequestException('Google account does not match this email');
+      }
+      googleVerified = true;
+      googleProviderId = profile.providerUserId;
+    }
+
     // When email delivery isn't available (local/dev), activate immediately so
     // the signup→login flow works without an unreachable verification link.
-    const autoVerify = this.config.get<boolean>('auth.autoVerifyEmail') === true;
+    const autoVerify = googleVerified || this.config.get<boolean>('auth.autoVerifyEmail') === true;
 
     const passwordHash = await this.tokens.hashPassword(dto.password);
     const user = await this.prisma.user.create({
@@ -63,6 +77,20 @@ export class AuthService {
         profile: { create: { fullName: dto.fullName, gender: dto.gender?.trim() || null } },
       },
     });
+
+    // Google-verified signup → link the Google account and sign the user in.
+    if (googleVerified) {
+      if (googleProviderId) {
+        await this.prisma.oAuthAccount
+          .create({ data: { userId: user.id, provider: 'GOOGLE', providerUserId: googleProviderId } })
+          .catch(() => undefined);
+      }
+      const tokens = await this.tokens.issueTokens(user, {
+        userAgent: meta?.userAgent,
+        ip: meta?.ip,
+      });
+      return { tokens, user: this.sanitize(user), autoVerified: true };
+    }
 
     if (autoVerify) {
       return { user: this.sanitize(user), autoVerified: true, message: 'Account ready' };

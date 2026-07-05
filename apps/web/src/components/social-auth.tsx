@@ -9,6 +9,45 @@ import { useGoogleAuth, useRequestMagicLink } from '@/hooks/use-auth';
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
+/** Whether Google auth is configured (a client id is present). */
+export const googleEnabled = !!GOOGLE_CLIENT_ID;
+
+/**
+ * Google button used to VERIFY (not log in) during signup. It returns the raw ID
+ * token (re-verified server-side) plus the decoded email/name for prefill, so the
+ * user completes the signup form rather than being logged straight in.
+ */
+export function GoogleVerifyButton({
+  onVerified,
+}: {
+  onVerified: (credential: string, profile: { email?: string; name?: string }) => void;
+}) {
+  if (!GOOGLE_CLIENT_ID) return null;
+  return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <div className="flex justify-center">
+        <GoogleLogin
+          onSuccess={(cred) => {
+            if (!cred.credential) return toast.error('Google verification failed');
+            let profile: { email?: string; name?: string } = {};
+            try {
+              const payload = JSON.parse(atob(cred.credential.split('.')[1]));
+              profile = { email: payload.email, name: payload.name };
+            } catch {
+              /* fall back to server-side decode */
+            }
+            onVerified(cred.credential, profile);
+          }}
+          onError={() => toast.error('Google verification failed')}
+          text="signup_with"
+          shape="pill"
+          width="320"
+        />
+      </div>
+    </GoogleOAuthProvider>
+  );
+}
+
 /** Standalone "Continue with Google" button (shown only when a client id is set). */
 export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {
   const google = useGoogleAuth();

@@ -32,8 +32,8 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('signup')
   @ApiOperation({ summary: 'Register with email + password' })
-  signup(@Body() dto: SignupDto) {
-    return this.auth.signup(dto);
+  signup(@Body() dto: SignupDto, @Req() req: Request) {
+    return this.auth.signup(dto, this.meta(req));
   }
 
   @Public()

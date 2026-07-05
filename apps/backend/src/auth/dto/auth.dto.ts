@@ -46,6 +46,15 @@ export class SignupDto {
   @IsString()
   @MaxLength(30)
   gender?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Google ID token proving the email. When present and valid, the account ' +
+      'is created verified/active and signed in immediately.',
+  })
+  @IsOptional()
+  @IsString()
+  googleIdToken?: string;
 }
 
 export class LoginDto {
