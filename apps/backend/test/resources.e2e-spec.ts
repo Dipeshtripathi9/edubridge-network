@@ -60,6 +60,13 @@ describe('Resource Hub (e2e)', () => {
       .expect(400);
   });
 
+  it('returns 404 (not 500) when liking a non-existent resource', async () => {
+    await request(app.getHttpServer())
+      .post(`${API}/resources/nonexistent-id/like`)
+      .set(auth(owner.token))
+      .expect(404);
+  });
+
   it('shares a resource via an external (Google Drive) link; open returns the link', async () => {
     const link = 'https://drive.google.com/file/d/abc123/view';
     const created = await request(app.getHttpServer())

@@ -147,7 +147,8 @@ export class PostsService {
     const sortBy: Prisma.PostOrderByWithRelationInput =
       query.sort === 'top' ? { likeCount: 'desc' } : { createdAt: 'desc' };
     // Pinned posts surface first.
-    const orderBy: Prisma.PostOrderByWithRelationInput[] = [{ isPinned: 'desc' }, sortBy];
+    // Trailing id keeps cursor pagination stable when isPinned/likeCount/createdAt tie.
+    const orderBy: Prisma.PostOrderByWithRelationInput[] = [{ isPinned: 'desc' }, sortBy, { id: 'desc' }];
 
     // Section filters map the single feed into the community's tabs.
     const sectionWhere: Prisma.PostWhereInput =

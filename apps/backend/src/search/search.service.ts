@@ -191,7 +191,7 @@ export class SearchService {
         // Only surface active users — don't keep banned/suspended/unverified
         // accounts discoverable through search.
         const where = {
-          user: { status: 'ACTIVE' as const },
+          user: { status: 'ACTIVE' as const, deletedAt: null },
           OR: [{ fullName: like }, { username: like }],
         };
         const [rows, total] = await Promise.all([
@@ -291,7 +291,11 @@ export class SearchService {
     const [colleges, communities, profiles, opportunities, resources, reviews] = await Promise.all([
       this.prisma.college.findMany(),
       this.prisma.community.findMany(),
-      this.prisma.profile.findMany({ include: { college: { select: { name: true } } } }),
+      // Only index active, non-deleted users so moderation applies to the ES path too.
+      this.prisma.profile.findMany({
+        where: { user: { status: 'ACTIVE', deletedAt: null } },
+        include: { college: { select: { name: true } } },
+      }),
       this.prisma.opportunity.findMany({ where: { isActive: true } }),
       this.prisma.resource.findMany({ where: { deletedAt: null } }),
       this.prisma.review.findMany({ where: { deletedAt: null }, include: { college: { select: { name: true, slug: true } } } }),

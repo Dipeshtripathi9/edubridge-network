@@ -226,6 +226,8 @@ export class PoolsService {
   }
 
   async toggleLike(id: string, userId: string) {
+    const pool = await this.prisma.pool.findUnique({ where: { id }, select: { id: true } });
+    if (!pool) throw new NotFoundException('Pool not found');
     const existing = await this.prisma.poolLike.findUnique({
       where: { poolId_userId: { poolId: id, userId } },
     });

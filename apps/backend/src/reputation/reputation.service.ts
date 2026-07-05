@@ -139,12 +139,14 @@ export class ReputationService {
   async leaderboard(query: LeaderboardQueryDto) {
     const where: Prisma.UserWhereInput = {
       status: 'ACTIVE',
+      deletedAt: null,
       reputationPoints: { gt: 0 },
       ...(query.collegeId ? { profile: { collegeId: query.collegeId } } : {}),
     };
     const users = await this.prisma.user.findMany({
       where,
-      orderBy: { reputationPoints: 'desc' },
+      // id tiebreaker keeps cursor pagination stable when points tie.
+      orderBy: [{ reputationPoints: 'desc' }, { id: 'desc' }],
       ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : { skip: query.skip }),
       take: query.limit,
       select: {
@@ -161,7 +163,22 @@ export class ReputationService {
         _count: { select: { userBadges: true } },
       },
     });
-    const ranked = users.map((u, i) => ({ ...u, rank: query.skip + i + 1 }));
+    // Global rank. In offset mode skip is the base; in cursor mode derive the base
+    // by counting everyone ordered before the first row (points desc, id desc).
+    let base = query.skip;
+    if (query.cursor && users[0]) {
+      const first = users[0];
+      base = await this.prisma.user.count({
+        where: {
+          ...where,
+          OR: [
+            { reputationPoints: { gt: first.reputationPoints } },
+            { reputationPoints: first.reputationPoints, id: { gt: first.id } },
+          ],
+        },
+      });
+    }
+    const ranked = users.map((u, i) => ({ ...u, rank: base + i + 1 }));
     return buildPaginatedResult(ranked, query);
   }
 

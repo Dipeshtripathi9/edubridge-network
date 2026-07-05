@@ -35,11 +35,15 @@ export class UsersService {
       include: {
         college: true,
         university: true,
-        user: { select: { id: true, reputationPoints: true, createdAt: true } },
+        user: { select: { id: true, status: true, deletedAt: true, reputationPoints: true, createdAt: true } },
       },
     });
-    if (!profile) throw new NotFoundException('Profile not found');
-    return profile;
+    // Don't expose the public page of a banned/suspended/deleted account.
+    if (!profile || !profile.user || profile.user.deletedAt || profile.user.status !== 'ACTIVE') {
+      throw new NotFoundException('Profile not found');
+    }
+    const { status, deletedAt, ...user } = profile.user;
+    return { ...profile, user };
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {

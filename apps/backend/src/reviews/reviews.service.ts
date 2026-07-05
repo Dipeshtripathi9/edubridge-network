@@ -122,8 +122,11 @@ export class ReviewsService {
       deletedAt: null,
       ...(query.category ? { category: query.category } : {}),
     };
-    const orderBy: Prisma.ReviewOrderByWithRelationInput =
-      query.sort === 'recent' ? { createdAt: 'desc' } : { upvotes: 'desc' };
+    // id tiebreaker keeps cursor pagination stable when upvotes/createdAt tie.
+    const orderBy: Prisma.ReviewOrderByWithRelationInput[] =
+      query.sort === 'recent'
+        ? [{ createdAt: 'desc' }, { id: 'desc' }]
+        : [{ upvotes: 'desc' }, { id: 'desc' }];
 
     const reviews = await this.prisma.review.findMany({
       where,
@@ -212,8 +215,10 @@ export class ReviewsService {
   async listCommunityReviews(slug: string, query: ReviewQueryDto, userId?: string) {
     const community = await this.prisma.community.findUnique({ where: { slug } });
     if (!community) throw new NotFoundException('Community not found');
-    const orderBy: Prisma.ReviewOrderByWithRelationInput =
-      query.sort === 'recent' ? { createdAt: 'desc' } : { upvotes: 'desc' };
+    const orderBy: Prisma.ReviewOrderByWithRelationInput[] =
+      query.sort === 'recent'
+        ? [{ createdAt: 'desc' }, { id: 'desc' }]
+        : [{ upvotes: 'desc' }, { id: 'desc' }];
     const reviews = await this.prisma.review.findMany({
       where: { communityId: community.id, category: 'COMMUNITY_MANAGERS', deletedAt: null },
       orderBy,
