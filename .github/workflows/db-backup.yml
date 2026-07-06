@@ -1,0 +1,55 @@
+# Daily encrypted backup of the production (Neon) database.
+#
+# The dump contains user PII + password hashes, and this repo is PUBLIC, so the
+# artifact is GPG-encrypted with a passphrase (repo secret BACKUP_PASSPHRASE)
+# before upload. Even someone who downloads the artifact cannot read it.
+#
+# Restore:  see `PRODUCTION.md` §7 (decrypt with the passphrase, then pg_restore).
+# Neon also keeps automatic point-in-time history as a second safety net.
+name: DB backup (encrypted)
+
+on:
+  schedule:
+    - cron: '30 2 * * *' # daily at 02:30 UTC (~08:00 IST)
+  workflow_dispatch: {} # manual "Run workflow" from the Actions tab
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install PostgreSQL 16 client
+        run: |
+          sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/pgdg.gpg
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+
+      - name: Dump and encrypt
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          STAMP=$(date -u +%Y%m%d_%H%M%S)
+          FILE="edubridge_prod_${STAMP}.dump"
+          echo "Dumping database…"
+          pg_dump "$DATABASE_URL" -Fc -f "$FILE"
+          ls -lh "$FILE"
+          echo "Encrypting…"
+          gpg --batch --yes --symmetric --cipher-algo AES256 \
+            --passphrase "$BACKUP_PASSPHRASE" -o "${FILE}.gpg" "$FILE"
+          rm -f "$FILE" # never keep the plaintext dump around
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+
+      - name: Upload encrypted backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ env.STAMP }}
+          path: '*.dump.gpg'
+          retention-days: 30 # GitHub deletes the artifact after this
+          if-no-files-found: error

@@ -127,14 +127,36 @@ DATABASE_URL="$NEON" npm run db:seed -w @edubridge/backend
 
 ## 6. Backups
 
-```bash
-# on-demand production backup → timestamped custom-format dump
-NEON="postgresql://neondb_owner:<PASSWORD>@ep-raspy-scene-aofn4gw8.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
-pg_dump "$NEON" -Fc -f backups/edubridge_prod_$(date +%Y%m%d_%H%M%S).dump
-```
+Three layers, in order of convenience:
 
-Neon also keeps automatic point-in-time history on its dashboard (restore/branch a
-database from a past timestamp). Keep at least one dump stored off-platform.
+1. **Automated daily (recommended):** `.github/workflows/db-backup.yml` runs
+   `pg_dump` against Neon every day at 02:30 UTC, **GPG-encrypts** the dump (repo
+   secret `BACKUP_PASSPHRASE`), and stores it as a GitHub Actions **artifact**
+   (30-day retention). Encryption is required because the repo is public and the
+   dump holds PII. Trigger on demand: repo → **Actions → "DB backup (encrypted)"
+   → Run workflow**. Download from that run's **Artifacts**.
+   - Repo secrets used: `DATABASE_URL` (Neon), `BACKUP_PASSPHRASE`.
+   - **The passphrase is write-only in GitHub — store it in a password manager.
+     Without it, backups cannot be decrypted.**
+2. **Neon PITR:** the Neon dashboard keeps automatic point-in-time history — restore
+   or branch the database to a past timestamp with no setup.
+3. **On-demand local dump:**
+   ```bash
+   NEON="postgresql://neondb_owner:<PASSWORD>@ep-raspy-scene-aofn4gw8.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+   pg_dump "$NEON" -Fc -f backups/edubridge_prod_$(date +%Y%m%d_%H%M%S).dump
+   ```
+
+> GitHub deletes artifacts after 30 days. For long-term archives, download an
+> encrypted `.dump.gpg` occasionally and keep it off-platform.
+
+### Restore an encrypted backup
+```bash
+# 1. download db-backup-<stamp> from the workflow run's Artifacts, then:
+gpg --batch --yes --decrypt --passphrase "<BACKUP_PASSPHRASE>" \
+  -o restored.dump edubridge_prod_<stamp>.dump.gpg
+# 2. restore into a target DB (see §5 for the DROP SCHEMA + pg_restore steps)
+pg_restore --no-owner --no-acl --no-comments -d "$NEON" restored.dump
+```
 
 ---
 
