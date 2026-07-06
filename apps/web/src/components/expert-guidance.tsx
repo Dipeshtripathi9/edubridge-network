@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { MotionProvider, m } from '@/components/motion';
 import {
   ArrowRight,
   Award,
@@ -60,16 +60,16 @@ const CARDS = [
 
 function Float({ children, className, delay = 0, rotate = 0 }: { children: React.ReactNode; className: string; delay?: number; rotate?: number }) {
   return (
-    <motion.div
+    <m.div
       className={cn('absolute', className)}
       initial={{ opacity: 0, y: 14, rotate }}
       animate={{ opacity: 1, y: 0, rotate }}
       transition={{ duration: 0.55, delay }}
     >
-      <motion.div animate={{ y: [0, -7, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay }}>
+      <m.div animate={{ y: [0, -7, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay }}>
         {children}
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   );
 }
 
@@ -119,7 +119,7 @@ function ProductCollage() {
           </div>
           <div className="flex items-end gap-1.5 rounded-lg bg-slate-50 p-2 dark:bg-slate-700/50">
             {[45, 70, 55, 85, 75, 95].map((h, i) => (
-              <motion.span
+              <m.span
                 key={i}
                 initial={{ height: 4 }}
                 animate={{ height: `${h}%` }}
@@ -278,7 +278,7 @@ function GuidanceForm({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
       className="mt-4 overflow-hidden rounded-2xl border border-primary/30 bg-background/70 p-5 backdrop-blur"
@@ -319,7 +319,7 @@ function GuidanceForm({ onDone }: { onDone: () => void }) {
           Request guidance <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -328,8 +328,9 @@ const TRUST = ['Verified students', 'Real college data', 'No AI predictions'];
 export function ExpertGuidance() {
   const [open, setOpen] = useState(false);
   return (
-    <motion.section
-      id="get-expert-guidance"
+    <MotionProvider>
+      <m.section
+        id="get-expert-guidance"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -386,7 +387,7 @@ export function ExpertGuidance() {
       {/* Feature cards */}
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {CARDS.map((c, i) => (
-          <motion.div
+          <m.div
             key={c.title}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -399,9 +400,10 @@ export function ExpertGuidance() {
             </span>
             <h3 className="font-semibold">{c.title}</h3>
             <p className="mt-1 text-sm text-muted-foreground">{c.desc}</p>
-          </motion.div>
+          </m.div>
         ))}
       </div>
-    </motion.section>
+      </m.section>
+    </MotionProvider>
   );
 }
