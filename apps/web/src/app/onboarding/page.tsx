@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import { MotionProvider, m } from '@/components/motion';
 import { ShieldCheck } from 'lucide-react';
 import { INTEREST_OPTIONS } from '@edubridge/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,7 +71,8 @@ export default function OnboardingPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-accent/20 px-4 py-10">
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg">
+      <MotionProvider>
+      <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg">
         <Card>
           <CardHeader>
             <div className="mb-2 flex gap-1">
@@ -207,7 +208,8 @@ export default function OnboardingPage() {
             )}
           </CardContent>
         </Card>
-      </motion.div>
+      </m.div>
+      </MotionProvider>
     </div>
   );
 }

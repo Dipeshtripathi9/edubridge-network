@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { MotionProvider, m } from '@/components/motion';
 import { Award, CalendarClock, GraduationCap, IndianRupee, Repeat, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,8 +14,9 @@ function MatchCard({ match }: { match: EligibleMatch }) {
   const createJourney = useCreateJourney();
   const { college, requirement, cgpaHeadroom } = match;
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-      <Card>
+    <MotionProvider>
+      <m.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+        <Card>
         <CardContent className="p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -73,7 +74,8 @@ function MatchCard({ match }: { match: EligibleMatch }) {
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+      </m.div>
+    </MotionProvider>
   );
 }
 
