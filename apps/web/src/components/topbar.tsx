@@ -5,6 +5,7 @@ import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { InstallAppButton } from '@/components/install-app-button';
 import { MobileNav } from '@/components/mobile-nav';
 import { GlobalSearch } from '@/components/global-search';
 import { NotificationBell } from '@/components/notification-bell';
@@ -24,6 +25,7 @@ export function Topbar() {
       <MobileNav />
       <GlobalSearch />
       <div className="ml-auto flex items-center gap-1">
+        <InstallAppButton />
         <ThemeToggle />
         {loggedIn ? (
           <>
