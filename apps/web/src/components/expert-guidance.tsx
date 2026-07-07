@@ -11,13 +11,14 @@ import {
   CheckCircle2,
   GraduationCap,
   Headset,
-  Phone,
+  Home,
   Quote,
   ShieldCheck,
   Sparkles,
   Star,
-  Target,
   TrendingUp,
+  Trophy,
+  Users,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -31,30 +32,42 @@ import { cn } from '@/lib/utils';
 // '/hero-students.png'. While null, the premium product collage is shown.
 const HERO_IMAGE: string | null = '/hero-students.jpg';
 
+// Quick-access shortcuts under the hero — icon, label, sublabel and where each goes.
 const CARDS = [
   {
-    icon: Headset,
+    icon: GraduationCap,
     tone: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
-    title: '1:1 Expert Guidance',
-    desc: 'Talk directly with our verified education experts over call or live chat — personalised counselling for choosing the right course, college, career path, admission, scholarships & future planning.',
+    title: 'Find Colleges',
+    sub: 'Compare & Explore',
+    href: '/colleges',
   },
   {
-    icon: ShieldCheck,
+    icon: Briefcase,
     tone: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-    title: 'Real Student Reviews',
-    desc: 'Verified reviews from real students on placements, faculty, hostel, campus life, fees, ROI, internships, attendance, culture & academics. No fake reviews — ever.',
+    title: 'Internships',
+    sub: 'Find Opportunities',
+    href: '/opportunities?type=INTERNSHIP',
   },
   {
-    icon: TrendingUp,
-    tone: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-    title: 'Data-Driven Insights',
-    desc: 'Verified college insights from real student data: placement stats, average & highest package, fees, ROI, internships, satisfaction, hostel ratings, infrastructure & faculty — in clean visualisations.',
-  },
-  {
-    icon: Target,
+    icon: Users,
     tone: 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
-    title: 'Personalized Guidance',
-    desc: 'Recommendations tailored to each student — course interest, location, marks, budget & category. Our experts connect over call or chat and suggest colleges that fit your profile.',
+    title: 'Communities',
+    sub: 'Join & Discuss',
+    href: '/communities',
+  },
+  {
+    icon: Home,
+    tone: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    title: 'Find PGs',
+    sub: 'EZ RentBuddy',
+    href: '/startups/ez-rentbuddy',
+  },
+  {
+    icon: Trophy,
+    tone: 'bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400',
+    title: 'Scholarships',
+    sub: 'Apply & Win',
+    href: '/opportunities?type=SCHOLARSHIP',
   },
 ];
 
@@ -323,7 +336,7 @@ function GuidanceForm({ onDone }: { onDone: () => void }) {
   );
 }
 
-const TRUST = ['Verified students', 'Real college data', 'No AI predictions'];
+const TRUST = ['Verified Students', 'Real College Data', 'No Paid Rankings'];
 
 export function ExpertGuidance() {
   const [open, setOpen] = useState(false);
@@ -343,30 +356,29 @@ export function ExpertGuidance() {
             <ShieldCheck className="h-3.5 w-3.5" /> Experts &amp; verified students
           </span>
           <h2 className="mt-3 text-2xl font-bold leading-tight tracking-tight [text-wrap:balance] sm:text-3xl lg:text-4xl">
-            Choose the right course.{' '}
+            From Choosing Your Future{' '}
             <br className="hidden sm:block" />
-            Find the right college.{' '}
-            <br className="hidden sm:block" />
+            to{' '}
             <span className="bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent">
-              Build the right future.
+              Building Your Career
             </span>
           </h2>
           <p className="mt-4 max-w-xl text-muted-foreground">
-            Expert guidance, verified student reviews and real college insights help you decide with confidence — and
-            after admission we keep supporting you with scholarships, internships, communities &amp; career
-            opportunities.
+            Verified college insights, real student reviews and opportunities that matter.
           </p>
 
           <div className="mt-5 flex flex-wrap gap-3">
+            <Button asChild size="lg">
+              <Link href="/colleges">
+                Explore Colleges <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
             {!open && (
               // Expert Guidance is open to everyone — no login or verification needed.
-              <Button size="lg" onClick={() => setOpen(true)}>
-                <Phone className="h-4 w-4" /> Get Expert Guidance
+              <Button size="lg" variant="outline" onClick={() => setOpen(true)}>
+                <Headset className="h-4 w-4" /> Ask an Expert
               </Button>
             )}
-            <Button asChild size="lg" variant="outline">
-              <Link href="/communities">Explore Communities</Link>
-            </Button>
           </div>
 
           <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2">
@@ -384,8 +396,8 @@ export function ExpertGuidance() {
 
       {open && <GuidanceForm onDone={() => setOpen(false)} />}
 
-      {/* Feature cards */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Quick-access shortcut cards */}
+      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {CARDS.map((c, i) => (
           <m.div
             key={c.title}
@@ -393,13 +405,17 @@ export function ExpertGuidance() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: i * 0.08 }}
             whileHover={{ y: -4 }}
-            className="group rounded-3xl border border-border bg-background/70 p-5 backdrop-blur transition-shadow hover:shadow-lg"
           >
-            <span className={cn('mb-3 flex h-12 w-12 items-center justify-center rounded-full', c.tone)}>
-              <c.icon className="h-6 w-6" />
-            </span>
-            <h3 className="font-semibold">{c.title}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">{c.desc}</p>
+            <Link
+              href={c.href}
+              className="group flex h-full flex-col items-center gap-2 rounded-3xl border border-border bg-background/70 p-5 text-center backdrop-blur transition-shadow hover:shadow-lg"
+            >
+              <span className={cn('flex h-14 w-14 items-center justify-center rounded-full', c.tone)}>
+                <c.icon className="h-7 w-7" />
+              </span>
+              <h3 className="font-semibold">{c.title}</h3>
+              <p className="text-xs text-muted-foreground">{c.sub}</p>
+            </Link>
           </m.div>
         ))}
       </div>
