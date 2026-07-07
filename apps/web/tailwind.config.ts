@@ -18,8 +18,16 @@ const config: Config = {
         accent: { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' },
         destructive: { DEFAULT: 'hsl(var(--destructive))', foreground: 'hsl(var(--destructive-foreground))' },
         card: { DEFAULT: 'hsl(var(--card))', foreground: 'hsl(var(--card-foreground))' },
+        // Brand accents. Green is reserved for verified/trust elements only.
+        marigold: { DEFAULT: 'hsl(var(--marigold))', soft: 'hsl(var(--marigold-soft))' },
+        green: { DEFAULT: 'hsl(var(--green))', soft: 'hsl(var(--green-soft))' },
+        'violet-deep': 'hsl(var(--violet-deep))',
       },
       borderRadius: { lg: 'var(--radius)', md: 'calc(var(--radius) - 2px)', sm: 'calc(var(--radius) - 4px)' },
+      fontFamily: {
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
+      },
     },
   },
   plugins: [require('@tailwindcss/typography')],

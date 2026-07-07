@@ -3,45 +3,62 @@
 @tailwind utilities;
 
 @layer base {
+  /* ---- EduBridge brand tokens ----
+     paper #F6F4EE · ink #1A1433 · violet #5A31F4 · marigold #F2A31B ·
+     green #0E8A5C (verified/trust only) · line #E6E1D3. Everything downstream
+     (bg-background, text-foreground, bg-primary, border-border…) re-skins from here. */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 4%;
+    --background: 45 30% 95%; /* --paper ivory, never pure white */
+    --foreground: 252 44% 14%; /* --ink */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
-    --primary: 250 84% 60%;
+    --card-foreground: 252 44% 14%;
+    --primary: 253 89% 57%; /* --violet */
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 6% 10%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
-    --accent: 250 84% 96%;
-    --accent-foreground: 250 84% 40%;
+    --secondary: 44 24% 92%;
+    --secondary-foreground: 252 30% 20%;
+    --muted: 44 24% 92%;
+    --muted-foreground: 252 16% 38%; /* --ink-2 */
+    --accent: 254 100% 96%; /* --violet-soft */
+    --accent-foreground: 253 70% 45%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 250 84% 60%;
-    --radius: 0.75rem;
+    --border: 44 28% 86%; /* --line */
+    --input: 44 28% 86%;
+    --ring: 253 89% 57%;
+    --radius: 1.05rem;
+
+    /* Brand accents — usable as marigold/green utilities. Green = verified only. */
+    --marigold: 38 89% 53%;
+    --marigold-soft: 40 88% 92%;
+    --green: 158 82% 30%;
+    --green-soft: 147 44% 92%;
+    --violet-deep: 252 69% 23%;
   }
 
   .dark {
-    --background: 240 10% 8%;
-    --foreground: 240 9% 92%;
-    --card: 240 8% 11%;
-    --card-foreground: 240 9% 92%;
-    --primary: 250 70% 68%;
-    --primary-foreground: 240 12% 10%;
-    --secondary: 240 6% 17%;
-    --secondary-foreground: 240 9% 92%;
-    --muted: 240 6% 17%;
-    --muted-foreground: 240 5% 64%;
-    --accent: 250 32% 22%;
-    --accent-foreground: 250 60% 86%;
+    --background: 252 45% 9%; /* ink-deep ground */
+    --foreground: 45 30% 92%;
+    --card: 252 40% 13%;
+    --card-foreground: 45 30% 92%;
+    --primary: 253 92% 70%;
+    --primary-foreground: 252 45% 10%;
+    --secondary: 252 24% 18%;
+    --secondary-foreground: 45 30% 92%;
+    --muted: 252 24% 18%;
+    --muted-foreground: 252 14% 66%;
+    --accent: 253 40% 24%;
+    --accent-foreground: 254 80% 88%;
     --destructive: 0 62% 50%;
-    --destructive-foreground: 240 9% 92%;
-    --border: 240 6% 20%;
-    --input: 240 6% 20%;
-    --ring: 250 70% 68%;
+    --destructive-foreground: 45 30% 92%;
+    --border: 252 20% 22%;
+    --input: 252 20% 22%;
+    --ring: 253 92% 70%;
+
+    --marigold: 38 92% 58%;
+    --marigold-soft: 38 40% 22%;
+    --green: 158 64% 44%;
+    --green-soft: 158 40% 20%;
+    --violet-deep: 252 69% 23%;
   }
 
   * {
@@ -55,6 +72,15 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+  /* Bricolage Grotesque carries every heading — the brand display voice. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
   /* Soft ambient wash on its own composited, fixed layer. Painting it via a
      fixed pseudo-element (instead of `background-attachment: fixed` on body)
