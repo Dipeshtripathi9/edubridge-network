@@ -48,11 +48,13 @@ export default function SignupPage() {
       },
       {
         onSuccess: (res) => {
-          // Google-verified signup returns tokens — sign the user straight in.
+          // Google-verified signup returns tokens — sign the user straight in and
+          // drop them right into the app (profile setup / campus verification stay
+          // optional and can be done later from the dashboard).
           if (res.tokens) {
             setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
             toast.success('Account created 🎉');
-            router.push('/onboarding');
+            router.push('/home');
             return;
           }
           // Fallback (no Google configured): email-verification flow.

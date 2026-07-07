@@ -50,10 +50,10 @@ export function useVerifyEmail() {
   return useMutation({
     mutationFn: (token: string) => api.post<AuthResult>('/auth/verify-email', { token }, { auth: false }),
     // Verifying the email activates the account AND signs the user in — they go
-    // straight to onboarding, never back to a manual login screen.
+    // straight into the app, never back to a manual login screen.
     onSuccess: (res) => {
       setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
-      router.push('/onboarding');
+      router.push('/home');
     },
   });
 }
@@ -112,7 +112,7 @@ export function useVerifyOtp() {
       api.post<AuthResult>('/auth/otp/verify', input, { auth: false }),
     onSuccess: (res) => {
       setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
-      router.push('/onboarding');
+      router.push('/home');
     },
   });
 }
