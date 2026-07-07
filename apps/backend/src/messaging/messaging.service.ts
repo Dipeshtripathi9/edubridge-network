@@ -16,19 +16,34 @@ export class MessagingService {
   ) {}
 
   // ---------------- Presence (Redis ref-counted) ----------------
+  // Presence is best-effort — a Redis hiccup (or a connection torn down during
+  // shutdown) must never throw into a socket connect/disconnect handler, or it
+  // surfaces as an unhandled rejection.
   async addPresence(userId: string): Promise<number> {
-    return this.redis.client.incr(`presence:${userId}`);
+    try {
+      return await this.redis.client.incr(`presence:${userId}`);
+    } catch {
+      return 1;
+    }
   }
 
   async removePresence(userId: string): Promise<number> {
-    const n = await this.redis.client.decr(`presence:${userId}`);
-    if (n <= 0) await this.redis.client.del(`presence:${userId}`);
-    return Math.max(0, n);
+    try {
+      const n = await this.redis.client.decr(`presence:${userId}`);
+      if (n <= 0) await this.redis.client.del(`presence:${userId}`);
+      return Math.max(0, n);
+    } catch {
+      return 0;
+    }
   }
 
   async isOnline(userId: string): Promise<boolean> {
-    const v = await this.redis.client.get(`presence:${userId}`);
-    return !!v && parseInt(v, 10) > 0;
+    try {
+      const v = await this.redis.client.get(`presence:${userId}`);
+      return !!v && parseInt(v, 10) > 0;
+    } catch {
+      return false;
+    }
   }
 
   /** Account still allowed to use realtime (mirrors the HTTP JwtStrategy check). */
