@@ -352,10 +352,7 @@ export function ExpertGuidance() {
       {/* Hero */}
       <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:items-center">
         <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <ShieldCheck className="h-3.5 w-3.5" /> Experts &amp; verified students
-          </span>
-          <h2 className="mt-3 text-2xl font-bold leading-tight tracking-tight [text-wrap:balance] sm:text-3xl lg:text-4xl">
+          <h2 className="text-2xl font-bold leading-tight tracking-tight [text-wrap:balance] sm:text-3xl lg:text-4xl">
             From Choosing Your Future{' '}
             <br className="hidden sm:block" />
             to{' '}
