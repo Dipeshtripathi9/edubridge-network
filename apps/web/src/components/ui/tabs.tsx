@@ -13,7 +13,10 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      'inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
+      // min-height (not fixed height) so a `flex-wrap` tab bar with many tabs can
+      // grow onto multiple rows on narrow/mobile screens instead of overlapping.
+      // Single-row tab bars are unchanged (content fits the 2.5rem minimum).
+      'inline-flex min-h-[2.5rem] items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
       className,
     )}
     {...props}
