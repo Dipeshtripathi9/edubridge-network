@@ -44,6 +44,17 @@ export function initials(name?: string | null): string {
     .join('');
 }
 
+/** Strip leading emoji / symbol decorations from a display name so the UI reads
+ *  as one clean brand voice (no emojis). Falls back to the original if a name is
+ *  entirely emoji. Names still keep any emoji they contain mid-string untouched. */
+export function cleanName(name?: string | null): string {
+  if (!name) return '';
+  const stripped = name
+    .replace(/^[\p{Extended_Pictographic}️‍☀-➿\s]+/u, '')
+    .trim();
+  return stripped || name.trim();
+}
+
 /** Dedupe a list of objects by their `id` (keeps first occurrence). Guards against
  * duplicate React keys when paginated infinite-query pages overlap. */
 export function uniqueById<T extends { id: string }>(items: T[]): T[] {

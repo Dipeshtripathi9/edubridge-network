@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth.store';
 import { type Community, useJoinCommunity } from '@/hooks/use-communities';
-import { seededCollegeMembers, seededInterestMembers, seededStartupMembers } from '@/lib/utils';
+import { cleanName, seededCollegeMembers, seededInterestMembers, seededStartupMembers } from '@/lib/utils';
 
 export function CommunityCard({ community }: { community: Community }) {
   const join = useJoinCommunity(community.slug);
@@ -45,7 +45,7 @@ export function CommunityCard({ community }: { community: Community }) {
         <CardContent className="flex h-full flex-col gap-3 p-5">
           <div className="flex items-start justify-between">
             <div>
-              <span className="font-semibold">{community.name}</span>
+              <span className="font-semibold">{cleanName(community.name)}</span>
               <Badge variant="secondary" className="ml-2">
                 {community.type === 'COLLEGE'
                   ? 'College'

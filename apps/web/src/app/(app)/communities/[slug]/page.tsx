@@ -10,7 +10,7 @@ import { CommunityMonitor } from '@/components/community-monitor';
 import { CommunitySections } from '@/components/community-sections';
 import { ApplyHead } from '@/components/apply-head';
 import { isCommunityManager, useCommunity, useJoinCommunity } from '@/hooks/use-communities';
-import { seededCollegeMembers, seededInterestMembers, seededStartupMembers } from '@/lib/utils';
+import { cleanName, seededCollegeMembers, seededInterestMembers, seededStartupMembers } from '@/lib/utils';
 import { useMe } from '@/hooks/use-profile';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -48,7 +48,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         <div className="flex items-center justify-between p-5">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold">{community.name}</h1>
+              <h1 className="text-xl font-bold">{cleanName(community.name)}</h1>
               <Badge variant="secondary">
                 {community.type === 'COLLEGE'
                   ? 'College'
