@@ -1,269 +1,126 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { MotionProvider, m } from '@/components/motion';
-import {
-  ArrowRight,
-  Award,
-  Briefcase,
-  CheckCircle2,
-  GraduationCap,
-  Headset,
-  Home,
-  Quote,
-  ShieldCheck,
-  Sparkles,
-  Star,
-  TrendingUp,
-  Trophy,
-  Users,
-} from 'lucide-react';
+import { ArrowRight, CheckCircle2, GraduationCap, Phone, ShieldCheck, Star, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { MotionProvider, m } from '@/components/motion';
 import { useSubmitMentorRequest } from '@/hooks/use-mentors';
 import { cn } from '@/lib/utils';
 
-// To use a real generated photo as the centerpiece, drop the file into
-// apps/web/public (e.g. hero-students.png) and set this to its path, e.g.
-// '/hero-students.png'. While null, the premium product collage is shown.
-const HERO_IMAGE: string | null = '/hero-students.jpg';
+const TRUST = ['Verified students', 'Real college data', 'No AI predictions'];
 
-// Quick-access shortcuts under the hero — icon, label, sublabel and where each goes.
-const CARDS = [
-  {
-    icon: GraduationCap,
-    tone: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-    title: 'Find Colleges',
-    sub: 'Compare & Explore',
-    href: '/colleges',
-  },
-  {
-    icon: Briefcase,
-    tone: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-    title: 'Internships',
-    sub: 'Find Opportunities',
-    href: '/opportunities?type=INTERNSHIP',
-  },
-  {
-    icon: Users,
-    tone: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    title: 'Communities',
-    sub: 'Join & Discuss',
-    href: '/communities',
-  },
-  {
-    icon: Home,
-    tone: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-    title: 'Find PGs',
-    sub: 'EZ RentBuddy',
-    href: '/startups/ez-rentbuddy',
-  },
-  {
-    icon: Trophy,
-    tone: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-    title: 'Scholarships',
-    sub: 'Apply & Win',
-    href: '/opportunities?type=SCHOLARSHIP',
-  },
+// The three verified-data bars in the proof card (label, value, width, gold?).
+const BARS: { label: string; value: string; w: string; gold?: boolean }[] = [
+  { label: 'Avg package', value: '₹8.2 L', w: '64%' },
+  { label: 'Highest package', value: '₹52 L', w: '90%', gold: true },
+  { label: 'Placement rate', value: '92%', w: '92%' },
 ];
 
-function Float({ children, className, delay = 0, rotate = 0 }: { children: React.ReactNode; className: string; delay?: number; rotate?: number }) {
+/** Floating glass chip around the proof card — gently bobs up and down. */
+function Chip({
+  className,
+  delay,
+  children,
+}: {
+  className: string;
+  delay: number;
+  children: React.ReactNode;
+}) {
   return (
     <m.div
-      className={cn('absolute', className)}
-      initial={{ opacity: 0, y: 14, rotate }}
-      animate={{ opacity: 1, y: 0, rotate }}
-      transition={{ duration: 0.55, delay }}
+      animate={{ y: [0, -9, 0] }}
+      transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay }}
+      className={cn(
+        'absolute z-10 flex items-center gap-2.5 rounded-2xl border border-border bg-card px-3.5 py-2.5 shadow-[0_2px_4px_rgba(26,20,51,.06),0_20px_44px_-18px_rgba(36,18,99,.24)]',
+        className,
+      )}
     >
-      <m.div animate={{ y: [0, -7, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay }}>
-        {children}
-      </m.div>
+      {children}
     </m.div>
   );
 }
 
-function Pill({ icon: Icon, label, tone, className, delay }: { icon: typeof Award; label: string; tone: string; className: string; delay: number }) {
+// The verified-college insight card + four floating proof chips.
+function ProofCollage() {
   return (
-    <Float className={className} delay={delay}>
-      <div className="flex items-center gap-1.5 rounded-full border border-white/60 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200">
-        <Icon className={cn('h-3.5 w-3.5', tone)} /> {label}
-      </div>
-    </Float>
-  );
-}
-
-function ProductCollage() {
-  return (
-    <div className="relative mx-auto aspect-square w-full max-w-md">
-      {/* gradient mesh + dotted nodes */}
-      <div className="absolute inset-0 overflow-hidden rounded-[2rem]">
-        <div className="absolute -left-8 -top-8 h-44 w-44 rounded-full bg-violet-500/25 blur-3xl" />
-        <div className="absolute -right-6 top-12 h-40 w-40 rounded-full bg-violet-500/20 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-44 w-44 rounded-full bg-emerald-500/20 blur-3xl" />
-        <svg className="absolute inset-0 h-full w-full text-violet-400/30 dark:text-violet-400/15" fill="none">
-          <defs>
-            <pattern id="eg-dots" width="24" height="24" patternUnits="userSpaceOnUse">
-              <circle cx="2" cy="2" r="1.3" fill="currentColor" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#eg-dots)" />
-          <path d="M60 80 Q 180 40 300 120" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 5" fill="none" />
-          <path d="M50 260 Q 180 300 320 230" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 5" fill="none" />
-        </svg>
-      </div>
-
-      {/* back: college insights dashboard (real data) */}
-      <Float className="left-3 top-6 w-60" delay={0.1} rotate={-5}>
-        <div className="rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-2xl backdrop-blur dark:border-slate-700 dark:bg-slate-800/95">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-100">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-violet-600 text-white">
-                <GraduationCap className="h-3.5 w-3.5" />
-              </span>
-              College Insights
-            </span>
-            <span className="flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-bold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
-              <CheckCircle2 className="h-2.5 w-2.5" /> Verified
-            </span>
-          </div>
-          <div className="flex items-end gap-1.5 rounded-lg bg-slate-50 p-2 dark:bg-slate-700/50">
-            {[45, 70, 55, 85, 75, 95].map((h, i) => (
-              <m.span
-                key={i}
-                initial={{ height: 4 }}
-                animate={{ height: `${h}%` }}
-                transition={{ duration: 0.6, delay: 0.3 + i * 0.08 }}
-                style={{ height: `${h}%` }}
-                className="w-full rounded-sm bg-gradient-to-t from-violet-500 to-violet-400"
-              />
-            ))}
-          </div>
-          <div className="mt-2 grid grid-cols-3 gap-1.5 text-center">
-            {[['92%', 'Placed'], ['₹12L', 'Avg pkg'], ['4.6★', 'Rating']].map(([v, l]) => (
-              <div key={l} className="rounded-md bg-slate-50 py-1 dark:bg-slate-700/50">
-                <p className="text-xs font-bold text-violet-600 dark:text-violet-400">{v}</p>
-                <p className="text-[8px] text-slate-500 dark:text-slate-400">{l}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Float>
-
-      {/* front: expert guidance chat */}
-      <Float className="bottom-6 left-1 w-52" delay={0.35} rotate={4}>
-        <div className="rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-2xl backdrop-blur dark:border-slate-700 dark:bg-slate-800/95">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-violet-600 text-white">
-              <Headset className="h-4 w-4" />
-            </span>
-            <div>
-              <p className="text-xs font-bold text-slate-800 dark:text-slate-100">Expert Counselor</p>
-              <p className="flex items-center gap-1 text-[9px] text-emerald-600">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Online now
-              </p>
-            </div>
-          </div>
-          <div className="mt-2 space-y-1.5">
-            <p className="ml-auto w-fit rounded-2xl rounded-br-sm bg-violet-600 px-2.5 py-1 text-[10px] text-white">Which course suits me?</p>
-            <p className="w-fit rounded-2xl rounded-bl-sm bg-slate-100 px-2.5 py-1 text-[10px] text-slate-700 dark:bg-slate-700 dark:text-slate-200">
-              Based on your marks & budget — here are 3 great fits 👇
-            </p>
-          </div>
-        </div>
-      </Float>
-
-      {/* verified student review */}
-      <Float className="right-1 top-2 w-48" delay={0.5} rotate={5}>
-        <div className="rounded-2xl border border-emerald-200 bg-white/95 p-3 shadow-2xl backdrop-blur dark:border-emerald-500/30 dark:bg-slate-800/95">
-          <div className="flex items-center gap-1.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-[10px] font-bold text-white">A</span>
-            <div className="flex-1">
-              <div className="flex items-center gap-0.5">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-              <p className="flex items-center gap-0.5 text-[8px] font-semibold text-emerald-600">
-                <ShieldCheck className="h-2.5 w-2.5" /> Verified student
-              </p>
-            </div>
-          </div>
-          <p className="mt-1.5 flex gap-1 text-[10px] leading-snug text-slate-600 dark:text-slate-300">
-            <Quote className="h-3 w-3 shrink-0 text-slate-300" /> Great placements & honest faculty. Hostel could be better.
-          </p>
-        </div>
-      </Float>
-
-      {/* opportunity pills */}
-      <Pill icon={Award} label="Scholarships" tone="text-amber-500" className="right-2 bottom-20" delay={0.7} />
-      <Pill icon={Briefcase} label="Internships" tone="text-amber-600" className="right-6 bottom-8" delay={0.9} />
-      <Pill icon={Sparkles} label="Growth" tone="text-violet-600" className="left-1/2 top-1 -translate-x-1/2" delay={1.1} />
-    </div>
-  );
-}
-
-// Real photo as the centerpiece, with premium floating SaaS cards overlaid.
-function PhotoScene() {
-  return (
-    <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[2rem] border border-border shadow-xl">
-      <Image src={HERO_IMAGE as string} alt="Students choosing their college with EduBridge" fill className="object-cover transition dark:brightness-[0.82]" sizes="(max-width:768px) 100vw, 28rem" priority />
-      {/* legibility gradient — a touch stronger in dark mode so the photo doesn't glare */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-transparent to-violet-900/15 dark:from-slate-950/65 dark:via-slate-950/10 dark:to-slate-950/30" />
-
-      {/* expert-online chip */}
-      <Float className="left-3 top-3" delay={0.2}>
-        <div className="flex items-center gap-1.5 rounded-2xl border border-white/60 bg-white/85 px-2.5 py-1.5 shadow-lg backdrop-blur dark:bg-slate-900/80">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 text-white">
-            <Headset className="h-3.5 w-3.5" />
+    <div className="relative mx-auto aspect-[10/10.6] w-full max-w-[460px]">
+      {/* Center: Bennett insight card */}
+      <div className="absolute inset-x-[8%] bottom-[14%] top-[16%] flex flex-col gap-4 rounded-3xl border border-border bg-card p-6 shadow-[0_2px_4px_rgba(26,20,51,.06),0_20px_44px_-18px_rgba(36,18,99,.24)]">
+        <div className="flex items-center gap-3">
+          <span className="grid h-11 w-11 flex-none place-items-center rounded-[14px] bg-accent text-primary">
+            <GraduationCap className="h-[22px] w-[22px]" />
           </span>
           <div className="leading-tight">
-            <p className="text-[11px] font-bold text-slate-800 dark:text-slate-100">Expert Counselor</p>
-            <p className="flex items-center gap-1 text-[9px] text-emerald-600"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Online now</p>
+            <b className="block font-display text-[16.5px] font-bold tracking-tight">Bennett University</b>
+            <span className="text-xs font-semibold text-muted-foreground">B.Tech CSE · Greater Noida</span>
           </div>
         </div>
-      </Float>
 
-      {/* verified review chip */}
-      <Float className="bottom-3 left-3" delay={0.4}>
-        <div className="flex items-center gap-1.5 rounded-2xl border border-emerald-300/70 bg-white/85 px-2.5 py-1.5 shadow-lg backdrop-blur dark:bg-slate-900/80">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
-            <ShieldCheck className="h-3.5 w-3.5" />
-          </span>
-          <div className="leading-tight">
-            <div className="flex items-center gap-0.5">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
-              ))}
+        <div className="flex flex-1 flex-col justify-center gap-3.5">
+          {BARS.map((b, i) => (
+            <div key={b.label} className="flex flex-col gap-1.5">
+              <div className="flex justify-between text-xs font-semibold text-muted-foreground">
+                <span>{b.label}</span>
+                <b className="font-mono text-xs text-foreground">{b.value}</b>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-secondary">
+                <m.span
+                  initial={{ width: 0 }}
+                  animate={{ width: b.w }}
+                  transition={{ duration: 1.1, delay: 0.2 + i * 0.12, ease: [0.2, 0.7, 0.2, 1] }}
+                  className={cn(
+                    'block h-full rounded-full',
+                    b.gold
+                      ? 'bg-gradient-to-r from-marigold to-amber-300'
+                      : 'bg-gradient-to-r from-primary to-violet-400',
+                  )}
+                />
+              </div>
             </div>
-            <p className="text-[9px] font-semibold text-slate-600 dark:text-slate-300">Verified student reviews</p>
-          </div>
+          ))}
         </div>
-      </Float>
 
-      {/* data chip */}
-      <Float className="right-3 top-3" delay={0.55}>
-        <div className="flex items-center gap-1.5 rounded-2xl border border-white/60 bg-white/85 px-2.5 py-1.5 shadow-lg backdrop-blur dark:bg-slate-900/80">
-          <TrendingUp className="h-4 w-4 text-violet-600" />
-          <div className="leading-tight">
-            <p className="text-[11px] font-bold text-violet-600 dark:text-violet-400">₹12L avg</p>
-            <p className="text-[9px] text-slate-500 dark:text-slate-400">Real placement data</p>
-          </div>
+        <div className="flex items-center gap-2 rounded-xl bg-green-soft px-3 py-2.5 text-xs font-semibold text-green">
+          <ShieldCheck className="h-4 w-4 flex-none" />
+          Data from 47 verified Bennett students
         </div>
-      </Float>
+      </div>
 
-      {/* opportunity pills */}
-      <Pill icon={Award} label="Scholarships" tone="text-amber-500" className="right-3 bottom-14" delay={0.7} />
-      <Pill icon={Briefcase} label="Internships" tone="text-amber-600" className="right-6 bottom-4" delay={0.9} />
+      {/* Floating chips */}
+      <Chip className="left-[-2%] top-[2%]" delay={0.2}>
+        <span className="h-2 w-2 flex-none rounded-full bg-green shadow-[0_0_0_4px_rgba(14,138,92,.16)]" />
+        <span className="text-[13px] font-bold leading-tight">
+          Expert counselor
+          <small className="block text-[11px] font-semibold text-muted-foreground">Online now</small>
+        </span>
+      </Chip>
+      <Chip className="right-[-3%] top-[6%]" delay={1.4}>
+        <TrendingUp className="h-4 w-4 flex-none text-primary" />
+        <span className="text-[13px] font-bold leading-tight">
+          ₹12L avg
+          <small className="block text-[11px] font-semibold text-muted-foreground">Real placement data</small>
+        </span>
+      </Chip>
+      <Chip className="bottom-[4%] left-[-3%]" delay={0.8}>
+        <span className="text-[13px] tracking-wide text-marigold">★★★★★</span>
+        <span className="text-[13px] font-bold leading-tight">
+          4.8
+          <small className="block text-[11px] font-semibold text-muted-foreground">Verified student reviews</small>
+        </span>
+      </Chip>
+      <Chip className="bottom-[1%] right-0" delay={2}>
+        <Star className="h-4 w-4 flex-none text-marigold" />
+        <span className="text-[13px] font-bold leading-tight">
+          Scholarships + internships
+          <small className="block text-[11px] font-semibold text-muted-foreground">Even after admission</small>
+        </span>
+      </Chip>
     </div>
   );
-}
-
-function HeroScene() {
-  return HERO_IMAGE ? <PhotoScene /> : <ProductCollage />;
 }
 
 function GuidanceForm({ onDone }: { onDone: () => void }) {
@@ -294,7 +151,7 @@ function GuidanceForm({ onDone }: { onDone: () => void }) {
     <m.div
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
-      className="mt-4 overflow-hidden rounded-2xl border border-primary/30 bg-background/70 p-5 backdrop-blur"
+      className="mt-5 overflow-hidden rounded-2xl border border-primary/30 bg-background/70 p-5 backdrop-blur"
     >
       <p className="mb-3 text-sm font-medium">Tell us about you — our expert will call or chat with personalised guidance.</p>
       <div className="grid gap-2 sm:grid-cols-2">
@@ -336,87 +193,79 @@ function GuidanceForm({ onDone }: { onDone: () => void }) {
   );
 }
 
-const TRUST = ['Verified Students', 'Real College Data', 'No Paid Rankings'];
-
 export function ExpertGuidance() {
   const [open, setOpen] = useState(false);
   return (
     <MotionProvider>
-      <m.section
+      <section
         id="get-expert-guidance"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="scroll-mt-20 rounded-3xl border border-border bg-gradient-to-br from-card to-accent/20 p-5 shadow-sm sm:p-8"
-    >
-      {/* Hero */}
-      <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:items-center">
-        <div>
-          <h2 className="text-2xl font-bold leading-tight tracking-tight [text-wrap:balance] sm:text-3xl lg:text-4xl">
-            From Choosing Your Future{' '}
-            <br className="hidden sm:block" />
-            to{' '}
-            <span className="bg-gradient-to-r from-violet-600 to-violet-500 bg-clip-text text-transparent">
-              Building Your Career
+        className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-card to-accent/30 p-5 shadow-sm sm:p-8 lg:p-10"
+      >
+        {/* soft brand glows */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            backgroundImage:
+              'radial-gradient(50% 60% at 78% 12%, hsl(var(--primary)/.10), transparent 62%), radial-gradient(44% 52% at 6% 66%, hsl(var(--marigold)/.12), transparent 60%)',
+          }}
+        />
+        <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_.95fr]">
+          {/* Text column */}
+          <div>
+            <span className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-border bg-card py-2 pl-2 pr-4 text-[13.5px] font-semibold text-muted-foreground shadow-sm">
+              <span className="grid h-6 w-6 place-items-center rounded-full bg-accent text-primary">
+                <GraduationCap className="h-3.5 w-3.5" />
+              </span>
+              70+ verified colleges · Delhi NCR
             </span>
-          </h2>
-          <p className="mt-4 max-w-xl text-muted-foreground">
-            Verified college insights, real student reviews and opportunities that matter.
-          </p>
 
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link href="/colleges">
-                Explore Colleges <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-            {!open && (
-              // Expert Guidance is open to everyone — no login or verification needed.
-              <Button size="lg" variant="outline" onClick={() => setOpen(true)}>
-                <Headset className="h-4 w-4" /> Ask an Expert
+            <h1 className="font-display text-[clamp(30px,6vw,52px)] font-extrabold leading-[1.04] tracking-[-.028em]">
+              <span className="block">Choose the right course.</span>
+              <span className="block">Find the right college.</span>
+              <span className="relative inline-block text-primary">
+                Build the right future.
+                <svg
+                  className="absolute -bottom-2 left-0 h-3.5 w-full text-marigold"
+                  viewBox="0 0 300 20"
+                  preserveAspectRatio="none"
+                  aria-hidden
+                >
+                  <path d="M4 16 C 80 2, 220 2, 296 16" stroke="currentColor" strokeWidth="5" strokeLinecap="round" fill="none" />
+                </svg>
+              </span>
+            </h1>
+
+            <p className="mt-6 max-w-[490px] text-[17px] text-muted-foreground">
+              Not sure which course or college is right for you? Decide with confidence — <b className="font-bold text-foreground">real experts</b>, verified student reviews and actual placement data. And after admission, we stay with you: scholarships, internships, communities &amp; career support.
+            </p>
+
+            <div className="mt-7 flex flex-wrap gap-3">
+              {!open && (
+                <Button size="lg" onClick={() => setOpen(true)}>
+                  <Phone className="h-4 w-4" /> Get expert guidance
+                </Button>
+              )}
+              <Button asChild size="lg" variant="outline">
+                <Link href="/communities">Explore communities</Link>
               </Button>
-            )}
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
+              {TRUST.map((t) => (
+                <span key={t} className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+                  <CheckCircle2 className="h-[17px] w-[17px] text-green" /> {t}
+                </span>
+              ))}
+            </div>
+
+            {open && <GuidanceForm onDone={() => setOpen(false)} />}
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2">
-            {TRUST.map((t) => (
-              <span key={t} className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> {t}
-              </span>
-            ))}
-          </div>
+          {/* Proof collage */}
+          <ProofCollage />
         </div>
-
-        {/* hero scene */}
-        <HeroScene />
-      </div>
-
-      {open && <GuidanceForm onDone={() => setOpen(false)} />}
-
-      {/* Quick-access shortcut cards */}
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        {CARDS.map((c, i) => (
-          <m.div
-            key={c.title}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: i * 0.08 }}
-            whileHover={{ y: -4 }}
-          >
-            <Link
-              href={c.href}
-              className="group flex h-full flex-col items-center gap-2 rounded-3xl border border-border bg-background/70 p-5 text-center backdrop-blur transition-shadow hover:shadow-lg"
-            >
-              <span className={cn('flex h-14 w-14 items-center justify-center rounded-full', c.tone)}>
-                <c.icon className="h-7 w-7" />
-              </span>
-              <h3 className="font-semibold">{c.title}</h3>
-              <p className="text-xs text-muted-foreground">{c.sub}</p>
-            </Link>
-          </m.div>
-        ))}
-      </div>
-      </m.section>
+      </section>
     </MotionProvider>
   );
 }
