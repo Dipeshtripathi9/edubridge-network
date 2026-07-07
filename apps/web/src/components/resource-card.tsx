@@ -142,7 +142,7 @@ export function ResourceCard({
 
         <div className="flex items-center gap-1 border-t border-border pt-2 text-sm text-muted-foreground">
           <button
-            className={cn('flex items-center gap-1 px-1 hover:text-foreground', resource.likedByMe && 'text-rose-500')}
+            className={cn('flex items-center gap-1 px-1 hover:text-foreground', resource.likedByMe && 'text-amber-500')}
             onClick={() => like.mutate(resource.id)}
           >
             <Heart className={cn('h-4 w-4', resource.likedByMe && 'fill-current')} /> {resource.likeCount}

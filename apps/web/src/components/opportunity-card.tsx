@@ -14,12 +14,12 @@ import {
 } from '@/hooks/use-opportunities';
 
 const TYPE_COLORS: Record<string, string> = {
-  INTERNSHIP: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  INTERNSHIP: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
   SCHOLARSHIP: 'bg-green-500/10 text-green-600 dark:text-green-400',
   COMPETITION: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
   FELLOWSHIP: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-  RESEARCH: 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
-  CERTIFICATION: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
+  RESEARCH: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  CERTIFICATION: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
 };
 
 function deadlineLabel(deadline?: string | null) {

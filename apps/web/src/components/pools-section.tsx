@@ -76,7 +76,7 @@ export function PoolChat({
             </p>
           </div>
           <button
-            className={cn('flex items-center gap-1 px-1 text-sm text-muted-foreground hover:text-foreground', pool.likedByMe && 'text-rose-500')}
+            className={cn('flex items-center gap-1 px-1 text-sm text-muted-foreground hover:text-foreground', pool.likedByMe && 'text-amber-500')}
             title="Like"
             onClick={() => like.mutate(pool.id)}
           >
@@ -280,7 +280,7 @@ export function PoolsSection({ slug }: { slug: string }) {
                   <p className="flex min-w-0 items-center gap-1.5 font-medium">
                     <span className="truncate">{p.title}</span>
                     {!p.isFull && (p.memberCount >= 2 || (p.likeCount ?? 0) >= 1) && (
-                      <span className="shrink-0 rounded bg-orange-500/15 px-1.5 py-0.5 text-xs text-orange-600">
+                      <span className="shrink-0 rounded bg-amber-500/15 px-1.5 py-0.5 text-xs text-amber-600">
                         🔥 Trending
                       </span>
                     )}
