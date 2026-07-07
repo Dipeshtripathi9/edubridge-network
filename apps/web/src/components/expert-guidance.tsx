@@ -36,7 +36,7 @@ const HERO_IMAGE: string | null = '/hero-students.jpg';
 const CARDS = [
   {
     icon: GraduationCap,
-    tone: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
+    tone: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
     title: 'Find Colleges',
     sub: 'Compare & Explore',
     href: '/colleges',
@@ -50,21 +50,21 @@ const CARDS = [
   },
   {
     icon: Users,
-    tone: 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+    tone: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
     title: 'Communities',
     sub: 'Join & Discuss',
     href: '/communities',
   },
   {
     icon: Home,
-    tone: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    tone: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
     title: 'Find PGs',
     sub: 'EZ RentBuddy',
     href: '/startups/ez-rentbuddy',
   },
   {
     icon: Trophy,
-    tone: 'bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400',
+    tone: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
     title: 'Scholarships',
     sub: 'Apply & Win',
     href: '/opportunities?type=SCHOLARSHIP',
@@ -101,10 +101,10 @@ function ProductCollage() {
     <div className="relative mx-auto aspect-square w-full max-w-md">
       {/* gradient mesh + dotted nodes */}
       <div className="absolute inset-0 overflow-hidden rounded-[2rem]">
-        <div className="absolute -left-8 -top-8 h-44 w-44 rounded-full bg-indigo-500/25 blur-3xl" />
+        <div className="absolute -left-8 -top-8 h-44 w-44 rounded-full bg-violet-500/25 blur-3xl" />
         <div className="absolute -right-6 top-12 h-40 w-40 rounded-full bg-violet-500/20 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 h-44 w-44 rounded-full bg-emerald-500/20 blur-3xl" />
-        <svg className="absolute inset-0 h-full w-full text-indigo-400/30 dark:text-indigo-400/15" fill="none">
+        <svg className="absolute inset-0 h-full w-full text-violet-400/30 dark:text-violet-400/15" fill="none">
           <defs>
             <pattern id="eg-dots" width="24" height="24" patternUnits="userSpaceOnUse">
               <circle cx="2" cy="2" r="1.3" fill="currentColor" />
@@ -121,7 +121,7 @@ function ProductCollage() {
         <div className="rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-2xl backdrop-blur dark:border-slate-700 dark:bg-slate-800/95">
           <div className="mb-2 flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-100">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-indigo-500 to-blue-600 text-white">
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-violet-600 text-white">
                 <GraduationCap className="h-3.5 w-3.5" />
               </span>
               College Insights
@@ -138,14 +138,14 @@ function ProductCollage() {
                 animate={{ height: `${h}%` }}
                 transition={{ duration: 0.6, delay: 0.3 + i * 0.08 }}
                 style={{ height: `${h}%` }}
-                className="w-full rounded-sm bg-gradient-to-t from-indigo-500 to-blue-400"
+                className="w-full rounded-sm bg-gradient-to-t from-violet-500 to-violet-400"
               />
             ))}
           </div>
           <div className="mt-2 grid grid-cols-3 gap-1.5 text-center">
             {[['92%', 'Placed'], ['₹12L', 'Avg pkg'], ['4.6★', 'Rating']].map(([v, l]) => (
               <div key={l} className="rounded-md bg-slate-50 py-1 dark:bg-slate-700/50">
-                <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{v}</p>
+                <p className="text-xs font-bold text-violet-600 dark:text-violet-400">{v}</p>
                 <p className="text-[8px] text-slate-500 dark:text-slate-400">{l}</p>
               </div>
             ))}
@@ -157,7 +157,7 @@ function ProductCollage() {
       <Float className="bottom-6 left-1 w-52" delay={0.35} rotate={4}>
         <div className="rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-2xl backdrop-blur dark:border-slate-700 dark:bg-slate-800/95">
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-violet-600 text-white">
               <Headset className="h-4 w-4" />
             </span>
             <div>
@@ -168,7 +168,7 @@ function ProductCollage() {
             </div>
           </div>
           <div className="mt-2 space-y-1.5">
-            <p className="ml-auto w-fit rounded-2xl rounded-br-sm bg-indigo-600 px-2.5 py-1 text-[10px] text-white">Which course suits me?</p>
+            <p className="ml-auto w-fit rounded-2xl rounded-br-sm bg-violet-600 px-2.5 py-1 text-[10px] text-white">Which course suits me?</p>
             <p className="w-fit rounded-2xl rounded-bl-sm bg-slate-100 px-2.5 py-1 text-[10px] text-slate-700 dark:bg-slate-700 dark:text-slate-200">
               Based on your marks & budget — here are 3 great fits 👇
             </p>
@@ -180,7 +180,7 @@ function ProductCollage() {
       <Float className="right-1 top-2 w-48" delay={0.5} rotate={5}>
         <div className="rounded-2xl border border-emerald-200 bg-white/95 p-3 shadow-2xl backdrop-blur dark:border-emerald-500/30 dark:bg-slate-800/95">
           <div className="flex items-center gap-1.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-[10px] font-bold text-white">A</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-[10px] font-bold text-white">A</span>
             <div className="flex-1">
               <div className="flex items-center gap-0.5">
                 {[0, 1, 2, 3, 4].map((i) => (
@@ -199,9 +199,9 @@ function ProductCollage() {
       </Float>
 
       {/* opportunity pills */}
-      <Pill icon={Award} label="Scholarships" tone="text-rose-500" className="right-2 bottom-20" delay={0.7} />
+      <Pill icon={Award} label="Scholarships" tone="text-amber-500" className="right-2 bottom-20" delay={0.7} />
       <Pill icon={Briefcase} label="Internships" tone="text-amber-600" className="right-6 bottom-8" delay={0.9} />
-      <Pill icon={Sparkles} label="Growth" tone="text-indigo-600" className="left-1/2 top-1 -translate-x-1/2" delay={1.1} />
+      <Pill icon={Sparkles} label="Growth" tone="text-violet-600" className="left-1/2 top-1 -translate-x-1/2" delay={1.1} />
     </div>
   );
 }
@@ -212,12 +212,12 @@ function PhotoScene() {
     <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[2rem] border border-border shadow-xl">
       <Image src={HERO_IMAGE as string} alt="Students choosing their college with EduBridge" fill className="object-cover transition dark:brightness-[0.82]" sizes="(max-width:768px) 100vw, 28rem" priority />
       {/* legibility gradient — a touch stronger in dark mode so the photo doesn't glare */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-transparent to-indigo-900/15 dark:from-slate-950/65 dark:via-slate-950/10 dark:to-slate-950/30" />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-transparent to-violet-900/15 dark:from-slate-950/65 dark:via-slate-950/10 dark:to-slate-950/30" />
 
       {/* expert-online chip */}
       <Float className="left-3 top-3" delay={0.2}>
         <div className="flex items-center gap-1.5 rounded-2xl border border-white/60 bg-white/85 px-2.5 py-1.5 shadow-lg backdrop-blur dark:bg-slate-900/80">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 text-white">
             <Headset className="h-3.5 w-3.5" />
           </span>
           <div className="leading-tight">
@@ -230,7 +230,7 @@ function PhotoScene() {
       {/* verified review chip */}
       <Float className="bottom-3 left-3" delay={0.4}>
         <div className="flex items-center gap-1.5 rounded-2xl border border-emerald-300/70 bg-white/85 px-2.5 py-1.5 shadow-lg backdrop-blur dark:bg-slate-900/80">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
             <ShieldCheck className="h-3.5 w-3.5" />
           </span>
           <div className="leading-tight">
@@ -247,16 +247,16 @@ function PhotoScene() {
       {/* data chip */}
       <Float className="right-3 top-3" delay={0.55}>
         <div className="flex items-center gap-1.5 rounded-2xl border border-white/60 bg-white/85 px-2.5 py-1.5 shadow-lg backdrop-blur dark:bg-slate-900/80">
-          <TrendingUp className="h-4 w-4 text-indigo-600" />
+          <TrendingUp className="h-4 w-4 text-violet-600" />
           <div className="leading-tight">
-            <p className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">₹12L avg</p>
+            <p className="text-[11px] font-bold text-violet-600 dark:text-violet-400">₹12L avg</p>
             <p className="text-[9px] text-slate-500 dark:text-slate-400">Real placement data</p>
           </div>
         </div>
       </Float>
 
       {/* opportunity pills */}
-      <Pill icon={Award} label="Scholarships" tone="text-rose-500" className="right-3 bottom-14" delay={0.7} />
+      <Pill icon={Award} label="Scholarships" tone="text-amber-500" className="right-3 bottom-14" delay={0.7} />
       <Pill icon={Briefcase} label="Internships" tone="text-amber-600" className="right-6 bottom-4" delay={0.9} />
     </div>
   );
@@ -356,7 +356,7 @@ export function ExpertGuidance() {
             From Choosing Your Future{' '}
             <br className="hidden sm:block" />
             to{' '}
-            <span className="bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-violet-600 to-violet-500 bg-clip-text text-transparent">
               Building Your Career
             </span>
           </h2>

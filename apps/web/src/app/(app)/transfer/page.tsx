@@ -10,7 +10,7 @@ import { EligibilityChecker } from '@/components/eligibility-checker';
 import { useMyJourneys, useStories } from '@/hooks/use-transfer';
 
 const STATUS_VARIANT: Record<string, string> = {
-  EXPLORING: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  EXPLORING: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
   ELIGIBLE: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
   APPLIED: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
   COMPLETED: 'bg-green-500/10 text-green-600 dark:text-green-400',

@@ -29,10 +29,10 @@ import { useMyResourceBookmarks } from '@/hooks/use-resources';
 // Type → colored tile, so lists read at a glance.
 function communityVisual(type: Community['type']) {
   if (type === 'COLLEGE')
-    return { Icon: GraduationCap, tone: 'from-indigo-500 to-blue-600', label: 'College' };
+    return { Icon: GraduationCap, tone: 'from-violet-500 to-violet-600', label: 'College' };
   if (type === 'STARTUP')
-    return { Icon: Rocket, tone: 'from-violet-500 to-fuchsia-600', label: 'Startup' };
-  return { Icon: LayoutGrid, tone: 'from-sky-500 to-cyan-600', label: 'Interest' };
+    return { Icon: Rocket, tone: 'from-violet-500 to-violet-600', label: 'Startup' };
+  return { Icon: LayoutGrid, tone: 'from-violet-500 to-violet-600', label: 'Interest' };
 }
 
 function StatCard({
@@ -190,7 +190,7 @@ export default function HomePage() {
           value={loggedIn ? joined.length : allCommunities.length}
           hint={loggedIn ? 'You have joined' : 'Browse communities'}
           href="/communities"
-          tone="from-indigo-500 to-blue-600"
+          tone="from-violet-500 to-violet-600"
         />
         <StatCard
           icon={Rocket}
@@ -198,7 +198,7 @@ export default function HomePage() {
           value={startupCount}
           hint="Startup communities"
           href="/communities?type=STARTUP"
-          tone="from-violet-500 to-fuchsia-600"
+          tone="from-violet-500 to-violet-600"
         />
         {loggedIn && (
           <>
@@ -208,7 +208,7 @@ export default function HomePage() {
               value={(recommended ?? []).length}
               hint="Opportunities picked for you"
               href="/opportunities?tab=recommended"
-              tone="from-rose-500 to-orange-500"
+              tone="from-amber-500 to-amber-500"
             />
             <StatCard
               icon={BookOpen}
@@ -216,7 +216,7 @@ export default function HomePage() {
               value={savedCount}
               hint="Opportunities, posts & resources"
               href="/saved"
-              tone="from-emerald-500 to-teal-600"
+              tone="from-emerald-500 to-emerald-600"
             />
           </>
         )}
@@ -275,7 +275,7 @@ export default function HomePage() {
                   <Link key={o.id} href="/opportunities">
                     <Card className="card-interactive group">
                       <CardContent className="flex items-center gap-3 p-4">
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-sm">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-500 text-white shadow-sm">
                           <Target className="h-5 w-5" />
                         </span>
                         <div className="min-w-0 flex-1">
