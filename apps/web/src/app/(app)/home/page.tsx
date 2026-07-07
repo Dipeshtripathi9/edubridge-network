@@ -16,7 +16,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn, uniqueById } from '@/lib/utils';
+import { cleanName, cn, uniqueById } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 import { useMe } from '@/hooks/use-profile';
 import { useMyApplications, useRecommendedOpportunities } from '@/hooks/use-opportunities';
@@ -116,7 +116,7 @@ function CommunityTile({ c }: { c: Community }) {
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className="truncate font-medium">{c.name}</p>
+              <p className="truncate font-medium">{cleanName(c.name)}</p>
               <Badge variant="secondary" className="shrink-0">
                 {c.type === 'TOPIC' && c.topic ? c.topic : label}
               </Badge>
@@ -350,7 +350,7 @@ export default function HomePage() {
                               </Badge>
                             </div>
                             {p.community && (
-                              <p className="mt-0.5 text-xs text-muted-foreground">{p.community.name}</p>
+                              <p className="mt-0.5 text-xs text-muted-foreground">{cleanName(p.community.name)}</p>
                             )}
                           </CardContent>
                         </Card>

@@ -8,7 +8,7 @@
      green #0E8A5C (verified/trust only) · line #E6E1D3. Everything downstream
      (bg-background, text-foreground, bg-primary, border-border…) re-skins from here. */
   :root {
-    --background: 45 30% 95%; /* --paper ivory, never pure white */
+    --background: 44 33% 94%; /* --paper warm ivory, never pure white */
     --foreground: 252 44% 14%; /* --ink */
     --card: 0 0% 100%;
     --card-foreground: 252 44% 14%;
@@ -92,8 +92,8 @@
     z-index: -1;
     pointer-events: none;
     background-image:
-      radial-gradient(60rem 60rem at 100% -10%, hsl(var(--primary) / 0.06), transparent 60%),
-      radial-gradient(50rem 50rem at -10% 10%, hsl(var(--accent-foreground) / 0.05), transparent 55%);
+      radial-gradient(60rem 60rem at 100% -10%, hsl(var(--primary) / 0.05), transparent 60%),
+      radial-gradient(55rem 55rem at -10% 8%, hsl(var(--marigold) / 0.06), transparent 55%);
   }
   /* Smoother, consistent focus ring across interactive elements. */
   :focus-visible {
