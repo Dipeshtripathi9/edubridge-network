@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { uniqueById } from '@/lib/utils';
 import Link from 'next/link';
-import { MapPin, Search, Star, Trophy } from 'lucide-react';
+import { MapPin, Search, Trophy } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { PageHero } from '@/components/page-hero';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Stars } from '@/components/stars';
 import { useColleges } from '@/hooks/use-colleges';
 
@@ -23,13 +25,12 @@ export default function ReviewsPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold">
-            <Star className="h-6 w-6 text-primary" />
-            College Reviews
-          </h1>
-          <p className="text-muted-foreground">Genuine reviews from verified students.</p>
-        </div>
+        <PageHero
+          eyebrow="College Reviews"
+          title="The real story,"
+          accent="from insiders."
+          sub="Genuine reviews from verified students — not brochures."
+        />
         <form
           className="relative w-full sm:w-72"
           onSubmit={(e) => {
@@ -37,12 +38,12 @@ export default function ReviewsPage() {
             setSearch(q);
           }}
         >
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search colleges…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="pl-9"
+            className="rounded-full pl-10"
           />
         </form>
       </div>
@@ -54,7 +55,7 @@ export default function ReviewsPage() {
           ))}
         </div>
       ) : colleges.length === 0 ? (
-        <p className="py-12 text-center text-muted-foreground">No colleges found.</p>
+        <EmptyState icon={Search} title="No colleges found" description="Try a different name or spelling." />
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

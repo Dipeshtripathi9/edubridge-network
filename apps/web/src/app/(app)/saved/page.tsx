@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { Bookmark } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { PageHero } from '@/components/page-hero';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { EmptyState } from '@/components/ui/empty-state';
 import { PostCard } from '@/components/post-card';
 import { OpportunityCard } from '@/components/opportunity-card';
 import { ResourceCard } from '@/components/resource-card';
@@ -15,7 +17,13 @@ import { useMySavedPosts } from '@/hooks/use-posts';
 import { useMyResourceBookmarks } from '@/hooks/use-resources';
 
 function Empty({ label }: { label: string }) {
-  return <p className="py-10 text-center text-muted-foreground">No saved {label} yet.</p>;
+  return (
+    <EmptyState
+      icon={Bookmark}
+      title={`No saved ${label} yet`}
+      description="Bookmark posts, save opportunities and rate resources to collect them here."
+    />
+  );
 }
 
 export default function SavedPage() {
@@ -27,12 +35,12 @@ export default function SavedPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold">
-          <Bookmark className="h-6 w-6 text-primary" /> Saved
-        </h1>
-        <p className="text-muted-foreground">Everything you bookmarked — in one place.</p>
-      </div>
+      <PageHero
+        eyebrow="Saved"
+        title="Everything you"
+        accent="bookmarked."
+        sub="Your saved opportunities, posts and resources — in one place."
+      />
 
       <Tabs defaultValue="opportunities">
         <TabsList className="flex-wrap">
