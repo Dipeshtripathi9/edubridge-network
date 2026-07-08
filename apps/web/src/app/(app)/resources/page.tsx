@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { PageHero } from '@/components/page-hero';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PillTabs, PillTabsContent, PillTabsList, PillTabsTrigger } from '@/components/ui/pill-tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ResourceCard } from '@/components/resource-card';
@@ -139,18 +139,18 @@ export default function ResourcesPage() {
         <ResourceUpload />
       </div>
 
-      <PillTabs defaultValue="browse">
-        <PillTabsList>
-          <PillTabsTrigger value="browse">Browse</PillTabsTrigger>
-          <PillTabsTrigger value="saved">Saved</PillTabsTrigger>
-        </PillTabsList>
-        <PillTabsContent value="browse">
+      <Tabs defaultValue="browse">
+        <TabsList>
+          <TabsTrigger value="browse">Browse</TabsTrigger>
+          <TabsTrigger value="saved">Saved</TabsTrigger>
+        </TabsList>
+        <TabsContent value="browse">
           <Browse />
-        </PillTabsContent>
-        <PillTabsContent value="saved">
+        </TabsContent>
+        <TabsContent value="saved">
           <Saved />
-        </PillTabsContent>
-      </PillTabs>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { PageHero } from '@/components/page-hero';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { uniqueById } from '@/lib/utils';
 import { useCommunities, useManagedCommunities } from '@/hooks/use-communities';
 import { useMe } from '@/hooks/use-profile';
@@ -143,12 +144,11 @@ function BecomeALeader() {
         {isLoading ? (
           <Skeleton className="h-32 w-full" />
         ) : vacancies.length === 0 ? (
-          <Card>
-            <CardContent className="p-6 text-center text-sm text-muted-foreground">
-              No open leadership positions in your college or interest communities right now. Check back
-              soon — admins open hiring when positions are available.
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={Crown}
+            title="No open positions right now"
+            description="Admins open hiring when positions are available in your college or interest communities. Check back soon."
+          />
         ) : (
           <div className="grid items-stretch gap-3 sm:grid-cols-2">
             {vacancies.map((c) => (

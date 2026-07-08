@@ -1,11 +1,12 @@
 'use client';
 
-import { ArrowRight, Repeat } from 'lucide-react';
+import { ArrowRight, MessageSquareQuote, Repeat, Route } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageHero } from '@/components/page-hero';
 import { Avatar } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { EmptyState } from '@/components/ui/empty-state';
 import { EligibilityChecker } from '@/components/eligibility-checker';
 import { useMyJourneys, useStories } from '@/hooks/use-transfer';
 
@@ -21,9 +22,11 @@ function MyJourney() {
   if (isLoading) return <Skeleton className="h-32 w-full" />;
   if (!data?.length) {
     return (
-      <p className="py-12 text-center text-muted-foreground">
-        No transfers tracked yet. Use the eligibility checker to find colleges and start a journey.
-      </p>
+      <EmptyState
+        icon={Route}
+        title="No transfers tracked yet"
+        description="Use the eligibility checker to find colleges you can move to and start a journey."
+      />
     );
   }
   return (
@@ -59,9 +62,11 @@ function Stories() {
   const stories = data?.data ?? [];
   if (!stories.length) {
     return (
-      <p className="py-12 text-center text-muted-foreground">
-        No transfer stories yet. Be the first to share yours!
-      </p>
+      <EmptyState
+        icon={MessageSquareQuote}
+        title="No transfer stories yet"
+        description="Be the first to share how your transfer went — it helps students who come after you."
+      />
     );
   }
   return (

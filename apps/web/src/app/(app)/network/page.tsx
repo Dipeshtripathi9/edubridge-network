@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useMyPools } from '@/hooks/use-pools';
 
 export default function NetworkPage() {
@@ -51,20 +52,18 @@ export default function NetworkPage() {
           ))}
         </div>
       ) : (pools?.length ?? 0) === 0 ? (
-        <Card>
-          <CardContent className="space-y-2 p-8 text-center">
-            <Lock className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="font-medium">No pools yet</p>
-            <p className="text-sm text-muted-foreground">
-              Join or create a private pool inside any community to chat with a small group.
-            </p>
-            <Button asChild size="sm">
+        <EmptyState
+          icon={Lock}
+          title="No pools yet"
+          description="Join or create a private pool inside any community to chat with a small group."
+          action={
+            <Button asChild>
               <Link href="/communities">Browse communities</Link>
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : filtered.length === 0 ? (
-        <p className="py-10 text-center text-muted-foreground">No pools match “{q}”.</p>
+        <EmptyState icon={Search} title="No pools match your search" description={`Nothing found for “${q}”. Try a different name.`} />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {filtered.map((p) => (

@@ -3,13 +3,15 @@
 import { Suspense, useState } from 'react';
 import { uniqueById } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
-import { Search, Sparkles } from 'lucide-react';
+import { Bookmark, Search, Sparkles, Target, UserCog } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { PageHero } from '@/components/page-hero';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FilterChips } from '@/components/ui/filter-chips';
+import { EmptyState } from '@/components/ui/empty-state';
 import { OpportunityCard } from '@/components/opportunity-card';
 import {
   useMyApplications,
@@ -53,21 +55,7 @@ function Browse() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-2">
-          {TYPES.map((t) => (
-            <button
-              key={t.label}
-              onClick={() => setType(t.value)}
-              className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                type === t.value
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border hover:bg-accent'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <FilterChips options={TYPES} value={type} onChange={setType} />
         <form
           className="relative w-full sm:w-64"
           onSubmit={(e) => {
@@ -75,18 +63,22 @@ function Browse() {
             setSearch(q);
           }}
         >
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="pl-9"
+            className="rounded-full pl-10"
           />
         </form>
       </div>
 
       {!isLoading && items.length === 0 ? (
-        <p className="py-12 text-center text-muted-foreground">No opportunities found.</p>
+        <EmptyState
+          icon={Target}
+          title="No opportunities found"
+          description="Try a different category or search term — new internships, scholarships & fellowships drop every week."
+        />
       ) : (
         <CardGrid loading={isLoading}>
           {items.map((o) => (
@@ -115,9 +107,16 @@ function Recommended() {
         Matched to your interests
       </p>
       {!isLoading && (!data || data.length === 0) ? (
-        <p className="py-12 text-center text-muted-foreground">
-          Add interests in your profile to get personalized recommendations.
-        </p>
+        <EmptyState
+          icon={UserCog}
+          title="Tell us what you're into"
+          description="Add interests in your profile and we'll match you to opportunities that fit."
+          action={
+            <Button asChild variant="outline">
+              <a href="/profile">Update interests</a>
+            </Button>
+          }
+        />
       ) : (
         <CardGrid loading={isLoading}>
           {(data ?? []).map((o) => (
@@ -133,7 +132,13 @@ function Saved() {
   const { data, isLoading } = useMyApplications();
   if (isLoading) return <Skeleton className="h-40 w-full" />;
   if (!data?.length) {
-    return <p className="py-12 text-center text-muted-foreground">Nothing saved yet.</p>;
+    return (
+      <EmptyState
+        icon={Bookmark}
+        title="Nothing saved yet"
+        description="Save or apply to an opportunity and it'll show up here to track."
+      />
+    );
   }
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

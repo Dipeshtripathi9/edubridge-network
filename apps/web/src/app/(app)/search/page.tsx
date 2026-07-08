@@ -15,6 +15,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { cn, uniqueById } from '@/lib/utils';
 import {
   useSearchAll,
@@ -60,7 +61,7 @@ function AllResults({ q, onPickType }: { q: string; onPickType: (t: SearchType) 
 
   const nonEmpty = TYPES.filter((t) => (data.groups[t]?.length ?? 0) > 0);
   if (nonEmpty.length === 0) {
-    return <p className="py-16 text-center text-muted-foreground">No results for “{q}”.</p>;
+    return <EmptyState icon={SearchIcon} title="No results" description={`Nothing matched “${q}”. Try different keywords.`} />;
   }
 
   return (
@@ -91,7 +92,7 @@ function TypeResults({ q, type }: { q: string; type: SearchType }) {
   const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
   if (isLoading) return <Skeleton className="h-64 w-full" />;
   if (items.length === 0) {
-    return <p className="py-16 text-center text-muted-foreground">No {TYPE_META[type].label.toLowerCase()} found.</p>;
+    return <EmptyState icon={SearchIcon} title={`No ${TYPE_META[type].label.toLowerCase()} found`} description={`Nothing matched “${q}” in ${TYPE_META[type].label.toLowerCase()}.`} />;
   }
   return (
     <div className="space-y-2">
@@ -129,7 +130,7 @@ function SearchInner() {
       </div>
 
       {!q ? (
-        <p className="py-16 text-center text-muted-foreground">Type a query in the search bar above.</p>
+        <EmptyState icon={SearchIcon} title="Search EduBridge" description="Type a query in the search bar above to find colleges, communities, opportunities & people." />
       ) : (
         <>
           <div className="flex flex-wrap gap-2">

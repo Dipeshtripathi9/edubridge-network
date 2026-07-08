@@ -13,10 +13,10 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      // min-height (not fixed height) so a `flex-wrap` tab bar with many tabs can
-      // grow onto multiple rows on narrow/mobile screens instead of overlapping.
-      // Single-row tab bars are unchanged (content fits the 2.5rem minimum).
-      'inline-flex min-h-[2.5rem] items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
+      // Brand segmented control: a rounded-full card track. min-height (not fixed)
+      // + flex-wrap so tab bars with many tabs grow onto multiple rows on narrow
+      // screens instead of overlapping.
+      'inline-flex min-h-[2.75rem] flex-wrap items-center gap-1 rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm',
       className,
     )}
     {...props}
@@ -31,7 +31,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
+      'inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-[13.5px] font-bold text-muted-foreground ring-offset-background transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-sm',
       className,
     )}
     {...props}

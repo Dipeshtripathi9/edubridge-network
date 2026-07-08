@@ -6,8 +6,12 @@ import Link from 'next/link';
 import {
   ArrowRight,
   BadgeCheck,
+  FileText,
   GraduationCap,
+  HelpCircle,
   MapPin,
+  Repeat,
+  Target,
   Users,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,6 +26,7 @@ import { PostCard } from '@/components/post-card';
 import { OpportunityCard } from '@/components/opportunity-card';
 import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
+import { EmptyState } from '@/components/ui/empty-state';
 import { PoolsSection } from '@/components/pools-section';
 import { OpportunitiesSection } from '@/components/community-sections';
 import { isCommunityManager, useCommunity, useJoinCommunity } from '@/hooks/use-communities';
@@ -101,7 +106,7 @@ function Opportunities({ collegeId }: { collegeId: string }) {
   const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
   if (isLoading) return <Skeleton className="h-40 w-full" />;
   return items.length === 0 ? (
-    <p className="py-10 text-center text-muted-foreground">No opportunities yet.</p>
+    <EmptyState icon={Target} title="No opportunities yet" description="Opportunities shared with this college will show up here." />
   ) : (
     <div className="grid gap-4 sm:grid-cols-2">
       {items.map((o) => (
@@ -131,7 +136,7 @@ function Transfers({ collegeId }: { collegeId: string }) {
       {isLoading ? (
         <Skeleton className="h-32 w-full" />
       ) : stories.length === 0 ? (
-        <p className="py-10 text-center text-muted-foreground">No transfer stories for this college yet.</p>
+        <EmptyState icon={Repeat} title="No transfer stories yet" description="Be the first to share your transfer journey to or from this college." />
       ) : (
         stories.map((s) => (
           <Card key={s.id}>
@@ -163,7 +168,7 @@ function Resources({ collegeId }: { collegeId: string }) {
       {isLoading ? (
         <Skeleton className="h-40 w-full" />
       ) : items.length === 0 ? (
-        <p className="py-10 text-center text-muted-foreground">No resources shared yet.</p>
+        <EmptyState icon={FileText} title="No resources shared yet" description="Notes, PDFs and reports shared for this college will appear here." />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((r) => (
@@ -178,7 +183,8 @@ function Resources({ collegeId }: { collegeId: string }) {
 function Faqs({ collegeId }: { collegeId: string }) {
   const { data, isLoading } = useFaqs(collegeId);
   if (isLoading) return <Skeleton className="h-32 w-full" />;
-  if (!data?.length) return <p className="py-10 text-center text-muted-foreground">No FAQs yet.</p>;
+  if (!data?.length)
+    return <EmptyState icon={HelpCircle} title="No FAQs yet" description="Common questions about this college will be answered here." />;
   return (
     <div className="space-y-3">
       {data.map((f) => {
