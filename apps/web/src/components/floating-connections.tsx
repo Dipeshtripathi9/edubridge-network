@@ -55,7 +55,7 @@ export function FloatingConnections() {
     // overlap: the bar auto-centres in the space left of the pill; the pill stays
     // flush to the right edge. Container ignores pointer events so the empty
     // middle never blocks the page underneath.
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex items-center gap-2 pl-3">
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex flex-col-reverse items-center gap-2 pl-3 sm:flex-row sm:items-center">
       {/* Connection 1 — auto-centred bar */}
       <nav
         aria-label="Quick links"
@@ -77,7 +77,7 @@ export function FloatingConnections() {
               )}
             >
               <Icon className={cn('h-[18px] w-[18px]', active && 'text-primary')} />
-              <span className="hidden text-[11px] font-bold leading-none tracking-tight sm:block">{label}</span>
+              <span className="text-[11px] font-bold leading-none tracking-tight">{label}</span>
             </Link>
           );
         })}
@@ -87,7 +87,7 @@ export function FloatingConnections() {
       <Link
         href="/startups/ez-rentbuddy"
         aria-label="EZ RentBuddy — Student Housing"
-        className="pointer-events-auto flex flex-none items-center rounded-l-2xl bg-[#16A34A] text-white shadow-xl shadow-[#16A34A]/30 transition-colors hover:bg-[#15803D]"
+        className="pointer-events-auto flex flex-none items-center self-end rounded-l-2xl bg-[#16A34A] text-white shadow-xl shadow-[#16A34A]/30 transition-colors hover:bg-[#15803D] sm:self-auto"
       >
         <span className="grid h-12 w-12 flex-none place-items-center">
           <Building2 className="h-5 w-5" />
