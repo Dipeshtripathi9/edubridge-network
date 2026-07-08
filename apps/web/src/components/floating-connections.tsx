@@ -90,7 +90,7 @@ export function FloatingConnections() {
           backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.14), rgba(0,0,0,0.05))',
         }}
         className={cn(
-          'pointer-events-auto ml-auto flex h-[60px] flex-none items-center rounded-full px-4 text-white shadow-[0_6px_20px_rgba(22,163,74,0.35)] transition-transform duration-300 ease-out motion-reduce:transition-none hover:brightness-95',
+          'pointer-events-auto ml-auto flex h-[60px] flex-none items-center rounded-l-full px-4 pr-5 text-white shadow-[0_6px_20px_rgba(22,163,74,0.35)] transition-transform duration-300 ease-out motion-reduce:transition-none hover:brightness-95',
           collapsed ? 'translate-x-[130%]' : 'translate-x-0',
         )}
       >
