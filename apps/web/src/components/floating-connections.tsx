@@ -56,7 +56,7 @@ export function FloatingConnections() {
       <nav
         aria-label="Quick links"
         className={cn(
-          'pointer-events-auto flex h-[60px] min-w-0 flex-1 max-w-[520px] items-stretch rounded-full bg-card p-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.10)] transition-transform duration-300 ease-out motion-reduce:transition-none',
+          'pointer-events-auto flex h-[60px] min-w-0 basis-0 grow-[72] items-stretch rounded-full bg-card p-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.10)] transition-transform duration-300 ease-out motion-reduce:transition-none',
           collapsed ? 'translate-y-[220%]' : 'translate-y-0',
         )}
       >
@@ -90,12 +90,12 @@ export function FloatingConnections() {
           backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.16), rgba(0,0,0,0.05))',
         }}
         className={cn(
-          'pointer-events-auto ml-auto flex h-[46px] flex-none items-center gap-1.5 self-center rounded-l-full px-3.5 text-white shadow-[0_6px_18px_rgba(47,191,155,0.42)] transition-transform duration-300 ease-out motion-reduce:transition-none hover:brightness-95',
+          'pointer-events-auto flex h-[46px] min-w-0 basis-0 grow-[28] items-center justify-center gap-1 self-center overflow-hidden rounded-l-full px-1.5 text-white shadow-[0_6px_18px_rgba(47,191,155,0.42)] transition-transform duration-300 ease-out motion-reduce:transition-none hover:brightness-95',
           collapsed ? 'translate-x-[130%]' : 'translate-x-0',
         )}
       >
-        <span className="whitespace-nowrap font-display text-[12.5px] font-extrabold tracking-tight">EZ RentBuddy</span>
-        <ArrowUpRight className="h-3.5 w-3.5 flex-none" strokeWidth={2.6} />
+        <span className="whitespace-nowrap font-display text-[10px] font-extrabold tracking-tight">EZ RentBuddy</span>
+        <ArrowUpRight className="h-3 w-3 flex-none" strokeWidth={2.6} />
       </Link>
     </div>
   );
