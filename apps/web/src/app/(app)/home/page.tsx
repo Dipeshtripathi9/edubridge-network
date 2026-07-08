@@ -1,17 +1,15 @@
 'use client';
 
-import { ExpertGuidance } from '@/components/expert-guidance';
-import { HomeShowcase } from '@/components/home-showcase';
+import { HomeIllustrated } from '@/components/home-illustrated';
 
-// The home page is the brand landing: the expert-guidance hero followed by the
-// full showcase (verified colleges, how it works, real data, Opportunity Hub,
-// builders, review and CTA). Personalised feeds live on their own pages
-// (Communities, Opportunities, Saved) reachable from the sidebar.
+// The home page is the brand landing — an illustrated, calm layout: bridge hero
+// with the working Get Expert Guidance form, announcement, why/popular cards,
+// students-first Q&A, planning + verified-college insights, and testimonials.
+// Personalised feeds live on their own pages (Communities, Opportunities, Saved).
 export default function HomePage() {
   return (
-    <div className="mx-auto max-w-6xl space-y-14 sm:space-y-20">
-      <ExpertGuidance />
-      <HomeShowcase />
+    <div className="mx-auto max-w-6xl">
+      <HomeIllustrated />
     </div>
   );
 }

@@ -123,7 +123,7 @@ function ProofCollage() {
   );
 }
 
-function GuidanceForm({ onDone }: { onDone: () => void }) {
+export function GuidanceForm({ onDone }: { onDone: () => void }) {
   const submit = useSubmitMentorRequest();
   const [f, setF] = useState({
     name: '', phone: '', email: '', course: '', location: '', marks: '', budget: '', category: '', preferredCollege: '', contactMethod: 'CALL', message: '',
