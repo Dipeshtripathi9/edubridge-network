@@ -82,12 +82,12 @@ export function FloatingConnections() {
         </nav>
       </div>
 
-      {/* Connection 2 — right edge, collapses to its icon nub */}
-      <div className="fixed right-0 top-1/2 z-30 -translate-y-1/2">
+      {/* Connection 2 — same bottom line as Connection 1, right edge; collapses to its icon nub */}
+      <div className="fixed bottom-4 right-0 z-40">
         <Link
           href="/startups/ez-rentbuddy"
           aria-label="EZ RentBuddy — Student Housing"
-          className="flex items-center rounded-l-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/25 transition-shadow hover:shadow-2xl"
+          className="flex items-center rounded-l-2xl bg-[#16A34A] text-white shadow-xl shadow-[#16A34A]/30 transition-colors hover:bg-[#15803D]"
         >
           <span className="grid h-12 w-12 flex-none place-items-center">
             <Building2 className="h-5 w-5" />
@@ -99,7 +99,7 @@ export function FloatingConnections() {
             )}
           >
             <span className="flex flex-col whitespace-nowrap pr-4 leading-tight">
-              <span className="font-mono text-[9px] font-bold uppercase tracking-[1.4px] text-primary-foreground/70">
+              <span className="font-mono text-[9px] font-bold uppercase tracking-[1.4px] text-[#DCFCE7]">
                 Student Housing
               </span>
               <span className="font-display text-sm font-bold tracking-tight">EZ RentBuddy</span>
