@@ -155,11 +155,10 @@ export function HomeIllustrated() {
           className="-mx-4 -mt-4 bg-secondary px-4 py-14 sm:-mx-6 sm:-mt-6 sm:px-8 sm:py-20"
         >
           <div className="max-w-[720px]">
-            <h1 className="font-display text-[clamp(34px,7vw,58px)] font-extrabold leading-[1.07] tracking-[-.03em]">
-              <span className="box-decoration-clone [box-shadow:inset_0_-0.16em_0_hsl(var(--marigold))]">College choice</span>,
+            <h1 className="font-display text-[clamp(31px,6.2vw,54px)] font-extrabold leading-[1.1] tracking-[-.03em]">
+              Everyone promises “best college.”
               <br />
-              minus the{' '}
-              <span className="box-decoration-clone [box-shadow:inset_0_-0.16em_0_hsl(var(--marigold))]">guesswork</span>.
+              <span className="box-decoration-clone [box-shadow:inset_0_-0.16em_0_hsl(var(--marigold))]">We find yours.</span>
             </h1>
             <p className="mt-7 max-w-[580px] text-[17.5px] font-bold leading-relaxed text-foreground">
               Verified student data, real placement numbers and 1:1 human experts for 70+ Delhi NCR colleges — free for students and parents.
