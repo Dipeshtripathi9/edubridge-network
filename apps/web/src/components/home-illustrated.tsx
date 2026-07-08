@@ -179,11 +179,8 @@ export function HomeIllustrated() {
     <MotionProvider>
       <div className="space-y-16 sm:space-y-24">
         {/* HERO */}
-        <section
-          id="get-expert-guidance"
-          className="rounded-[28px] border border-border bg-card p-6 shadow-sm sm:p-9 lg:p-12"
-        >
-          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_.95fr]">
+        <section id="get-expert-guidance" className="pt-1">
+          <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_.95fr] lg:gap-14">
             <div>
               <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-accent px-3.5 py-1.5 text-[12.5px] font-bold text-primary">
                 <ShieldCheck className="h-3.5 w-3.5" /> 70+ verified colleges · Delhi NCR
@@ -217,9 +214,7 @@ export function HomeIllustrated() {
               </div>
               {open && <GuidanceForm onDone={() => setOpen(false)} />}
             </div>
-            <div className="rounded-3xl bg-background p-6 sm:p-8">
-              <Illo svg={BRIDGE} className="mx-auto w-full max-w-[440px] [&_svg]:h-auto [&_svg]:w-full" label="Illustration of a bridge leading to the right college" />
-            </div>
+            <Illo svg={BRIDGE} className="mx-auto w-full max-w-[460px] [&_svg]:h-auto [&_svg]:w-full" label="Illustration of a bridge leading to the right college" />
           </div>
         </section>
 
