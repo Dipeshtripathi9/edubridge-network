@@ -51,7 +51,7 @@ export function FloatingConnections() {
   if (pathname.startsWith('/messages') || pathname.startsWith('/pools')) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex items-stretch gap-3 overflow-x-clip px-3">
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex items-stretch gap-2 overflow-x-clip px-2.5">
       {/* Connection 1 — segmented control (takes the remaining width) */}
       <nav
         aria-label="Quick links"
@@ -90,12 +90,12 @@ export function FloatingConnections() {
           backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.14), rgba(0,0,0,0.05))',
         }}
         className={cn(
-          'pointer-events-auto ml-auto flex h-[60px] flex-none items-center gap-2 rounded-full px-4 text-white shadow-[0_6px_20px_rgba(22,163,74,0.35)] transition-transform duration-300 ease-out motion-reduce:transition-none hover:brightness-95',
+          'pointer-events-auto ml-auto flex h-[60px] flex-none items-center gap-1.5 rounded-full px-3 text-white shadow-[0_6px_20px_rgba(22,163,74,0.35)] transition-transform duration-300 ease-out motion-reduce:transition-none hover:brightness-95',
           collapsed ? 'translate-x-[130%]' : 'translate-x-0',
         )}
       >
-        <span className="whitespace-nowrap font-display text-[14px] font-extrabold tracking-tight">EZ RentBuddy</span>
-        <ArrowUpRight className="h-4 w-4 flex-none" strokeWidth={2.6} />
+        <span className="whitespace-nowrap font-display text-[12.5px] font-extrabold tracking-tight">EZ RentBuddy</span>
+        <ArrowUpRight className="h-3.5 w-3.5 flex-none" strokeWidth={2.6} />
       </Link>
     </div>
   );
