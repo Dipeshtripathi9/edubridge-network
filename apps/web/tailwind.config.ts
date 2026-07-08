@@ -43,6 +43,12 @@ const config: Config = {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         display: ['var(--font-display)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
       },
+      keyframes: {
+        'eb-marquee': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },
+      },
+      animation: {
+        'eb-marquee': 'eb-marquee 34s linear infinite',
+      },
     },
   },
   plugins: [require('@tailwindcss/typography')],
