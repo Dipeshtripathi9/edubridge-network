@@ -51,12 +51,12 @@ export function FloatingConnections() {
   if (pathname.startsWith('/messages') || pathname.startsWith('/pools')) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex items-stretch gap-4 overflow-x-clip pl-3">
-      {/* Connection 1 — segmented control (~66%) */}
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex items-stretch gap-3 overflow-x-clip px-3">
+      {/* Connection 1 — segmented control (takes the remaining width) */}
       <nav
         aria-label="Quick links"
         className={cn(
-          'pointer-events-auto flex h-[60px] basis-[66%] max-w-[560px] shrink-0 items-stretch rounded-full bg-card p-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.10)] transition-transform duration-300 ease-out motion-reduce:transition-none',
+          'pointer-events-auto flex h-[60px] min-w-0 flex-1 max-w-[520px] items-stretch rounded-full bg-card p-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.10)] transition-transform duration-300 ease-out motion-reduce:transition-none',
           collapsed ? 'translate-y-[220%]' : 'translate-y-0',
         )}
       >
@@ -81,22 +81,21 @@ export function FloatingConnections() {
         })}
       </nav>
 
-      {/* Connection 2 — standalone launcher (~34%), bleeds off the right edge */}
+      {/* Connection 2 — standalone launcher, full wordmark always visible */}
       <Link
         href="/startups/ez-rentbuddy"
         aria-label="EZ RentBuddy"
         style={{
           backgroundColor: '#16A34A',
-          backgroundImage:
-            'repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0 2px, transparent 2px 9px), linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.06))',
+          backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.14), rgba(0,0,0,0.05))',
         }}
         className={cn(
-          'pointer-events-auto ml-auto flex h-[60px] flex-none items-center gap-2.5 rounded-full px-6 text-white shadow-[0_6px_20px_rgba(22,163,74,0.35)] transition-transform duration-300 ease-out motion-reduce:transition-none hover:brightness-95',
-          collapsed ? 'translate-x-full' : 'translate-x-0',
+          'pointer-events-auto ml-auto flex h-[60px] flex-none items-center gap-2 rounded-full px-4 text-white shadow-[0_6px_20px_rgba(22,163,74,0.35)] transition-transform duration-300 ease-out motion-reduce:transition-none hover:brightness-95',
+          collapsed ? 'translate-x-[130%]' : 'translate-x-0',
         )}
       >
-        <span className="whitespace-nowrap font-display text-[16px] font-extrabold tracking-tight">EZ RentBuddy</span>
-        <ArrowUpRight className="h-[18px] w-[18px] flex-none" strokeWidth={2.6} />
+        <span className="whitespace-nowrap font-display text-[14px] font-extrabold tracking-tight">EZ RentBuddy</span>
+        <ArrowUpRight className="h-4 w-4 flex-none" strokeWidth={2.6} />
       </Link>
     </div>
   );
