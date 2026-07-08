@@ -40,13 +40,22 @@ import {
 } from '@/hooks/use-college-hub';
 import { useAuthStore } from '@/stores/auth.store';
 
-function Stat({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: number }) {
+function StatPill({
+  icon: Icon,
+  tone,
+  label,
+  value,
+}: {
+  icon: typeof Users;
+  tone: string;
+  label: string;
+  value: number;
+}) {
   return (
-    <div className="flex items-center gap-2">
-      <Icon className="h-4 w-4 text-primary" />
-      <span className="font-semibold">{value.toLocaleString()}</span>
-      <span className="text-sm text-muted-foreground">{label}</span>
-    </div>
+    <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-[13px] font-bold text-muted-foreground shadow-sm">
+      <Icon className={`h-[15px] w-[15px] ${tone}`} />{' '}
+      <b className="font-display text-foreground">{value.toLocaleString()}</b> {label}
+    </span>
   );
 }
 
@@ -231,18 +240,28 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       {/* Header */}
-      <div className="overflow-hidden rounded-xl border border-border">
-        <div className="h-32 bg-gradient-to-r from-primary/40 via-primary/20 to-accent" />
-        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between">
+      <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+        <div
+          className="h-28 bg-secondary sm:h-32"
+          style={{
+            backgroundImage:
+              'radial-gradient(60% 130% at 12% 0%, hsl(var(--primary) / .30), transparent 60%), radial-gradient(52% 130% at 92% 12%, hsl(var(--marigold) / .28), transparent 62%)',
+          }}
+        />
+        <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-end gap-4">
-            <span className="-mt-12 flex h-20 w-20 items-center justify-center rounded-xl border-4 border-background bg-primary/10 text-primary">
+            <span className="-mt-16 grid h-20 w-20 flex-none place-items-center rounded-[20px] border-4 border-card bg-accent text-primary shadow-sm">
               <GraduationCap className="h-9 w-9" />
             </span>
-            <div>
-              <h1 className="text-2xl font-bold">{c.name}</h1>
-              <p className="text-sm text-muted-foreground">Connect • Share • Grow Together</p>
+            <div className="min-w-0">
+              <span className="inline-flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[2.6px] text-primary">
+                <span className="h-0.5 w-[20px] rounded-full bg-marigold" /> College Hub
+              </span>
+              <h1 className="mt-1.5 font-display text-[clamp(23px,4vw,34px)] font-extrabold leading-[1.08] tracking-[-.02em]">
+                {c.name}
+              </h1>
               {(c.city || c.state) && (
-                <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                <p className="mt-1 flex items-center gap-1 text-sm font-semibold text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5" />
                   {[c.city, c.state].filter(Boolean).join(', ')}
                 </p>
@@ -251,6 +270,7 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
           </div>
           {communitySlug && (
             <Button
+              size="lg"
               variant={community?.isMember ? 'outline' : 'default'}
               disabled={join.isPending}
               onClick={() => join.mutate(!community?.isMember)}
@@ -259,14 +279,17 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
             </Button>
           )}
         </div>
-        <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-border px-5 py-3">
-          <Stat
+        <div className="flex flex-wrap gap-2.5 border-t border-border px-6 py-4">
+          <StatPill
             icon={BadgeCheck}
-            label="Verified Students"
+            tone="text-green"
+            label="verified students"
             value={Math.max(hub.counts.verifiedStudents, seededCollegeMembers(c.id))}
           />
+          <StatPill icon={FileText} tone="text-primary" label="resources" value={hub.counts.resources} />
+          <StatPill icon={HelpCircle} tone="text-marigold" label="FAQs" value={hub.counts.faqs} />
         </div>
-      </div>
+      </section>
 
       {/* Sections — same style as every community, plus college-only Transfers & FAQs */}
       <Tabs defaultValue="opportunities">
