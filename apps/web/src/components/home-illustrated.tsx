@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, Phone, Search, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Search, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MotionProvider } from '@/components/motion';
 import { GuidanceForm } from '@/components/expert-guidance';
@@ -38,27 +38,6 @@ function Illo({ svg, className, label }: { svg: string; className?: string; labe
     />
   );
 }
-
-const BRIDGE = `<svg viewBox="0 0 520 400" fill="none" style="width:100%;height:auto;display:block">
-  <circle cx="88" cy="66" r="26" stroke="var(--accent)" stroke-width="5"/>
-  <path d="M300 340 C 300 220, 380 160, 470 160 C 512 160, 520 200, 520 250 L 520 340 Z" fill="var(--primary-soft)"/>
-  <path d="M0 340 C 10 260, 90 230, 170 236 C 230 240, 250 290, 252 340 Z" fill="var(--hill)"/>
-  <line x1="452" y1="160" x2="452" y2="96" stroke="var(--ink)" stroke-width="6" stroke-linecap="round"/>
-  <path d="M452 96 L 500 110 L 452 124 Z" fill="var(--primary)"/>
-  <path d="M96 268 C 190 130, 330 130, 440 190" stroke="var(--accent)" stroke-width="9" stroke-linecap="round"/>
-  <circle cx="96" cy="268" r="11" fill="var(--ink)"/>
-  <circle cx="258" cy="165" r="8" fill="var(--primary)"/>
-  <circle cx="440" cy="190" r="12" fill="var(--paper)" stroke="var(--ink)" stroke-width="6"/>
-  <g transform="translate(238 96)">
-    <path d="M0 18 L 26 6 L 52 18 L 26 30 Z" fill="var(--ink)"/>
-    <path d="M12 24 v 12 c 6 7 22 7 28 0 v -12" stroke="var(--ink)" stroke-width="5" fill="none" stroke-linecap="round"/>
-    <line x1="52" y1="18" x2="52" y2="34" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/>
-    <circle cx="52" cy="38" r="4" fill="var(--accent)"/>
-  </g>
-  <path d="M56 336 c 0 -18 -10 -26 -18 -30 M56 336 c 0 -14 10 -22 16 -24" stroke="var(--green)" stroke-width="5" stroke-linecap="round"/>
-  <path d="M300 336 c 0 -14 -8 -20 -14 -23 M300 336 c 0 -11 8 -17 13 -19" stroke="var(--green)" stroke-width="5" stroke-linecap="round"/>
-  <line x1="16" y1="340" x2="504" y2="340" stroke="var(--ink)" stroke-width="6" stroke-linecap="round"/>
-</svg>`;
 
 const ILLO_QUIZ = `<svg viewBox="0 0 320 210" fill="none" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
   <ellipse cx="160" cy="120" rx="122" ry="76" fill="var(--primary-soft)"/>
@@ -114,14 +93,6 @@ const ILLO_CAMPUS = `<svg viewBox="0 0 320 210" fill="none" preserveAspectRatio=
   </g>
   <line x1="40" y1="190" x2="284" y2="190" stroke="var(--ink)" stroke-width="6" stroke-linecap="round"/>
 </svg>`;
-
-const ARC = (
-  <svg className="absolute -bottom-2 left-0 h-3 w-full text-marigold" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden>
-    <path d="M4 16 C 80 2, 220 2, 296 16" stroke="currentColor" strokeWidth="5" strokeLinecap="round" fill="none" />
-  </svg>
-);
-
-const TRUST = ['Verified students', 'Real college data', 'Free 1:1 human experts'];
 
 const WHY = [
   { num: '70+', body: 'verified colleges across Delhi NCR — a college is listed only when real students inside it verify the data.', cta: 'Explore colleges', href: '/reviews' },
@@ -179,42 +150,26 @@ export function HomeIllustrated() {
     <MotionProvider>
       <div className="space-y-16 sm:space-y-24">
         {/* HERO */}
-        <section id="get-expert-guidance" className="pt-1">
-          <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_.95fr] lg:gap-14">
-            <div>
-              <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-accent px-3.5 py-1.5 text-[12.5px] font-bold text-primary">
-                <ShieldCheck className="h-3.5 w-3.5" /> 70+ verified colleges · Delhi NCR
-              </span>
-              <h1 className="font-display text-[clamp(32px,5.4vw,56px)] font-extrabold leading-[1.06] tracking-[-.028em]">
-                College choice,<br />
-                minus{' '}
-                <span className="relative inline-block whitespace-nowrap text-primary">
-                  the guesswork.{ARC}
-                </span>
-              </h1>
-              <p className="mt-6 max-w-[520px] text-[17.5px] text-muted-foreground">
-                Verified student data, real placement numbers and <b className="font-bold text-foreground">1:1 human experts</b> for 70+ Delhi NCR colleges — free for students and parents.
-              </p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                {!open && (
-                  <Button size="lg" onClick={() => setOpen(true)}>
-                    <Phone className="h-4 w-4" /> Get started
-                  </Button>
-                )}
-                <Button asChild size="lg" variant="outline">
-                  <Link href="/reviews">Explore colleges</Link>
-                </Button>
-              </div>
-              <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
-                {TRUST.map((t) => (
-                  <span key={t} className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
-                    <CheckCircle2 className="h-[17px] w-[17px] text-green" /> {t}
-                  </span>
-                ))}
-              </div>
-              {open && <GuidanceForm onDone={() => setOpen(false)} />}
-            </div>
-            <Illo svg={BRIDGE} className="mx-auto w-full max-w-[460px] [&_svg]:h-auto [&_svg]:w-full" label="Illustration of a bridge leading to the right college" />
+        <section
+          id="get-expert-guidance"
+          className="-mx-4 -mt-4 bg-secondary px-4 py-14 sm:-mx-6 sm:-mt-6 sm:px-8 sm:py-20"
+        >
+          <div className="max-w-[720px]">
+            <h1 className="font-display text-[clamp(34px,7vw,58px)] font-extrabold leading-[1.07] tracking-[-.03em]">
+              <span className="box-decoration-clone [box-shadow:inset_0_-0.16em_0_hsl(var(--marigold))]">College choice</span>,
+              <br />
+              minus the{' '}
+              <span className="box-decoration-clone [box-shadow:inset_0_-0.16em_0_hsl(var(--marigold))]">guesswork</span>.
+            </h1>
+            <p className="mt-7 max-w-[580px] text-[17.5px] font-bold leading-relaxed text-foreground">
+              Verified student data, real placement numbers and 1:1 human experts for 70+ Delhi NCR colleges — free for students and parents.
+            </p>
+            {!open && (
+              <Button size="lg" className="mt-8" onClick={() => setOpen(true)}>
+                Get started
+              </Button>
+            )}
+            {open && <GuidanceForm onDone={() => setOpen(false)} />}
           </div>
         </section>
 
