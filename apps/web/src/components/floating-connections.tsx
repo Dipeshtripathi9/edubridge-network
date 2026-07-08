@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Code2, GraduationCap, Home } from 'lucide-react';
+import { ArrowUpRight, Code2, GraduationCap, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -86,15 +86,16 @@ export function FloatingConnections() {
         href="/startups/ez-rentbuddy"
         aria-label="EZ RentBuddy"
         style={{
-          backgroundColor: '#16A34A',
-          backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.14), rgba(0,0,0,0.05))',
+          backgroundColor: '#2fbf9b',
+          backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.16), rgba(0,0,0,0.05))',
         }}
         className={cn(
-          'pointer-events-auto ml-auto flex h-[60px] flex-none items-center rounded-l-full px-4 pr-5 text-white shadow-[0_6px_20px_rgba(22,163,74,0.35)] transition-transform duration-300 ease-out motion-reduce:transition-none hover:brightness-95',
+          'pointer-events-auto ml-auto flex h-[46px] flex-none items-center gap-1.5 self-center rounded-l-full px-3.5 text-white shadow-[0_6px_18px_rgba(47,191,155,0.42)] transition-transform duration-300 ease-out motion-reduce:transition-none hover:brightness-95',
           collapsed ? 'translate-x-[130%]' : 'translate-x-0',
         )}
       >
         <span className="whitespace-nowrap font-display text-[12.5px] font-extrabold tracking-tight">EZ RentBuddy</span>
+        <ArrowUpRight className="h-3.5 w-3.5 flex-none" strokeWidth={2.6} />
       </Link>
     </div>
   );
