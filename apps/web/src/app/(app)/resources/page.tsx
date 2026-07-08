@@ -1,15 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Bookmark, FileText, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { PageHero } from '@/components/page-hero';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PillTabs, PillTabsContent, PillTabsList, PillTabsTrigger } from '@/components/ui/pill-tabs';
+import { FilterChips } from '@/components/ui/filter-chips';
+import { EmptyState } from '@/components/ui/empty-state';
 import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
-import { cn, uniqueById } from '@/lib/utils';
+import { uniqueById } from '@/lib/utils';
 import { useMyResourceBookmarks, useResources } from '@/hooks/use-resources';
 
 const TYPES = [
@@ -49,22 +51,7 @@ function Browse() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap gap-2">
-          {TYPES.map((t) => (
-            <button
-              key={t.label}
-              onClick={() => setType(t.value)}
-              className={cn(
-                'rounded-full border px-3 py-1.5 text-sm',
-                type === t.value
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border hover:bg-accent',
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <FilterChips options={TYPES} value={type} onChange={setType} />
         <div className="flex items-center gap-2">
           <form
             className="relative"
@@ -73,18 +60,18 @@ function Browse() {
               setSearch(q);
             }}
           >
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              className="w-44 pl-9"
+              className="w-44 rounded-full pl-10"
             />
           </form>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+            className="h-10 rounded-full border border-border bg-card px-4 text-[13px] font-bold text-muted-foreground shadow-sm"
           >
             <option value="recent">Recent</option>
             <option value="top">Top rated</option>
@@ -94,7 +81,12 @@ function Browse() {
       </div>
 
       {!isLoading && items.length === 0 ? (
-        <p className="py-12 text-center text-muted-foreground">No resources yet.</p>
+        <EmptyState
+          icon={FileText}
+          title="No resources yet"
+          description="Be the first to share notes, a roadmap or a placement report with your peers."
+          action={<ResourceUpload />}
+        />
       ) : (
         <Grid loading={isLoading}>
           {items.map((r) => (
@@ -117,7 +109,14 @@ function Browse() {
 function Saved() {
   const { data, isLoading } = useMyResourceBookmarks();
   if (isLoading) return <Skeleton className="h-40 w-full" />;
-  if (!data?.length) return <p className="py-12 text-center text-muted-foreground">Nothing saved yet.</p>;
+  if (!data?.length)
+    return (
+      <EmptyState
+        icon={Bookmark}
+        title="Nothing saved yet"
+        description="Tap the bookmark on any resource to keep it here for later."
+      />
+    );
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {data.map((r) => (
@@ -140,18 +139,18 @@ export default function ResourcesPage() {
         <ResourceUpload />
       </div>
 
-      <Tabs defaultValue="browse">
-        <TabsList>
-          <TabsTrigger value="browse">Browse</TabsTrigger>
-          <TabsTrigger value="saved">Saved</TabsTrigger>
-        </TabsList>
-        <TabsContent value="browse">
+      <PillTabs defaultValue="browse">
+        <PillTabsList>
+          <PillTabsTrigger value="browse">Browse</PillTabsTrigger>
+          <PillTabsTrigger value="saved">Saved</PillTabsTrigger>
+        </PillTabsList>
+        <PillTabsContent value="browse">
           <Browse />
-        </TabsContent>
-        <TabsContent value="saved">
+        </PillTabsContent>
+        <PillTabsContent value="saved">
           <Saved />
-        </TabsContent>
-      </Tabs>
+        </PillTabsContent>
+      </PillTabs>
     </div>
   );
 }
