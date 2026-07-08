@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Bookmark, ExternalLink, FileText, Heart, MessageCircle, Send, Share2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Stars } from '@/components/stars';
@@ -68,19 +67,21 @@ export function ResourceCard({
   };
 
   return (
-    <Card className="h-full">
-      <CardContent className="flex h-full flex-col gap-3 p-5">
-        <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <FileText className="h-5 w-5" />
+    <Card className="group h-full rounded-3xl transition-all hover:-translate-y-1 hover:shadow-lg">
+      <CardContent className="flex h-full flex-col gap-3 p-6">
+        <div className="flex items-start gap-3.5">
+          <span className="grid h-12 w-12 flex-none place-items-center rounded-[15px] bg-accent text-primary">
+            <FileText className="h-[22px] w-[22px]" />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="truncate font-semibold">{resource.title}</h3>
-            <Badge variant="secondary">{TYPE_LABEL[resource.type] ?? resource.type}</Badge>
+            <h3 className="font-display text-[17px] font-bold leading-tight tracking-tight">{resource.title}</h3>
+            <span className="mt-1 inline-block rounded-full border border-border bg-background px-2.5 py-1 font-mono text-[10.5px] font-bold uppercase tracking-[1.1px] text-muted-foreground">
+              {TYPE_LABEL[resource.type] ?? resource.type}
+            </span>
           </div>
           {canModerate && (
             <button
-              className="shrink-0 text-muted-foreground hover:text-destructive"
+              className="shrink-0 text-muted-foreground transition-colors hover:text-destructive"
               title="Delete resource"
               onClick={() => {
                 if (window.confirm('Delete this resource?')) {
