@@ -47,6 +47,9 @@ export function FloatingConnections() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Keep chat surfaces (DMs and pool group chats) clear of floating overlays.
+  if (pathname.startsWith('/messages') || pathname.startsWith('/pools')) return null;
+
   return (
     <>
       {/* Connection 1 — bottom center */}
