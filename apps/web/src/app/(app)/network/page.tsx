@@ -68,10 +68,10 @@ export default function NetworkPage() {
         <div className="grid gap-3 sm:grid-cols-2">
           {filtered.map((p) => (
             <Link key={p.id} href={`/pools/${p.id}`}>
-              <Card className="h-full transition-colors hover:border-primary/50">
+              <Card className="group h-full transition-all hover:-translate-y-1 hover:shadow-lg">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
-                    <p className="font-medium">{p.title}</p>
+                    <p className="font-display font-bold tracking-tight">{p.title}</p>
                     <Badge variant={p.isFull ? 'outline' : 'secondary'}>
                       <Users className="mr-1 h-3 w-3" />
                       {p.memberCount}/{p.maxMembers}

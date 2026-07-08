@@ -61,10 +61,10 @@ export default function ReviewsPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {colleges.map((c) => (
               <Link key={c.id} href={`/reviews/${c.slug}`}>
-                <Card className="h-full transition-shadow hover:shadow-md">
+                <Card className="group h-full transition-all hover:-translate-y-1 hover:shadow-lg">
                   <CardContent className="flex h-full flex-col gap-2 p-5">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold leading-tight">{c.name}</h3>
+                      <h3 className="font-display font-bold leading-tight tracking-tight">{c.name}</h3>
                       {c.nirfRank && (
                         <Badge variant="secondary" className="shrink-0">
                           <Trophy className="mr-1 h-3 w-3" />#{c.nirfRank}
