@@ -3,20 +3,22 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Building2, Code2, GraduationCap, Home } from 'lucide-react';
+import { ArrowUpRight, Code2, GraduationCap, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
- * Two scroll-aware floating panels, styled after the Zomato floating UI:
- *  - Connection 1: a white bottom-center pill bar (Home · 99x · Expert Guidance)
- *    with a soft-tinted highlight on the active tab; slides down on scroll-down.
- *  - Connection 2: a solid violet "EZ RentBuddy" pill flush to the right edge that
- *    collapses to just its icon nub on scroll-down and expands back on scroll-up.
+ * Bottom floating row (Zomato-style), split ~66% / ~34% on one line:
+ *  - Connection 1: a stadium segmented control (icon-over-label). The active
+ *    segment gets a full-height inner capsule end-cap; its icon/label emphasise.
+ *  - Connection 2: a standalone emerald "EZ RentBuddy ↗" launcher capsule of the
+ *    same height/radius that bleeds off the right edge (a deliberate peek).
+ * On scroll-down the bar slides down and the launcher slides right at the same
+ * speed; both return on scroll-up.
  */
 const PRIMARY = [
   { href: '/home', label: 'Home', Icon: Home },
-  { href: '/startups/99x-developers', label: '99x Developers', Icon: Code2 },
-  { href: '/home#get-expert-guidance', label: 'Expert Guidance', Icon: GraduationCap },
+  { href: '/startups/99x-developers', label: '99x', Icon: Code2 },
+  { href: '/home#get-expert-guidance', label: 'Guidance', Icon: GraduationCap },
 ];
 
 export function FloatingConnections() {
@@ -33,8 +35,6 @@ export function FloatingConnections() {
       requestAnimationFrame(() => {
         const y = window.scrollY;
         const delta = y - lastY.current;
-        // Ignore tiny jitters; collapse when scrolling down past a threshold,
-        // reveal as soon as the user scrolls up.
         if (Math.abs(delta) > 6) {
           if (delta > 0 && y > 80) setCollapsed(true);
           else if (delta < 0) setCollapsed(false);
@@ -51,16 +51,12 @@ export function FloatingConnections() {
   if (pathname.startsWith('/messages') || pathname.startsWith('/pools')) return null;
 
   return (
-    // One bottom row so the bar and pill each keep their own space and never
-    // overlap: the bar auto-centres in the space left of the pill; the pill stays
-    // flush to the right edge. Container ignores pointer events so the empty
-    // middle never blocks the page underneath.
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex flex-col-reverse items-center gap-2 pl-3 sm:flex-row sm:items-center">
-      {/* Connection 1 — auto-centred bar */}
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex items-stretch gap-4 overflow-x-clip pl-3">
+      {/* Connection 1 — segmented control (~66%) */}
       <nav
         aria-label="Quick links"
         className={cn(
-          'pointer-events-auto mx-auto flex items-center gap-0.5 rounded-full border border-border bg-card p-1.5 shadow-xl shadow-black/10 transition-transform duration-300 ease-out motion-reduce:transition-none',
+          'pointer-events-auto flex h-[60px] basis-[66%] max-w-[560px] shrink-0 items-stretch rounded-full bg-card p-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.10)] transition-transform duration-300 ease-out motion-reduce:transition-none',
           collapsed ? 'translate-y-[220%]' : 'translate-y-0',
         )}
       >
@@ -72,39 +68,35 @@ export function FloatingConnections() {
               href={href}
               title={label}
               className={cn(
-                'flex flex-col items-center gap-1 rounded-full px-3.5 py-2 transition-colors',
-                active ? 'bg-accent text-primary' : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground',
+                'flex flex-1 flex-col items-center justify-center gap-1 rounded-full transition-colors',
+                active ? 'bg-accent text-primary' : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              <Icon className={cn('h-[18px] w-[18px]', active && 'text-primary')} />
-              <span className="text-[11px] font-bold leading-none tracking-tight">{label}</span>
+              <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.6 : 2} fill={active ? 'currentColor' : 'none'} fillOpacity={active ? 0.14 : 0} />
+              <span className={cn('text-[12.5px] leading-none tracking-tight', active ? 'font-bold' : 'font-medium')}>
+                {label}
+              </span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Connection 2 — flush right on the same line; collapses to its icon nub */}
+      {/* Connection 2 — standalone launcher (~34%), bleeds off the right edge */}
       <Link
         href="/startups/ez-rentbuddy"
-        aria-label="EZ RentBuddy — Student Housing"
-        className="pointer-events-auto flex flex-none items-center self-end rounded-l-2xl bg-[#16A34A] text-white shadow-xl shadow-[#16A34A]/30 transition-colors hover:bg-[#15803D] sm:self-auto"
+        aria-label="EZ RentBuddy"
+        style={{
+          backgroundColor: '#16A34A',
+          backgroundImage:
+            'repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0 2px, transparent 2px 9px), linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.06))',
+        }}
+        className={cn(
+          'pointer-events-auto ml-auto flex h-[60px] flex-none items-center gap-2.5 rounded-full px-6 text-white shadow-[0_6px_20px_rgba(22,163,74,0.35)] transition-transform duration-300 ease-out motion-reduce:transition-none hover:brightness-95',
+          collapsed ? 'translate-x-full' : 'translate-x-0',
+        )}
       >
-        <span className="grid h-12 w-12 flex-none place-items-center">
-          <Building2 className="h-5 w-5" />
-        </span>
-        <span
-          className={cn(
-            'overflow-hidden transition-[max-width,opacity] duration-300 ease-out motion-reduce:transition-none',
-            collapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100',
-          )}
-        >
-          <span className="flex flex-col whitespace-nowrap pr-4 leading-tight">
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[1.4px] text-[#DCFCE7]">
-              Student Housing
-            </span>
-            <span className="font-display text-sm font-bold tracking-tight">EZ RentBuddy</span>
-          </span>
-        </span>
+        <span className="whitespace-nowrap font-display text-[16px] font-extrabold tracking-tight">EZ RentBuddy</span>
+        <ArrowUpRight className="h-[18px] w-[18px] flex-none" strokeWidth={2.6} />
       </Link>
     </div>
   );
