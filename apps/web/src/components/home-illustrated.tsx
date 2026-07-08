@@ -181,16 +181,14 @@ export function HomeIllustrated() {
         {/* HERO */}
         <section
           id="get-expert-guidance"
-          className="relative overflow-hidden rounded-[28px] border border-border bg-gradient-to-br from-card to-accent/25 p-6 shadow-sm sm:p-10 lg:p-12"
+          className="rounded-[28px] border border-border bg-card p-6 shadow-sm sm:p-9 lg:p-12"
         >
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10"
-            style={{ backgroundImage: 'radial-gradient(50% 60% at 80% 8%, hsl(var(--primary)/.10), transparent 62%), radial-gradient(44% 52% at 4% 70%, hsl(var(--marigold)/.12), transparent 60%)' }}
-          />
           <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_.95fr]">
             <div>
-              <h1 className="font-display text-[clamp(34px,5.6vw,58px)] font-extrabold leading-[1.06] tracking-[-.028em]">
+              <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-accent px-3.5 py-1.5 text-[12.5px] font-bold text-primary">
+                <ShieldCheck className="h-3.5 w-3.5" /> 70+ verified colleges · Delhi NCR
+              </span>
+              <h1 className="font-display text-[clamp(32px,5.4vw,56px)] font-extrabold leading-[1.06] tracking-[-.028em]">
                 College choice,<br />
                 minus{' '}
                 <span className="relative inline-block whitespace-nowrap text-primary">
@@ -219,7 +217,9 @@ export function HomeIllustrated() {
               </div>
               {open && <GuidanceForm onDone={() => setOpen(false)} />}
             </div>
-            <Illo svg={BRIDGE} className="mx-auto w-full max-w-[500px] [&_svg]:h-auto [&_svg]:w-full" label="Illustration of a bridge leading to the right college" />
+            <div className="rounded-3xl bg-background p-6 sm:p-8">
+              <Illo svg={BRIDGE} className="mx-auto w-full max-w-[440px] [&_svg]:h-auto [&_svg]:w-full" label="Illustration of a bridge leading to the right college" />
+            </div>
           </div>
         </section>
 
