@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Lock, Search, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { PageHero } from '@/components/page-hero';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,10 +25,12 @@ export default function NetworkPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Network</h1>
-        <p className="text-muted-foreground">Private pools you&apos;ve joined — chat with your groups.</p>
-      </div>
+      <PageHero
+        eyebrow="Network"
+        title="Your private"
+        accent="pools."
+        sub="Private pools you've joined — chat with your groups."
+      />
 
       {(pools?.length ?? 0) > 0 && (
         <div className="relative">

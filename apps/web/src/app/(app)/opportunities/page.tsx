@@ -3,8 +3,9 @@
 import { Suspense, useState } from 'react';
 import { uniqueById } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
-import { Search, Sparkles, Target } from 'lucide-react';
+import { Search, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { PageHero } from '@/components/page-hero';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -153,15 +154,12 @@ function OpportunitiesContent() {
     : 'browse';
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold">
-          <Target className="h-6 w-6 text-primary" />
-          Opportunity Hub
-        </h1>
-        <p className="text-muted-foreground">
-          Internships, scholarships, competitions, fellowships & research programs.
-        </p>
-      </div>
+      <PageHero
+        eyebrow="Opportunity Hub"
+        title="After admission,"
+        accent="the real game."
+        sub="Internships, scholarships, competitions, fellowships & research programs — curated for you."
+      />
 
       <Tabs defaultValue={tab}>
         <TabsList>
