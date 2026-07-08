@@ -4,8 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, Search, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MotionProvider } from '@/components/motion';
-import { GuidanceForm } from '@/components/expert-guidance';
+import { CollegeQuiz } from '@/components/college-quiz';
 
 /* Map the pasted design's palette vars onto the app's brand tokens so the
    hand-drawn SVGs render in the violet brand. Longer names first. */
@@ -140,14 +139,12 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 export function HomeIllustrated() {
-  const [open, setOpen] = useState(false);
-  const openForm = () => {
-    setOpen(true);
-    document.getElementById('get-expert-guidance')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  const [quizOpen, setQuizOpen] = useState(false);
+  const openQuiz = () => setQuizOpen(true);
 
   return (
-    <MotionProvider>
+    <>
+      <CollegeQuiz open={quizOpen} onClose={() => setQuizOpen(false)} />
       <div className="space-y-16 sm:space-y-24">
         {/* HERO */}
         <section
@@ -163,12 +160,9 @@ export function HomeIllustrated() {
             <p className="mt-7 max-w-[580px] text-[17.5px] font-bold leading-relaxed text-foreground">
               Verified student data, real placement numbers and 1:1 human experts for 70+ Delhi NCR colleges — free for students and parents.
             </p>
-            {!open && (
-              <Button size="lg" className="mt-8" onClick={() => setOpen(true)}>
-                Get started
-              </Button>
-            )}
-            {open && <GuidanceForm onDone={() => setOpen(false)} />}
+            <Button size="lg" className="mt-8" onClick={openQuiz}>
+              Get started
+            </Button>
           </div>
         </section>
 
@@ -181,7 +175,7 @@ export function HomeIllustrated() {
             <h3 className="font-display text-xl font-extrabold tracking-tight">Find the colleges that fit you</h3>
             <p className="mt-1 text-sm font-medium text-[#6B4A05]">Answer a few questions and preview your top match in 60 seconds — verified by a real counselor on a free call.</p>
           </div>
-          <Button className="bg-foreground text-background hover:bg-foreground/90" onClick={openForm}>Start the quiz</Button>
+          <Button className="bg-foreground text-background hover:bg-foreground/90" onClick={openQuiz}>Start the quiz</Button>
         </section>
 
         {/* WHY */}
@@ -210,7 +204,7 @@ export function HomeIllustrated() {
                 <h3 className="font-display text-[21px] font-extrabold tracking-tight">{c.title}</h3>
                 <p className="flex-1 text-[15px] text-muted-foreground">{c.body}</p>
                 {c.form ? (
-                  <Button variant="outline" size="sm" onClick={openForm}>{c.cta}</Button>
+                  <Button variant="outline" size="sm" onClick={openQuiz}>{c.cta}</Button>
                 ) : (
                   <Button asChild variant="outline" size="sm">
                     <Link href={c.href!}>{c.cta}</Link>
@@ -258,7 +252,7 @@ export function HomeIllustrated() {
                 </div>
               ))}
             </div>
-            <Button size="lg" onClick={openForm}>Get started now</Button>
+            <Button size="lg" onClick={openQuiz}>Get started now</Button>
           </div>
 
           {/* Insights frame */}
@@ -333,6 +327,6 @@ export function HomeIllustrated() {
           </div>
         </footer>
       </div>
-    </MotionProvider>
+    </>
   );
 }
