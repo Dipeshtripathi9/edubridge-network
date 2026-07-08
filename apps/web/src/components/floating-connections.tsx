@@ -7,16 +7,16 @@ import { Building2, Code2, GraduationCap, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
- * Two scroll-aware floating panels (Zomato / Google-Maps style):
- *  - Connection 1: a bottom-center pill bar (Home · 99x · Expert Guidance) that
- *    slides down out of view on scroll-down and back up on scroll-up.
- *  - Connection 2: a right-edge "EZ RentBuddy" tab that slides half off-screen on
- *    scroll-down (still tappable) and fully back in on scroll-up.
+ * Two scroll-aware floating panels, styled after the Zomato floating UI:
+ *  - Connection 1: a white bottom-center pill bar (Home · 99x · Expert Guidance)
+ *    with a soft-tinted highlight on the active tab; slides down on scroll-down.
+ *  - Connection 2: a solid violet "EZ RentBuddy" pill flush to the right edge that
+ *    collapses to just its icon nub on scroll-down and expands back on scroll-up.
  */
 const PRIMARY = [
-  { href: '/home', label: 'Home', desc: 'Homepage', Icon: Home },
-  { href: '/startups/99x-developers', label: '99x Developers', desc: 'Website Development', Icon: Code2 },
-  { href: '/home#get-expert-guidance', label: 'Expert Guidance', desc: 'College Selection', Icon: GraduationCap },
+  { href: '/home', label: 'Home', Icon: Home },
+  { href: '/startups/99x-developers', label: '99x Developers', Icon: Code2 },
+  { href: '/home#get-expert-guidance', label: 'Expert Guidance', Icon: GraduationCap },
 ];
 
 export function FloatingConnections() {
@@ -61,53 +61,49 @@ export function FloatingConnections() {
       >
         <nav
           aria-label="Quick links"
-          className="flex items-center gap-0.5 rounded-full border border-border bg-card/95 p-1.5 shadow-xl shadow-black/10 backdrop-blur"
+          className="flex items-center gap-0.5 rounded-full border border-border bg-card p-1.5 shadow-xl shadow-black/10"
         >
-          {PRIMARY.map(({ href, label, desc, Icon }) => {
+          {PRIMARY.map(({ href, label, Icon }) => {
             const active = pathname === href;
             return (
               <Link
                 key={label}
                 href={href}
-                title={`${label} — ${desc}`}
                 className={cn(
-                  'group flex items-center gap-2.5 rounded-full px-3 py-2 transition-colors',
-                  active ? 'bg-accent' : 'hover:bg-accent',
+                  'flex flex-col items-center gap-1 rounded-full px-3.5 py-2 transition-colors',
+                  active ? 'bg-accent text-primary' : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground',
                 )}
               >
-                <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-accent text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span className="flex flex-col text-left leading-tight">
-                  <span className="text-[13px] font-bold tracking-tight">{label}</span>
-                  <span className="hidden text-[10px] font-medium text-muted-foreground sm:block">{desc}</span>
-                </span>
+                <Icon className={cn('h-[18px] w-[18px]', active && 'text-primary')} />
+                <span className="text-[11px] font-bold leading-none tracking-tight">{label}</span>
               </Link>
             );
           })}
         </nav>
       </div>
 
-      {/* Connection 2 — right edge */}
-      <div
-        className={cn(
-          'fixed right-0 top-1/2 z-30 -translate-y-1/2 transition-transform duration-300 ease-out motion-reduce:transition-none',
-          collapsed ? 'translate-x-1/2' : 'translate-x-0',
-        )}
-      >
+      {/* Connection 2 — right edge, collapses to its icon nub */}
+      <div className="fixed right-0 top-1/2 z-30 -translate-y-1/2">
         <Link
           href="/startups/ez-rentbuddy"
           aria-label="EZ RentBuddy — Student Housing"
-          className="flex items-center gap-2.5 rounded-l-2xl border border-r-0 border-border bg-card py-3 pl-3.5 pr-4 shadow-xl shadow-black/10 transition-shadow hover:shadow-2xl"
+          className="flex items-center rounded-l-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/25 transition-shadow hover:shadow-2xl"
         >
-          <span className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-marigold-soft text-amber-600">
+          <span className="grid h-12 w-12 flex-none place-items-center">
             <Building2 className="h-5 w-5" />
           </span>
-          <span className="flex flex-col leading-tight">
-            <span className="font-mono text-[9.5px] font-bold uppercase tracking-[1.4px] text-muted-foreground">
-              Student Housing
+          <span
+            className={cn(
+              'overflow-hidden transition-[max-width,opacity] duration-300 ease-out motion-reduce:transition-none',
+              collapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100',
+            )}
+          >
+            <span className="flex flex-col whitespace-nowrap pr-4 leading-tight">
+              <span className="font-mono text-[9px] font-bold uppercase tracking-[1.4px] text-primary-foreground/70">
+                Student Housing
+              </span>
+              <span className="font-display text-sm font-bold tracking-tight">EZ RentBuddy</span>
             </span>
-            <span className="font-display text-sm font-bold tracking-tight">EZ RentBuddy</span>
           </span>
         </Link>
       </div>
