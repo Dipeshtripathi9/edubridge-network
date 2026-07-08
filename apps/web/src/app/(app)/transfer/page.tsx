@@ -1,8 +1,8 @@
 'use client';
 
-import { ArrowRight, BookOpenText, Repeat } from 'lucide-react';
+import { ArrowRight, Repeat } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { PageHero } from '@/components/page-hero';
 import { Avatar } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -89,18 +89,12 @@ function Stories() {
 export default function TransferHubPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold">
-          <Repeat className="h-6 w-6 text-primary" />
-          Transfer Hub
-        </h1>
-        <div className="text-muted-foreground">
-          Discover colleges you can transfer to, track your journey, and learn from others.
-          <Badge variant="secondary" className="ml-2">
-            <BookOpenText className="mr-1 h-3 w-3" /> Powered by the College Data layer
-          </Badge>
-        </div>
-      </div>
+      <PageHero
+        eyebrow="Transfer Hub"
+        title="Switch colleges,"
+        accent="the smart way."
+        sub="Discover colleges you can transfer to, track your journey, and learn from others."
+      />
 
       <Tabs defaultValue="find">
         <TabsList>

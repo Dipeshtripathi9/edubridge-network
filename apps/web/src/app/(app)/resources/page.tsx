@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { PageHero } from '@/components/page-hero';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -130,15 +131,12 @@ export default function ResourcesPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold">
-            <BookOpen className="h-6 w-6 text-primary" />
-            Resource Hub
-          </h1>
-          <p className="text-muted-foreground">
-            Notes, PDFs, roadmaps & placement reports shared by students.
-          </p>
-        </div>
+        <PageHero
+          eyebrow="Resource Hub"
+          title="Learn from what"
+          accent="actually worked."
+          sub="Notes, PDFs, roadmaps & placement reports shared by students."
+        />
         <ResourceUpload />
       </div>
 

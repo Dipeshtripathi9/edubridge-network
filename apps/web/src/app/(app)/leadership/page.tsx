@@ -8,11 +8,11 @@ import {
   Gift,
   Megaphone,
   Rocket,
-  ShieldCheck,
   Sparkles,
   Users,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { PageHero } from '@/components/page-hero';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -194,16 +194,16 @@ export default function LeadershipPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold">
-          <ShieldCheck className="h-6 w-6 text-primary" /> Leadership
-        </h1>
-        <p className="text-muted-foreground">
-          {isLeader
+      <PageHero
+        eyebrow="Leadership"
+        title="Lead a"
+        accent="community."
+        sub={
+          isLeader
             ? 'Communities you lead or moderate. Open one to manage members, activity, reports & analytics.'
-            : 'Lead a community — see open positions and the perks of becoming a head.'}
-        </p>
-      </div>
+            : 'Lead a community — see open positions and the perks of becoming a head.'
+        }
+      />
 
       {isLoading ? (
         <div className="grid gap-3 sm:grid-cols-2">
