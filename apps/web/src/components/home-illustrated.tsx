@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { CheckCircle2, Search, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CollegeQuiz } from '@/components/college-quiz';
+import { HomeExplainer } from '@/components/home-explainer';
 
 /* Map the pasted design's palette vars onto the app's brand tokens so the
    hand-drawn SVGs render in the violet brand. Longer names first. */
@@ -177,6 +178,9 @@ export function HomeIllustrated() {
           </div>
           <Button className="bg-foreground text-background hover:bg-foreground/90" onClick={openQuiz}>Start the quiz</Button>
         </section>
+
+        {/* EXPLAINER */}
+        <HomeExplainer />
 
         {/* WHY */}
         <section>
