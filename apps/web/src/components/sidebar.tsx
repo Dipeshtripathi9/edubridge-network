@@ -13,10 +13,8 @@ import {
   LayoutGrid,
   LifeBuoy,
   Repeat,
-  Rocket,
   ShieldCheck,
   Target,
-  BookOpen,
   Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -25,9 +23,7 @@ import { useAuthStore } from '@/stores/auth.store';
 export const NAV = [
   { href: '/home', label: 'Home', icon: Home },
   { href: '/communities', label: 'Communities', icon: LayoutGrid },
-  { href: '/startups', label: 'Startups', icon: Rocket },
   { href: '/opportunities', label: 'Opportunities', icon: Target },
-  { href: '/resources', label: 'Resources', icon: BookOpen },
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
   { href: '/network', label: 'Network', icon: Users },
   { href: '/leadership', label: 'Leadership', icon: Crown },
