@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ArrowUpRight, Check, Home, MapPin, Search, ShieldCheck, Upload, Users, Wallet } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Home, MapPin, Search, ShieldCheck, Upload, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { RoomQuiz } from '@/components/room-quiz';
 import { useSubmitRentalLead } from '@/hooks/use-rentals';
@@ -14,13 +14,13 @@ const PARTICIPANTS = ['Property Owner', 'Broker', 'Student', 'Local Resident'];
 const TRUST = [
   { Icon: ShieldCheck, title: 'Resident-verified', sub: 'Reviews only from students living there' },
   { Icon: Wallet, title: 'Real rent, upfront', sub: 'Deposit, mess, electricity — all on the card' },
-  { Icon: Users, title: 'Roommate matching', sub: 'Match by budget, food & sleep schedule' },
+  { Icon: MapPin, title: 'Near your campus', sub: 'Rooms mapped by walking distance' },
 ];
 
 const STEPS = [
   { n: '01', title: 'Pick your college', body: 'Search your campus and see every verified room around it, mapped by walking distance.' },
   { n: '02', title: 'Compare like a local', body: 'Real rent breakdowns and reviews from current residents — the good and the annoying, both.' },
-  { n: '03', title: 'Move in, sorted', body: 'Book a visit, match a roommate if you want one, and move in — with a resident’s honest take first.' },
+  { n: '03', title: 'Move in, sorted', body: 'Book a visit, get a resident’s honest take, and move in — verified before you commit.' },
 ];
 
 function Roofline({ className }: { className: string }) {
@@ -127,11 +127,12 @@ export default function EzRentbuddyPage() {
         <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[2.6px] text-[#F4502C]">
           <Home className="h-3.5 w-3.5" /> Verified rooms near NCR colleges
         </span>
-        <h1 className="mx-auto mt-4 max-w-[760px] font-display text-[clamp(38px,6vw,64px)] font-extrabold leading-[1.06] tracking-[-.03em]">
-          Room near campus?
+        <h1 className="mx-auto mt-4 max-w-[720px] font-display text-[clamp(30px,5.6vw,54px)] font-extrabold leading-[1.08] tracking-[-.03em]">
+          Find your accommodation
           <br />
+          in{' '}
           <span className="relative inline-block whitespace-nowrap text-[#F4502C]">
-            Sorted.<Roofline className="absolute -bottom-2 left-0 h-3.5 w-full text-[#F4502C]" />
+            7 simple taps.<Roofline className="absolute -bottom-2 left-0 h-3 w-full text-[#F4502C]" />
           </span>
         </h1>
         <p className="mx-auto mt-6 max-w-[560px] text-[17.5px] font-medium text-muted-foreground">
@@ -189,43 +190,6 @@ export default function EzRentbuddyPage() {
                 <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* buddy */}
-      <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:py-20 lg:grid-cols-2 lg:gap-14">
-        <div>
-          <h2 className="font-display text-[clamp(28px,4vw,40px)] font-extrabold leading-[1.12] tracking-[-.024em]">
-            Find a roommate,
-            <br />
-            not a stranger.
-          </h2>
-          <p className="mt-4 max-w-[440px] text-[16px] text-muted-foreground">
-            Match with students from your own college and course — by sleep schedule, food habits and budget. That’s the “buddy” in Rentbuddy.
-          </p>
-          <button onClick={openQuiz} className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-[#F4502C] px-7 py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-[#D93E1D]">
-            Find my buddy <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="mx-auto w-full max-w-[420px] rounded-[24px] border border-border bg-white p-6 shadow-lg">
-          <div className="flex items-center gap-3.5 py-3">
-            <span className="grid h-11 w-11 flex-none place-items-center rounded-full bg-[#F4502C] font-display text-sm font-bold text-white">AM</span>
-            <div className="min-w-0">
-              <b className="block text-[14.5px]">Aman · B.Tech CSE ’29, Bennett</b>
-              <span className="text-[12.5px] font-semibold text-muted-foreground">Budget ₹8–10k · Needs AC</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3.5 border-t border-dashed border-border py-3">
-            <span className="grid h-11 w-11 flex-none place-items-center rounded-full bg-[#FFC24B] font-display text-sm font-bold text-foreground">?</span>
-            <div className="min-w-0">
-              <b className="block text-[14.5px]">You</b>
-              <span className="text-[12.5px] font-semibold text-muted-foreground">Tell us your vibe — a few quick taps</span>
-            </div>
-          </div>
-          <div className="mt-3.5 flex items-center justify-between gap-3 rounded-2xl bg-green-soft px-4 py-3">
-            <span className="inline-flex items-center gap-2 text-[13px] font-extrabold text-green"><Check className="h-4 w-4" /> 87% compatibility</span>
-            <button onClick={openQuiz} className="rounded-full bg-[#F4502C] px-4 py-2 text-[13px] font-bold text-white transition-colors hover:bg-[#D93E1D]">Say hi</button>
           </div>
         </div>
       </section>
