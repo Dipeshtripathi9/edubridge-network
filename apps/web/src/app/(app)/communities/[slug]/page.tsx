@@ -45,9 +45,9 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="overflow-hidden rounded-lg border border-border">
         <div className="h-28 bg-gradient-to-r from-primary/30 to-accent" />
-        <div className="flex items-center justify-between p-5">
-          <div>
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl font-bold">{cleanName(community.name)}</h1>
               <Badge variant="secondary">
                 {community.type === 'COLLEGE'
@@ -69,7 +69,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
               members · {community.postCount} posts
             </span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-none flex-wrap gap-2">
             <Button
               variant="outline"
               title="Share this community"
