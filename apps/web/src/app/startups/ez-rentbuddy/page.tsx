@@ -52,10 +52,10 @@ function ShareProperty() {
     );
   };
 
-  const field = 'w-full rounded-2xl border-[1.5px] border-border bg-white px-4 py-3 text-[15px] font-semibold outline-none focus:border-[#F4502C] focus:ring-4 focus:ring-[#FFE9E1]';
+  const field = 'w-full rounded-2xl border-[1.5px] border-border bg-white px-4 py-3 text-[15px] font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-accent';
 
   return (
-    <div className="rounded-[24px] border border-[#F3DFB0] bg-[#FFF3DC] p-6 sm:p-8">
+    <div className="rounded-[24px] border border-marigold/30 bg-marigold-soft p-6 sm:p-8">
       <div className="grid gap-2.5 sm:grid-cols-2">
         <input className={field} placeholder="Your name *" value={name} onChange={(e) => setName(e.target.value)} />
         <input className={field} inputMode="numeric" maxLength={10} placeholder="WhatsApp number *" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} />
@@ -66,7 +66,7 @@ function ShareProperty() {
           <button
             key={p}
             onClick={() => setParticipant(p)}
-            className={cn('rounded-full border-[1.5px] px-4 py-2 text-[13.5px] font-bold transition-colors', participant === p ? 'border-[#F4502C] bg-[#FFE9E1] text-[#7A2410]' : 'border-border bg-white text-muted-foreground hover:border-foreground')}
+            className={cn('rounded-full border-[1.5px] px-4 py-2 text-[13.5px] font-bold transition-colors', participant === p ? 'border-primary bg-accent text-primary' : 'border-border bg-white text-muted-foreground hover:border-foreground')}
           >
             {p}
           </button>
@@ -74,7 +74,7 @@ function ShareProperty() {
       </div>
       <input className={cn(field, 'mt-4')} placeholder="Google Drive folder link (photos, rent, contact…) — optional" value={driveUrl} onChange={(e) => setDriveUrl(e.target.value)} />
       <textarea className={cn(field, 'mt-2.5 min-h-[96px] rounded-2xl')} placeholder="Or describe the place — rent, amenities, location, owner contact…" value={details} onChange={(e) => setDetails(e.target.value)} />
-      <button onClick={onSubmit} disabled={submit.isPending} className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-[#F4502C] px-7 py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-[#D93E1D] disabled:opacity-60">
+      <button onClick={onSubmit} disabled={submit.isPending} className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60">
         <Upload className="h-4 w-4" /> {submit.isPending ? 'Sharing…' : 'Share a property'}
       </button>
       <p className="mt-3 text-[12.5px] font-semibold text-muted-foreground">Cashback is paid once we verify and list the place — the day it goes live.</p>
@@ -93,22 +93,22 @@ export default function EzRentbuddyPage() {
       {/* family strip */}
       <div className="bg-foreground px-4 py-2.5 text-center text-[12.5px] font-semibold text-white/80">
         An <b className="text-white">EduBridge Network</b> company — same verified-first rules, now for rooms.{' '}
-        <Link href="/home" className="font-bold text-[#FFC24B]">Know the network →</Link>
+        <Link href="/home" className="font-bold text-marigold">Know the network →</Link>
       </div>
 
       {/* header */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-[70px] max-w-6xl items-center gap-4 px-5">
           <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-[11px] bg-[#F4502C] text-white"><Home className="h-[18px] w-[18px]" /></span>
-            <span className="font-display text-xl font-extrabold tracking-[-.5px]">ez-<span className="text-[#F4502C]">rentbuddy</span></span>
+            <span className="grid h-9 w-9 place-items-center rounded-[11px] bg-primary text-white"><Home className="h-[18px] w-[18px]" /></span>
+            <span className="font-display text-xl font-extrabold tracking-[-.5px]">ez-<span className="text-primary">rentbuddy</span></span>
           </div>
           <nav className="ml-auto flex items-center gap-2.5">
             <Link href="/home" className="hidden items-center gap-1.5 rounded-full border-[1.5px] border-border bg-white px-4 py-2.5 text-[13.5px] font-bold text-muted-foreground hover:border-foreground hover:text-foreground sm:inline-flex">
               <span className="grid h-[18px] w-[18px] place-items-center rounded-[6px] bg-primary text-[9px] font-black text-primary-foreground">E</span>
               EduBridge <ArrowUpRight className="h-3 w-3" />
             </Link>
-            <button onClick={openQuiz} className="inline-flex items-center justify-center rounded-full bg-[#F4502C] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#D93E1D]">
+            <button onClick={openQuiz} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary/90">
               Find a place
             </button>
           </nav>
@@ -117,15 +117,15 @@ export default function EzRentbuddyPage() {
 
       {/* hero */}
       <section className="px-5 py-16 text-center sm:py-20">
-        <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[2.6px] text-[#F4502C]">
+        <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[2.6px] text-primary">
           <Home className="h-3.5 w-3.5" /> Verified rooms near NCR colleges
         </span>
         <h1 className="mx-auto mt-4 max-w-[720px] font-display text-[clamp(30px,5.6vw,54px)] font-extrabold leading-[1.08] tracking-[-.03em]">
           Find your accommodation
           <br />
           in{' '}
-          <span className="relative inline-block whitespace-nowrap text-[#F4502C]">
-            7 simple taps.<Roofline className="absolute -bottom-2 left-0 h-3 w-full text-[#F4502C]" />
+          <span className="relative inline-block whitespace-nowrap text-primary">
+            7 simple taps.<Roofline className="absolute -bottom-2 left-0 h-3 w-full text-marigold" />
           </span>
         </h1>
         <p className="mx-auto mt-6 max-w-[560px] text-[17.5px] font-medium text-muted-foreground">
@@ -135,7 +135,7 @@ export default function EzRentbuddyPage() {
         {/* single full-width CTA → opens quiz */}
         <button
           onClick={openQuiz}
-          className="mx-auto mt-9 flex w-full max-w-[560px] items-center justify-center gap-2 rounded-full bg-[#F4502C] px-8 py-4 text-[16px] font-bold text-white shadow-[0_10px_30px_-10px_rgba(244,80,44,0.6)] transition-colors hover:bg-[#D93E1D]"
+          className="mx-auto mt-9 flex w-full max-w-[560px] items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-[16px] font-bold text-white shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.55)] transition-colors hover:bg-primary/90"
         >
           Find my place <ArrowRight className="h-[18px] w-[18px]" />
         </button>
@@ -148,7 +148,7 @@ export default function EzRentbuddyPage() {
           <div className="grid gap-4 md:grid-cols-3">
             {STEPS.map((s, i) => (
               <div key={s.n} className="rounded-[24px] border border-border bg-background p-6 shadow-sm">
-                <span className={cn('grid h-11 w-11 place-items-center rounded-[14px] font-display text-[15px] font-extrabold', i === 1 ? 'bg-[#FFC24B] text-foreground' : 'bg-[#F4502C] text-white')}>{s.n}</span>
+                <span className={cn('grid h-11 w-11 place-items-center rounded-[14px] font-display text-[15px] font-extrabold', i === 1 ? 'bg-marigold text-foreground' : 'bg-primary text-white')}>{s.n}</span>
                 <h3 className="mt-3.5 font-display text-lg font-bold tracking-tight">{s.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>
               </div>
@@ -164,25 +164,25 @@ export default function EzRentbuddyPage() {
           <p className="min-w-[260px] flex-1 text-[15px] text-muted-foreground">
             <b className="text-foreground">Born inside EduBridge Network.</b> Pitched by students in Founders Hub, built by 99x Developers — because “college sorted” should include the room too. Same rule here as there: <b className="text-foreground">if it isn’t verified, it isn’t listed.</b>
           </p>
-          <Link href="/home" className="inline-flex items-center gap-2 whitespace-nowrap text-[14.5px] font-extrabold text-[#F4502C]">
+          <Link href="/home" className="inline-flex items-center gap-2 whitespace-nowrap text-[14.5px] font-extrabold text-primary">
             The EduBridge story <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
 
       {/* dark CTA */}
-      <section className="bg-[#2E100A] px-5 py-20 text-center text-white sm:py-24">
-        <span className="font-mono text-[11px] uppercase tracking-[3px] text-[#FFC24B]">EZ-Rentbuddy</span>
+      <section className="bg-[#241263] px-5 py-20 text-center text-white sm:py-24">
+        <span className="font-mono text-[11px] uppercase tracking-[3px] text-marigold">EZ-Rentbuddy</span>
         <h2 className="mx-auto mt-4 max-w-[680px] font-display text-[clamp(32px,5vw,52px)] font-extrabold leading-[1.08] tracking-[-.028em]">
           Admission sorted.
           <br />
           Now sort{' '}
           <span className="relative inline-block whitespace-nowrap">
-            the room.<Roofline className="absolute -bottom-2 left-0 h-3.5 w-full text-[#FFC24B]" />
+            the room.<Roofline className="absolute -bottom-2 left-0 h-3.5 w-full text-marigold" />
           </span>
         </h2>
-        <p className="mx-auto mt-4 max-w-[460px] text-[16.5px] text-[#E8C9BC]">Verified rooms, real rents, and a roommate who won’t eat your Maggi. Free to browse.</p>
-        <button onClick={openQuiz} className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-[#F4502C] px-8 py-4 text-[15.5px] font-bold text-white transition-colors hover:bg-[#FF6240]">
+        <p className="mx-auto mt-4 max-w-[460px] text-[16.5px] text-[#DCD5F7]">Verified rooms, real rents, and a roommate who won’t eat your Maggi. Free to browse.</p>
+        <button onClick={openQuiz} className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-[15.5px] font-bold text-white transition-colors hover:bg-primary/90">
           Find rooms near my college <ArrowRight className="h-4 w-4" />
         </button>
       </section>
@@ -197,13 +197,13 @@ export default function EzRentbuddyPage() {
             <h2 className="mt-4 font-display text-[clamp(28px,4vw,40px)] font-extrabold leading-[1.12] tracking-[-.024em]">
               Know a good room?
               <br />
-              <span className="text-[#F4502C]">Earn ₹500 cashback.</span>
+              <span className="text-primary">Earn ₹500 cashback.</span>
             </h2>
             <p className="mt-4 max-w-[460px] text-[16px] text-muted-foreground">
               Share a PG or flat you know — if our team verifies and lists it, the cashback is yours the day it goes live. Residents can refer their own building too.
             </p>
             <div className="mt-6 flex items-center gap-2.5 text-[13.5px] font-semibold text-muted-foreground">
-              <MapPin className="h-4 w-4 flex-none text-[#F4502C]" /> Any PG, hostel, flat or room near an NCR college counts.
+              <MapPin className="h-4 w-4 flex-none text-primary" /> Any PG, hostel, flat or room near an NCR college counts.
             </div>
           </div>
           <ShareProperty />
@@ -214,12 +214,12 @@ export default function EzRentbuddyPage() {
       <footer className="border-t border-border bg-background px-5 py-12">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-6 border-b border-border pb-6">
           <div className="flex items-center gap-2.5">
-            <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#F4502C] text-white"><Home className="h-4 w-4" /></span>
-            <span className="font-display text-lg font-extrabold tracking-tight">ez-<span className="text-[#F4502C]">rentbuddy</span></span>
+            <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-primary text-white"><Home className="h-4 w-4" /></span>
+            <span className="font-display text-lg font-extrabold tracking-tight">ez-<span className="text-primary">rentbuddy</span></span>
           </div>
           <div className="flex flex-wrap gap-x-7 gap-y-2 text-[14px] font-semibold text-muted-foreground">
-            <button onClick={openQuiz} className="hover:text-[#F4502C]">Find a place</button>
-            <Link href="/home" className="hover:text-[#F4502C]">EduBridge Network</Link>
+            <button onClick={openQuiz} className="hover:text-primary">Find a place</button>
+            <Link href="/home" className="hover:text-primary">EduBridge Network</Link>
           </div>
         </div>
         <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-3 pt-5 text-[13px] font-semibold text-muted-foreground">

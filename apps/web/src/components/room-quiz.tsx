@@ -170,8 +170,8 @@ export function RoomQuiz({ open, onClose }: { open: boolean; onClose: () => void
       <header className="sticky top-0 z-10 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-[720px] items-center justify-between px-5">
           <div className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#F4502C] text-white"><Home className="h-4 w-4" /></span>
-            <span className="font-display text-lg font-extrabold tracking-tight">ez-<span className="text-[#F4502C]">rentbuddy</span></span>
+            <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-primary text-white"><Home className="h-4 w-4" /></span>
+            <span className="font-display text-lg font-extrabold tracking-tight">ez-<span className="text-primary">rentbuddy</span></span>
           </div>
           <button onClick={close} className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground hover:text-foreground">
             Save &amp; exit <X className="h-4 w-4" />
@@ -190,7 +190,7 @@ export function RoomQuiz({ open, onClose }: { open: boolean; onClose: () => void
         <div className="mb-14 rounded-[28px] border border-border bg-card p-5 shadow-lg sm:p-7">
           <div className="mb-6 flex items-center gap-3.5">
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
-              <div className="h-full rounded-full bg-gradient-to-r from-[#FFC24B] to-[#FFD98A] transition-[width] duration-500" style={{ width: `${progressPct}%` }} />
+              <div className="h-full rounded-full bg-gradient-to-r from-marigold to-amber-300 transition-[width] duration-500" style={{ width: `${progressPct}%` }} />
             </div>
             <span className="whitespace-nowrap font-mono text-xs tracking-[1.4px] text-muted-foreground">{done ? 'Done' : `${step} / ${TOTAL - 1}`}</span>
           </div>
@@ -202,11 +202,11 @@ export function RoomQuiz({ open, onClose }: { open: boolean; onClose: () => void
               <p className="mx-auto mt-2 max-w-[440px] text-[15px] text-muted-foreground">
                 A room buddy will WhatsApp your top matches near <b className="text-foreground">{answers.college === 'other' ? reveals.college || 'your campus' : (answers.college as string) || 'your campus'}</b> — with a current resident’s honest take on each.
               </p>
-              <button onClick={close} className="mt-6 inline-flex items-center justify-center rounded-full bg-[#F4502C] px-7 py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-[#D93E1D]">Done</button>
+              <button onClick={close} className="mt-6 inline-flex items-center justify-center rounded-full bg-primary px-7 py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-primary/90">Done</button>
             </div>
           ) : step <= 5 ? (
             <div key={step} className="animate-page">
-              <div className="mb-2 font-mono text-[10.5px] uppercase tracking-[2.4px] text-[#F4502C]">{cur.kicker}</div>
+              <div className="mb-2 font-mono text-[10.5px] uppercase tracking-[2.4px] text-primary">{cur.kicker}</div>
               <h2 className="font-display text-[21px] font-bold tracking-tight">{cur.title}</h2>
               {cur.hint && <p className="mb-4 mt-1 text-[13.5px] font-semibold text-muted-foreground">{cur.hint}</p>}
               <div className={cn('grid grid-cols-1 gap-2.5 sm:grid-cols-2', cur.hint ? '' : 'mt-4')}>
@@ -221,14 +221,14 @@ export function RoomQuiz({ open, onClose }: { open: boolean; onClose: () => void
                       className={cn(
                         'flex items-center gap-2.5 rounded-2xl border-[1.5px] px-4 py-3.5 text-left text-[14.5px] font-bold transition-colors active:scale-[.98]',
                         full && 'sm:col-span-2',
-                        selected ? 'border-[#F4502C] bg-[#FFE9E1] text-[#7A2410]' : 'border-border bg-card hover:border-foreground',
+                        selected ? 'border-primary bg-accent text-primary' : 'border-border bg-card hover:border-foreground',
                       )}
                     >
                       {cur.multi && (
-                        <span className={cn('grid h-[22px] w-[22px] flex-none place-items-center rounded-full font-display text-[11.5px] font-extrabold', selected ? 'bg-[#F4502C] text-white' : 'hidden')}>{rank}</span>
+                        <span className={cn('grid h-[22px] w-[22px] flex-none place-items-center rounded-full font-display text-[11.5px] font-extrabold', selected ? 'bg-primary text-white' : 'hidden')}>{rank}</span>
                       )}
                       <span className="flex-1">{o.label}</span>
-                      {!cur.multi && <Check className={cn('h-[17px] w-[17px] flex-none text-[#F4502C] transition-opacity', selected ? 'opacity-100' : 'opacity-0')} />}
+                      {!cur.multi && <Check className={cn('h-[17px] w-[17px] flex-none text-primary transition-opacity', selected ? 'opacity-100' : 'opacity-0')} />}
                     </button>
                   );
                 })}
@@ -240,7 +240,7 @@ export function RoomQuiz({ open, onClose }: { open: boolean; onClose: () => void
                   <input
                     autoFocus
                     inputMode={rv === 'budget' ? 'numeric' : 'text'}
-                    className={cn('min-w-0 flex-1 rounded-full border-[1.5px] bg-card px-4 py-3 text-[14.5px] font-semibold outline-none focus:ring-4 focus:ring-[#FFE9E1]', errs.reveal ? 'border-destructive' : 'border-border focus:border-[#F4502C]')}
+                    className={cn('min-w-0 flex-1 rounded-full border-[1.5px] bg-card px-4 py-3 text-[14.5px] font-semibold outline-none focus:ring-4 focus:ring-accent', errs.reveal ? 'border-destructive' : 'border-border focus:border-primary')}
                     placeholder={rv === 'college' ? 'Type your college — e.g. Amity Noida' : rv === 'budget' ? 'e.g. 8500 per month' : 'e.g. attached washroom, parking'}
                     value={reveals[rv]}
                     onChange={(e) => setReveals((r) => ({ ...r, [rv]: rv === 'budget' ? e.target.value.replace(/\D/g, '') : e.target.value }))}
@@ -254,7 +254,7 @@ export function RoomQuiz({ open, onClose }: { open: boolean; onClose: () => void
                   <ArrowLeft className="h-4 w-4" /> Back
                 </button>
                 {(cur.multi ? arr(cur.key).length > 0 : !!rv) && (
-                  <button onClick={goNext} className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#F4502C] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#D93E1D]">
+                  <button onClick={goNext} className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary/90">
                     Continue <ArrowRight className="h-4 w-4" />
                   </button>
                 )}
@@ -262,13 +262,13 @@ export function RoomQuiz({ open, onClose }: { open: boolean; onClose: () => void
             </div>
           ) : (
             <div key="contact" className="animate-page">
-              <div className="mb-2 font-mono text-[10.5px] uppercase tracking-[2.4px] text-[#F4502C]">Last step</div>
+              <div className="mb-2 font-mono text-[10.5px] uppercase tracking-[2.4px] text-primary">Last step</div>
               <h2 className="font-display text-[21px] font-bold tracking-tight">Where should we send your matches?</h2>
               <p className="mb-4 mt-1 text-[13.5px] font-semibold text-muted-foreground">A room buddy sends your top matches on WhatsApp and books your visits — free.</p>
               <div className="flex flex-col gap-3.5">
                 <div>
                   <input
-                    className={cn('w-full rounded-full border-[1.5px] bg-card px-4 py-3 text-[15px] font-semibold outline-none focus:ring-4 focus:ring-[#FFE9E1]', errs.name ? 'border-destructive' : 'border-border focus:border-[#F4502C]')}
+                    className={cn('w-full rounded-full border-[1.5px] bg-card px-4 py-3 text-[15px] font-semibold outline-none focus:ring-4 focus:ring-accent', errs.name ? 'border-destructive' : 'border-border focus:border-primary')}
                     placeholder="Your name *"
                     value={contact.name}
                     onChange={(e) => setContact((c) => ({ ...c, name: e.target.value }))}
@@ -279,7 +279,7 @@ export function RoomQuiz({ open, onClose }: { open: boolean; onClose: () => void
                   <input
                     inputMode="numeric"
                     maxLength={10}
-                    className={cn('w-full rounded-full border-[1.5px] bg-card px-4 py-3 text-[15px] font-semibold outline-none focus:ring-4 focus:ring-[#FFE9E1]', errs.phone ? 'border-destructive' : 'border-border focus:border-[#F4502C]')}
+                    className={cn('w-full rounded-full border-[1.5px] bg-card px-4 py-3 text-[15px] font-semibold outline-none focus:ring-4 focus:ring-accent', errs.phone ? 'border-destructive' : 'border-border focus:border-primary')}
                     placeholder="WhatsApp number *"
                     value={contact.phone}
                     onChange={(e) => setContact((c) => ({ ...c, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
@@ -287,13 +287,13 @@ export function RoomQuiz({ open, onClose }: { open: boolean; onClose: () => void
                   {errs.phone && <span className="mt-1.5 block text-[12.5px] font-bold text-destructive">Enter a valid 10-digit mobile number</span>}
                 </div>
                 <input
-                  className="w-full rounded-full border-[1.5px] border-border bg-card px-4 py-3 text-[15px] font-semibold outline-none focus:border-[#F4502C] focus:ring-4 focus:ring-[#FFE9E1]"
+                  className="w-full rounded-full border-[1.5px] border-border bg-card px-4 py-3 text-[15px] font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-accent"
                   placeholder="Preferred area (optional) — e.g. Knowledge Park 3"
                   value={contact.area}
                   onChange={(e) => setContact((c) => ({ ...c, area: e.target.value }))}
                 />
                 <label className="flex items-start gap-2.5 text-[13px] font-medium text-muted-foreground">
-                  <input type="checkbox" className="mt-1 h-[18px] w-[18px] flex-none accent-[#F4502C]" checked={contact.consent} onChange={(e) => setContact((c) => ({ ...c, consent: e.target.checked }))} />
+                  <input type="checkbox" className="mt-1 h-[18px] w-[18px] flex-none accent-primary" checked={contact.consent} onChange={(e) => setContact((c) => ({ ...c, consent: e.target.checked }))} />
                   <span>EZ-Rentbuddy may message me on WhatsApp about these matches. Opt out anytime.</span>
                 </label>
               </div>
@@ -301,7 +301,7 @@ export function RoomQuiz({ open, onClose }: { open: boolean; onClose: () => void
                 <button onClick={() => setStep((s) => Math.max(1, s - 1))} className="inline-flex items-center gap-1.5 text-[13.5px] font-bold text-muted-foreground hover:text-foreground">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </button>
-                <button onClick={onSubmit} disabled={submit.isPending} className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#F4502C] px-6 py-3 text-[15px] font-bold text-white transition-colors hover:bg-[#D93E1D] disabled:opacity-60">
+                <button onClick={onSubmit} disabled={submit.isPending} className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-6 py-3 text-[15px] font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60">
                   {submit.isPending ? 'Sending…' : 'Send my top matches'} <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
