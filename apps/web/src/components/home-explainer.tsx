@@ -37,8 +37,11 @@ svg{display:block}
 .head span{font-size:1.6cqi;color:var(--ink-2);font-weight:600;border-left:.15cqi solid var(--line);padding-left:1.4cqi}
 .head span i{font-style:normal;position:relative;white-space:nowrap}
 .head .arc{position:absolute;left:0;right:0;bottom:-.8cqi;height:.9cqi;width:100%;color:var(--marigold)}
-.board{position:absolute;top:4cqi;left:4cqi;right:4cqi;bottom:8.8cqi;display:grid;grid-template-columns:25cqi 1fr 26cqi;gap:2.6cqi}
+.board{position:absolute;top:4cqi;left:0;right:0;bottom:8cqi}
 .panel{position:relative}
+.phaseA{position:absolute;top:0;left:3%;width:58%}
+.phaseB{position:absolute;top:0;right:3%;width:42%}
+.phaseC{position:absolute;top:0;left:15.5%;width:69%}
 .plabel{font-family:var(--font-mono);font-size:1.2cqi;letter-spacing:.28em;text-transform:uppercase;color:var(--violet);margin-bottom:1.2cqi}
 .phone{background:#fff;border:.42cqi solid var(--ink);border-radius:2.8cqi;padding:1.9cqi;width:100%}
 .pbar{height:.8cqi;border-radius:99px;background:var(--hill);overflow:hidden;margin-bottom:1.5cqi}
@@ -98,7 +101,7 @@ svg{display:block}
 .chips{display:flex;gap:.65cqi;flex-wrap:wrap}
 .chips span{font-size:1.1cqi;font-weight:800;padding:.5cqi 1cqi;border-radius:99px;background:var(--paper);border:.13cqi solid var(--line);color:var(--ink-2);white-space:nowrap}
 .chips span b{color:var(--ink)}
-.call-wrap{position:absolute;left:50%;top:50%;transform:translate(-50%,-46%);width:30cqi;z-index:35}
+.call-wrap{position:absolute;left:50%;top:50%;transform:translate(-50%,-46%);width:50%;z-index:35}
 .call{background:#fff;border:.2cqi solid var(--line);border-radius:2.2cqi;padding:2.2cqi;box-shadow:0 2cqi 5cqi -2cqi rgba(26,20,51,.5);position:relative}
 .call-label{position:absolute;top:-2.4cqi;left:.2cqi;font-family:var(--font-mono);font-size:1.1cqi;letter-spacing:.26em;text-transform:uppercase;color:var(--violet)}
 .call-top{display:flex;align-items:center;gap:1.1cqi;margin-bottom:1.1cqi}
