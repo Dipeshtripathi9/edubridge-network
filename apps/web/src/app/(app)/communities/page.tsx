@@ -75,9 +75,10 @@ function VerifyCTA() {
   );
 }
 
-// Isolated so scroll (collapse) and typing only re-render the toolbar, never the
-// community grid — keeps scrolling smooth.
-function StickyToolbar({ type, onType, onSearch }: { type?: string; onType: (t?: string) => void; onSearch: (q: string) => void }) {
+// Connection 3 — a fixed, transform-animated floating search (like connections
+// 1 & 2). Fixed + transform is compositor-only: no reflow, no grid re-render on
+// scroll, so it can never lag. Slides up (1ms) on scroll-down, back on scroll-up.
+function FloatingSearch({ onSearch }: { onSearch: (q: string) => void }) {
   const [q, setQ] = useState('');
   const [collapsed, setCollapsed] = useState(false);
   useEffect(() => {
@@ -102,36 +103,44 @@ function StickyToolbar({ type, onType, onSearch }: { type?: string; onType: (t?:
   }, []);
 
   return (
-    <div className="sticky top-16 z-20 -mx-4 border-b border-border/60 bg-background px-4 pb-3 pt-1 md:-mx-6 md:px-6">
-      <div className="flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {TABS.map((t) => (
-          <button
-            key={t.label}
-            onClick={() => onType(t.type)}
-            className={cn(
-              'flex-none rounded-full border px-4 py-2.5 text-[13.5px] font-bold transition-colors',
-              type === t.type ? 'border-foreground bg-foreground text-background' : 'border-border bg-card text-muted-foreground hover:border-foreground',
-            )}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-      <div className={cn('overflow-hidden', collapsed ? 'h-0' : 'h-auto')}>
-        <form
-          className="mt-3 flex items-center gap-2.5 rounded-full border border-border bg-card px-5 py-3 shadow-sm focus-within:border-primary focus-within:ring-4 focus-within:ring-accent"
-          onSubmit={(e) => { e.preventDefault(); onSearch(q); }}
+    <div
+      className={cn(
+        'fixed left-1/2 top-[70px] z-20 w-[min(600px,calc(100vw-1.5rem))] -translate-x-1/2 transition-transform duration-[1ms] ease-out motion-reduce:transition-none',
+        collapsed && '-translate-y-[240%]',
+      )}
+    >
+      <form
+        className="flex items-center gap-2.5 rounded-full border border-border bg-card px-5 py-3 shadow-lg shadow-black/5 focus-within:border-primary focus-within:ring-4 focus-within:ring-accent"
+        onSubmit={(e) => { e.preventDefault(); onSearch(q); }}
+      >
+        <Search className="h-[18px] w-[18px] flex-none text-muted-foreground" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search communities…"
+          aria-label="Search communities"
+          className="w-full min-w-0 border-0 bg-transparent text-[15px] font-medium outline-none placeholder:text-muted-foreground"
+        />
+      </form>
+    </div>
+  );
+}
+
+function CommunityTabs({ type, onType }: { type?: string; onType: (t?: string) => void }) {
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {TABS.map((t) => (
+        <button
+          key={t.label}
+          onClick={() => onType(t.type)}
+          className={cn(
+            'flex-none rounded-full border px-4 py-2.5 text-[13.5px] font-bold transition-colors',
+            type === t.type ? 'border-foreground bg-foreground text-background' : 'border-border bg-card text-muted-foreground hover:border-foreground',
+          )}
         >
-          <Search className="h-[18px] w-[18px] flex-none text-muted-foreground" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search communities…"
-            aria-label="Search communities"
-            className="w-full min-w-0 border-0 bg-transparent text-[15px] font-medium outline-none placeholder:text-muted-foreground"
-          />
-        </form>
-      </div>
+          {t.label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -147,9 +156,10 @@ function CommunitiesContent() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <StickyToolbar type={type} onType={setType} onSearch={setSearch} />
+      <FloatingSearch onSearch={setSearch} />
 
-      <div className="space-y-12 pt-6 sm:space-y-16">
+      <div className="space-y-12 pt-[68px] sm:space-y-16">
+      <CommunityTabs type={type} onType={setType} />
       {/* Grid */}
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2">
