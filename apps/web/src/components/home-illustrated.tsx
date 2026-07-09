@@ -145,11 +145,11 @@ export function HomeIllustrated() {
   return (
     <>
       <CollegeQuiz open={quizOpen} onClose={() => setQuizOpen(false)} />
-      <div className="space-y-16 sm:space-y-24">
+      <div className="space-y-12 sm:space-y-16">
         {/* HERO */}
         <section
           id="get-expert-guidance"
-          className="-mx-4 -mt-4 bg-secondary px-4 py-14 sm:-mx-6 sm:-mt-6 sm:px-8 sm:py-20"
+          className="-mx-4 -mt-4 bg-secondary px-4 py-9 sm:-mx-6 sm:-mt-6 sm:px-8 sm:py-12"
         >
           <div className="max-w-[720px]">
             <h1 className="font-display text-[clamp(31px,6.2vw,54px)] font-extrabold leading-[1.1] tracking-[-.03em]">
@@ -157,10 +157,10 @@ export function HomeIllustrated() {
               <br />
               <span className="box-decoration-clone [box-shadow:inset_0_-0.16em_0_hsl(var(--marigold))]">We find yours.</span>
             </h1>
-            <p className="mt-7 max-w-[580px] text-[17.5px] font-bold leading-relaxed text-foreground">
+            <p className="mt-5 max-w-[580px] text-[17.5px] font-bold leading-relaxed text-foreground">
               Verified student data, real placement numbers and 1:1 human experts for 70+ Delhi NCR colleges — free for students and parents.
             </p>
-            <Button size="lg" className="mt-8" onClick={openQuiz}>
+            <Button size="lg" className="mt-6" onClick={openQuiz}>
               Get started
             </Button>
           </div>
