@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { ArrowRight, Code2, Home, LayoutGrid, Plus, Rocket, Search, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Code2, Home, Plus, Search, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CommunityCard } from '@/components/community-card';
@@ -89,7 +89,6 @@ function CommunitiesContent() {
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommunities({ type, q: search || undefined });
   const communities = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
-  const startupCount = communities.filter((c) => c.type === 'STARTUP').length;
 
   return (
     <div className="mx-auto max-w-6xl space-y-12 sm:space-y-16">
@@ -104,17 +103,6 @@ function CommunitiesContent() {
         <p className="mt-3 max-w-[560px] text-[16.5px] text-muted-foreground">
           Connect with your college and the topics you love — verified students only. Post reviews, ask doubts, share opportunities, find co-founders.
         </p>
-        <div className="mt-6 flex flex-wrap gap-2.5">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-[13px] font-bold text-muted-foreground shadow-sm">
-            <LayoutGrid className="h-[15px] w-[15px] text-primary" /> <b className="font-display text-foreground">{communities.length || '—'}</b> communities
-          </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-[13px] font-bold text-muted-foreground shadow-sm">
-            <ShieldCheck className="h-[15px] w-[15px] text-green" /> <b className="font-display text-foreground">200+</b> verified students
-          </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-[13px] font-bold text-muted-foreground shadow-sm">
-            <Rocket className="h-[15px] w-[15px] text-marigold" /> <b className="font-display text-foreground">{startupCount}</b> startups live
-          </span>
-        </div>
       </section>
 
       {/* Toolbar: search + tabs */}
