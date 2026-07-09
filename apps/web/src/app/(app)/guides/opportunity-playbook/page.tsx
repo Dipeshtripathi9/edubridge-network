@@ -10,10 +10,10 @@ export default function OpportunityPlaybookPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <Link
-        href="/resources"
+        href="/opportunities"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to Resources
+        <ArrowLeft className="h-4 w-4" /> Back to Opportunities
       </Link>
       <article className="prose prose-slate max-w-none dark:prose-invert prose-headings:scroll-mt-20 prose-a:font-medium prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
         <ReactMarkdown

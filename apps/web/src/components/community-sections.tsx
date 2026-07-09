@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { toast } from 'sonner';
 import { CheckCircle2, LifeBuoy, Megaphone } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -330,7 +329,6 @@ export function CommunitySections({
   slug,
   communityId,
   canModerate,
-  collegeSlug,
   isMember = false,
   type,
 }: {
@@ -379,18 +377,6 @@ export function CommunitySections({
 
   const reviews = (
     <TabsContent value="reviews" className="space-y-4">
-      {collegeSlug && (
-        <Card>
-          <CardContent className="flex items-center justify-between p-4">
-            <p className="text-sm text-muted-foreground">
-              Rate the college too — placement, faculty, ROI & more.
-            </p>
-            <Button asChild size="sm" variant="outline">
-              <Link href={`/reviews/${collegeSlug}`}>College reviews</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
       <CommunityReviews slug={slug} canReview={isMember} />
     </TabsContent>
   );

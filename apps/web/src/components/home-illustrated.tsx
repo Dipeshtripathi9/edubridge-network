@@ -114,7 +114,6 @@ export function HomeIllustrated() {
               <Link href="/reviews" className="hover:text-primary">Colleges</Link>
               <Link href="/communities" className="hover:text-primary">Communities</Link>
               <Link href="/opportunities" className="hover:text-primary">Opportunities</Link>
-              <Link href="/startups" className="hover:text-primary">Startups</Link>
               <Link href="/about" className="hover:text-primary">About</Link>
             </nav>
           </div>
