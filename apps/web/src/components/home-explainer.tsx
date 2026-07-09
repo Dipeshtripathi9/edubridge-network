@@ -12,10 +12,11 @@ const SRC = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
 <style>
 :root{--paper:#F6F4EE;--white:#FFFFFF;--hill:#EDE8DA;--ink:#1A1433;--ink-2:#575170;--ink-3:#8B86A0;--line:#E6E1D3;--violet:#5A31F4;--violet-dark:#4A26D6;--violet-soft:#EFEAFF;--violet-deep:#241263;--marigold:#F2A31B;--marigold-soft:#FDF1DA;--green:#0E8A5C;--green-soft:#E4F4EC;--font-display:"Bricolage Grotesque",system-ui,sans-serif;--font-body:"Hanken Grotesk",system-ui,sans-serif;--font-mono:ui-monospace,"SF Mono",Menlo,monospace}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--font-body);background:var(--paper);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;-webkit-font-smoothing:antialiased}
+html,body{background:transparent}
+body{font-family:var(--font-body);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;-webkit-font-smoothing:antialiased}
 svg{display:block}
 .stage-wrap{width:100%}
-.stage{position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--paper);container-type:inline-size}
+.stage{position:relative;aspect-ratio:16/9;overflow:hidden;background:transparent;container-type:inline-size}
 .fx,.pop,.zoom{opacity:0}
 .stage.run .fx{animation:fadeUp .6s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
 .stage.run .pop{animation:popIn .45s cubic-bezier(.2,.9,.3,1.35) forwards;animation-delay:var(--d,0s)}
@@ -36,7 +37,7 @@ svg{display:block}
 .head span{font-size:1.6cqi;color:var(--ink-2);font-weight:600;border-left:.15cqi solid var(--line);padding-left:1.4cqi}
 .head span i{font-style:normal;position:relative;white-space:nowrap}
 .head .arc{position:absolute;left:0;right:0;bottom:-.8cqi;height:.9cqi;width:100%;color:var(--marigold)}
-.board{position:absolute;top:9.4cqi;left:4cqi;right:4cqi;bottom:8.8cqi;display:grid;grid-template-columns:25cqi 1fr 26cqi;gap:2.6cqi}
+.board{position:absolute;top:4cqi;left:4cqi;right:4cqi;bottom:8.8cqi;display:grid;grid-template-columns:25cqi 1fr 26cqi;gap:2.6cqi}
 .panel{position:relative}
 .plabel{font-family:var(--font-mono);font-size:1.2cqi;letter-spacing:.28em;text-transform:uppercase;color:var(--violet);margin-bottom:1.2cqi}
 .phone{background:#fff;border:.42cqi solid var(--ink);border-radius:2.8cqi;padding:1.9cqi;width:100%}
@@ -120,11 +121,6 @@ svg{display:block}
 </style></head>
 <body>
 <div class="stage-wrap"><div class="stage run" id="stage">
-  <div class="head fx" style="--d:.2s">
-    <svg class="mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><rect width="44" height="44" rx="13" fill="#5A31F4"/><path d="M9 30 C 15 15, 29 15, 35 30" stroke="#F2A31B" stroke-width="3.4" stroke-linecap="round" fill="none"/><circle cx="9" cy="30" r="3.4" fill="#F6F4EE"/><circle cx="35" cy="30" r="3.4" fill="#F6F4EE"/></svg>
-    <b>EduBridge Network</b>
-    <span>Helping thousands of students find their college — <i>according to their fit.<svg class="arc" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4 16 C 80 2, 220 2, 296 16" stroke="currentColor" stroke-width="7" stroke-linecap="round" fill="none"/></svg></i></span>
-  </div>
   <div class="board">
     <div class="panel phase phaseA">
       <div class="plabel">Step 1 · Answer the quiz</div>
@@ -180,7 +176,6 @@ export function HomeExplainer() {
         title="How EduBridge works — quiz, expert review, fit list, call"
         srcDoc={SRC}
         loading="lazy"
-        scrolling="no"
         className="mx-auto block w-full max-w-[1040px] border-0 bg-transparent"
         style={{ aspectRatio: '16 / 9' }}
       />
