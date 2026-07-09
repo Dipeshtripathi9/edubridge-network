@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ArrowRight, Code2, Home, Plus, Search, ShieldCheck } from 'lucide-react';
@@ -75,57 +75,6 @@ function VerifyCTA() {
   );
 }
 
-// Connection 3 — a fixed, transform-animated floating search (like connections
-// 1 & 2). Fixed + transform is compositor-only: no reflow, no grid re-render on
-// scroll, so it can never lag. Slides up (1ms) on scroll-down, back on scroll-up.
-function FloatingSearch({ onSearch }: { onSearch: (q: string) => void }) {
-  const [q, setQ] = useState('');
-  const [collapsed, setCollapsed] = useState(false);
-  useEffect(() => {
-    let last = window.scrollY;
-    let ticking = false;
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const y = window.scrollY;
-        const d = y - last;
-        if (Math.abs(d) > 6) {
-          if (d > 0 && y > 60) setCollapsed(true);
-          else if (d < 0) setCollapsed(false);
-          last = y;
-        }
-        ticking = false;
-      });
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  return (
-    <div
-      className={cn(
-        'fixed left-1/2 top-[70px] z-20 w-[min(600px,calc(100vw-1.5rem))] -translate-x-1/2 transition-transform duration-[1ms] ease-out motion-reduce:transition-none',
-        collapsed && '-translate-y-[240%]',
-      )}
-    >
-      <form
-        className="flex items-center gap-2.5 rounded-full border border-border bg-card px-5 py-3 shadow-lg shadow-black/5 focus-within:border-primary focus-within:ring-4 focus-within:ring-accent"
-        onSubmit={(e) => { e.preventDefault(); onSearch(q); }}
-      >
-        <Search className="h-[18px] w-[18px] flex-none text-muted-foreground" />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search communities…"
-          aria-label="Search communities"
-          className="w-full min-w-0 border-0 bg-transparent text-[15px] font-medium outline-none placeholder:text-muted-foreground"
-        />
-      </form>
-    </div>
-  );
-}
-
 function CommunityTabs({ type, onType }: { type?: string; onType: (t?: string) => void }) {
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -149,16 +98,13 @@ function CommunitiesContent() {
   const params = useSearchParams();
   const initialType = ['COLLEGE', 'TOPIC', 'STARTUP'].includes(params.get('type') ?? '') ? params.get('type')! : undefined;
   const [type, setType] = useState<string | undefined>(initialType);
-  const [search, setSearch] = useState('');
 
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommunities({ type, q: search || undefined });
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommunities({ type });
   const communities = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
 
   return (
     <div className="mx-auto max-w-6xl">
-      <FloatingSearch onSearch={setSearch} />
-
-      <div className="space-y-12 pt-[68px] sm:space-y-16">
+      <div className="space-y-12 pt-1 sm:space-y-16">
       <CommunityTabs type={type} onType={setType} />
       {/* Grid */}
       {isLoading ? (
