@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight, Home, MapPin, ShieldCheck, Upload, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
@@ -87,7 +87,10 @@ export default function EzRentbuddyPage() {
   const openQuiz = () => setQuizOpen(true);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div
+      className="min-h-screen bg-background text-foreground"
+      style={{ '--primary': '224 55% 31%', '--accent': '221 44% 92%' } as CSSProperties}
+    >
       <RoomQuiz open={quizOpen} onClose={() => setQuizOpen(false)} />
 
       {/* family strip */}
@@ -171,7 +174,7 @@ export default function EzRentbuddyPage() {
       </section>
 
       {/* dark CTA */}
-      <section className="bg-[#241263] px-5 py-20 text-center text-white sm:py-24">
+      <section className="bg-[#16264f] px-5 py-20 text-center text-white sm:py-24">
         <span className="font-mono text-[11px] uppercase tracking-[3px] text-marigold">EZ-Rentbuddy</span>
         <h2 className="mx-auto mt-4 max-w-[680px] font-display text-[clamp(32px,5vw,52px)] font-extrabold leading-[1.08] tracking-[-.028em]">
           Admission sorted.
@@ -181,7 +184,7 @@ export default function EzRentbuddyPage() {
             the room.<Roofline className="absolute -bottom-2 left-0 h-3.5 w-full text-marigold" />
           </span>
         </h2>
-        <p className="mx-auto mt-4 max-w-[460px] text-[16.5px] text-[#DCD5F7]">Verified rooms, real rents, and a roommate who won’t eat your Maggi. Free to browse.</p>
+        <p className="mx-auto mt-4 max-w-[460px] text-[16.5px] text-[#C7D0EC]">Verified rooms, real rents, and a roommate who won’t eat your Maggi. Free to browse.</p>
         <button onClick={openQuiz} className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-[15.5px] font-bold text-white transition-colors hover:bg-primary/90">
           Find rooms near my college <ArrowRight className="h-4 w-4" />
         </button>
