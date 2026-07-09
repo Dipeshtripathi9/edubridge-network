@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { useSubmitMentorRequest } from '@/hooks/use-mentors';
 import { cn } from '@/lib/utils';
 
-type Opt = { val: string; label: string };
-type QStep = { kicker: string; title: string; hint?: string; key: string; multi?: boolean; max?: number; opts: Opt[] };
+type Opt = { val: string; label: string; custom?: boolean };
+type QStep = { kicker: string; title: string; hint?: string; key: string; multi?: boolean; max?: number; ordered?: boolean; opts: Opt[] };
+
+const CUSTOM = 'other';
 
 const STEPS: QStep[] = [
   {
@@ -25,8 +27,10 @@ const STEPS: QStep[] = [
     opts: [
       { val: 'pcm', label: 'Science — PCM' },
       { val: 'pcb', label: 'Science — PCB' },
+      { val: 'pcmb', label: 'Science — PCMB' },
       { val: 'commerce', label: 'Commerce' },
       { val: 'arts', label: 'Arts / Humanities' },
+      { val: CUSTOM, label: "Other — I'll type it", custom: true },
     ],
   },
   {
@@ -46,17 +50,19 @@ const STEPS: QStep[] = [
       { val: 'neet', label: 'NEET' },
       { val: 'university_test', label: "University's own test" },
       { val: 'none_yet', label: 'None yet' },
+      { val: CUSTOM, label: "Other — I'll type it", custom: true },
     ],
   },
   {
     kicker: 'Your college · 1 of 8', key: 'courses', title: 'Which courses interest you?', hint: 'Select up to 2', multi: true, max: 2,
     opts: [
       { val: 'btech_cse', label: 'B.Tech — CSE / IT' },
-      { val: 'btech_other', label: 'B.Tech — other branches' },
+      { val: 'btech_biotech', label: 'B.Tech — Biotechnology' },
       { val: 'bba_bcom', label: 'BBA / B.Com' },
-      { val: 'design', label: 'Design / Architecture' },
+      { val: 'mba', label: 'MBA' },
       { val: 'law_liberal', label: 'Law / Liberal Arts' },
       { val: 'not_sure', label: 'Not sure — need guidance' },
+      { val: CUSTOM, label: "Other — I'll type it", custom: true },
     ],
   },
   {
@@ -74,6 +80,8 @@ const STEPS: QStep[] = [
       { val: 'noida_gnoida', label: 'Noida / Greater Noida' },
       { val: 'gurugram', label: 'Gurugram' },
       { val: 'delhi', label: 'Delhi' },
+      { val: 'ghaziabad', label: 'Ghaziabad' },
+      { val: 'faridabad', label: 'Faridabad' },
       { val: 'anywhere_ncr', label: 'Anywhere in NCR' },
     ],
   },
@@ -87,7 +95,7 @@ const STEPS: QStep[] = [
     ],
   },
   {
-    kicker: 'Your college · 5 of 8', key: 'priorities', title: 'What matters most to you?', hint: 'Pick your top 2 — this shapes your shortlist', multi: true, max: 2,
+    kicker: 'Your college · 5 of 8', key: 'priorities', title: 'What matters most to you?', hint: 'Pick your top 2 — the first you tap is priority #1', multi: true, max: 2, ordered: true,
     opts: [
       { val: 'placements', label: 'Placements & packages' },
       { val: 'fees_roi', label: 'Fees & return on investment' },
@@ -105,6 +113,7 @@ const STEPS: QStep[] = [
       { val: 'budget_vs_quality', label: 'Budget vs quality' },
       { val: 'parents_disagree', label: 'My parents & I disagree' },
       { val: 'all_of_it', label: 'Honestly — all of it' },
+      { val: CUSTOM, label: "Other — I'll type it", custom: true },
     ],
   },
   {
@@ -144,6 +153,8 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [contact, setContact] = useState({ name: '', phone: '', city: '', consent: false });
   const [errs, setErrs] = useState<{ name?: boolean; phone?: boolean; consent?: boolean }>({});
+  const [reveals, setReveals] = useState<Record<string, string>>({});
+  const [revealErr, setRevealErr] = useState(false);
   const [done, setDone] = useState(false);
 
   if (!open) return null;
@@ -152,6 +163,8 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
     setStep(1);
     setAnswers({});
     setContact({ name: '', phone: '', city: '', consent: false });
+    setReveals({});
+    setRevealErr(false);
     setErrs({});
     setDone(false);
   };
@@ -165,11 +178,13 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
   const arr = (k: string) => (Array.isArray(answers[k]) ? (answers[k] as string[]) : []);
   const progressPct = done ? 100 : Math.min(((step - 1) / TOTAL) * 100 + 100 / TOTAL, 100);
 
-  const chooseSingle = (key: string, val: string) => {
-    setAnswers((a) => ({ ...a, [key]: val }));
-    window.setTimeout(() => setStep((s) => Math.min(s + 1, TOTAL)), 200);
+  const chooseSingle = (o: Opt) => {
+    setRevealErr(false);
+    setAnswers((a) => ({ ...a, [cur.key]: o.val }));
+    if (!o.custom) window.setTimeout(() => setStep((s) => Math.min(s + 1, TOTAL)), 200);
   };
   const toggleMulti = (key: string, val: string, max: number) => {
+    setRevealErr(false);
     setAnswers((a) => {
       const c = Array.isArray(a[key]) ? [...(a[key] as string[])] : [];
       const i = c.indexOf(val);
@@ -182,6 +197,23 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
     });
   };
 
+  // The current step's custom "Other" option, if it's selected (needs a typed value).
+  const activeCustomKey = () => {
+    if (!cur || !cur.opts.some((o) => o.custom)) return null;
+    const sel = cur.multi ? arr(cur.key).includes(CUSTOM) : answers[cur.key] === CUSTOM;
+    return sel ? cur.key : null;
+  };
+  const resolveLabel = (key: string, val: string) => (val === CUSTOM ? reveals[key]?.trim() || 'Other' : optLabel(key, val));
+  const goNext = () => {
+    const ck = activeCustomKey();
+    if (ck && (reveals[ck] ?? '').trim().length < 2) {
+      setRevealErr(true);
+      return;
+    }
+    setRevealErr(false);
+    setStep((s) => Math.min(s + 1, TOTAL));
+  };
+
   const onSubmit = () => {
     const nameBad = contact.name.trim().length < 2;
     const phoneBad = !/^[6-9]\d{9}$/.test(contact.phone.trim());
@@ -192,7 +224,7 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
     const summary = SUMMARY_KEYS.map(([k, label]) => {
       const v = answers[k];
       if (v == null || (Array.isArray(v) && v.length === 0)) return null;
-      const text = Array.isArray(v) ? v.map((x) => optLabel(k, x)).join(', ') : optLabel(k, v);
+      const text = Array.isArray(v) ? v.map((x) => resolveLabel(k, x)).join(', ') : resolveLabel(k, v);
       return `${label}: ${text}`;
     })
       .filter(Boolean)
@@ -204,7 +236,7 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
         name: contact.name.trim(),
         phone: contact.phone.trim(),
         email: '',
-        course: arr('courses').map((v) => optLabel('courses', v)).join(', '),
+        course: arr('courses').map((v) => resolveLabel('courses', v)).join(', '),
         location: answers.location ? optLabel('location', answers.location as string) : '',
         marks: answers.marks ? optLabel('marks', answers.marks as string) : '',
         budget: answers.budget ? optLabel('budget', answers.budget as string) : '',
@@ -255,31 +287,48 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
           </div>
 
           {done ? (
-            <Success name={contact.name} answers={answers} onClose={close} onRetake={reset} />
+            <Success name={contact.name} answers={answers} reveals={reveals} onClose={close} onRetake={reset} />
           ) : step <= 12 ? (
             <div key={step} className="animate-page">
               <div className="mb-2 font-mono text-[10.5px] uppercase tracking-[2.4px] text-primary">{cur.kicker}</div>
               <h2 className="font-display text-[21px] font-bold tracking-tight">{cur.title}</h2>
               {cur.hint && <p className="mb-4 mt-1 text-[13.5px] font-semibold text-muted-foreground">{cur.hint}</p>}
-              <div className={cn('mt-4 grid gap-2.5', cur.hint ? 'mt-0' : '')}>
+              <div className={cn('mt-4', cur.hint ? 'mt-0' : '')}>
                 <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   {cur.opts.map((o) => {
                     const selected = cur.multi ? arr(cur.key).includes(o.val) : answers[cur.key] === o.val;
+                    const rank = cur.ordered && selected ? arr(cur.key).indexOf(o.val) + 1 : 0;
                     return (
                       <button
                         key={o.val}
-                        onClick={() => (cur.multi ? toggleMulti(cur.key, o.val, cur.max ?? 99) : chooseSingle(cur.key, o.val))}
+                        onClick={() => (cur.multi ? toggleMulti(cur.key, o.val, cur.max ?? 99) : chooseSingle(o))}
                         className={cn(
-                          'flex items-center justify-between gap-2.5 rounded-2xl border-[1.5px] px-4 py-3.5 text-left text-[14.5px] font-bold transition-colors active:scale-[.98]',
+                          'flex items-center gap-2.5 rounded-2xl border-[1.5px] px-4 py-3.5 text-left text-[14.5px] font-bold transition-colors active:scale-[.98]',
+                          o.custom && 'sm:col-span-2',
                           selected ? 'border-primary bg-accent text-primary' : 'border-border bg-card hover:border-foreground',
                         )}
                       >
-                        {o.label}
-                        <Check className={cn('h-[17px] w-[17px] flex-none text-primary transition-opacity', selected ? 'opacity-100' : 'opacity-0')} />
+                        {cur.ordered && (
+                          <span className={cn('grid h-[22px] w-[22px] flex-none place-items-center rounded-full font-display text-[11.5px] font-extrabold', selected ? 'bg-primary text-primary-foreground' : 'hidden')}>{rank}</span>
+                        )}
+                        <span className="flex-1">{o.label}</span>
+                        {!cur.ordered && <Check className={cn('h-[17px] w-[17px] flex-none text-primary transition-opacity', selected ? 'opacity-100' : 'opacity-0')} />}
                       </button>
                     );
                   })}
                 </div>
+                {activeCustomKey() && (
+                  <div className="mt-3">
+                    <input
+                      autoFocus
+                      value={reveals[cur.key] ?? ''}
+                      onChange={(e) => setReveals((r) => ({ ...r, [cur.key]: e.target.value }))}
+                      placeholder={cur.key === 'exams' ? 'Which exam? e.g. BITSAT, VITEEE' : cur.key === 'courses' ? 'Which course? e.g. B.Arch, BCA' : cur.key === 'confusion' ? 'Tell us in a few words' : 'Type your answer'}
+                      className={cn('w-full rounded-2xl border-[1.5px] bg-card px-4 py-3 text-[14.5px] font-semibold outline-none focus:ring-4 focus:ring-accent', revealErr ? 'border-destructive' : 'border-border focus:border-primary')}
+                    />
+                    {revealErr && <span className="mt-1.5 block text-[12.5px] font-bold text-destructive">Please fill this in to continue</span>}
+                  </div>
+                )}
               </div>
               {/* nav */}
               <div className="mt-6 flex items-center justify-between gap-3">
@@ -289,8 +338,8 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
                 >
                   <ArrowLeft className="h-4 w-4" /> Back
                 </button>
-                {cur.multi && (
-                  <Button size="sm" disabled={arr(cur.key).length === 0} onClick={() => setStep((s) => Math.min(s + 1, TOTAL))}>
+                {(cur.multi ? arr(cur.key).length > 0 : !!activeCustomKey()) && (
+                  <Button size="sm" onClick={goNext}>
                     Continue <ArrowRight className="h-4 w-4" />
                   </Button>
                 )}
@@ -368,11 +417,12 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
   );
 }
 
-function Success({ name, answers, onClose, onRetake }: { name: string; answers: Record<string, string | string[]>; onClose: () => void; onRetake: () => void }) {
+function Success({ name, answers, reveals, onClose, onRetake }: { name: string; answers: Record<string, string | string[]>; reveals: Record<string, string>; onClose: () => void; onRetake: () => void }) {
+  const label2 = (k: string, val: string) => (val === CUSTOM ? reveals[k]?.trim() || 'Other' : optLabel(k, val));
   const chips = SUMMARY_KEYS.map(([k, label]) => {
     const v = answers[k];
     if (v == null || (Array.isArray(v) && v.length === 0)) return null;
-    const text = Array.isArray(v) ? v.map((x) => optLabel(k, x)).join(' · ') : optLabel(k, v);
+    const text = Array.isArray(v) ? v.map((x) => label2(k, x)).join(' · ') : label2(k, v);
     return { label, text };
   }).filter(Boolean) as { label: string; text: string }[];
 
