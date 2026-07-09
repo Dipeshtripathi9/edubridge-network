@@ -72,8 +72,8 @@ export function FloatingConnections() {
                 active ? 'bg-accent text-primary' : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.6 : 2} fill={active ? 'currentColor' : 'none'} fillOpacity={active ? 0.14 : 0} />
-              <span className={cn('text-[12.5px] leading-none tracking-tight', active ? 'font-bold' : 'font-medium')}>
+              <Icon className="h-5 w-5" strokeWidth={active ? 2.6 : 2} fill={active ? 'currentColor' : 'none'} fillOpacity={active ? 0.14 : 0} />
+              <span className={cn('max-w-full truncate whitespace-nowrap px-1 text-[11px] leading-none tracking-tight', active ? 'font-bold' : 'font-medium')}>
                 {label}
               </span>
             </Link>
