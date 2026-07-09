@@ -6,6 +6,7 @@ import { CheckCircle2, Search, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CollegeQuiz } from '@/components/college-quiz';
 import { HomeExplainer } from '@/components/home-explainer';
+import { HomeTools } from '@/components/home-tools';
 
 /* Map the pasted design's palette vars onto the app's brand tokens so the
    hand-drawn SVGs render in the violet brand. Longer names first. */
@@ -167,17 +168,8 @@ export function HomeIllustrated() {
           </div>
         </section>
 
-        {/* ANNOUNCEMENT */}
-        <section className="flex flex-wrap items-center gap-6 rounded-[22px] border-l-[5px] border-marigold bg-marigold-soft px-6 py-7 sm:px-8">
-          <span className="grid h-14 w-14 flex-none place-items-center rounded-2xl bg-card text-amber-600">
-            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>
-          </span>
-          <div className="min-w-[240px] flex-1">
-            <h3 className="font-display text-xl font-extrabold tracking-tight">Find the colleges that fit you</h3>
-            <p className="mt-1 text-sm font-medium text-[#6B4A05]">Answer a few questions and preview your top match in 60 seconds — verified by a real counselor on a free call.</p>
-          </div>
-          <Button className="bg-foreground text-background hover:bg-foreground/90" onClick={openQuiz}>Start the quiz</Button>
-        </section>
+        {/* TOOLS + SCHOLARSHIPS */}
+        <HomeTools onQuiz={openQuiz} />
 
         {/* EXPLAINER */}
         <HomeExplainer />
