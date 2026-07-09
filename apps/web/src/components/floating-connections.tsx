@@ -15,10 +15,12 @@ import { cn } from '@/lib/utils';
  * On scroll-down the bar slides down and the launcher slides right at the same
  * speed; both return on scroll-up.
  */
+// grow weights give unequal widths: Communities ~+15% and Compare ~+5% wider
+// than an equal third (Home takes the remainder).
 const PRIMARY = [
-  { href: '/home', label: 'Home', Icon: Home },
-  { href: '/communities', label: 'Communities', Icon: Users },
-  { href: '/reviews', label: 'Compare', Icon: GraduationCap },
+  { href: '/home', label: 'Home', Icon: Home, grow: 'grow-[16]' },
+  { href: '/communities', label: 'Communities', Icon: Users, grow: 'grow-[23]' },
+  { href: '/reviews', label: 'Compare', Icon: GraduationCap, grow: 'grow-[21]' },
 ];
 
 export function FloatingConnections() {
@@ -60,7 +62,7 @@ export function FloatingConnections() {
           collapsed ? 'translate-y-[220%]' : 'translate-y-0',
         )}
       >
-        {PRIMARY.map(({ href, label, Icon }) => {
+        {PRIMARY.map(({ href, label, Icon, grow }) => {
           const active = pathname === href;
           return (
             <Link
@@ -68,7 +70,8 @@ export function FloatingConnections() {
               href={href}
               title={label}
               className={cn(
-                'flex flex-1 flex-col items-center justify-center gap-1 rounded-full transition-colors',
+                'flex min-w-0 basis-0 flex-col items-center justify-center gap-1 rounded-full transition-colors',
+                grow,
                 active ? 'bg-accent text-primary' : 'text-muted-foreground hover:text-foreground',
               )}
             >
