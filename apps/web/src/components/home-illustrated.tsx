@@ -47,7 +47,7 @@ export function HomeIllustrated() {
               <span className="box-decoration-clone [box-shadow:inset_0_-0.16em_0_hsl(var(--marigold))]">We find yours.</span>
             </h1>
             <p className="mt-5 max-w-[580px] text-[17.5px] font-bold leading-relaxed text-foreground">
-              Verified student data, real placement numbers and 1:1 human experts for 70+ Delhi NCR colleges — free for students and parents.
+              Verified student data, real placement numbers and 1:1 human experts for Delhi NCR colleges — free for students and parents.
             </p>
             <Button size="lg" className="mt-6" onClick={openQuiz}>
               Get started
@@ -110,7 +110,7 @@ export function HomeIllustrated() {
               <ShieldCheck className="h-6 w-6 text-primary" />
               <span className="font-display text-lg font-extrabold tracking-tight">EduBridge Network</span>
             </div>
-            <nav className="flex flex-wrap gap-x-7 gap-y-2 text-[14.5px] font-semibold text-muted-foreground">
+            <nav className="flex flex-nowrap items-center gap-x-5 overflow-x-auto whitespace-nowrap text-[14px] font-semibold text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <Link href="/reviews" className="hover:text-primary">Colleges</Link>
               <Link href="/communities" className="hover:text-primary">Communities</Link>
               <Link href="/opportunities" className="hover:text-primary">Opportunities</Link>
@@ -120,7 +120,7 @@ export function HomeIllustrated() {
           </div>
           <div className="flex flex-wrap justify-between gap-3 pt-6 text-[13.5px] font-semibold text-muted-foreground">
             <span>© 2026 EduBridge Network. All rights reserved.</span>
-            <span>Made with ♥ in Delhi NCR</span>
+            <span>Made in India</span>
           </div>
         </footer>
       </div>

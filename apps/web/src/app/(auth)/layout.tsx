@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { GraduationCap } from 'lucide-react';
-import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +11,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </span>
           <span className="font-bold">EduBridge Network</span>
         </Link>
-        <ThemeToggle />
       </header>
       <main className="flex flex-1 items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">{children}</div>
