@@ -2,20 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ArrowUpRight, Home, MapPin, Search, ShieldCheck, Upload, Wallet } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Home, MapPin, ShieldCheck, Upload, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { RoomQuiz } from '@/components/room-quiz';
 import { useSubmitRentalLead } from '@/hooks/use-rentals';
 import { cn } from '@/lib/utils';
 
-const CHIPS = ['Near Bennett', 'Near Shiv Nadar', 'Near Galgotias', 'Under ₹8,000', 'Girls PG'];
 const PARTICIPANTS = ['Property Owner', 'Broker', 'Student', 'Local Resident'];
-
-const TRUST = [
-  { Icon: ShieldCheck, title: 'Resident-verified', sub: 'Reviews only from students living there' },
-  { Icon: Wallet, title: 'Real rent, upfront', sub: 'Deposit, mess, electricity — all on the card' },
-  { Icon: MapPin, title: 'Near your campus', sub: 'Rooms mapped by walking distance' },
-];
 
 const STEPS = [
   { n: '01', title: 'Pick your college', body: 'Search your campus and see every verified room around it, mapped by walking distance.' },
@@ -139,43 +132,13 @@ export default function EzRentbuddyPage() {
           Verified PGs and flats near 70+ NCR colleges — <b className="font-bold text-foreground">real rents, real photos, reviewed by students who actually live there.</b>
         </p>
 
-        {/* search → opens quiz */}
-        <div className="mx-auto mt-8 flex max-w-[560px] items-center gap-2 rounded-full border-[1.5px] border-border bg-white p-2 pl-5 shadow-sm focus-within:border-[#F4502C]">
-          <Search className="h-[18px] w-[18px] flex-none text-muted-foreground" />
-          <input
-            readOnly
-            onFocus={openQuiz}
-            onClick={openQuiz}
-            placeholder="Search your college — e.g. Bennett, Shiv Nadar…"
-            aria-label="Find a place"
-            className="min-w-0 flex-1 cursor-pointer bg-transparent text-[15px] font-semibold outline-none placeholder:font-medium placeholder:text-muted-foreground"
-          />
-          <button onClick={openQuiz} className="inline-flex flex-none items-center justify-center rounded-full bg-[#F4502C] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#D93E1D]">
-            Find place
-          </button>
-        </div>
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
-          {CHIPS.map((c) => (
-            <button key={c} onClick={openQuiz} className="rounded-full border-[1.5px] border-border bg-white px-4 py-2 text-[13px] font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground">
-              {c}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* trust strip */}
-      <section className="mx-auto max-w-6xl px-5 pb-16">
-        <div className="grid gap-4 sm:grid-cols-3">
-          {TRUST.map((t) => (
-            <div key={t.title} className="flex items-center gap-3.5 rounded-2xl border border-border bg-white p-5 shadow-sm">
-              <span className="grid h-11 w-11 flex-none place-items-center rounded-[13px] bg-[#FFE9E1] text-[#F4502C]"><t.Icon className="h-5 w-5" /></span>
-              <div>
-                <b className="block font-display text-[15.5px] tracking-tight">{t.title}</b>
-                <span className="text-[13px] text-muted-foreground">{t.sub}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* single full-width CTA → opens quiz */}
+        <button
+          onClick={openQuiz}
+          className="mx-auto mt-9 flex w-full max-w-[560px] items-center justify-center gap-2 rounded-full bg-[#F4502C] px-8 py-4 text-[16px] font-bold text-white shadow-[0_10px_30px_-10px_rgba(244,80,44,0.6)] transition-colors hover:bg-[#D93E1D]"
+        >
+          Find my place <ArrowRight className="h-[18px] w-[18px]" />
+        </button>
       </section>
 
       {/* how it works */}
