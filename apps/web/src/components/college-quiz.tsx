@@ -147,8 +147,9 @@ function optLabel(key: string, val: string) {
   return STEPS.find((s) => s.key === key)?.opts.find((o) => o.val === val)?.label ?? val;
 }
 
-export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CollegeQuiz({ open, onClose, colleges }: { open: boolean; onClose: () => void; colleges?: string[] }) {
   const submit = useSubmitMentorRequest();
+  const isCompare = !!(colleges && colleges.length);
   const [step, setStep] = useState(1); // 1..13 (13 = contact)
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [contact, setContact] = useState({ name: '', phone: '', city: '', consent: false });
@@ -229,7 +230,8 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
     })
       .filter(Boolean)
       .join('\n');
-    const message = `College Fit Quiz${contact.city.trim() ? ` · City: ${contact.city.trim()}` : ''}\n${summary}`;
+    const header = isCompare ? `College Comparison — comparing: ${colleges!.join(', ')}` : 'College Fit Quiz';
+    const message = `${header}${contact.city.trim() ? ` · City: ${contact.city.trim()}` : ''}\n${summary}`;
 
     submit.mutate(
       {
@@ -241,8 +243,8 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
         marks: answers.marks ? optLabel('marks', answers.marks as string) : '',
         budget: answers.budget ? optLabel('budget', answers.budget as string) : '',
         category: '',
-        preferredCollege: '',
-        contactMethod: 'CALL',
+        preferredCollege: isCompare ? colleges!.join(', ') : '',
+        contactMethod: isCompare ? 'CHAT' : 'CALL',
         message,
       },
       {
@@ -259,7 +261,7 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
         <div className="mx-auto flex h-16 max-w-[720px] items-center justify-between px-5">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-6 w-6 text-primary" />
-            <span className="font-display text-lg font-extrabold tracking-tight">College Fit Quiz</span>
+            <span className="font-display text-lg font-extrabold tracking-tight">{isCompare ? 'Compare Colleges' : 'College Fit Quiz'}</span>
           </div>
           <button onClick={close} className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground hover:text-foreground">
             Save &amp; exit <X className="h-4 w-4" />
@@ -270,8 +272,12 @@ export function CollegeQuiz({ open, onClose }: { open: boolean; onClose: () => v
       <div className="mx-auto max-w-[720px] px-5 pb-16">
         {!done && (
           <div className="pb-6 pt-8 text-center">
-            <h1 className="font-display text-[clamp(24px,4vw,32px)] font-extrabold tracking-[-.02em]">College Fit Quiz</h1>
-            <p className="mt-1.5 text-[15px] text-muted-foreground">12 quick taps — we build your profile, your counselor brings your shortlist.</p>
+            <h1 className="font-display text-[clamp(24px,4vw,32px)] font-extrabold tracking-[-.02em]">{isCompare ? 'Compare Colleges' : 'College Fit Quiz'}</h1>
+            <p className="mt-1.5 text-[15px] text-muted-foreground">
+              {isCompare
+                ? `A few taps — a verified counselor sends your comparison of ${colleges!.length} colleges on WhatsApp.`
+                : '12 quick taps — we build your profile, your counselor brings your shortlist.'}
+            </p>
           </div>
         )}
 
