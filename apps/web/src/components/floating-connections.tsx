@@ -56,7 +56,7 @@ export function FloatingConnections() {
       <nav
         aria-label="Quick links"
         className={cn(
-          'pointer-events-auto flex h-[60px] min-w-0 basis-0 grow-[72] items-stretch rounded-full bg-card p-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.10)] transition-transform duration-500 ease-out motion-reduce:transition-none',
+          'pointer-events-auto flex h-[60px] min-w-0 basis-0 grow-[72] items-stretch gap-1.5 rounded-full bg-card p-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.10)] transition-transform duration-500 ease-out motion-reduce:transition-none',
           collapsed ? 'translate-y-[220%]' : 'translate-y-0',
         )}
       >
