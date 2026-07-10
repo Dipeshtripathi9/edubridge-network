@@ -1,6 +1,7 @@
 'use client';
 
-import { Bell, CheckCheck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Bell, CheckCheck, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,15 +9,30 @@ import { cn, timeAgo } from '@/lib/utils';
 import { useMarkAllRead, useMarkRead, useNotifications } from '@/hooks/use-notifications';
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const { data, isLoading } = useNotifications();
   const markRead = useMarkRead();
   const markAll = useMarkAllRead();
   const items = data?.data ?? [];
 
+  // Close the page: go back if there's history, otherwise fall back to Home.
+  const close = () => {
+    if (window.history.length > 1) router.back();
+    else router.push('/home');
+  };
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="flex items-center gap-2 text-2xl font-bold">
+          <button
+            type="button"
+            aria-label="Close notifications"
+            onClick={close}
+            className="grid h-9 w-9 flex-none place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <X className="h-5 w-5" strokeWidth={2.4} />
+          </button>
           <Bell className="h-6 w-6 text-primary" />
           Notifications
         </h1>
