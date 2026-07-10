@@ -51,7 +51,7 @@ export function AccountMenu() {
   // Logged-in menu: Find colleges · Notifications · Get verified (only if not
   // yet verified) — Log out sits in its own footer group.
   const items = [
-    { label: 'Find colleges', href: '/colleges', badge: 0, show: true, accent: false },
+    { label: 'Profile', href: '/profile', badge: 0, show: true, accent: false },
     { label: 'Notifications', href: '/notifications', badge: count, show: true, accent: false },
     { label: 'Get verified', href: '/verify', badge: 0, show: !verified, accent: true },
   ].filter((i) => i.show);
