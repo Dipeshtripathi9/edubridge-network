@@ -23,21 +23,21 @@ export default function NotificationsPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="flex items-center gap-2 text-2xl font-bold">
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="flex min-w-0 items-center gap-1.5 text-xl font-bold sm:gap-2 sm:text-2xl">
           <button
             type="button"
             aria-label="Close notifications"
             onClick={close}
-            className="grid h-9 w-9 flex-none place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="grid h-8 w-8 flex-none place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:h-9 sm:w-9"
           >
             <X className="h-5 w-5" strokeWidth={2.4} />
           </button>
-          <Bell className="h-6 w-6 text-primary" />
-          Notifications
+          <Bell className="h-5 w-5 flex-none text-primary sm:h-6 sm:w-6" />
+          <span className="truncate">Notifications</span>
         </h1>
-        <Button variant="outline" size="sm" onClick={() => markAll.mutate()}>
-          <CheckCheck className="h-4 w-4" /> Mark all read
+        <Button variant="outline" size="sm" className="flex-none" onClick={() => markAll.mutate()}>
+          <CheckCheck className="h-4 w-4" /> <span className="hidden sm:inline">Mark all read</span>
         </Button>
       </div>
 
@@ -50,13 +50,13 @@ export default function NotificationsPage() {
           {items.map((n) => (
             <Card key={n.id} className={cn(!n.isRead && 'border-primary/40 bg-primary/5')}>
               <CardContent className="flex items-start justify-between gap-3 p-4">
-                <div>
-                  <p className="font-medium">{n.title}</p>
-                  {n.body && <p className="text-sm text-muted-foreground">{n.body}</p>}
+                <div className="min-w-0">
+                  <p className="break-words font-medium">{n.title}</p>
+                  {n.body && <p className="break-words text-sm text-muted-foreground">{n.body}</p>}
                   <p className="mt-1 text-xs text-muted-foreground">{timeAgo(n.createdAt)} ago</p>
                 </div>
                 {!n.isRead && (
-                  <Button variant="ghost" size="sm" onClick={() => markRead.mutate(n.id)}>
+                  <Button variant="ghost" size="sm" className="flex-none" onClick={() => markRead.mutate(n.id)}>
                     Mark read
                   </Button>
                 )}
