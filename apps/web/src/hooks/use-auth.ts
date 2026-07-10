@@ -130,7 +130,8 @@ export function useLogout() {
     // Tear down the authenticated realtime socket so it doesn't linger with the
     // old identity after logout.
     disconnectSocket();
-    router.push('/login');
+    // Stay in the app as a guest — the home page is browseable without auth.
+    router.push('/home');
   };
 }
 
