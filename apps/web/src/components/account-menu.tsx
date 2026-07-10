@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ChevronDown, CircleUserRound, X } from 'lucide-react';
+import { CircleUserRound, X } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { VerifiedBadge } from '@/components/verified-badge';
 import { cn } from '@/lib/utils';
@@ -59,7 +59,7 @@ export function AccountMenu() {
   const drawer = (
     <div className="fixed inset-0 z-[70]">
       <div className="absolute inset-0 bg-black/45 backdrop-blur-sm" onClick={() => setOpen(false)} />
-      <aside className="animate-slide-in-right absolute right-0 top-0 flex h-full w-80 max-w-[86%] flex-col border-l border-border bg-card shadow-2xl">
+      <aside className="animate-slide-in-right absolute right-0 top-0 flex h-full w-[192px] max-w-[62%] flex-col border-l border-border bg-card shadow-2xl">
         {/* Top bar: member identity on the left (registered users see their
             name + tick), no EduBridge branding for guests. Close on the right. */}
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -170,10 +170,7 @@ export function AccountMenu() {
           )}
         </span>
         {loggedIn && (
-          <>
-            <span className="hidden max-w-[110px] truncate text-[15px] font-bold sm:block">{firstName}</span>
-            <ChevronDown className="hidden h-4 w-4 text-muted-foreground sm:block" strokeWidth={2.4} />
-          </>
+          <span className="hidden max-w-[110px] truncate text-[15px] font-bold sm:block">{firstName}</span>
         )}
       </button>
       {open && mounted && createPortal(drawer, document.body)}
