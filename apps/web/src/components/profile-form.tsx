@@ -226,6 +226,8 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
   function err(n,m){var e=document.getElementById('err'+n);if(!m){e.classList.remove('show');return false;}e.textContent=m;e.classList.add('show');postH();return true;}
   document.querySelectorAll('#q1a .qopt').forEach(function(b){b.addEventListener('click',function(){P.purpose=b.getAttribute('data-v');document.getElementById('q1a').style.display='none';document.getElementById('q1b').style.display='';postH();});});
   document.getElementById('q1back').addEventListener('click',function(){document.getElementById('q1b').style.display='none';document.getElementById('q1a').style.display='';postH();});
+  var dobEl=document.getElementById('dob');
+  dobEl.addEventListener('input',function(){var v=dobEl.value.replace(/\D/g,'').slice(0,8);if(v.length>4)dobEl.value=v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4);else if(v.length>2)dobEl.value=v.slice(0,2)+'/'+v.slice(2);else dobEl.value=v;});
   document.querySelectorAll('#q1b .qopt').forEach(function(b){b.addEventListener('click',function(){
     var fn=document.getElementById('fn').value.trim();var ln=document.getElementById('ln').value.trim();var dob=document.getElementById('dob').value.trim();
     if(!fn||!ln){err(1,'Please add your first and last name above.');return;}
