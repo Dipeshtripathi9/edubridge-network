@@ -210,12 +210,24 @@
   .animate-slide-in-left {
     animation: slide-in-left 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   }
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  .animate-slide-in-right {
+    animation: slide-in-right 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  }
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
     }
     .animate-page,
     .animate-slide-in-left,
+    .animate-slide-in-right,
     .shimmer::after {
       animation: none;
     }
