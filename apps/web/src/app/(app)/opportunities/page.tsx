@@ -3,9 +3,7 @@
 import { Suspense, useState } from 'react';
 import { uniqueById } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
-import { Bookmark, Search, Sparkles, Target, UserCog } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { PageHero } from '@/components/page-hero';
+import { Bookmark, Sparkles, Target, UserCog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -42,42 +40,17 @@ function CardGrid({ loading, children }: { loading: boolean; children: React.Rea
   return <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>;
 }
 
-function Browse() {
-  const [type, setType] = useState<string | undefined>(undefined);
-  const [q, setQ] = useState('');
-  const [search, setSearch] = useState('');
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useOpportunities({
-    type,
-    q: search || undefined,
-  });
+function Browse({ type }: { type?: string }) {
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useOpportunities({ type });
   const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <FilterChips options={TYPES} value={type} onChange={setType} />
-        <form
-          className="relative w-full sm:w-64"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setSearch(q);
-          }}
-        >
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="rounded-full pl-10"
-          />
-        </form>
-      </div>
-
       {!isLoading && items.length === 0 ? (
         <EmptyState
           icon={Target}
           title="No opportunities found"
-          description="Try a different category or search term — new internships, scholarships & fellowships drop every week."
+          description="Try a different category — new internships, scholarships & fellowships drop every week."
         />
       ) : (
         <CardGrid loading={isLoading}>
@@ -157,23 +130,25 @@ function OpportunitiesContent() {
   const tab = params.get('tab') === 'recommended' || params.get('tab') === 'saved'
     ? params.get('tab')!
     : 'browse';
+  const [type, setType] = useState<string | undefined>(undefined);
+
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <PageHero
-        eyebrow="Opportunity Hub"
-        title="After admission,"
-        accent="the real game."
-        sub="Internships, scholarships, competitions, fellowships & research programs — curated for you."
-      />
-
       <Tabs defaultValue={tab}>
-        <TabsList>
-          <TabsTrigger value="browse">Browse</TabsTrigger>
-          <TabsTrigger value="recommended">For You</TabsTrigger>
-          <TabsTrigger value="saved">Saved</TabsTrigger>
-        </TabsList>
+        {/* Category filter on top, view switcher (Browse / For You / Saved) on
+            the right just below it. */}
+        <div className="space-y-3">
+          <FilterChips options={TYPES} value={type} onChange={setType} />
+          <div className="flex justify-end">
+            <TabsList>
+              <TabsTrigger value="browse">Browse</TabsTrigger>
+              <TabsTrigger value="recommended">For You</TabsTrigger>
+              <TabsTrigger value="saved">Saved</TabsTrigger>
+            </TabsList>
+          </div>
+        </div>
         <TabsContent value="browse">
-          <Browse />
+          <Browse type={type} />
         </TabsContent>
         <TabsContent value="recommended">
           <Recommended />
