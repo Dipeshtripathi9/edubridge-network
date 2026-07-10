@@ -289,12 +289,13 @@ model User {
   reportsAgainst Report[]   @relation("ReportedUser")
   auditLogs      AuditLog[]
 
-  verificationRequests VerificationRequest[]
-  headApplications     CommunityHeadApplication[]
-  adCards              AdCard[]
-  discountClaims       DiscountClaim[]
-  referralsPosted      Referral[]
+  verificationRequests   VerificationRequest[]
+  headApplications       CommunityHeadApplication[]
+  adCards                AdCard[]
+  discountClaims         DiscountClaim[]
+  referralsPosted        Referral[]
   managerSupportRequests ManagerSupportRequest[]
+  profileLead            ProfileLead?
 
   @@index([status])
   @@index([role])
@@ -966,21 +967,21 @@ model ResourceComment {
 }
 
 model VerificationRequest {
-  id           String                    @id @default(cuid())
-  userId       String
-  user         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  collegeId    String?
-  college      College?                  @relation(fields: [collegeId], references: [id])
-  collegeName  String? // free-text college when not in the directory
-  method       VerificationMethod
-  collegeEmail String?
-  collegeEmailVerified Boolean @default(false) // student clicked the emailed link
-  feedback     Json? // honest per-category thoughts about the college
-  evidenceKey  String? // S3 key for ID card / admission proof
-  status       VerificationRequestStatus @default(PENDING)
-  note         String?
-  reviewedById String?
-  reviewedAt   DateTime?
+  id                   String                    @id @default(cuid())
+  userId               String
+  user                 User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collegeId            String?
+  college              College?                  @relation(fields: [collegeId], references: [id])
+  collegeName          String? // free-text college when not in the directory
+  method               VerificationMethod
+  collegeEmail         String?
+  collegeEmailVerified Boolean                   @default(false) // student clicked the emailed link
+  feedback             Json? // honest per-category thoughts about the college
+  evidenceKey          String? // S3 key for ID card / admission proof
+  status               VerificationRequestStatus @default(PENDING)
+  note                 String?
+  reviewedById         String?
+  reviewedAt           DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1247,6 +1248,46 @@ model MentorRequest {
 
   @@index([createdAt])
   @@map("mentor_requests")
+}
+
+// One "EduBridge Profile" per student, filled across 4 steps. Each step's data is
+// stored as JSON so the admin counselor card can swipe through them; completionPct
+// advances 25 per finished step. Counselors add a private note and can delete the
+// lead (with a reason logged to ProfileLeadDeletion) — which resets the student to
+// a fresh form.
+model ProfileLead {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String?
+  phone         String?
+  email         String?
+  step1         Json? // welcome: name, dob, purpose, studying
+  step2         Json? // contact: email, city, state, pin, phone
+  step3         Json? // personalize: courses, cities, mode, degree, hostel, budget
+  step4         Json? // academics: board, stream, marks, exams, doc names
+  completionPct Int      @default(0)
+  adminNote     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([updatedAt])
+  @@map("profile_leads")
+}
+
+// Audit trail for counselor-deleted profile leads — keeps the reason + a snapshot
+// after the live lead is removed from every view.
+model ProfileLeadDeletion {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String?
+  reason    String
+  snapshot  Json?
+  deletedBy String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("profile_lead_deletions")
 }
 
 // Per-email delivery audit — one row per send attempt (verification, reset, magic

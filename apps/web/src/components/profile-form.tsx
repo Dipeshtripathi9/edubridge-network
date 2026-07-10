@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useProfileProgress } from '@/stores/profile-progress.store';
+import { useMyProfileLead, useUpsertProfileStep } from '@/hooks/use-profile-leads';
 
 // The 4-step EduBridge Profile form, embedded in an isolated iframe (its own
 // fonts/CSS/JS). Each completed step posts its % to the parent so the progress
@@ -215,6 +216,7 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
   var files={};
   var customCount=0;
   function postPct(p){try{parent.postMessage({eduPct:p},'*');}catch(e){}}
+  function postStep(step,pct,data,contact){try{parent.postMessage(Object.assign({eduStep:step,eduPct:pct,eduData:data},contact||{}),'*');}catch(e){}}
   function postH(){try{parent.postMessage({eduHeight:Math.ceil(document.body.scrollHeight)+8},'*');}catch(e){}}
   function esc(s){return s.replace(/</g,'&lt;');}
   function go(n){
@@ -233,7 +235,7 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     if(!fn||!ln){err(1,'Please add your first and last name above.');return;}
     if(!/^\d{2}\/\d{2}\/\d{4}$/.test(dob)){err(1,'Birthdate format: DD/MM/YYYY');return;}
     err(1);P.firstName=fn;P.lastName=ln;P.dob=dob;P.studying=b.getAttribute('data-v');
-    postPct(25);go(2);
+    postStep(1,25,{firstName:fn,lastName:ln,dob:dob,purpose:P.purpose,studying:P.studying},{eduName:(fn+' '+ln).trim()});go(2);
   });});
   function makeTABox(container,list,labelTxt,arr){
     var wrap=document.createElement('div');wrap.className='fbox ta';
@@ -276,8 +278,8 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
       if(!/^\d{6}$/.test(pin))return void err(2,'PIN code is 6 digits.');
       if(!/^[6-9]\d{9}$/.test(ph))return void err(2,'Enter a valid 10-digit number.');
       if(!document.getElementById('c2').checked)return void err(2,'Please tick the consent box.');
-      err(2);P.email=em;P.city=city;P.state=st;P.pin=pin;P.phone=ph;postPct(50);}
-    if(n===4){if(!P.courses.length)return void err(3,'Add at least one course you\'re interested in.');if(!document.getElementById('budget').value)return void err(3,'Please select your budget.');err(3);P.mode=document.getElementById('mode').value;P.degree=document.getElementById('degree').value;P.hostel=document.getElementById('hostel').value;P.budget=document.getElementById('budget').value;postPct(75);}
+      err(2);P.email=em;P.city=city;P.state=st;P.pin=pin;P.phone=ph;postStep(2,50,{email:em,city:city,state:st,pin:pin,phone:ph},{eduName:((P.firstName||'')+' '+(P.lastName||'')).trim(),eduPhone:ph,eduEmail:em});}
+    if(n===4){if(!P.courses.length)return void err(3,'Add at least one course you\'re interested in.');if(!document.getElementById('budget').value)return void err(3,'Please select your budget.');err(3);P.mode=document.getElementById('mode').value;P.degree=document.getElementById('degree').value;P.hostel=document.getElementById('hostel').value;P.budget=document.getElementById('budget').value;postStep(3,75,{courses:P.courses,cities:P.cities,mode:P.mode,degree:P.degree,hostel:P.hostel,budget:P.budget},{});}
     go(n);
   });});
   document.getElementById('finish').addEventListener('click',function(){
@@ -292,7 +294,7 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     for(var i=1;i<=customCount;i++){var k='cx'+i;var enEl=document.getElementById('en_'+k);if(!enEl)continue;var en=enEl.value.trim();var sc2=document.getElementById('sc_'+k).value.trim();if(en||sc2||files[k])P.exams.push({name:en||'Other exam',score:sc2||null,file:files[k]?files[k].name:null});}
     P.submittedAt=new Date().toISOString();
     document.getElementById('sentTxt').textContent='Welcome aboard, '+P.firstName+'! Your EduBridge Profile is ready. A counselor will review it and call '+P.phone.replace(/(\d{2})\d{6}(\d{2})/,'$1******$2')+' with your matches — then everything lands on WhatsApp & email. Free, always.';
-    postPct(100);go(5);
+    postStep(4,100,{board:board,stream:stream,passYear:py,p12:p12,p10:p10,marksheet:P.marksheet,exams:P.exams},{eduName:((P.firstName||'')+' '+(P.lastName||'')).trim(),eduPhone:P.phone,eduEmail:P.email});go(5);
   });
   window.addEventListener('load',postH);
   if(window.ResizeObserver){new ResizeObserver(postH).observe(document.body);}else{setTimeout(postH,400);}
@@ -304,16 +306,34 @@ export function ProfileForm() {
   const ref = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(620);
   const setPct = useProfileProgress((s) => s.setPct);
+  const upsert = useUpsertProfileStep();
+  const { data: myLead } = useMyProfileLead();
+
+  // Server is the source of truth for progress — sync the store from it (e.g.
+  // after a counselor deletes the lead, this drops back to a fresh 0%).
+  useEffect(() => {
+    if (typeof myLead?.completionPct === 'number') setPct(myLead.completionPct);
+  }, [myLead?.completionPct, setPct]);
 
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
       if (e.source !== ref.current?.contentWindow) return;
       if (typeof e.data?.eduHeight === 'number') setHeight(Math.max(300, e.data.eduHeight));
       if (typeof e.data?.eduPct === 'number') setPct(e.data.eduPct);
+      if (typeof e.data?.eduStep === 'number' && e.data.eduData) {
+        upsert.mutate({
+          step: e.data.eduStep,
+          completionPct: e.data.eduPct ?? e.data.eduStep * 25,
+          data: e.data.eduData,
+          name: e.data.eduName || undefined,
+          phone: e.data.eduPhone || undefined,
+          email: e.data.eduEmail || undefined,
+        });
+      }
     };
     window.addEventListener('message', onMsg);
     return () => window.removeEventListener('message', onMsg);
-  }, [setPct]);
+  }, [setPct, upsert]);
 
   return (
     <iframe
