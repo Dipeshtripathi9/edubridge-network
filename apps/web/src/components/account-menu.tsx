@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { VerifiedBadge } from '@/components/verified-badge';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
+import { useProfileProgress } from '@/stores/profile-progress.store';
 import { useLogout } from '@/hooks/use-auth';
 import { useMe } from '@/hooks/use-profile';
 import { useUnreadCount } from '@/hooks/use-notifications';
@@ -30,6 +31,7 @@ export function AccountMenu() {
   const verified = me?.profile?.collegeVerification === 'VERIFIED';
   const count = loggedIn ? unread?.count ?? 0 : 0;
   const firstName = firstNameOf(me?.profile?.fullName);
+  const profilePct = useProfileProgress((s) => s.pct);
 
   useEffect(() => setMounted(true), []);
   // Close the drawer on route change.
@@ -83,21 +85,36 @@ export function AccountMenu() {
           <>
             <nav className="flex flex-1 flex-col overflow-y-auto px-5 py-4">
               {items.map((it) => (
-                <button
-                  key={it.label}
-                  onClick={() => go(it.href)}
-                  className={cn(
-                    'flex items-center justify-end gap-2.5 rounded-lg px-3 py-3.5 text-[17px] font-bold transition-colors',
-                    it.accent ? 'text-primary hover:text-primary/80' : 'text-foreground hover:text-primary',
+                <div key={it.label}>
+                  <button
+                    onClick={() => go(it.href)}
+                    className={cn(
+                      'flex w-full items-center justify-end gap-2.5 rounded-lg px-3 py-3.5 text-[17px] font-bold transition-colors',
+                      it.accent ? 'text-primary hover:text-primary/80' : 'text-foreground hover:text-primary',
+                    )}
+                  >
+                    {it.badge > 0 && (
+                      <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1.5 text-[11px] font-bold text-destructive-foreground">
+                        {it.badge > 9 ? '9+' : it.badge}
+                      </span>
+                    )}
+                    {it.label}
+                  </button>
+                  {/* Animated profile-completion line under the Profile item */}
+                  {it.href === '/profile' && (
+                    <div className="px-3 pb-1">
+                      <div className="flex items-center justify-end gap-2">
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-accent">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-primary to-marigold transition-[width] duration-700 ease-out"
+                            style={{ width: `${profilePct}%` }}
+                          />
+                        </div>
+                        <span className="text-[11px] font-bold tabular-nums text-muted-foreground">{profilePct}%</span>
+                      </div>
+                    </div>
                   )}
-                >
-                  {it.badge > 0 && (
-                    <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1.5 text-[11px] font-bold text-destructive-foreground">
-                      {it.badge > 9 ? '9+' : it.badge}
-                    </span>
-                  )}
-                  {it.label}
-                </button>
+                </div>
               ))}
             </nav>
             <div className="border-t border-border px-5 py-4">
