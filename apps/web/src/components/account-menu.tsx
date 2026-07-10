@@ -57,7 +57,7 @@ export function AccountMenu() {
   ].filter((i) => i.show);
 
   const drawer = (
-    <div className="fixed inset-0 z-[70]">
+    <div className="fixed inset-0 z-[100]">
       <div className="absolute inset-0 bg-black/45 backdrop-blur-sm" onClick={() => setOpen(false)} />
       <aside className="animate-slide-in-right absolute right-0 top-0 flex h-full w-[192px] max-w-[62%] flex-col border-l border-border bg-card shadow-2xl">
         {/* Member identity header (registered users see their name + tick);

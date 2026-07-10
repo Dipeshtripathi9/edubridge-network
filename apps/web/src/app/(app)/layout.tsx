@@ -2,7 +2,6 @@
 
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
-import { Sidebar } from '@/components/sidebar';
 import { Topbar } from '@/components/topbar';
 import { VerifyBanner } from '@/components/verify-banner';
 import { FloatingConnections } from '@/components/floating-connections';
@@ -19,15 +18,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!hydrated) return null;
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar />
-        <VerifyBanner />
-        <main key={pathname} className="animate-page flex-1 p-4 md:p-6">
-          {children}
-        </main>
-      </div>
+    <div className="flex min-h-screen flex-col">
+      <Topbar />
+      <VerifyBanner />
+      <main key={pathname} className="animate-page flex-1 p-4 md:p-6">
+        {children}
+      </main>
       <FloatingConnections />
     </div>
   );

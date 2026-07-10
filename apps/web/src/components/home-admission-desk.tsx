@@ -111,7 +111,7 @@ export function HomeAdmissionDesk({ onApply }: { onApply?: () => void }) {
   }, [onApply]);
 
   return (
-    <section aria-label="Direct Admission Desk" className="-mx-1 sm:mx-0">
+    <section id="direct-admission" aria-label="Direct Admission Desk" className="-mx-1 scroll-mt-24 sm:mx-0">
       <iframe
         ref={ref}
         title="Direct Admission Desk — fill one free form, a counselor calls you"
