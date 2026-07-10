@@ -4,18 +4,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import {
-  Bell,
-  ChevronDown,
-  CircleUserRound,
-  GraduationCap,
-  Inbox,
-  LogOut,
-  Search,
-  ShieldCheck,
-  X,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ChevronDown, CircleUserRound, X } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { VerifiedBadge } from '@/components/verified-badge';
 import { cn } from '@/lib/utils';
@@ -59,18 +48,20 @@ export function AccountMenu() {
     router.push(href);
   };
 
+  // Logged-in menu: Find colleges · Notifications · Get verified (only if not
+  // yet verified) — Log out sits in its own footer group.
   const items = [
-    { label: 'Inbox', href: '/messages', icon: Inbox, show: true },
-    { label: 'Notifications', href: '/notifications', icon: Bell, show: true, badge: count },
-    { label: 'Find colleges', href: '/colleges', icon: Search, show: true },
-    { label: 'Get verified', href: '/verify', icon: ShieldCheck, show: !verified, accent: true },
+    { label: 'Find colleges', href: '/colleges', badge: 0, show: true, accent: false },
+    { label: 'Notifications', href: '/notifications', badge: count, show: true, accent: false },
+    { label: 'Get verified', href: '/verify', badge: 0, show: !verified, accent: true },
   ].filter((i) => i.show);
 
   const drawer = (
     <div className="fixed inset-0 z-[70]">
       <div className="absolute inset-0 bg-black/45 backdrop-blur-sm" onClick={() => setOpen(false)} />
       <aside className="animate-slide-in-right absolute right-0 top-0 flex h-full w-80 max-w-[86%] flex-col border-l border-border bg-card shadow-2xl">
-        {/* Header */}
+        {/* Top bar: member identity on the left (registered users see their
+            name + tick), no EduBridge branding for guests. Close on the right. */}
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           {loggedIn ? (
             <div className="flex min-w-0 items-center gap-3">
@@ -86,69 +77,75 @@ export function AccountMenu() {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground">
-                <GraduationCap className="h-5 w-5" />
-              </span>
-              <span className="font-display font-bold tracking-tight">EduBridge Network</span>
-            </div>
+            <span aria-hidden />
           )}
-          <Button variant="ghost" size="icon" aria-label="Close" onClick={() => setOpen(false)}>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => setOpen(false)}
+            className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
             <X className="h-5 w-5" />
-          </Button>
+          </button>
         </div>
 
         {loggedIn ? (
           <>
-            <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-              {items.map((it) => {
-                const Icon = it.icon;
-                return (
-                  <button
-                    key={it.label}
-                    onClick={() => go(it.href)}
-                    className={cn(
-                      'flex w-full items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-semibold transition-colors',
-                      it.accent
-                        ? 'bg-accent text-primary hover:bg-primary hover:text-primary-foreground'
-                        : 'text-foreground hover:bg-accent',
-                    )}
-                  >
-                    <Icon className="h-[18px] w-[18px] flex-none" />
-                    <span className="flex-1 text-left">{it.label}</span>
-                    {'badge' in it && (it.badge ?? 0) > 0 && (
-                      <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1.5 text-[11px] font-bold text-destructive-foreground">
-                        {it.badge! > 9 ? '9+' : it.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+            <nav className="flex flex-1 flex-col overflow-y-auto px-5 py-4">
+              {items.map((it) => (
+                <button
+                  key={it.label}
+                  onClick={() => go(it.href)}
+                  className={cn(
+                    'flex items-center justify-end gap-2.5 rounded-lg px-3 py-3.5 text-[17px] font-bold transition-colors',
+                    it.accent ? 'text-primary hover:text-primary/80' : 'text-foreground hover:text-primary',
+                  )}
+                >
+                  {it.badge > 0 && (
+                    <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1.5 text-[11px] font-bold text-destructive-foreground">
+                      {it.badge > 9 ? '9+' : it.badge}
+                    </span>
+                  )}
+                  {it.label}
+                </button>
+              ))}
             </nav>
-            <div className="border-t border-border p-3">
+            <div className="border-t border-border px-5 py-4">
               <button
                 onClick={() => {
                   setOpen(false);
                   logout();
                 }}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                className="flex w-full items-center justify-end rounded-lg px-3 py-3.5 text-[17px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
               >
-                <LogOut className="h-[18px] w-[18px] flex-none" /> Log out
+                Log out
               </button>
             </div>
           </>
         ) : (
-          <div className="flex flex-1 flex-col gap-4 p-5">
-            <p className="text-[15px] text-muted-foreground">
-              Sign in to save colleges, get verified and message mentors.
-            </p>
-            <div className="flex items-center gap-3">
-              <Button asChild variant="outline" className="flex-1" onClick={() => setOpen(false)}>
-                <Link href="/login">Sign in</Link>
-              </Button>
-              <Button asChild className="flex-1" onClick={() => setOpen(false)}>
-                <Link href="/signup">Sign up</Link>
-              </Button>
+          <div className="flex flex-1 flex-col px-5 py-4">
+            <button
+              onClick={() => go('/colleges')}
+              className="flex items-center justify-end rounded-lg px-3 py-3.5 text-[17px] font-bold text-foreground transition-colors hover:text-primary"
+            >
+              Find my college
+            </button>
+            <div className="my-3 border-t border-border" />
+            <div className="flex flex-col gap-3 px-3">
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="rounded-full bg-accent px-5 py-3 text-center text-[15px] font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                onClick={() => setOpen(false)}
+                className="rounded-full bg-accent px-5 py-3 text-center text-[15px] font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+              >
+                Sign up
+              </Link>
             </div>
           </div>
         )}
