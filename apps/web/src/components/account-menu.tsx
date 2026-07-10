@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { CircleUserRound, X } from 'lucide-react';
+import { CircleUserRound } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { VerifiedBadge } from '@/components/verified-badge';
 import { cn } from '@/lib/utils';
@@ -60,10 +60,10 @@ export function AccountMenu() {
     <div className="fixed inset-0 z-[70]">
       <div className="absolute inset-0 bg-black/45 backdrop-blur-sm" onClick={() => setOpen(false)} />
       <aside className="animate-slide-in-right absolute right-0 top-0 flex h-full w-[192px] max-w-[62%] flex-col border-l border-border bg-card shadow-2xl">
-        {/* Top bar: member identity on the left (registered users see their
-            name + tick), no EduBridge branding for guests. Close on the right. */}
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          {loggedIn ? (
+        {/* Member identity header (registered users see their name + tick);
+            no branding or close button for guests — tap outside to dismiss. */}
+        {loggedIn && (
+          <div className="flex items-center border-b border-border px-5 py-4">
             <div className="flex min-w-0 items-center gap-3">
               <Avatar src={me?.profile?.avatarUrl} name={me?.profile?.fullName} className="h-10 w-10 text-sm" />
               <div className="min-w-0">
@@ -76,18 +76,8 @@ export function AccountMenu() {
                 </p>
               </div>
             </div>
-          ) : (
-            <span aria-hidden />
-          )}
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={() => setOpen(false)}
-            className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+          </div>
+        )}
 
         {loggedIn ? (
           <>
