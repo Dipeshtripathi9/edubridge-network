@@ -12,10 +12,10 @@ export class ProfileLeadsService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Upsert the current student's lead with one step's data. Steps map to the
-  // step1..step4 JSON columns; completionPct only ever moves forward.
+  // step1..step5 JSON columns; completionPct only ever moves forward.
   async upsertStep(userId: string, dto: UpsertProfileStepDto) {
     const stepData = dto.data as Prisma.InputJsonValue;
-    const stepField = `step${dto.step}` as 'step1' | 'step2' | 'step3' | 'step4';
+    const stepField = `step${dto.step}` as 'step1' | 'step2' | 'step3' | 'step4' | 'step5';
     const contact = {
       ...(dto.name ? { name: dto.name } : {}),
       ...(dto.phone ? { phone: dto.phone } : {}),
@@ -72,6 +72,7 @@ export class ProfileLeadsService {
             step2: lead.step2 ?? undefined,
             step3: lead.step3 ?? undefined,
             step4: lead.step4 ?? undefined,
+            step5: lead.step5 ?? undefined,
             completionPct: lead.completionPct,
             adminNote: lead.adminNote,
           } as Prisma.InputJsonValue,

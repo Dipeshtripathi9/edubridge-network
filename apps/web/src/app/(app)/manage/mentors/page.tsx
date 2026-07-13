@@ -71,7 +71,7 @@ function ProfileLeadsSection() {
         <h2 className="flex items-center gap-2 text-2xl font-bold">
           <IdCard className="h-6 w-6 text-primary" /> Student Profiles
         </h2>
-        <p className="text-muted-foreground">One card per student — swipe the 4 steps, add a note, or delete with a reason.</p>
+        <p className="text-muted-foreground">One card per student — swipe through their steps and next-step choices, add a note, or delete with a reason.</p>
       </div>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

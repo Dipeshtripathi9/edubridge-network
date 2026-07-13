@@ -11,17 +11,24 @@ import {
   useSetProfileLeadNote,
 } from '@/hooks/use-profile-leads';
 
-const STEP_TITLES = ['Welcome', 'Contact', 'Personalize', 'Academics'];
+const STEP_TITLES = ['Welcome', 'Contact', 'Personalize', 'Academics', 'Next steps'];
 const LABELS: Record<string, string> = {
   firstName: 'First name', lastName: 'Last name', dob: 'Birthdate', purpose: 'Purpose', studying: 'Studying',
   email: 'Email', city: 'City', state: 'State', pin: 'PIN', phone: 'Phone',
   courses: 'Courses', cities: 'Cities', mode: 'Mode', degree: 'Degree', hostel: 'Hostel', budget: 'Budget',
   board: 'Board', stream: 'Stream', passYear: 'Passing year', p12: 'Class 12 %', p10: 'Class 10 %',
   marksheet: 'Marksheet', exams: 'Entrance exams',
+  quiz: 'College quiz — priority', comparePriorities: 'Compare priorities', directApply: 'Wants direct apply',
+};
+const QUIZ_ANSWERS: Record<string, string> = {
+  placements: 'Placements & career outcomes', fees: 'Fees & scholarships',
+  location: 'Location & campus life', faculty: 'Faculty & curriculum',
 };
 
-function renderValue(v: unknown): string {
+function renderValue(v: unknown, key?: string): string {
   if (v === null || v === undefined || v === '') return '—';
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+  if (key === 'quiz' && typeof v === 'string') return QUIZ_ANSWERS[v] ?? v;
   if (Array.isArray(v)) {
     if (v.length === 0) return '—';
     if (typeof v[0] === 'object' && v[0] !== null) {
@@ -43,7 +50,7 @@ function StepPanel({ data }: { data?: StepData | null }) {
       {Object.entries(data).map(([k, v]) => (
         <div key={k} className="min-w-0">
           <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{LABELS[k] ?? k}</dt>
-          <dd className="break-words text-sm font-medium">{renderValue(v)}</dd>
+          <dd className="break-words text-sm font-medium">{renderValue(v, k)}</dd>
         </div>
       ))}
     </dl>
@@ -59,7 +66,7 @@ export function ProfileLeadCard({ lead }: { lead: ProfileLead }) {
   const setNoteM = useSetProfileLeadNote();
   const del = useDeleteProfileLead();
 
-  const steps = [lead.step1, lead.step2, lead.step3, lead.step4];
+  const steps = [lead.step1, lead.step2, lead.step3, lead.step4, lead.step5];
   const words = note.trim() ? note.trim().split(/\s+/).length : 0;
   const overLimit = words > 300;
 

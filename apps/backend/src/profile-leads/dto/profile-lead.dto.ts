@@ -13,8 +13,8 @@ import {
 // A student saving one step of their EduBridge Profile. The step's fields are an
 // arbitrary JSON object (shape differs per step); the server just stores it.
 export class UpsertProfileStepDto {
-  @ApiProperty({ enum: [1, 2, 3, 4] })
-  @IsIn([1, 2, 3, 4])
+  @ApiProperty({ enum: [1, 2, 3, 4, 5] })
+  @IsIn([1, 2, 3, 4, 5])
   step!: number;
 
   @ApiProperty({ minimum: 0, maximum: 100 })

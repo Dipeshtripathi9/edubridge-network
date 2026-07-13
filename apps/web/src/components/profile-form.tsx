@@ -48,6 +48,8 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
 .qopt{display:block;width:100%;text-align:center;background:var(--hill);border-radius:8px;font-size:16px;font-weight:700;padding:15px 14px;margin-bottom:10px;transition:background .12s ease}
 .qopt:hover{background:#DCD6C7}
 .qopt:last-child{margin-bottom:0}
+.qopt.picked{background:var(--violet-soft);color:var(--violet);box-shadow:inset 0 0 0 1.5px var(--violet)}
+.ns-done{margin-top:8px;font-size:14.5px;font-weight:600;color:var(--green)}
 .ta{position:relative}
 .ta-drop{position:absolute;top:calc(100% + 2px);left:0;right:0;z-index:40;background:var(--white);border:1px solid var(--bord);border-radius:8px;box-shadow:0 12px 28px -12px rgba(26,20,51,.25);overflow:hidden;display:none;max-height:260px;overflow-y:auto}
 .ta-drop.open{display:block}
@@ -205,6 +207,31 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
       <p id="sentTxt"></p>
       <span class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>All matches verified by a human counselor</span>
     </div>
+    <div class="qcard" id="nsMenu">
+      <div class="qhead"><b>While you wait — a few quick things</b></div>
+      <button class="qopt" data-ns="nsQuiz">Take the 30-second college quiz</button>
+      <button class="qopt" data-ns="nsCompare">Compare colleges by what matters to you</button>
+      <button class="qopt" data-ns="nsApply">Apply directly to your shortlist</button>
+    </div>
+    <div class="qcard" id="nsQuiz" style="display:none">
+      <div class="qhead"><b>What matters most to you?</b><button class="back" data-back="nsQuiz">Back</button></div>
+      <button class="qopt" data-v="placements">Placements & career outcomes</button>
+      <button class="qopt" data-v="fees">Fees & scholarships</button>
+      <button class="qopt" data-v="location">Location & campus life</button>
+      <button class="qopt" data-v="faculty">Faculty & curriculum</button>
+      <p class="ns-done" id="nsQuizDone" style="display:none"></p>
+    </div>
+    <div class="qcard" id="nsCompare" style="display:none">
+      <div class="qhead"><b>Compare colleges by…</b><button class="back" data-back="nsCompare">Back</button></div>
+      <div id="nsCompareChips"></div>
+      <button class="cta" id="nsCompareSave" style="margin-top:14px">Save</button>
+    </div>
+    <div class="qcard" id="nsApply" style="display:none">
+      <div class="qhead"><b>Apply directly once matched?</b><button class="back" data-back="nsApply">Back</button></div>
+      <button class="qopt" data-v="yes">Yes — apply for me</button>
+      <button class="qopt" data-v="no">No — I'll decide after the call</button>
+      <p class="ns-done" id="nsApplyDone" style="display:none"></p>
+    </div>
   </section>
 </div>
 <script>
@@ -296,6 +323,31 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     document.getElementById('sentTxt').textContent='Welcome aboard, '+P.firstName+'! Your EduBridge Profile is ready. A counselor will review it and call '+P.phone.replace(/(\d{2})\d{6}(\d{2})/,'$1******$2')+' with your matches — then everything lands on WhatsApp & email. Free, always.';
     postStep(4,100,{board:board,stream:stream,passYear:py,p12:p12,p10:p10,marksheet:P.marksheet,exams:P.exams},{eduName:((P.firstName||'')+' '+(P.lastName||'')).trim(),eduPhone:P.phone,eduEmail:P.email});go(5);
   });
+  var NS={};
+  function postNext(){postStep(5,100,NS,{});}
+  function nsShow(id){document.getElementById('nsMenu').style.display='none';document.getElementById(id).style.display='';postH();}
+  function nsBack(id){document.getElementById(id).style.display='none';document.getElementById('nsMenu').style.display='';postH();}
+  document.querySelectorAll('#nsMenu .qopt').forEach(function(b){b.addEventListener('click',function(){nsShow(b.getAttribute('data-ns'));});});
+  document.querySelectorAll('.qcard .back[data-back]').forEach(function(b){b.addEventListener('click',function(){nsBack(b.getAttribute('data-back'));});});
+  document.querySelectorAll('#nsQuiz .qopt').forEach(function(b){b.addEventListener('click',function(){
+    NS.quiz=b.getAttribute('data-v');
+    document.querySelectorAll('#nsQuiz .qopt').forEach(function(x){x.style.display='none';});
+    var d=document.getElementById('nsQuizDone');d.textContent="Got it — we'll prioritize colleges that lead on that.";d.style.display='block';
+    postNext();postH();
+  });});
+  var NS_COMPARE=['Fees','Placements','Hostel & safety','Faculty','Location','Rankings'];
+  var compareChips=document.getElementById('nsCompareChips');
+  NS_COMPARE.forEach(function(c){var b=document.createElement('button');b.type='button';b.className='qopt';b.textContent=c;b.addEventListener('click',function(){b.classList.toggle('picked');});compareChips.appendChild(b);});
+  document.getElementById('nsCompareSave').addEventListener('click',function(){
+    NS.comparePriorities=Array.prototype.slice.call(compareChips.querySelectorAll('.qopt.picked')).map(function(b){return b.textContent;});
+    postNext();nsBack('nsCompare');
+  });
+  document.querySelectorAll('#nsApply .qopt').forEach(function(b){b.addEventListener('click',function(){
+    NS.directApply=b.getAttribute('data-v')==='yes';
+    document.querySelectorAll('#nsApply .qopt').forEach(function(x){x.style.display='none';});
+    var d=document.getElementById('nsApplyDone');d.textContent=NS.directApply?"Great — we'll submit applications on your behalf once matches are ready.":"No problem — you can decide after your counselor call.";d.style.display='block';
+    postNext();postH();
+  });});
   window.addEventListener('load',postH);
   if(window.ResizeObserver){new ResizeObserver(postH).observe(document.body);}else{setTimeout(postH,400);}
 })();
