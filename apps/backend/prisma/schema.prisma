@@ -1266,6 +1266,7 @@ model ProfileLead {
   step2         Json? // contact: email, city, state, pin, phone
   step3         Json? // personalize: courses, cities, mode, degree, hostel, budget
   step4         Json? // academics: board, stream, marks, exams, doc names
+  step5         Json? // next steps: quiz, comparePriorities, directApply
   completionPct Int      @default(0)
   adminNote     String?
   createdAt     DateTime @default(now())

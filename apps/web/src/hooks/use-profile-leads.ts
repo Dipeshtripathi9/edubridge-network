@@ -15,6 +15,7 @@ export interface ProfileLead {
   step2?: StepData | null;
   step3?: StepData | null;
   step4?: StepData | null;
+  step5?: StepData | null;
   completionPct: number;
   adminNote?: string | null;
   createdAt: string;
@@ -23,7 +24,7 @@ export interface ProfileLead {
 }
 
 export interface UpsertStepInput {
-  step: 1 | 2 | 3 | 4;
+  step: 1 | 2 | 3 | 4 | 5;
   completionPct: number;
   data: StepData;
   name?: string;
