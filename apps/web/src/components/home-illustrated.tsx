@@ -39,11 +39,11 @@ export function HomeIllustrated() {
         {/* HERO */}
         <section
           id="get-expert-guidance"
-          className="-mx-4 -mt-4 bg-secondary px-4 py-16 text-center sm:-mx-6 sm:-mt-6 sm:px-8 sm:py-20"
+          className="-mx-4 -mt-4 bg-background px-4 py-16 text-center sm:-mx-6 sm:-mt-6 sm:px-8 sm:py-20"
         >
-          <div className="mx-auto max-w-[720px]">
+          <div className="mx-auto max-w-[840px]">
             <p className="text-[15px] font-semibold uppercase tracking-[.3em] text-primary">India&rsquo;s Student</p>
-            <h1 className="mt-2 font-display text-[clamp(32px,6.5vw,48px)] font-extrabold uppercase leading-[1.15] tracking-[-.02em]">
+            <h1 className="mt-2 font-display text-[clamp(32px,8vw,84px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em]">
               Success Network
             </h1>
             <svg className="mx-auto mb-8 mt-6 h-5 w-[150px]" viewBox="0 0 150 20" fill="none" aria-hidden>
@@ -58,14 +58,14 @@ export function HomeIllustrated() {
               Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
             </p>
             <p className="mt-10 text-[15px] font-semibold uppercase tracking-[.25em]">Start your search</p>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
-              <Button className="w-[140px]" onClick={openQuiz}>
+            <div className="mx-auto mt-4 flex max-w-xs flex-col gap-3 sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4">
+              <Button className="w-full sm:w-[150px] md:w-[170px]" onClick={openQuiz}>
                 College
               </Button>
-              <Button asChild className="w-[140px]">
+              <Button asChild className="w-full sm:w-[150px] md:w-[170px]">
                 <Link href="/opportunities">Scholarship</Link>
               </Button>
-              <Button asChild className="w-[140px]">
+              <Button asChild className="w-full sm:w-[150px] md:w-[170px]">
                 <Link href="/opportunities">Internship</Link>
               </Button>
             </div>
