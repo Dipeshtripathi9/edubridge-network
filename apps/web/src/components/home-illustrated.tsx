@@ -46,26 +46,18 @@ export function HomeIllustrated() {
             <h1 className="mt-2 font-display text-[clamp(32px,8vw,84px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em]">
               Success Network
             </h1>
-            <svg className="mx-auto mb-8 mt-6 h-5 w-[150px]" viewBox="0 0 150 20" fill="none" aria-hidden>
-              <path
-                d="M2 12 C 14 2, 26 2, 38 12 C 50 22, 62 22, 74 12 C 86 2, 98 2, 110 12 C 118 18, 130 18, 148 8"
-                stroke="hsl(var(--marigold))"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </svg>
-            <p className="mx-auto max-w-[600px] text-[19px] leading-relaxed text-muted-foreground">
+            <p className="mx-auto mt-6 max-w-[600px] text-[19px] leading-relaxed text-muted-foreground">
               Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
             </p>
             <p className="mt-10 text-[15px] font-semibold uppercase tracking-[.25em]">Start your search</p>
-            <div className="mx-auto mt-4 flex max-w-xs flex-col gap-3 sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4">
-              <Button className="w-full sm:w-[150px] md:w-[170px]" onClick={openQuiz}>
+            <div className="mx-auto mt-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
+              <Button className="w-[40vw] sm:w-[150px] md:w-[170px]" onClick={openQuiz}>
                 College
               </Button>
-              <Button asChild className="w-full sm:w-[150px] md:w-[170px]">
+              <Button asChild className="w-[40vw] sm:w-[150px] md:w-[170px]">
                 <Link href="/opportunities">Scholarship</Link>
               </Button>
-              <Button asChild className="w-full sm:w-[150px] md:w-[170px]">
+              <Button asChild className="w-[40vw] sm:w-[150px] md:w-[170px]">
                 <Link href="/opportunities">Internship</Link>
               </Button>
             </div>
@@ -73,7 +65,7 @@ export function HomeIllustrated() {
         </section>
 
         {/* TOOLS + SCHOLARSHIPS */}
-        <HomeTools onQuiz={openQuiz} />
+        <HomeTools />
 
         {/* EXPLAINER */}
         <HomeExplainer />
