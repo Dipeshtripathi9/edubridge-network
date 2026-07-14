@@ -39,7 +39,7 @@ export function HomeIllustrated() {
         {/* HERO */}
         <section
           id="get-expert-guidance"
-          className="-mx-4 -mt-4 bg-background px-4 py-16 text-center sm:-mx-6 sm:-mt-6 sm:px-8 sm:py-20"
+          className="-mx-4 -mt-4 bg-background px-4 pb-6 pt-16 text-center sm:-mx-6 sm:-mt-6 sm:px-8 sm:pb-8 sm:pt-20"
         >
           <div className="mx-auto max-w-[840px]">
             <p className="text-[15px] font-semibold uppercase tracking-[.3em] text-primary">India&rsquo;s Student</p>
