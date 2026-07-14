@@ -7,7 +7,9 @@ import { ArrowUpRight, GraduationCap, Home, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
- * Bottom floating row (Zomato-style), split ~66% / ~34% on one line:
+ * Bottom floating row (Zomato-style), mobile/tablet-portrait only — desktop
+ * already has the sidebar nav via the hamburger menu, and the bar would
+ * otherwise overlap page content at wider viewports. Split ~66% / ~34% on one line:
  *  - Connection 1: a stadium segmented control (icon-over-label). The active
  *    segment gets a full-height inner capsule end-cap; its icon/label emphasise.
  *  - Connection 2: a standalone emerald "EZ RentBuddy ↗" launcher capsule of the
@@ -53,7 +55,7 @@ export function FloatingConnections() {
   if (pathname.startsWith('/messages') || pathname.startsWith('/pools')) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex items-stretch gap-2 overflow-x-clip pl-2.5">
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex items-stretch gap-2 overflow-x-clip pl-2.5 md:hidden">
       {/* Connection 1 — segmented control (takes the remaining width) */}
       <nav
         aria-label="Quick links"
