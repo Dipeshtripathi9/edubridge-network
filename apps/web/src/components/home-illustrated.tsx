@@ -65,7 +65,7 @@ export function HomeIllustrated() {
         </section>
 
         {/* TOOLS + SCHOLARSHIPS */}
-        <HomeTools />
+        <HomeTools onQuiz={openQuiz} />
 
         {/* EXPLAINER */}
         <HomeExplainer />
