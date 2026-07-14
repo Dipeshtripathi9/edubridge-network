@@ -294,8 +294,9 @@ const POSTERS = [
   { svg: POSTER_RESOURCES, action: { type: 'href' as const, href: '/communities' } },
   { svg: POSTER_EXPERT, action: { type: 'quiz' as const } },
 ];
-// Doubled so the marquee can scroll -50% and loop seamlessly.
-const POSTER_TRACK = [...POSTERS, ...POSTERS];
+// Repeated 4x (scroll -25% per loop) so the track always spans well past even
+// very wide viewports — no dead background ever shows at either edge.
+const POSTER_TRACK = [...POSTERS, ...POSTERS, ...POSTERS, ...POSTERS];
 
 function PosterStack({ onQuiz }: { onQuiz: () => void }) {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -317,7 +318,7 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
   }, []);
 
   return (
-    <div ref={sectionRef} className="stack-section -mx-4 sm:-mx-6">
+    <div ref={sectionRef} className="stack-section">
       <div className="stack-outer">
         <div className="stack-track">
           {POSTER_TRACK.map(({ svg, action }, i) => {
@@ -336,9 +337,15 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         </div>
       </div>
       <style>{`
-        .stack-section { width: 100%; background: hsl(var(--background)); padding: 8px 0 56px; }
+        .stack-section {
+          width: 100vw;
+          margin-left: calc(50% - 50vw);
+          margin-right: calc(50% - 50vw);
+          background: hsl(var(--background));
+          padding: 8px 0 56px;
+        }
         .stack-outer { width: 100%; overflow: hidden; }
-        .stack-track { display: flex; width: max-content; gap: 24px; padding-left: 5vw; }
+        .stack-track { display: flex; width: max-content; gap: 24px; }
         .m-item {
           position: relative;
           flex: 0 0 210px;
@@ -381,7 +388,7 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         }
         @keyframes scroll-rtl {
           from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
+          to { transform: translateX(-25%); }
         }
         @media (max-width: 700px) {
           .m-item { flex-basis: 130px; width: 130px; }
