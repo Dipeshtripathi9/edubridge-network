@@ -283,11 +283,21 @@ const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/
   <text x="240" y="530" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Expert Guide</text>
 </svg>`;
 
-const POSTERS = [POSTER_QUIZ, POSTER_COMPARE, POSTER_INTERNSHIP, POSTER_SCHOLARSHIP, POSTER_RESOURCES, POSTER_EXPERT];
+// Each poster is a clickable card — "quiz" opens the lead-gen quiz modal,
+// "href" navigates. Expert Guide reuses the quiz modal too: it's the same
+// counselor-callback flow the hero's "College" button starts.
+const POSTERS = [
+  { svg: POSTER_QUIZ, action: { type: 'quiz' as const } },
+  { svg: POSTER_COMPARE, action: { type: 'href' as const, href: '/reviews' } },
+  { svg: POSTER_INTERNSHIP, action: { type: 'href' as const, href: '/opportunities' } },
+  { svg: POSTER_SCHOLARSHIP, action: { type: 'href' as const, href: '/opportunities' } },
+  { svg: POSTER_RESOURCES, action: { type: 'href' as const, href: '/communities' } },
+  { svg: POSTER_EXPERT, action: { type: 'quiz' as const } },
+];
 // Doubled so the marquee can scroll -50% and loop seamlessly.
 const POSTER_TRACK = [...POSTERS, ...POSTERS];
 
-function PosterStack() {
+function PosterStack({ onQuiz }: { onQuiz: () => void }) {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -310,11 +320,19 @@ function PosterStack() {
     <div ref={sectionRef} className="stack-section -mx-4 sm:-mx-6">
       <div className="stack-outer">
         <div className="stack-track">
-          {POSTER_TRACK.map((svg, i) => (
-            <div key={i} className={`m-item fan-${i % 6}`}>
-              <div className="s-photo" dangerouslySetInnerHTML={{ __html: svg }} />
-            </div>
-          ))}
+          {POSTER_TRACK.map(({ svg, action }, i) => {
+            const photo = <span className="s-photo block" dangerouslySetInnerHTML={{ __html: svg }} />;
+            const className = `m-item fan-${i % 6}`;
+            return action.type === 'quiz' ? (
+              <button key={i} type="button" className={className} onClick={onQuiz}>
+                {photo}
+              </button>
+            ) : (
+              <Link key={i} href={action.href} className={className}>
+                {photo}
+              </Link>
+            );
+          })}
         </div>
       </div>
       <style>{`
@@ -326,6 +344,23 @@ function PosterStack() {
           flex: 0 0 210px;
           width: 210px;
           transform: translateX(var(--fx)) translateY(var(--fy)) rotate(var(--fr));
+          display: block;
+          border: 0;
+          padding: 0;
+          margin: 0;
+          background: none;
+          font: inherit;
+          text-align: left;
+          text-decoration: none;
+          color: inherit;
+          cursor: pointer;
+          appearance: none;
+        }
+        .m-item:focus-visible { outline: 3px solid hsl(var(--primary)); outline-offset: 4px; border-radius: 18px; }
+        .m-item .s-photo { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+        .m-item:hover .s-photo, .m-item:focus-visible .s-photo {
+          transform: translateY(-6px) scale(1.03);
+          box-shadow: 0 16px 32px rgba(27, 22, 51, 0.24);
         }
         .fan-0 { --fx: 212px; --fy: 32px; --fr: -15deg; z-index: 1; }
         .fan-1 { --fx: 127px; --fy: 20px; --fr: -9deg; z-index: 2; }
@@ -363,11 +398,11 @@ function PosterStack() {
   );
 }
 
-export function HomeTools() {
+export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
   return (
     <section aria-label="Tools & scholarships" className="mx-auto w-full max-w-[960px]">
       {/* Fanned poster carousel */}
-      <PosterStack />
+      <PosterStack onQuiz={onQuiz} />
 
       {/* Scholarships */}
       <div className="mt-6 border-t border-border pt-8">
