@@ -39,20 +39,36 @@ export function HomeIllustrated() {
         {/* HERO */}
         <section
           id="get-expert-guidance"
-          className="-mx-4 -mt-4 bg-secondary px-4 py-9 sm:-mx-6 sm:-mt-6 sm:px-8 sm:py-12"
+          className="-mx-4 -mt-4 bg-secondary px-4 py-16 text-center sm:-mx-6 sm:-mt-6 sm:px-8 sm:py-20"
         >
-          <div className="max-w-[720px]">
-            <h1 className="font-display text-[clamp(31px,6.2vw,54px)] font-extrabold leading-[1.1] tracking-[-.03em]">
-              Everyone promises “best college.”
-              <br />
-              <span className="box-decoration-clone [box-shadow:inset_0_-0.16em_0_hsl(var(--marigold))]">We find yours.</span>
+          <div className="mx-auto max-w-[720px]">
+            <p className="text-[15px] font-semibold uppercase tracking-[.3em] text-primary">India&rsquo;s Student</p>
+            <h1 className="mt-2 font-display text-[clamp(32px,6.5vw,48px)] font-extrabold uppercase leading-[1.15] tracking-[-.02em]">
+              Success Network
             </h1>
-            <p className="mt-5 max-w-[580px] text-[17.5px] font-bold leading-relaxed text-foreground">
-              Verified student data, real placement numbers and 1:1 human experts for Delhi NCR colleges — free for students and parents.
+            <svg className="mx-auto mb-8 mt-6 h-5 w-[150px]" viewBox="0 0 150 20" fill="none" aria-hidden>
+              <path
+                d="M2 12 C 14 2, 26 2, 38 12 C 50 22, 62 22, 74 12 C 86 2, 98 2, 110 12 C 118 18, 130 18, 148 8"
+                stroke="hsl(var(--marigold))"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            </svg>
+            <p className="mx-auto max-w-[600px] text-[19px] leading-relaxed text-muted-foreground">
+              Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
             </p>
-            <Button size="lg" className="mt-6" onClick={openQuiz}>
-              Get started
-            </Button>
+            <p className="mt-10 text-[15px] font-semibold uppercase tracking-[.25em]">Start your search</p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
+              <Button className="w-[140px]" onClick={openQuiz}>
+                College
+              </Button>
+              <Button asChild className="w-[140px]">
+                <Link href="/opportunities">Scholarship</Link>
+              </Button>
+              <Button asChild className="w-[140px]">
+                <Link href="/opportunities">Internship</Link>
+              </Button>
+            </div>
           </div>
         </section>
 
