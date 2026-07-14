@@ -41,8 +41,8 @@ const SCHOLARSHIPS = [
 // icon scene + title baked in). Raw markup, same reasoning as the Ill SVGs above.
 const POSTER_QUIZ = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="150" fill="#EAE7DC"/>
-  <g transform="translate(240 250) scale(0.45) translate(-240 -250)">
+  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
+  <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <rect x="170" y="150" width="150" height="230" rx="18" fill="#1B1633" opacity="0.06"/>
   <path d="M160 150 h150 v230 l-20 20 h-130 z" fill="#fff" stroke="#1B1633" stroke-width="6" stroke-linejoin="round"/>
   <g>
@@ -65,13 +65,13 @@ const POSTER_QUIZ = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/sv
     <path d="M0 0 h26 l-13 22 z" fill="#1B1633" stroke-linejoin="round" transform="translate(300 300) rotate(35)"/>
   </g>
   </g>
-  <text x="240" y="530" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">College Quiz</text>
+  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">College Quiz</text>
 </svg>`;
 
 const POSTER_COMPARE = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="150" fill="#EAE7DC"/>
-  <g transform="translate(240 250) scale(0.45) translate(-240 -250)">
+  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
+  <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <g>
     <rect x="115" y="160" width="150" height="230" rx="18" fill="#1B1633" opacity="0.06" transform="rotate(-4 190 275)"/>
     <rect x="115" y="160" width="150" height="230" rx="18" fill="#fff" stroke="#1B1633" stroke-width="6" transform="rotate(-4 190 275)"/>
@@ -121,13 +121,13 @@ const POSTER_COMPARE = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000
     <line x1="24" y1="24" x2="55" y2="55" stroke="#5B4FE9" stroke-width="12" stroke-linecap="round"/>
   </g>
   </g>
-  <text x="240" y="530" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Compare Colleges</text>
+  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Compare Colleges</text>
 </svg>`;
 
 const POSTER_INTERNSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="150" fill="#EAE7DC"/>
-  <g transform="translate(240 250) scale(0.45) translate(-240 -250)">
+  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
+  <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <g transform="translate(105 260)">
     <rect x="0" y="30" width="110" height="90" rx="10" fill="#1B1633"/>
     <rect x="35" y="10" width="40" height="25" rx="6" fill="none" stroke="#1B1633" stroke-width="7"/>
@@ -162,13 +162,13 @@ const POSTER_INTERNSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2
   <circle cx="355" cy="360" r="34" fill="#5B4FE9"/>
   <path d="M340 361 l10 10 l20 -22" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
-  <text x="240" y="530" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">Internship</text>
+  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">Internship</text>
 </svg>`;
 
 const POSTER_SCHOLARSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="150" fill="#EAE7DC"/>
-  <g transform="translate(240 250) scale(0.45) translate(-240 -250)">
+  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
+  <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <rect x="145" y="150" width="150" height="220" rx="16" fill="#fff" stroke="#1B1633" stroke-width="6"/>
   <text x="220" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="800" fill="#1B1633" letter-spacing="1">SCHOLARSHIP</text>
   <line x1="165" y1="205" x2="275" y2="205" stroke="#1B1633" stroke-width="4" opacity="0.3" stroke-linecap="round"/>
@@ -192,13 +192,13 @@ const POSTER_SCHOLARSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/
   <circle cx="355" cy="290" r="26" fill="#5B4FE9"/>
   <text x="355" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="800" fill="#fff">₹</text>
   </g>
-  <text x="240" y="530" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Scholarship</text>
+  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Scholarship</text>
 </svg>`;
 
 const POSTER_RESOURCES = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="150" fill="#EAE7DC"/>
-  <g transform="translate(240 250) scale(0.45) translate(-240 -250)">
+  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
+  <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <rect x="120" y="200" width="70" height="140" rx="8" fill="#1B1633"/>
   <line x1="135" y1="230" x2="175" y2="230" stroke="#fff" stroke-width="4" opacity="0.5"/>
   <line x1="135" y1="245" x2="165" y2="245" stroke="#fff" stroke-width="4" opacity="0.5"/>
@@ -232,13 +232,13 @@ const POSTER_RESOURCES = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/20
     <line x1="-26" y1="-26" x2="-19" y2="-19" stroke="#1B1633" stroke-width="4" stroke-linecap="round"/>
   </g>
   </g>
-  <text x="240" y="530" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">Resources</text>
+  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">Resources</text>
 </svg>`;
 
 const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="150" fill="#EAE7DC"/>
-  <g transform="translate(240 250) scale(0.45) translate(-240 -250)">
+  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
+  <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <g transform="translate(110 220)">
     <rect x="0" y="0" width="100" height="150" rx="12" fill="#fff" stroke="#1B1633" stroke-width="6"/>
     <rect x="30" y="-14" width="40" height="24" rx="6" fill="#1B1633"/>
@@ -280,7 +280,7 @@ const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/
   <circle cx="368" cy="322" r="8" fill="#fff"/>
   <path d="M356 342 q12 -14 24 0" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/>
   </g>
-  <text x="240" y="530" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Expert Guide</text>
+  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Expert Guide</text>
 </svg>`;
 
 // Each poster is a clickable card — "quiz" opens the lead-gen quiz modal,
@@ -336,7 +336,7 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         </div>
       </div>
       <style>{`
-        .stack-section { width: 100%; background: hsl(var(--background)); padding: 60px 0 64px; }
+        .stack-section { width: 100%; background: hsl(var(--background)); padding: 8px 0 56px; }
         .stack-outer { width: 100%; overflow: hidden; }
         .stack-track { display: flex; width: max-content; gap: 24px; padding-left: 5vw; }
         .m-item {
@@ -401,6 +401,8 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
 export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
   return (
     <section aria-label="Tools & scholarships" className="mx-auto w-full max-w-[960px]">
+      <h2 className="text-center font-display text-[clamp(24px,3.6vw,34px)] font-extrabold tracking-tight">Networking starts here</h2>
+
       {/* Fanned poster carousel */}
       <PosterStack onQuiz={onQuiz} />
 
