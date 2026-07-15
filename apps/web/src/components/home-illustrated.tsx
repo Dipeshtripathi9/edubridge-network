@@ -36,10 +36,10 @@ export function HomeIllustrated() {
     <>
       <CollegeQuiz open={quizOpen} onClose={() => setQuizOpen(false)} />
       <div className="space-y-12 sm:space-y-16">
-        {/* HERO — full-bleed photo + solid brand panel, scalloped divider */}
+        {/* HERO — full-bleed photo + copy panel */}
         <section
           id="get-expert-guidance"
-          className="relative -mt-4 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] w-screen overflow-hidden sm:-mt-6"
+          className="relative -mt-4 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] w-screen overflow-hidden bg-background sm:-mt-6"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2">
             {/* Photo — full-bleed */}
@@ -51,30 +51,28 @@ export function HomeIllustrated() {
               />
             </div>
 
-            {/* Text panel — solid brand color */}
-            <div className="relative flex flex-col justify-center bg-primary px-6 py-8 text-center text-primary-foreground sm:px-10 sm:py-10 lg:items-start lg:px-14 lg:text-left [@media(max-height:700px)]:py-4">
-              <span className="inline-block rounded-full bg-white/15 px-4 py-1.5 text-[13px] font-bold uppercase tracking-[.25em]">
+            {/* Text panel */}
+            <div className="relative flex flex-col justify-center px-6 py-8 text-center sm:px-10 sm:py-10 lg:items-start lg:px-14 lg:text-left [@media(max-height:700px)]:py-4">
+              <span className="inline-block rounded-full bg-accent px-4 py-1.5 text-[13px] font-bold uppercase tracking-[.25em] text-primary">
                 India&rsquo;s Student
               </span>
               <h1 className="mt-3 font-display text-[clamp(28px,4.6vw,48px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em] [@media(max-height:700px)]:mt-1.5">
                 Success Network
               </h1>
-              <p className="mx-auto mt-3 max-w-[480px] text-[16px] leading-relaxed text-primary-foreground/80 lg:mx-0 [@media(max-height:700px)]:mt-2">
+              <p className="mx-auto mt-3 max-w-[480px] text-[16px] leading-relaxed text-muted-foreground lg:mx-0 [@media(max-height:700px)]:mt-2">
                 Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
               </p>
-              <p className="mt-4 text-[14px] font-semibold uppercase tracking-[.25em] text-primary-foreground/70 [@media(max-height:700px)]:mt-3">
-                Start your search
-              </p>
+              <p className="mt-4 text-[14px] font-semibold uppercase tracking-[.25em] [@media(max-height:700px)]:mt-3">Start your search</p>
               <div className="mt-3 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3 lg:justify-start [@media(max-height:700px)]:mt-1 [@media(max-height:700px)]:gap-1">
-                <Button className="w-[70vw] max-w-[220px] gap-2 bg-white text-primary hover:bg-white/90 sm:w-auto" onClick={openQuiz}>
+                <Button className="w-[70vw] max-w-[220px] gap-2 sm:w-auto" onClick={openQuiz}>
                   <Building2 className="h-4 w-4" /> Find College
                 </Button>
-                <Button asChild className="w-[70vw] max-w-[220px] gap-2 bg-white text-primary hover:bg-white/90 sm:w-auto">
+                <Button asChild className="w-[70vw] max-w-[220px] gap-2 sm:w-auto">
                   <Link href="/opportunities">
                     <GraduationCap className="h-4 w-4" /> Explore Scholarship
                   </Link>
                 </Button>
-                <Button asChild className="w-[70vw] max-w-[220px] gap-2 bg-white text-primary hover:bg-white/90 sm:w-auto">
+                <Button asChild className="w-[70vw] max-w-[220px] gap-2 sm:w-auto">
                   <Link href="/opportunities">
                     <Briefcase className="h-4 w-4" /> Find Internship
                   </Link>
@@ -82,16 +80,6 @@ export function HomeIllustrated() {
               </div>
             </div>
           </div>
-
-          {/* Scalloped wave divider into the page background */}
-          <svg aria-hidden className="absolute inset-x-0 bottom-0 block h-4 w-full text-background">
-            <defs>
-              <pattern id="hero-scallop" x="0" y="0" width="32" height="16" patternUnits="userSpaceOnUse">
-                <circle cx="16" cy="0" r="16" fill="currentColor" />
-              </pattern>
-            </defs>
-            <rect x="0" y="0" width="100%" height="100%" fill="url(#hero-scallop)" />
-          </svg>
         </section>
 
         {/* TOOLS + SCHOLARSHIPS */}
