@@ -39,21 +39,21 @@ export function HomeIllustrated() {
         {/* HERO */}
         <section
           id="get-expert-guidance"
-          className="-mx-4 -mt-4 bg-background px-4 pb-6 pt-10 sm:-mx-6 sm:-mt-6 sm:px-8 sm:pt-14"
+          className="-mx-4 -mt-4 bg-background px-4 pb-6 pt-6 sm:-mx-6 sm:-mt-6 sm:px-8 sm:pt-8 lg:pt-10 [@media(max-height:700px)]:pt-2"
         >
-          <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-6 lg:grid-cols-2 lg:gap-10 [@media(max-height:700px)]:gap-2">
             {/* Photo */}
-            <div className="relative order-1 mx-auto w-full max-w-[520px]">
+            <div className="relative order-1 mx-auto w-full max-w-[380px] lg:max-w-none">
               <span aria-hidden className="pointer-events-none absolute -left-3 -top-3 grid grid-cols-4 gap-1.5 text-primary/30">
                 {Array.from({ length: 16 }).map((_, i) => (
                   <span key={i} className="h-1.5 w-1.5 rounded-full bg-current" />
                 ))}
               </span>
-              <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-accent to-marigold-soft px-6 pt-8 sm:px-10">
+              <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-accent to-marigold-soft px-6 pt-5 sm:px-8 sm:pt-6 [@media(max-height:700px)]:pt-1.5">
                 <img
                   src="/hero-students-group.webp"
                   alt="Four students collaborating on a laptop"
-                  className="mx-auto w-full max-w-[460px] object-contain"
+                  className="mx-auto w-full max-w-[380px] object-contain [@media(max-height:700px)]:max-w-[220px]"
                 />
               </div>
             </div>
@@ -63,14 +63,14 @@ export function HomeIllustrated() {
               <span className="inline-block rounded-full bg-accent px-4 py-1.5 text-[13px] font-bold uppercase tracking-[.25em] text-primary">
                 India&rsquo;s Student
               </span>
-              <h1 className="mt-4 font-display text-[clamp(32px,6vw,64px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em]">
+              <h1 className="mt-2 font-display text-[clamp(28px,4.6vw,48px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em] [@media(max-height:700px)]:mt-1.5">
                 Success Network
               </h1>
-              <p className="mx-auto mt-5 max-w-[520px] text-[17px] leading-relaxed text-muted-foreground lg:mx-0">
+              <p className="mx-auto mt-3 max-w-[480px] text-[16px] leading-relaxed text-muted-foreground lg:mx-0 [@media(max-height:700px)]:mt-2">
                 Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
               </p>
-              <p className="mt-8 text-[14px] font-semibold uppercase tracking-[.25em]">Start your search</p>
-              <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
+              <p className="mt-4 text-[14px] font-semibold uppercase tracking-[.25em] [@media(max-height:700px)]:mt-3">Start your search</p>
+              <div className="mt-3 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3 lg:justify-start [@media(max-height:700px)]:mt-1 [@media(max-height:700px)]:gap-1">
                 <Button className="w-[70vw] max-w-[220px] gap-2 sm:w-auto" onClick={openQuiz}>
                   <Building2 className="h-4 w-4" /> Find College
                 </Button>
