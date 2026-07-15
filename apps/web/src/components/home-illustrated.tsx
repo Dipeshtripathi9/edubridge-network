@@ -84,9 +84,9 @@ export function HomeIllustrated() {
           </div>
 
           {/* Scalloped wave divider into the page background */}
-          <svg aria-hidden className="absolute inset-x-0 bottom-0 block h-4 w-full text-background sm:h-6" preserveAspectRatio="none">
+          <svg aria-hidden className="absolute inset-x-0 bottom-0 block h-4 w-full text-background">
             <defs>
-              <pattern id="hero-scallop" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+              <pattern id="hero-scallop" x="0" y="0" width="32" height="16" patternUnits="userSpaceOnUse">
                 <circle cx="16" cy="0" r="16" fill="currentColor" />
               </pattern>
             </defs>
