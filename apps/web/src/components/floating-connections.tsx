@@ -40,7 +40,7 @@ export function FloatingConnections() {
         const y = window.scrollY;
         const delta = y - lastY.current;
         if (Math.abs(delta) > 6) {
-          if (delta > 0 && y > 80) setCollapsed(true);
+          if (delta > 0 && y > 24) setCollapsed(true);
           else if (delta < 0) setCollapsed(false);
           lastY.current = y;
         }
