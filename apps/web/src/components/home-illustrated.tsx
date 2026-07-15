@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ShieldCheck } from 'lucide-react';
+import { Briefcase, Building2, CheckCircle2, GraduationCap, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CollegeQuiz } from '@/components/college-quiz';
 import { HomeExplainer } from '@/components/home-explainer';
@@ -39,27 +39,52 @@ export function HomeIllustrated() {
         {/* HERO */}
         <section
           id="get-expert-guidance"
-          className="-mx-4 -mt-4 bg-background px-4 pb-6 pt-16 text-center sm:-mx-6 sm:-mt-6 sm:px-8 sm:pb-8 sm:pt-20"
+          className="-mx-4 -mt-4 bg-background px-4 pb-6 pt-10 sm:-mx-6 sm:-mt-6 sm:px-8 sm:pt-14"
         >
-          <div className="mx-auto max-w-[840px]">
-            <p className="text-[15px] font-semibold uppercase tracking-[.3em] text-primary">India&rsquo;s Student</p>
-            <h1 className="mt-2 font-display text-[clamp(32px,8vw,84px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em]">
-              Success Network
-            </h1>
-            <p className="mx-auto mt-6 max-w-[600px] text-[19px] leading-relaxed text-muted-foreground">
-              Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
-            </p>
-            <p className="mt-10 text-[15px] font-semibold uppercase tracking-[.25em]">Start your search</p>
-            <div className="mx-auto mt-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
-              <Button className="w-[40vw] sm:w-[150px] md:w-[170px]" onClick={openQuiz}>
-                College
-              </Button>
-              <Button asChild className="w-[40vw] sm:w-[150px] md:w-[170px]">
-                <Link href="/opportunities">Scholarship</Link>
-              </Button>
-              <Button asChild className="w-[40vw] sm:w-[150px] md:w-[170px]">
-                <Link href="/opportunities">Internship</Link>
-              </Button>
+          <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
+            {/* Photo */}
+            <div className="relative order-1 mx-auto w-full max-w-[520px]">
+              <span aria-hidden className="pointer-events-none absolute -left-3 -top-3 grid grid-cols-4 gap-1.5 text-primary/30">
+                {Array.from({ length: 16 }).map((_, i) => (
+                  <span key={i} className="h-1.5 w-1.5 rounded-full bg-current" />
+                ))}
+              </span>
+              <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-accent to-marigold-soft px-6 pt-8 sm:px-10">
+                <img
+                  src="/hero-students-group.webp"
+                  alt="Four students collaborating on a laptop"
+                  className="mx-auto w-full max-w-[460px] object-contain"
+                />
+              </div>
+            </div>
+
+            {/* Text */}
+            <div className="order-2 text-center lg:text-left">
+              <span className="inline-block rounded-full bg-accent px-4 py-1.5 text-[13px] font-bold uppercase tracking-[.25em] text-primary">
+                India&rsquo;s Student
+              </span>
+              <h1 className="mt-4 font-display text-[clamp(32px,6vw,64px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em]">
+                Success Network
+              </h1>
+              <p className="mx-auto mt-5 max-w-[520px] text-[17px] leading-relaxed text-muted-foreground lg:mx-0">
+                Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
+              </p>
+              <p className="mt-8 text-[14px] font-semibold uppercase tracking-[.25em]">Start your search</p>
+              <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
+                <Button className="w-[70vw] max-w-[220px] gap-2 sm:w-auto" onClick={openQuiz}>
+                  <Building2 className="h-4 w-4" /> Find College
+                </Button>
+                <Button asChild className="w-[70vw] max-w-[220px] gap-2 sm:w-auto">
+                  <Link href="/opportunities">
+                    <GraduationCap className="h-4 w-4" /> Explore Scholarship
+                  </Link>
+                </Button>
+                <Button asChild className="w-[70vw] max-w-[220px] gap-2 sm:w-auto">
+                  <Link href="/opportunities">
+                    <Briefcase className="h-4 w-4" /> Find Internship
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </section>
