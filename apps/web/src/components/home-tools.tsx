@@ -41,7 +41,7 @@ const SCHOLARSHIPS = [
 // icon scene + title baked in). Raw markup, same reasoning as the Ill SVGs above.
 const POSTER_QUIZ = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
+  <circle cx="240" cy="230" r="168" fill="#EFEAFF"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <rect x="170" y="150" width="150" height="230" rx="18" fill="#1B1633" opacity="0.06"/>
   <path d="M160 150 h150 v230 l-20 20 h-130 z" fill="#fff" stroke="#1B1633" stroke-width="6" stroke-linejoin="round"/>
@@ -126,7 +126,7 @@ const POSTER_COMPARE = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000
 
 const POSTER_INTERNSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
+  <circle cx="240" cy="230" r="168" fill="#FDF1DA"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <g transform="translate(105 260)">
     <rect x="0" y="30" width="110" height="90" rx="10" fill="#1B1633"/>
@@ -167,7 +167,7 @@ const POSTER_INTERNSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2
 
 const POSTER_SCHOLARSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
+  <circle cx="240" cy="230" r="168" fill="#EFEAFF"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <rect x="145" y="150" width="150" height="220" rx="16" fill="#fff" stroke="#1B1633" stroke-width="6"/>
   <text x="220" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="800" fill="#1B1633" letter-spacing="1">SCHOLARSHIP</text>
@@ -237,7 +237,7 @@ const POSTER_RESOURCES = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/20
 
 const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
+  <circle cx="240" cy="230" r="168" fill="#FDF1DA"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <g transform="translate(110 220)">
     <rect x="0" y="0" width="100" height="150" rx="12" fill="#fff" stroke="#1B1633" stroke-width="6"/>
@@ -389,7 +389,7 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         .fan-3 { --fx: -42px; --fy: 7px; --fr: 3deg; z-index: 3; }
         .fan-4 { --fx: -127px; --fy: 20px; --fr: 9deg; z-index: 2; }
         .fan-5 { --fx: -212px; --fy: 32px; --fr: 15deg; z-index: 1; }
-        .s-photo { width: 100%; height: 263px; border-radius: 18px; overflow: hidden; box-shadow: 0 4px 16px rgba(27, 22, 51, 0.1); }
+        .s-photo { width: 100%; height: 263px; border-radius: 18px; overflow: hidden; border: 1.5px solid hsl(var(--border)); box-shadow: 0 4px 16px rgba(27, 22, 51, 0.1); }
         .s-photo svg { width: 100%; height: 100%; display: block; }
         .poster-explore {
           position: absolute;
@@ -412,9 +412,6 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         }
         .m-item:hover .poster-explore, .m-item:focus-visible .poster-explore { transform: translateY(-6px) scale(1.03); }
         .stack-section.started .m-item { animation: settle 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards; }
-        .poster-title { opacity: 0; }
-        .stack-section.started .poster-title { animation: title-fade 0.6s ease 2s forwards; }
-        @keyframes title-fade { to { opacity: 1; } }
         @keyframes settle {
           from { transform: translateX(var(--fx)) translateY(var(--fy)) rotate(var(--fr)); }
           to { transform: translateX(0) translateY(0) rotate(0deg); }
@@ -439,7 +436,7 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
 export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
   return (
     <section aria-label="Tools & scholarships" className="!mt-0 mx-auto w-full max-w-[960px]">
-      <div className="mb-8 px-4 text-center sm:px-0">
+      <div className="mb-8 border-t border-border px-4 pt-10 text-center sm:px-0 sm:pt-14">
         <h2 className="font-display text-[clamp(26px,3.6vw,36px)] font-extrabold tracking-[-.02em]">Everything You Need to Succeed</h2>
         <p className="mx-auto mt-3 max-w-[560px] text-[15.5px] text-muted-foreground">
           Explore tools that help you choose the right college, discover opportunities, and make confident career decisions.

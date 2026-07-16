@@ -43,11 +43,12 @@ export function HomeIllustrated() {
         >
           <div className="grid grid-cols-1 lg:grid-cols-2">
             {/* Photo — full-bleed */}
-            <div className="relative h-[220px] sm:h-[320px] lg:h-[440px] [@media(max-height:700px)]:h-[140px]">
+            <div className="relative h-[200px] sm:h-[290px] lg:h-[400px] [@media(max-height:700px)]:h-[140px]">
               <img
                 src="/hero-students-group.webp"
                 alt="Four students collaborating on a laptop"
-                className="h-full w-full object-cover object-[center_20%]"
+                className="h-full w-full object-cover object-[center_75%]"
+                style={{ maskImage: 'linear-gradient(to right, transparent, black 4%)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%)' }}
               />
               {/* Decorative accents */}
               <span aria-hidden className="pointer-events-none absolute left-4 top-4 grid grid-cols-4 gap-1.5 text-primary/40 sm:left-6 sm:top-6">
@@ -68,17 +69,17 @@ export function HomeIllustrated() {
             </div>
 
             {/* Text panel */}
-            <div className="relative flex flex-col justify-center px-6 pb-0 pt-8 text-center sm:px-10 sm:pt-10 lg:items-start lg:justify-end lg:px-14 lg:pb-0 lg:text-left [@media(max-height:700px)]:py-4">
-              <span className="inline-block rounded-full bg-accent px-4 py-1.5 text-[13px] font-bold uppercase tracking-[.25em] text-primary">
+            <div className="relative flex flex-col justify-center px-6 pb-0 pt-8 text-center sm:px-10 sm:pt-10 lg:items-start lg:justify-center lg:px-14 lg:text-left [@media(max-height:700px)]:py-4">
+              <span className="block text-[13px] font-extrabold uppercase tracking-[.3em] text-primary">
                 India&rsquo;s Student
               </span>
-              <h1 className="mt-3 font-serif text-[clamp(28px,4.6vw,48px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em] [@media(max-height:700px)]:mt-1.5">
+              <h1 className="mt-2 font-serif text-[clamp(28px,4.6vw,48px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em] [@media(max-height:700px)]:mt-1.5">
                 Success Network
               </h1>
-              <svg aria-hidden className="mx-auto mt-2 h-4 w-[90px] text-marigold lg:mx-0 [@media(max-height:700px)]:hidden" viewBox="0 0 90 14" fill="none">
+              <svg aria-hidden className="mx-auto -mt-1 h-4 w-[90px] text-marigold lg:mx-0 [@media(max-height:700px)]:hidden" viewBox="0 0 90 14" fill="none">
                 <path d="M2 8 C 12 2, 20 2, 28 8 C 36 14, 44 14, 52 8 C 60 2, 68 2, 76 8 C 80 11, 84 11, 88 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              <p className="mx-auto mt-3 max-w-[480px] text-[16px] leading-relaxed text-muted-foreground lg:mx-0 [@media(max-height:700px)]:mt-2">
+              <p className="mx-auto mt-3 max-w-[540px] text-[16px] leading-relaxed text-muted-foreground lg:mx-0 [@media(max-height:700px)]:mt-2">
                 Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
               </p>
               <p className="mt-4 text-[14px] font-semibold uppercase tracking-[.25em] [@media(max-height:700px)]:mt-3">Start your search</p>
@@ -86,12 +87,12 @@ export function HomeIllustrated() {
                 <Button className="w-[70vw] max-w-[220px] gap-2 sm:w-auto" onClick={openQuiz}>
                   <Building2 className="h-4 w-4" /> Find College
                 </Button>
-                <Button asChild className="w-[70vw] max-w-[220px] gap-2 sm:w-auto">
+                <Button asChild variant="outline" className="w-[70vw] max-w-[220px] gap-2 sm:w-auto">
                   <Link href="/opportunities">
                     <GraduationCap className="h-4 w-4" /> Explore Scholarship
                   </Link>
                 </Button>
-                <Button asChild className="w-[70vw] max-w-[220px] gap-2 sm:w-auto">
+                <Button asChild variant="outline" className="w-[70vw] max-w-[220px] gap-2 sm:w-auto">
                   <Link href="/opportunities">
                     <Briefcase className="h-4 w-4" /> Find Internship
                   </Link>
