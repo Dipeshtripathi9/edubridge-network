@@ -439,6 +439,13 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
 export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
   return (
     <section aria-label="Tools & scholarships" className="!mt-0 mx-auto w-full max-w-[960px]">
+      <div className="mb-8 px-4 text-center sm:px-0">
+        <h2 className="font-display text-[clamp(26px,3.6vw,36px)] font-extrabold tracking-[-.02em]">Everything You Need to Succeed</h2>
+        <p className="mx-auto mt-3 max-w-[560px] text-[15.5px] text-muted-foreground">
+          Explore tools that help you choose the right college, discover opportunities, and make confident career decisions.
+        </p>
+      </div>
+
       {/* Fanned poster carousel */}
       <PosterStack onQuiz={onQuiz} />
 
