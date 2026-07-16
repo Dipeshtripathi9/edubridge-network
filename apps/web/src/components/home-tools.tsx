@@ -323,14 +323,21 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         <div className="stack-track">
           {POSTER_TRACK.map(({ svg, action }, i) => {
             const photo = <span className="s-photo block" dangerouslySetInnerHTML={{ __html: svg }} />;
+            const arrow = (
+              <span className="poster-arrow" aria-hidden>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            );
             const className = `m-item fan-${i % 6}`;
             return action.type === 'quiz' ? (
               <button key={i} type="button" className={className} onClick={onQuiz}>
                 {photo}
+                {arrow}
               </button>
             ) : (
               <Link key={i} href={action.href} className={className}>
                 {photo}
+                {arrow}
               </Link>
             );
           })}
@@ -377,6 +384,23 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         .fan-5 { --fx: -212px; --fy: 32px; --fr: 15deg; z-index: 1; }
         .s-photo { width: 100%; height: 263px; border-radius: 18px; overflow: hidden; box-shadow: 0 4px 16px rgba(27, 22, 51, 0.1); }
         .s-photo svg { width: 100%; height: 100%; display: block; }
+        .poster-arrow {
+          position: absolute;
+          bottom: 12px;
+          right: 12px;
+          z-index: 2;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: hsl(var(--primary));
+          color: #fff;
+          box-shadow: 0 2px 8px rgba(27, 22, 51, 0.28);
+          transition: transform 0.25s ease;
+        }
+        .m-item:hover .poster-arrow, .m-item:focus-visible .poster-arrow { transform: translateY(-6px) scale(1.03); }
         .stack-section.started .m-item { animation: settle 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards; }
         .stack-section.started .stack-track { animation: scroll-rtl 26s linear 2.5s infinite; }
         .poster-title { opacity: 0; }
@@ -393,6 +417,8 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         @media (max-width: 700px) {
           .m-item { flex-basis: 130px; width: 130px; }
           .s-photo { height: 163px; }
+          .poster-arrow { bottom: 8px; right: 8px; width: 22px; height: 22px; }
+          .poster-arrow svg { width: 11px; height: 11px; }
           .fan-0 { --fx: 132px; --fy: 20px; }
           .fan-1 { --fx: 79px; --fy: 12px; }
           .fan-2 { --fx: 26px; --fy: 4px; }
@@ -408,8 +434,6 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
 export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
   return (
     <section aria-label="Tools & scholarships" className="mx-auto w-full max-w-[960px]">
-      <h2 className="text-center font-display text-[clamp(24px,3.6vw,34px)] font-extrabold tracking-tight">Networking starts here</h2>
-
       {/* Fanned poster carousel */}
       <PosterStack onQuiz={onQuiz} />
 
