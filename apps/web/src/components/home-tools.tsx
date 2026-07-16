@@ -331,21 +331,14 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         <div className="stack-track" style={{ paddingLeft: gutter, paddingRight: gutter }}>
           {POSTER_TRACK.map(({ svg, action }, i) => {
             const photo = <span className="s-photo block" dangerouslySetInnerHTML={{ __html: svg }} />;
-            const arrow = (
-              <span className="poster-explore" aria-hidden>
-                Explore <ArrowRight className="h-3 w-3" />
-              </span>
-            );
             const className = `m-item fan-${i % 6}`;
             return action.type === 'quiz' ? (
               <button key={i} type="button" className={className} onClick={onQuiz}>
                 {photo}
-                {arrow}
               </button>
             ) : (
               <Link key={i} href={action.href} className={className}>
                 {photo}
-                {arrow}
               </Link>
             );
           })}
@@ -408,26 +401,6 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         .fan-5 { --fx: -212px; --fy: 32px; --fr: 15deg; z-index: 1; }
         .s-photo { width: 100%; height: 263px; border-radius: 22px; overflow: hidden; border: 1.5px solid hsl(var(--border)); box-shadow: 0 4px 16px rgba(27, 22, 51, 0.1); }
         .s-photo svg { width: 100%; height: 100%; display: block; }
-        .poster-explore {
-          position: absolute;
-          bottom: 10px;
-          right: 10px;
-          z-index: 2;
-          display: inline-flex;
-          align-items: center;
-          gap: 3px;
-          padding: 4px 9px;
-          border-radius: 999px;
-          background: #1B1633;
-          color: #fff;
-          font-size: 10.5px;
-          font-weight: 700;
-          letter-spacing: 0.02em;
-          white-space: nowrap;
-          box-shadow: 0 2px 8px rgba(27, 22, 51, 0.28);
-          transition: transform 0.25s ease;
-        }
-        .m-item:hover .poster-explore, .m-item:focus-visible .poster-explore { transform: translateY(-6px) scale(1.03); }
         .stack-section.started .m-item { animation: settle 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards; }
         @keyframes settle {
           from { transform: translateX(var(--fx)) translateY(var(--fy)) rotate(var(--fr)); }
@@ -436,8 +409,6 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         @media (max-width: 700px) {
           .m-item { flex-basis: 130px; width: 130px; }
           .s-photo { height: 163px; }
-          .poster-explore { bottom: 8px; right: 8px; padding: 3px 7px; font-size: 9px; gap: 2px; }
-          .poster-explore svg { width: 9px; height: 9px; }
           .fan-0 { --fx: 132px; --fy: 20px; }
           .fan-1 { --fx: 79px; --fy: 12px; }
           .fan-2 { --fx: 26px; --fy: 4px; }

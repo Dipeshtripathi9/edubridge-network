@@ -69,7 +69,7 @@ export function HomeIllustrated() {
             </div>
 
             {/* Text panel */}
-            <div className="relative flex flex-col justify-center px-6 pb-0 pt-8 text-center sm:px-10 sm:pt-10 lg:items-start lg:justify-center lg:px-14 lg:text-left [@media(max-height:700px)]:py-4">
+            <div className="relative flex flex-col justify-center px-6 pb-8 pt-8 text-center sm:px-10 sm:pb-10 sm:pt-10 lg:items-start lg:justify-center lg:px-14 lg:pb-0 lg:text-left [@media(max-height:700px)]:py-4">
               <span className="block text-[13px] font-extrabold uppercase tracking-[.3em] text-primary">
                 India&rsquo;s Student
               </span>
