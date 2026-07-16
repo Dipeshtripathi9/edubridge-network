@@ -395,7 +395,7 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
           width: 28px;
           height: 28px;
           border-radius: 50%;
-          background: hsl(var(--primary));
+          background: #1B1633;
           color: #fff;
           box-shadow: 0 2px 8px rgba(27, 22, 51, 0.28);
           transition: transform 0.25s ease;
