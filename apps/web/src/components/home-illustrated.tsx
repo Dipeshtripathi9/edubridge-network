@@ -49,6 +49,22 @@ export function HomeIllustrated() {
                 alt="Four students collaborating on a laptop"
                 className="h-full w-full object-cover object-[center_20%]"
               />
+              {/* Decorative accents */}
+              <span aria-hidden className="pointer-events-none absolute left-4 top-4 grid grid-cols-4 gap-1.5 text-background/80 sm:left-6 sm:top-6">
+                {Array.from({ length: 16 }).map((_, i) => (
+                  <span key={i} className="h-1.5 w-1.5 rounded-full bg-current" />
+                ))}
+              </span>
+              <svg aria-hidden className="pointer-events-none absolute left-[30%] top-3 h-4 w-4 text-marigold sm:top-4" viewBox="0 0 24 24" fill="none">
+                <path d="M4 13 L4.5 19M9 13 L10 19M14 13 L15.5 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <svg aria-hidden className="pointer-events-none absolute left-[48%] top-1 h-5 w-5 text-primary/70" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2v6M12 16v6M2 12h6M16 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              {/* Wavy mask into the page background */}
+              <svg aria-hidden className="absolute inset-x-0 bottom-0 h-6 w-full text-background sm:h-9" viewBox="0 0 200 24" preserveAspectRatio="none">
+                <path d="M0 12 Q 50 24 100 12 Q 150 0 200 12 V24 H0 Z" fill="currentColor" />
+              </svg>
             </div>
 
             {/* Text panel */}
@@ -56,9 +72,12 @@ export function HomeIllustrated() {
               <span className="inline-block rounded-full bg-accent px-4 py-1.5 text-[13px] font-bold uppercase tracking-[.25em] text-primary">
                 India&rsquo;s Student
               </span>
-              <h1 className="mt-3 font-display text-[clamp(28px,4.6vw,48px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em] [@media(max-height:700px)]:mt-1.5">
+              <h1 className="mt-3 font-serif text-[clamp(28px,4.6vw,48px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em] [@media(max-height:700px)]:mt-1.5">
                 Success Network
               </h1>
+              <svg aria-hidden className="mx-auto mt-2 h-4 w-[90px] text-marigold lg:mx-0 [@media(max-height:700px)]:hidden" viewBox="0 0 90 14" fill="none">
+                <path d="M2 8 C 12 2, 20 2, 28 8 C 36 14, 44 14, 52 8 C 60 2, 68 2, 76 8 C 80 11, 84 11, 88 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
               <p className="mx-auto mt-3 max-w-[480px] text-[16px] leading-relaxed text-muted-foreground lg:mx-0 [@media(max-height:700px)]:mt-2">
                 Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
               </p>
