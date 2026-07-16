@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronRight, IndianRupee } from 'lucide-react';
 
@@ -41,7 +41,7 @@ const SCHOLARSHIPS = [
 // icon scene + title baked in). Raw markup, same reasoning as the Ill SVGs above.
 const POSTER_QUIZ = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#EFEAFF"/>
+  <circle cx="240" cy="230" r="168" fill="#E4D9FF"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <rect x="170" y="150" width="150" height="230" rx="18" fill="#1B1633" opacity="0.06"/>
   <path d="M160 150 h150 v230 l-20 20 h-130 z" fill="#fff" stroke="#1B1633" stroke-width="6" stroke-linejoin="round"/>
@@ -70,8 +70,8 @@ const POSTER_QUIZ = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/sv
 
 const POSTER_COMPARE = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
-  <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
+  <circle cx="240" cy="230" r="168" fill="#DFDACB"/>
+  <g transform="translate(240 250) scale(0.74) translate(-240 -250)">
   <g>
     <rect x="115" y="160" width="150" height="230" rx="18" fill="#1B1633" opacity="0.06" transform="rotate(-4 190 275)"/>
     <rect x="115" y="160" width="150" height="230" rx="18" fill="#fff" stroke="#1B1633" stroke-width="6" transform="rotate(-4 190 275)"/>
@@ -126,7 +126,7 @@ const POSTER_COMPARE = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000
 
 const POSTER_INTERNSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#FDF1DA"/>
+  <circle cx="240" cy="230" r="168" fill="#FBE3B8"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <g transform="translate(105 260)">
     <rect x="0" y="30" width="110" height="90" rx="10" fill="#1B1633"/>
@@ -167,7 +167,7 @@ const POSTER_INTERNSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2
 
 const POSTER_SCHOLARSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#EFEAFF"/>
+  <circle cx="240" cy="230" r="168" fill="#E4D9FF"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <rect x="145" y="150" width="150" height="220" rx="16" fill="#fff" stroke="#1B1633" stroke-width="6"/>
   <text x="220" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="800" fill="#1B1633" letter-spacing="1">SCHOLARSHIP</text>
@@ -197,7 +197,7 @@ const POSTER_SCHOLARSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/
 
 const POSTER_RESOURCES = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#EAE7DC"/>
+  <circle cx="240" cy="230" r="168" fill="#DFDACB"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <rect x="120" y="200" width="70" height="140" rx="8" fill="#1B1633"/>
   <line x1="135" y1="230" x2="175" y2="230" stroke="#fff" stroke-width="4" opacity="0.5"/>
@@ -237,7 +237,7 @@ const POSTER_RESOURCES = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/20
 
 const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#FDF1DA"/>
+  <circle cx="240" cy="230" r="168" fill="#FBE3B8"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <g transform="translate(110 220)">
     <rect x="0" y="0" width="100" height="150" rx="12" fill="#fff" stroke="#1B1633" stroke-width="6"/>
@@ -298,6 +298,7 @@ const POSTER_TRACK = POSTERS;
 
 function PosterStack({ onQuiz }: { onQuiz: () => void }) {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const [gutter, setGutter] = useState(16);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -315,10 +316,19 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
     return () => observer.disconnect();
   }, []);
 
+  useLayoutEffect(() => {
+    const el = sectionRef.current;
+    if (!el?.parentElement) return;
+    const update = () => setGutter(el.parentElement!.getBoundingClientRect().left);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
   return (
     <div ref={sectionRef} className="stack-section">
-      <div className="stack-outer">
-        <div className="stack-track">
+      <div className="stack-outer" style={{ scrollPaddingLeft: gutter }}>
+        <div className="stack-track" style={{ paddingLeft: gutter, paddingRight: gutter }}>
           {POSTER_TRACK.map(({ svg, action }, i) => {
             const photo = <span className="s-photo block" dangerouslySetInnerHTML={{ __html: svg }} />;
             const arrow = (
@@ -341,6 +351,11 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
           })}
         </div>
       </div>
+      <div aria-hidden className="mt-4 flex justify-center gap-1.5">
+        {POSTERS.map((_, i) => (
+          <span key={i} className="h-1.5 w-1.5 rounded-full bg-foreground/20" />
+        ))}
+      </div>
       <style>{`
         .stack-section {
           width: 100vw;
@@ -356,9 +371,11 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
           -webkit-overflow-scrolling: touch;
           scroll-snap-type: x proximity;
           scrollbar-width: none;
+          mask-image: linear-gradient(to right, black 0%, black 94%, transparent 100%);
+          -webkit-mask-image: linear-gradient(to right, black 0%, black 94%, transparent 100%);
         }
         .stack-outer::-webkit-scrollbar { display: none; }
-        .stack-track { display: flex; width: max-content; gap: 24px; padding: 0 4px; }
+        .stack-track { display: flex; width: max-content; gap: 24px; }
         .m-item {
           position: relative;
           flex: 0 0 210px;
@@ -389,12 +406,12 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         .fan-3 { --fx: -42px; --fy: 7px; --fr: 3deg; z-index: 3; }
         .fan-4 { --fx: -127px; --fy: 20px; --fr: 9deg; z-index: 2; }
         .fan-5 { --fx: -212px; --fy: 32px; --fr: 15deg; z-index: 1; }
-        .s-photo { width: 100%; height: 263px; border-radius: 18px; overflow: hidden; border: 1.5px solid hsl(var(--border)); box-shadow: 0 4px 16px rgba(27, 22, 51, 0.1); }
+        .s-photo { width: 100%; height: 263px; border-radius: 22px; overflow: hidden; border: 1.5px solid hsl(var(--border)); box-shadow: 0 4px 16px rgba(27, 22, 51, 0.1); }
         .s-photo svg { width: 100%; height: 100%; display: block; }
         .poster-explore {
           position: absolute;
-          bottom: 8px;
-          right: 8px;
+          bottom: 10px;
+          right: 10px;
           z-index: 2;
           display: inline-flex;
           align-items: center;
@@ -419,7 +436,7 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         @media (max-width: 700px) {
           .m-item { flex-basis: 130px; width: 130px; }
           .s-photo { height: 163px; }
-          .poster-explore { bottom: 6px; right: 6px; padding: 3px 7px; font-size: 9px; gap: 2px; }
+          .poster-explore { bottom: 8px; right: 8px; padding: 3px 7px; font-size: 9px; gap: 2px; }
           .poster-explore svg { width: 9px; height: 9px; }
           .fan-0 { --fx: 132px; --fy: 20px; }
           .fan-1 { --fx: 79px; --fy: 12px; }
@@ -436,9 +453,10 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
 export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
   return (
     <section aria-label="Tools & scholarships" className="!mt-0 mx-auto w-full max-w-[960px]">
-      <div className="mb-8 border-t border-border px-4 pt-10 text-center sm:px-0 sm:pt-14">
-        <h2 className="font-display text-[clamp(26px,3.6vw,36px)] font-extrabold tracking-[-.02em]">Everything You Need to Succeed</h2>
-        <p className="mx-auto mt-3 max-w-[560px] text-[15.5px] text-muted-foreground">
+      <div className="mb-8 border-t-2 border-border pt-7 text-center sm:pt-10">
+        <span aria-hidden className="mx-auto block h-[3px] w-10 -translate-y-[calc(50%+1px)] rounded-full bg-marigold" />
+        <h2 className="text-balance font-display text-[clamp(22px,3.4vw,34px)] font-extrabold tracking-[-.02em]">Everything You Need to Succeed</h2>
+        <p className="mx-auto mt-3 max-w-[440px] text-[14.5px] leading-relaxed text-muted-foreground sm:max-w-[560px] sm:text-[15.5px]">
           Explore tools that help you choose the right college, discover opportunities, and make confident career decisions.
         </p>
       </div>

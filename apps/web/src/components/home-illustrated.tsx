@@ -85,16 +85,16 @@ export function HomeIllustrated() {
               <p className="mt-4 text-[14px] font-semibold uppercase tracking-[.25em] [@media(max-height:700px)]:mt-3">Start your search</p>
               <div className="mt-3 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3 lg:justify-start [@media(max-height:700px)]:mt-1 [@media(max-height:700px)]:gap-1">
                 <Button className="w-[70vw] max-w-[220px] gap-2 sm:w-auto" onClick={openQuiz}>
-                  <Building2 className="h-4 w-4" /> Find College
+                  <Building2 className="h-4 w-4" strokeWidth={1.75} /> Find College
                 </Button>
-                <Button asChild variant="outline" className="w-[70vw] max-w-[220px] gap-2 sm:w-auto">
+                <Button asChild variant="outline" className="gap-1.5 px-4 text-[13.5px]">
                   <Link href="/opportunities">
-                    <GraduationCap className="h-4 w-4" /> Explore Scholarship
+                    <GraduationCap className="h-4 w-4" strokeWidth={1.75} /> Explore Scholarship
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="w-[70vw] max-w-[220px] gap-2 sm:w-auto">
+                <Button asChild variant="outline" className="gap-1.5 px-4 text-[13.5px]">
                   <Link href="/opportunities">
-                    <Briefcase className="h-4 w-4" /> Find Internship
+                    <Briefcase className="h-4 w-4" strokeWidth={1.75} /> Find Internship
                   </Link>
                 </Button>
               </div>
