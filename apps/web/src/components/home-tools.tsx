@@ -294,9 +294,7 @@ const POSTERS = [
   { svg: POSTER_RESOURCES, action: { type: 'href' as const, href: '/communities' } },
   { svg: POSTER_EXPERT, action: { type: 'quiz' as const } },
 ];
-// Repeated 4x (scroll -25% per loop) so the track always spans well past even
-// very wide viewports — no dead background ever shows at either edge.
-const POSTER_TRACK = [...POSTERS, ...POSTERS, ...POSTERS, ...POSTERS];
+const POSTER_TRACK = POSTERS;
 
 function PosterStack({ onQuiz }: { onQuiz: () => void }) {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -351,8 +349,16 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
           background: hsl(var(--background));
           padding: 0 0 56px;
         }
-        .stack-outer { width: 100%; overflow: hidden; }
-        .stack-track { display: flex; width: max-content; gap: 24px; }
+        .stack-outer {
+          width: 100%;
+          overflow-x: auto;
+          overflow-y: hidden;
+          -webkit-overflow-scrolling: touch;
+          scroll-snap-type: x proximity;
+          scrollbar-width: none;
+        }
+        .stack-outer::-webkit-scrollbar { display: none; }
+        .stack-track { display: flex; width: max-content; gap: 24px; padding: 0 4px; }
         .m-item {
           position: relative;
           flex: 0 0 210px;
@@ -369,6 +375,7 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
           color: inherit;
           cursor: pointer;
           appearance: none;
+          scroll-snap-align: start;
         }
         .m-item:focus-visible { outline: 3px solid hsl(var(--primary)); outline-offset: 4px; border-radius: 18px; }
         .m-item .s-photo { transition: transform 0.25s ease, box-shadow 0.25s ease; }
@@ -405,17 +412,12 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         }
         .m-item:hover .poster-explore, .m-item:focus-visible .poster-explore { transform: translateY(-6px) scale(1.03); }
         .stack-section.started .m-item { animation: settle 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards; }
-        .stack-section.started .stack-track { animation: scroll-rtl 26s linear 2.5s infinite; }
         .poster-title { opacity: 0; }
         .stack-section.started .poster-title { animation: title-fade 0.6s ease 2s forwards; }
         @keyframes title-fade { to { opacity: 1; } }
         @keyframes settle {
           from { transform: translateX(var(--fx)) translateY(var(--fy)) rotate(var(--fr)); }
           to { transform: translateX(0) translateY(0) rotate(0deg); }
-        }
-        @keyframes scroll-rtl {
-          from { transform: translateX(0); }
-          to { transform: translateX(-25%); }
         }
         @media (max-width: 700px) {
           .m-item { flex-basis: 130px; width: 130px; }
