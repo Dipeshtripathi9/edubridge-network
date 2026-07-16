@@ -50,7 +50,7 @@ export function HomeIllustrated() {
                 className="h-full w-full object-cover object-[center_20%]"
               />
               {/* Decorative accents */}
-              <span aria-hidden className="pointer-events-none absolute left-4 top-4 grid grid-cols-4 gap-1.5 text-background/80 sm:left-6 sm:top-6">
+              <span aria-hidden className="pointer-events-none absolute left-4 top-4 grid grid-cols-4 gap-1.5 text-primary/40 sm:left-6 sm:top-6">
                 {Array.from({ length: 16 }).map((_, i) => (
                   <span key={i} className="h-1.5 w-1.5 rounded-full bg-current" />
                 ))}
