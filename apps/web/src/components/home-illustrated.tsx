@@ -76,9 +76,6 @@ export function HomeIllustrated() {
               <h1 className="mt-2 font-serif text-[clamp(28px,4.6vw,48px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em] [@media(max-height:700px)]:mt-1.5">
                 Success Network
               </h1>
-              <svg aria-hidden className="mx-auto -mt-1 h-4 w-[90px] text-marigold lg:mx-0 xl:mx-auto [@media(max-height:700px)]:hidden" viewBox="0 0 90 14" fill="none">
-                <path d="M2 8 C 12 2, 20 2, 28 8 C 36 14, 44 14, 52 8 C 60 2, 68 2, 76 8 C 80 11, 84 11, 88 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
               <p className="mx-auto mt-3 max-w-[540px] text-[16px] leading-relaxed text-muted-foreground lg:mx-0 xl:mx-auto [@media(max-height:700px)]:mt-2">
                 Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
               </p>
