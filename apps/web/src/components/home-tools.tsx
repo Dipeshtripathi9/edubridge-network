@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronRight, IndianRupee } from 'lucide-react';
 
@@ -300,22 +300,6 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [gutter, setGutter] = useState(16);
 
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('started');
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.4 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
   useLayoutEffect(() => {
     const el = sectionRef.current;
     if (!el?.parentElement) return;
@@ -331,7 +315,7 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
         <div className="stack-track" style={{ paddingLeft: gutter, paddingRight: gutter }}>
           {POSTER_TRACK.map(({ svg, action }, i) => {
             const photo = <span className="s-photo block" dangerouslySetInnerHTML={{ __html: svg }} />;
-            const className = `m-item fan-${i % 6}`;
+            const className = 'm-item';
             return action.type === 'quiz' ? (
               <button key={i} type="button" className={className} onClick={onQuiz}>
                 {photo}
@@ -373,7 +357,6 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
           position: relative;
           flex: 0 0 210px;
           width: 210px;
-          transform: translateX(var(--fx)) translateY(var(--fy)) rotate(var(--fr));
           display: block;
           border: 0;
           padding: 0;
@@ -393,28 +376,11 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
           transform: translateY(-6px) scale(1.03);
           box-shadow: 0 16px 32px rgba(27, 22, 51, 0.24);
         }
-        .fan-0 { --fx: 212px; --fy: 32px; --fr: -15deg; z-index: 1; }
-        .fan-1 { --fx: 127px; --fy: 20px; --fr: -9deg; z-index: 2; }
-        .fan-2 { --fx: 42px; --fy: 7px; --fr: -3deg; z-index: 3; }
-        .fan-3 { --fx: -42px; --fy: 7px; --fr: 3deg; z-index: 3; }
-        .fan-4 { --fx: -127px; --fy: 20px; --fr: 9deg; z-index: 2; }
-        .fan-5 { --fx: -212px; --fy: 32px; --fr: 15deg; z-index: 1; }
         .s-photo { width: 100%; height: 263px; border-radius: 22px; overflow: hidden; border: 1.5px solid hsl(var(--border)); box-shadow: 0 4px 16px rgba(27, 22, 51, 0.1); }
         .s-photo svg { width: 100%; height: 100%; display: block; }
-        .stack-section.started .m-item { animation: settle 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards; }
-        @keyframes settle {
-          from { transform: translateX(var(--fx)) translateY(var(--fy)) rotate(var(--fr)); }
-          to { transform: translateX(0) translateY(0) rotate(0deg); }
-        }
         @media (max-width: 700px) {
           .m-item { flex-basis: 130px; width: 130px; }
           .s-photo { height: 163px; }
-          .fan-0 { --fx: 132px; --fy: 20px; }
-          .fan-1 { --fx: 79px; --fy: 12px; }
-          .fan-2 { --fx: 26px; --fy: 4px; }
-          .fan-3 { --fx: -26px; --fy: 4px; }
-          .fan-4 { --fx: -79px; --fy: 12px; }
-          .fan-5 { --fx: -132px; --fy: 20px; }
         }
       `}</style>
     </div>
