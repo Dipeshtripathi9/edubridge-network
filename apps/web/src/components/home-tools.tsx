@@ -390,10 +390,10 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
 export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
   return (
     <section aria-label="Tools & scholarships" className="!mt-0 mx-auto w-full max-w-[960px]">
-      <div className="mb-8 border-t-2 border-border pt-7 text-center sm:pt-10">
+      <div className="mb-8 border-t-2 border-border pt-7 text-center sm:pt-10 [@media(max-height:700px)]:mb-4 [@media(max-height:700px)]:pt-4">
         <span aria-hidden className="mx-auto block h-[3px] w-10 -translate-y-[calc(50%+1px)] rounded-full bg-marigold" />
         <h2 className="text-balance font-display text-[clamp(22px,3.4vw,34px)] font-extrabold tracking-[-.02em]">Everything You Need to Succeed</h2>
-        <p className="mx-auto mt-3 max-w-[440px] text-[14.5px] leading-relaxed text-muted-foreground sm:max-w-[560px] sm:text-[15.5px]">
+        <p className="mx-auto mt-3 max-w-[440px] text-[14.5px] leading-relaxed text-muted-foreground sm:max-w-[560px] sm:text-[15.5px] [@media(max-height:700px)]:mt-1.5">
           Explore tools that help you choose the right college, discover opportunities, and make confident career decisions.
         </p>
       </div>
