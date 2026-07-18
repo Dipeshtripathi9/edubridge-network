@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ArrowUpRight, GraduationCap, Home, Users } from 'lucide-react';
@@ -29,6 +29,13 @@ export function FloatingConnections() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const lastY = useRef(0);
+
+  useLayoutEffect(() => {
+    // Very short viewports (e.g. in-app browser chrome eating vertical space)
+    // can fit enough content above the fold to sit under the bar before the
+    // user ever scrolls — start collapsed there so nothing is covered at load.
+    if (window.innerHeight < 700) setCollapsed(true);
+  }, []);
 
   useEffect(() => {
     lastY.current = window.scrollY;

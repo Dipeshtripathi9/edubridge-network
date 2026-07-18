@@ -21,7 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen flex-col">
       <Topbar />
       <VerifyBanner />
-      <main key={pathname} className="animate-page flex-1 p-4 md:p-6">
+      <main key={pathname} className="animate-page flex-1 p-4 pb-24 md:p-6">
         {children}
       </main>
       <FloatingConnections />
