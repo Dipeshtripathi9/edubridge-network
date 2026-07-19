@@ -48,11 +48,11 @@ export function HomeIllustrated() {
                 src="/hero-students-group.webp"
                 alt="Four students collaborating on a laptop"
                 className="h-full w-full object-cover object-[center_75%]"
-                style={{
-                  maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
-                  WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
-                }}
               />
+              {/* Edge fades — plain gradient overlays (not mask-image) for reliable
+                  rendering across mobile browsers/in-app webviews */}
+              <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-background to-transparent sm:w-14" />
+              <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:w-14" />
               {/* Decorative accents */}
               <span aria-hidden className="pointer-events-none absolute left-4 top-4 grid grid-cols-4 gap-1.5 text-primary/40 sm:left-6 sm:top-6">
                 {Array.from({ length: 16 }).map((_, i) => (
