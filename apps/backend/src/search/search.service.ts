@@ -170,23 +170,6 @@ export class SearchService {
           })),
         };
       }
-      case 'community': {
-        const where = { OR: [{ name: like }, { topic: like }] };
-        const [rows, total] = await Promise.all([
-          this.prisma.community.findMany({ where, skip, take, orderBy: { memberCount: 'desc' } }),
-          this.prisma.community.count({ where }),
-        ]);
-        return {
-          total,
-          items: rows.map((c) => ({
-            type,
-            id: c.id,
-            title: c.name,
-            subtitle: c.type === 'COLLEGE' ? 'College community' : c.topic,
-            url: `/communities/${c.slug}`,
-          })),
-        };
-      }
       case 'user': {
         // Only surface active users — don't keep banned/suspended/unverified
         // accounts discoverable through search.
@@ -288,9 +271,8 @@ export class SearchService {
     const docs: Array<SearchHit & { entityType: SearchType; entityId: string }> = [];
     const push = (h: SearchHit) => docs.push({ ...h, entityType: h.type, entityId: h.id });
 
-    const [colleges, communities, profiles, opportunities, resources, reviews] = await Promise.all([
+    const [colleges, profiles, opportunities, resources, reviews] = await Promise.all([
       this.prisma.college.findMany(),
-      this.prisma.community.findMany(),
       // Only index active, non-deleted users so moderation applies to the ES path too.
       this.prisma.profile.findMany({
         where: { user: { status: 'ACTIVE', deletedAt: null } },
@@ -303,9 +285,6 @@ export class SearchService {
 
     colleges.forEach((c) =>
       push({ type: 'college', id: c.id, title: c.name, subtitle: [c.city, c.state].filter(Boolean).join(', '), url: `/reviews/${c.slug}` }),
-    );
-    communities.forEach((c) =>
-      push({ type: 'community', id: c.id, title: c.name, subtitle: c.topic ?? 'College community', body: c.description, url: `/communities/${c.slug}` }),
     );
     profiles.forEach((p) =>
       push({ type: 'user', id: p.userId, title: p.fullName, subtitle: p.college?.name ?? p.username, url: null }),

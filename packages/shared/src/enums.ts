@@ -21,30 +21,6 @@ export enum AuthProvider {
   PHONE = 'PHONE',
 }
 
-export enum CommunityType {
-  COLLEGE = 'COLLEGE',
-  TOPIC = 'TOPIC',
-}
-
-export enum CommunityRole {
-  MEMBER = 'MEMBER',
-  MODERATOR = 'MODERATOR',
-  ADMIN = 'ADMIN',
-}
-
-export enum CommunityVisibility {
-  PUBLIC = 'PUBLIC',
-  PRIVATE = 'PRIVATE',
-  RESTRICTED = 'RESTRICTED',
-}
-
-export enum PostType {
-  TEXT = 'TEXT',
-  POLL = 'POLL',
-  RESOURCE = 'RESOURCE',
-  LINK = 'LINK',
-}
-
 export enum OpportunityType {
   INTERNSHIP = 'INTERNSHIP',
   SCHOLARSHIP = 'SCHOLARSHIP',

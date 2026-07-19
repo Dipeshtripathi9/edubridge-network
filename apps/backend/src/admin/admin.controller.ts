@@ -80,7 +80,7 @@ export class AdminController {
 
   // ---- Content moderation ----
   @Delete('content')
-  @ApiOperation({ summary: 'Remove a post / comment / review / resource' })
+  @ApiOperation({ summary: 'Remove a review / resource' })
   moderate(@CurrentUser('sub') adminId: string, @Body() dto: ModerateContentDto) {
     return this.admin.moderateContent(adminId, dto);
   }

@@ -1,4 +1,4 @@
-import { CommunityType, PostType, UserRole, UserStatus } from './enums';
+import { UserRole, UserStatus } from './enums';
 
 export interface ApiResponse<T> {
   success: true;
@@ -55,36 +55,3 @@ export interface AuthResult {
   user: PublicUser;
 }
 
-export interface CommunitySummary {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string | null;
-  type: CommunityType;
-  topic?: string | null;
-  memberCount: number;
-  postCount: number;
-  iconUrl?: string | null;
-  bannerUrl?: string | null;
-  isMember?: boolean;
-}
-
-export interface PostSummary {
-  id: string;
-  type: PostType;
-  title?: string | null;
-  body: string;
-  hashtags: string[];
-  likeCount: number;
-  commentCount: number;
-  shareCount: number;
-  saveCount: number;
-  likedByMe?: boolean;
-  savedByMe?: boolean;
-  createdAt: string;
-  author: {
-    id: string;
-    reputationPoints?: number;
-    profile?: { fullName: string; username?: string | null; avatarUrl?: string | null } | null;
-  };
-}

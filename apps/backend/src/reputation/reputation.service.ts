@@ -104,7 +104,6 @@ export class ReputationService {
 
     if (pts >= 50 && !have.has('contributor')) toAward.push('contributor');
     if (pts >= 200 && !have.has('campus_expert')) toAward.push('campus_expert');
-    if (pts >= 1000 && !have.has('community_leader')) toAward.push('community_leader');
 
     if (!have.has('placement_expert') && pts >= 50) {
       const placementReviews = await this.prisma.review.count({

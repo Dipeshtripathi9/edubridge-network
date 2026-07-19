@@ -47,57 +47,6 @@ enum CollegeVerificationStatus {
   REJECTED
 }
 
-enum CommunityType {
-  COLLEGE
-  TOPIC
-  STARTUP
-}
-
-enum CommunityRole {
-  MEMBER
-  MODERATOR
-  ADMIN
-  CAMPUS_LEAD
-  OPPORTUNITY_HEAD
-  STUDENT_RELATIONS_HEAD
-}
-
-enum CommunityVisibility {
-  PUBLIC
-  PRIVATE
-  RESTRICTED
-}
-
-enum PostType {
-  TEXT
-  POLL
-  RESOURCE
-  LINK
-}
-
-enum PostKind {
-  DISCUSSION
-  QUESTION
-  PLACEMENT_EXPERIENCE
-  INTERNSHIP_EXPERIENCE
-  RESOURCE_SHARE
-  POLL
-  ANNOUNCEMENT
-}
-
-enum PostStatus {
-  PUBLISHED
-  HIDDEN
-  REMOVED
-  PENDING_REVIEW
-}
-
-enum ReactionType {
-  LIKE
-  POST
-  COMMENT
-}
-
 enum OpportunityType {
   INTERNSHIP
   SCHOLARSHIP
@@ -252,13 +201,6 @@ model User {
   otpVerifications   OtpVerification[]
   oauthAccounts      OAuthAccount[]
 
-  communityMembers CommunityMember[]
-  posts            Post[]
-  comments         Comment[]
-  reactions        Reaction[]
-  bookmarks        Bookmark[]
-  pollVotes        PollVote[]
-
   resources         Resource[]
   resourceDownloads ResourceDownload[]
   resourceRatings   ResourceRating[]
@@ -280,22 +222,15 @@ model User {
 
   chatParticipants ChatParticipant[]
   messages         Message[]
-  poolMemberships  PoolMember[]
-  poolLikes        PoolLike[]
-  helpRequests     HelpRequest[]
   complaints       Complaint[]
 
   reportsMade    Report[]   @relation("Reporter")
   reportsAgainst Report[]   @relation("ReportedUser")
   auditLogs      AuditLog[]
 
-  verificationRequests   VerificationRequest[]
-  headApplications       CommunityHeadApplication[]
-  adCards                AdCard[]
-  discountClaims         DiscountClaim[]
-  referralsPosted        Referral[]
-  managerSupportRequests ManagerSupportRequest[]
-  profileLead            ProfileLead?
+  verificationRequests VerificationRequest[]
+  referralsPosted      Referral[]
+  profileLead          ProfileLead?
 
   @@index([status])
   @@index([role])
@@ -474,7 +409,6 @@ model College {
   updatedAt DateTime @updatedAt
 
   profiles             Profile[]
-  communities          Community[]
   reviews              Review[]
   cutoffs              CollegeCutoff[]
   transfersFrom        Transfer[]            @relation("TransferFromCollege")
@@ -510,230 +444,6 @@ model CollegeCutoff {
   @@index([collegeId, year])
   @@index([branch, category])
   @@map("college_cutoffs")
-}
-
-// ============================================================
-// MODULE 1: COMMUNITIES
-// ============================================================
-
-model Community {
-  id          String              @id @default(cuid())
-  name        String
-  slug        String              @unique
-  description String?
-  type        CommunityType
-  visibility  CommunityVisibility @default(PUBLIC)
-  iconUrl     String?
-  bannerUrl   String?
-
-  collegeId String?
-  college   College? @relation(fields: [collegeId], references: [id])
-  topic     String? // for TOPIC communities: AI, DSA, Startups...
-
-  memberCount Int @default(0)
-  postCount   Int @default(0)
-
-  // Per-community hiring for head/manager posts (admin-controlled)
-  hiringOpen Boolean @default(false)
-  hiringNote String?
-
-  createdById String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  members          CommunityMember[]
-  posts            Post[]
-  chats            Chat[]
-  headApplications CommunityHeadApplication[]
-  opportunities    Opportunity[]
-  resources        Resource[]
-  pools            Pool[]
-  reviews          Review[]
-  helpRequests     HelpRequest[]
-  complaints       Complaint[]
-  adCards          AdCard[]
-  discountClaim    DiscountClaim?
-
-  @@index([type])
-  @@index([collegeId])
-  @@index([memberCount(sort: Desc)])
-  @@map("communities")
-}
-
-model CommunityHeadApplication {
-  id            String                    @id @default(cuid())
-  userId        String
-  user          User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  communityId   String
-  community     Community                 @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  requestedRole CommunityRole
-  status        VerificationRequestStatus @default(PENDING)
-  pitch         String?
-  note          String?
-  reviewedById  String?
-  reviewedAt    DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([status, createdAt])
-  @@index([userId])
-  @@map("community_head_applications")
-}
-
-model CommunityMember {
-  id          String        @id @default(cuid())
-  communityId String
-  community   Community     @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  userId      String
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role        CommunityRole @default(MEMBER)
-  joinedAt    DateTime      @default(now())
-  mutedUntil  DateTime?
-  bannedAt    DateTime?
-
-  @@unique([communityId, userId])
-  @@index([userId])
-  @@index([communityId, role])
-  @@map("community_members")
-}
-
-model Post {
-  id          String    @id @default(cuid())
-  communityId String
-  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  authorId    String
-  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  type        PostType   @default(TEXT)
-  kind        PostKind   @default(DISCUSSION)
-  status      PostStatus @default(PUBLISHED)
-  isPinned    Boolean    @default(false)
-  title       String?
-  body        String
-  attachments String[] // S3 keys
-  linkUrl     String?
-  hashtags    String[]
-  mentions    String[] // userIds
-
-  likeCount    Int @default(0)
-  commentCount Int @default(0)
-  shareCount   Int @default(0)
-  saveCount    Int @default(0)
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  comments  Comment[]
-  reactions Reaction[]
-  bookmarks Bookmark[]
-  poll      Poll?
-
-  @@index([communityId, createdAt(sort: Desc)])
-  @@index([authorId])
-  @@index([status])
-  @@index([hashtags])
-  @@map("posts")
-}
-
-model Comment {
-  id       String    @id @default(cuid())
-  postId   String
-  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  authorId String
-  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  parentId String?
-  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies  Comment[] @relation("CommentReplies")
-
-  body      String
-  mentions  String[]
-  likeCount Int      @default(0)
-  isHelpful Boolean  @default(false)
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  reactions Reaction[]
-
-  @@index([postId, createdAt])
-  @@index([authorId])
-  @@index([parentId])
-  @@map("comments")
-}
-
-model Reaction {
-  id        String       @id @default(cuid())
-  userId    String
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      ReactionType @default(LIKE)
-  postId    String?
-  post      Post?        @relation(fields: [postId], references: [id], onDelete: Cascade)
-  commentId String?
-  comment   Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  createdAt DateTime     @default(now())
-
-  @@unique([userId, postId])
-  @@unique([userId, commentId])
-  @@index([postId])
-  @@index([commentId])
-  @@map("reactions")
-}
-
-model Bookmark {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@unique([userId, postId])
-  @@index([userId])
-  @@map("bookmarks")
-}
-
-model Poll {
-  id        String       @id @default(cuid())
-  postId    String       @unique
-  post      Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
-  question  String
-  multiple  Boolean      @default(false)
-  expiresAt DateTime?
-  options   PollOption[]
-  votes     PollVote[]
-  createdAt DateTime     @default(now())
-
-  @@map("polls")
-}
-
-model PollOption {
-  id        String     @id @default(cuid())
-  pollId    String
-  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  text      String
-  voteCount Int        @default(0)
-  votes     PollVote[]
-
-  @@index([pollId])
-  @@map("poll_options")
-}
-
-model PollVote {
-  id           String     @id @default(cuid())
-  pollId       String
-  poll         Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  pollOptionId String
-  pollOption   PollOption @relation(fields: [pollOptionId], references: [id], onDelete: Cascade)
-  userId       String
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime   @default(now())
-
-  @@unique([pollId, userId, pollOptionId])
-  @@index([pollOptionId])
-  @@map("poll_votes")
 }
 
 // ============================================================
@@ -809,8 +519,6 @@ model Opportunity {
   createdBy      User?                     @relation("OpportunityCreator", fields: [createdById], references: [id])
   collegeId      String?
   college        College?                  @relation(fields: [collegeId], references: [id])
-  communityId    String?
-  community      Community?                @relation(fields: [communityId], references: [id])
   approvalStatus VerificationRequestStatus @default(APPROVED)
   isActive       Boolean                   @default(true)
   sourceSystem   String?
@@ -824,7 +532,6 @@ model Opportunity {
   @@index([isActive])
   @@index([tags])
   @@index([collegeId])
-  @@index([communityId, approvalStatus])
   @@map("opportunities")
 }
 
@@ -849,20 +556,18 @@ model Application {
 // ============================================================
 
 model Review {
-  id          String         @id @default(cuid())
-  collegeId   String?
-  college     College?       @relation(fields: [collegeId], references: [id], onDelete: Cascade)
-  communityId String?
-  community   Community?     @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  authorId    String
-  author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  category    ReviewCategory
-  rating      Int // 1-5
-  title       String?
-  body        String
-  isVerified  Boolean        @default(false) // only verified college students
-  upvotes     Int            @default(0)
-  downvotes   Int            @default(0)
+  id         String         @id @default(cuid())
+  collegeId  String?
+  college    College?       @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  authorId   String
+  author     User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category   ReviewCategory
+  rating     Int // 1-5
+  title      String?
+  body       String
+  isVerified Boolean        @default(false) // only verified college students
+  upvotes    Int            @default(0)
+  downvotes  Int            @default(0)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -871,9 +576,7 @@ model Review {
   votes ReviewVote[]
 
   @@unique([collegeId, authorId, category])
-  @@unique([communityId, authorId, category])
   @@index([collegeId, category])
-  @@index([communityId, category])
   @@index([upvotes(sort: Desc)])
   @@map("reviews")
 }
@@ -912,8 +615,6 @@ model Resource {
   courseTag   String?
   collegeId   String?
   college     College?     @relation(fields: [collegeId], references: [id])
-  communityId String?
-  community   Community?   @relation(fields: [communityId], references: [id])
   isFeatured  Boolean      @default(false)
 
   downloadCount Int   @default(0)
@@ -1052,121 +753,20 @@ model ResourceBookmark {
 // ============================================================
 
 model Chat {
-  id            String     @id @default(cuid())
+  id            String    @id @default(cuid())
   type          ChatType
-  communityId   String?
-  community     Community? @relation(fields: [communityId], references: [id], onDelete: Cascade)
   title         String?
   lastMessageAt DateTime?
-  createdAt     DateTime   @default(now())
+  createdAt     DateTime  @default(now())
 
   participants ChatParticipant[]
   messages     Message[]
-  pool         Pool?
 
-  @@index([communityId])
   @@index([lastMessageAt(sort: Desc)])
   @@map("chats")
 }
 
-model Pool {
-  id          String       @id @default(cuid())
-  communityId String
-  community   Community    @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  title       String
-  description String?
-  maxMembers  Int          @default(10)
-  createdById String
-  chatId      String       @unique
-  chat        Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  likeCount   Int          @default(0)
-  shareCount  Int          @default(0)
-  createdAt   DateTime     @default(now())
-  members     PoolMember[]
-  likes       PoolLike[]
-
-  @@index([communityId, createdAt])
-  @@map("pools")
-}
-
-model PoolLike {
-  id        String   @id @default(cuid())
-  poolId    String
-  pool      Pool     @relation(fields: [poolId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@unique([poolId, userId])
-  @@index([userId])
-  @@map("pool_likes")
-}
-
-model PoolMember {
-  id       String   @id @default(cuid())
-  poolId   String
-  pool     Pool     @relation(fields: [poolId], references: [id], onDelete: Cascade)
-  userId   String
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  joinedAt DateTime @default(now())
-
-  @@unique([poolId, userId])
-  @@index([userId])
-  @@map("pool_members")
-}
-
-model HelpRequest {
-  id           String    @id @default(cuid())
-  communityId  String
-  community    Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  userId       String
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  body         String
-  status       String    @default("OPEN") // OPEN | RESOLVED
-  resolvedById String?
-  resolvedAt   DateTime?
-  createdAt    DateTime  @default(now())
-
-  @@index([communityId, status, createdAt])
-  @@map("help_requests")
-}
-
-// Advertisement cards a community head (or admin) books to pin in their community.
-// Booked for a future day (before it starts), runs for 7 days; quota per booker.
-model AdCard {
-  id           String    @id @default(cuid())
-  communityId  String
-  community    Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  createdById  String
-  createdBy    User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  title        String
-  body         String?
-  imageUrl     String?
-  linkUrl      String?
-  scheduledFor DateTime // the day the ad starts running
-  expiresAt    DateTime // scheduledFor + 7 days
-  createdAt    DateTime  @default(now())
-
-  @@index([communityId, scheduledFor])
-  @@index([createdById, scheduledFor])
-  @@map("ad_cards")
-}
-
-// Perk: a head claims the 45%-off website-development offer once their community
-// crosses 600 members. One claim per community; admin follows up.
-model DiscountClaim {
-  id          String    @id @default(cuid())
-  communityId String    @unique
-  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  claimedById String
-  claimedBy   User      @relation(fields: [claimedById], references: [id], onDelete: Cascade)
-  status      String    @default("PENDING") // PENDING | CONTACTED | DONE
-  createdAt   DateTime  @default(now())
-
-  @@map("discount_claims")
-}
-
-// Perk: career referral opportunities surfaced to community leaders.
+// Perk: career referral opportunities, open to every user.
 model Referral {
   id          String   @id @default(cuid())
   role        String
@@ -1308,23 +908,6 @@ model EmailLog {
   @@map("email_logs")
 }
 
-// A community manager (head/mod) reaching out to the platform admin team — for a
-// referral, personal mentorship, or any question. Only community managers can
-// create these; admins read & resolve them.
-model ManagerSupportRequest {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  topic     String // REFERRAL | MENTORSHIP | GENERAL
-  message   String
-  status    String   @default("OPEN") // OPEN | RESOLVED
-  createdAt DateTime @default(now())
-
-  @@index([status, createdAt])
-  @@index([userId])
-  @@map("manager_support_requests")
-}
-
 model ChatParticipant {
   id         String    @id @default(cuid())
   chatId     String
@@ -1437,14 +1020,12 @@ model Report {
   reason         String
   details        String?
   status         ReportStatus     @default(OPEN)
-  communityId    String?
   resolvedById   String?
   resolvedAt     DateTime?
   createdAt      DateTime         @default(now())
 
   @@index([status, createdAt])
   @@index([targetType, targetId])
-  @@index([communityId, status])
   @@map("reports")
 }
 
@@ -1503,16 +1084,14 @@ model Setting {
 }
 
 model Complaint {
-  id           String     @id @default(cuid())
+  id           String    @id @default(cuid())
   userId       String
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  communityId  String?
-  community    Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   body         String
-  status       String     @default("OPEN") // OPEN | RESOLVED
+  status       String    @default("OPEN") // OPEN | RESOLVED
   resolvedById String?
   resolvedAt   DateTime?
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime  @default(now())
 
   @@index([status, createdAt])
   @@map("complaints")

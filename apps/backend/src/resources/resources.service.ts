@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { buildPaginatedResult, PaginationDto } from '../common/dto/pagination.dto';
-import { isPlatformAdmin, roleHasCapability } from '../communities/community-permissions';
+import { isPlatformAdmin } from '../common/utils/platform-admin';
 import {
   CreateResourceDto,
   RateResourceDto,
@@ -33,7 +33,7 @@ export class ResourcesService {
     return this.storage.getUploadUrl(key, dto.contentType);
   }
 
-  async create(userId: string, dto: CreateResourceDto, role = 'STUDENT') {
+  async create(userId: string, dto: CreateResourceDto) {
     if (!dto.externalUrl && !dto.fileKey) {
       throw new BadRequestException('Provide a link (externalUrl) or an uploaded file');
     }
@@ -42,13 +42,6 @@ export class ResourcesService {
     // then presign a download for it via GET /resources/:id/download.
     if (dto.fileKey && !dto.fileKey.startsWith('resources/')) {
       throw new BadRequestException('Invalid file key');
-    }
-    // Must be a member to share a resource in a community (platform admins exempt).
-    if (dto.communityId && !isPlatformAdmin(role)) {
-      const member = await this.prisma.communityMember.findUnique({
-        where: { communityId_userId: { communityId: dto.communityId, userId } },
-      });
-      if (!member) throw new ForbiddenException('Join the community to share resources');
     }
     const resource = await this.prisma.resource.create({
       data: {
@@ -64,7 +57,6 @@ export class ResourcesService {
         collegeTag: dto.collegeTag,
         courseTag: dto.courseTag,
         collegeId: dto.collegeId,
-        communityId: dto.communityId,
       },
       include: { uploader: UPLOADER_SELECT },
     });
@@ -76,12 +68,12 @@ export class ResourcesService {
   }
 
   async list(query: ResourceQueryDto, userId?: string) {
-    // A specific community or college view is "scoped" and shows everything in it.
+    // A specific college view is "scoped" and shows everything in it.
     // The global feed (no scope):
-    //  - always includes topic/startup (and college-less) resources;
+    //  - always includes college-less resources;
     //  - hides OTHER colleges' resources;
     //  - adds the viewer's OWN college resources only if they're a VERIFIED student.
-    const scoped = !!(query.communityId || query.collegeId);
+    const scoped = !!query.collegeId;
 
     let verifiedCollegeId: string | null = null;
     if (!scoped && userId) {
@@ -92,11 +84,8 @@ export class ResourcesService {
       if (profile?.collegeVerification === 'VERIFIED') verifiedCollegeId = profile.collegeId ?? null;
     }
 
-    // Topic/startup + college-less resources (visible to everyone).
-    const globalOnly: Prisma.ResourceWhereInput = {
-      collegeId: null,
-      OR: [{ communityId: null }, { community: { type: { not: 'COLLEGE' } } }],
-    };
+    // College-less resources (visible to everyone).
+    const globalOnly: Prisma.ResourceWhereInput = { collegeId: null };
     const where: Prisma.ResourceWhereInput = {
       deletedAt: null,
       ...(query.type ? { type: query.type } : {}),
@@ -104,25 +93,11 @@ export class ResourcesService {
       ...(query.q ? { title: { contains: query.q, mode: 'insensitive' } } : {}),
     };
 
-    // Scoping: a COLLEGE community/college hub shows its own resources PLUS everything
-    // globally visible; an interest/startup community shows only its own.
+    // Scoping: a college hub shows its own resources PLUS everything globally visible.
     if (query.collegeId) {
       where.OR = [{ collegeId: query.collegeId }, globalOnly];
-    } else if (query.communityId) {
-      const comm = await this.prisma.community.findUnique({
-        where: { id: query.communityId },
-        select: { type: true },
-      });
-      where.OR =
-        comm?.type === 'COLLEGE'
-          ? [{ communityId: query.communityId }, globalOnly]
-          : [{ communityId: query.communityId }];
     } else if (verifiedCollegeId) {
-      where.OR = [
-        globalOnly,
-        { collegeId: verifiedCollegeId },
-        { community: { type: 'COLLEGE', collegeId: verifiedCollegeId } },
-      ];
+      where.OR = [globalOnly, { collegeId: verifiedCollegeId }];
     } else {
       where.OR = [globalOnly];
     }
@@ -336,7 +311,7 @@ export class ResourcesService {
   async remove(id: string, userId: string, role: string) {
     const resource = await this.prisma.resource.findUnique({ where: { id } });
     if (!resource || resource.deletedAt) throw new NotFoundException('Resource not found');
-    if (resource.uploaderId !== userId && !(await this.canModerate(resource.communityId, userId, role))) {
+    if (resource.uploaderId !== userId && !isPlatformAdmin(role) && role !== 'MODERATOR') {
       throw new ForbiddenException('Cannot delete this resource');
     }
     await this.prisma.resource.update({ where: { id }, data: { deletedAt: new Date() } });
@@ -346,15 +321,5 @@ export class ResourcesService {
       refId: id,
     });
     return { deleted: true };
-  }
-
-  /** Platform admins/mods, or a manager of the item's community, may moderate it. */
-  private async canModerate(communityId: string | null, userId: string, role: string): Promise<boolean> {
-    if (isPlatformAdmin(role) || role === 'MODERATOR') return true;
-    if (!communityId) return false;
-    const member = await this.prisma.communityMember.findUnique({
-      where: { communityId_userId: { communityId, userId } },
-    });
-    return roleHasCapability(member?.role, 'MODERATE');
   }
 }

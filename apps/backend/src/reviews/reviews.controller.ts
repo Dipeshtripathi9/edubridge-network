@@ -2,12 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/commo
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { ReviewsService } from './reviews.service';
-import {
-  CreateCommunityReviewDto,
-  CreateReviewDto,
-  ReviewQueryDto,
-  VoteReviewDto,
-} from './dto/review.dto';
+import { CreateReviewDto, ReviewQueryDto, VoteReviewDto } from './dto/review.dto';
 import { CurrentUser, JwtUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -44,34 +39,6 @@ export class ReviewsController {
   @ApiOperation({ summary: 'Rating summary by category' })
   summary(@Param('collegeId') collegeId: string) {
     return this.reviews.summary(collegeId);
-  }
-
-  @Post('communities/:slug/reviews')
-  @ApiOperation({ summary: 'Review a community’s managers (members only)' })
-  createCommunityReview(
-    @Param('slug') slug: string,
-    @CurrentUser('sub') userId: string,
-    @Body() dto: CreateCommunityReviewDto,
-  ) {
-    return this.reviews.createCommunityReview(userId, slug, dto);
-  }
-
-  @Public()
-  @Get('communities/:slug/reviews')
-  @ApiOperation({ summary: 'List a community’s manager reviews' })
-  listCommunityReviews(
-    @Param('slug') slug: string,
-    @Query() query: ReviewQueryDto,
-    @CurrentUser('sub') userId?: string,
-  ) {
-    return this.reviews.listCommunityReviews(slug, query, userId);
-  }
-
-  @Public()
-  @Get('communities/:slug/reviews/summary')
-  @ApiOperation({ summary: 'Community manager rating summary' })
-  communitySummary(@Param('slug') slug: string) {
-    return this.reviews.communitySummary(slug);
   }
 
   @Post('reviews/:id/vote')

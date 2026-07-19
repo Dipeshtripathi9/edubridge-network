@@ -11,9 +11,9 @@ export class ReferralsController {
   constructor(private readonly referrals: ReferralsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Career referrals (leaders & admins)' })
-  list(@CurrentUser('sub') userId: string, @CurrentUser('role') role: string) {
-    return this.referrals.list({ sub: userId, role });
+  @ApiOperation({ summary: 'Career referrals (open to every authenticated user)' })
+  list() {
+    return this.referrals.list();
   }
 
   @Post()

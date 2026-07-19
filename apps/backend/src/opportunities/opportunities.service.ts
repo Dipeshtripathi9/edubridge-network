@@ -3,11 +3,7 @@ import { OpportunityType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
-import {
-  CommunityCapability,
-  isPlatformAdmin,
-  roleHasCapability,
-} from '../communities/community-permissions';
+import { isPlatformAdmin } from '../common/utils/platform-admin';
 import {
   ApplicationDto,
   CreateOpportunityDto,
@@ -37,10 +33,10 @@ export class OpportunitiesService {
 
   async list(query: OpportunityQueryDto, userId?: string) {
     // Global feed scoping (mirrors resources):
-    //  - everyone sees topic/startup (and college-less) opportunities;
+    //  - everyone sees college-less opportunities;
     //  - other colleges' opportunities stay hidden;
     //  - a VERIFIED student also sees THEIR OWN college's opportunities.
-    const scoped = !!(query.communityId || query.collegeId);
+    const scoped = !!query.collegeId;
 
     let verifiedCollegeId: string | null = null;
     if (!scoped && userId) {
@@ -51,18 +47,9 @@ export class OpportunitiesService {
       if (profile?.collegeVerification === 'VERIFIED') verifiedCollegeId = profile.collegeId ?? null;
     }
 
-    const globalOnly: Prisma.OpportunityWhereInput = {
-      collegeId: null,
-      OR: [{ communityId: null }, { community: { type: { not: 'COLLEGE' } } }],
-    };
+    const globalOnly: Prisma.OpportunityWhereInput = { collegeId: null };
     const scopeWhere: Prisma.OpportunityWhereInput = verifiedCollegeId
-      ? {
-          OR: [
-            globalOnly,
-            { collegeId: verifiedCollegeId },
-            { community: { type: 'COLLEGE', collegeId: verifiedCollegeId } },
-          ],
-        }
+      ? { OR: [globalOnly, { collegeId: verifiedCollegeId }] }
       : globalOnly;
 
     // Use AND so the search-OR and the scope-OR don't overwrite each other.
@@ -77,23 +64,9 @@ export class OpportunitiesService {
     }
     if (!scoped) and.push(scopeWhere);
 
-    // Scoping rules:
-    //  - A COLLEGE community / college hub shows its own opportunities PLUS everything
-    //    globally visible (truly-global + interest/startup-community opportunities).
-    //  - An interest/startup community shows ONLY its own (category-specific) ones.
+    // A college hub shows its own opportunities PLUS everything globally visible.
     if (query.collegeId) {
       and.push({ OR: [{ collegeId: query.collegeId }, globalOnly] });
-    }
-    if (query.communityId) {
-      const comm = await this.prisma.community.findUnique({
-        where: { id: query.communityId },
-        select: { type: true },
-      });
-      and.push(
-        comm?.type === 'COLLEGE'
-          ? { OR: [{ communityId: query.communityId }, globalOnly] }
-          : { communityId: query.communityId },
-      );
     }
 
     const where: Prisma.OpportunityWhereInput = {
@@ -135,45 +108,16 @@ export class OpportunitiesService {
   }
 
   async create(actor: { sub: string; role: string }, dto: CreateOpportunityDto) {
+    // Platform admins publish immediately; everyone else's submission needs
+    // manual admin review via listPending/decide before it goes live.
     const isAdmin = isPlatformAdmin(actor.role);
-    let isStartup = false;
-    let canManageHere = isAdmin;
-
-    if (dto.communityId) {
-      const community = await this.prisma.community.findUnique({
-        where: { id: dto.communityId },
-        select: { type: true },
-      });
-      if (!community) throw new NotFoundException('Community not found');
-      isStartup = community.type === 'STARTUP';
-      if (!canManageHere) {
-        const member = await this.prisma.communityMember.findUnique({
-          where: { communityId_userId: { communityId: dto.communityId, userId: actor.sub } },
-        });
-        // Must be a member to post in a community.
-        if (!member && !isAdmin) {
-          throw new ForbiddenException('Join the community to post opportunities');
-        }
-        canManageHere = roleHasCapability(member?.role, 'VIEW');
-      }
-      // Startup communities: only admins & the community's managers may post.
-      if (isStartup && !canManageHere) {
-        throw new ForbiddenException(
-          "Only admins & this community's managers can post opportunities here",
-        );
-      }
-    }
-
-    // Admins, and managers posting in their startup community, publish immediately;
-    // members submitting to a topic/college community still need manager approval.
-    const needsApproval = !!dto.communityId && !isAdmin && !(isStartup && canManageHere);
     const opportunity = await this.prisma.opportunity.create({
       data: {
         ...dto,
         tags: dto.tags ?? [],
         deadline: dto.deadline ? new Date(dto.deadline) : null,
         createdById: actor.sub,
-        approvalStatus: needsApproval ? 'PENDING' : 'APPROVED',
+        approvalStatus: isAdmin ? 'APPROVED' : 'PENDING',
         sourceSystem: 'manual',
       },
     });
@@ -181,40 +125,21 @@ export class OpportunitiesService {
     return opportunity;
   }
 
-  /** Capability check against the actor's role in a community. */
-  private async assertCommunityCap(
-    communityId: string | null,
-    actor: { sub: string; role: string },
-    cap: CommunityCapability,
-  ) {
-    if (isPlatformAdmin(actor.role)) return;
-    if (communityId) {
-      const member = await this.prisma.communityMember.findUnique({
-        where: { communityId_userId: { communityId, userId: actor.sub } },
-      });
-      if (roleHasCapability(member?.role, cap)) return;
-    }
-    throw new ForbiddenException('Your role cannot perform this action');
-  }
-
-  async listPending(actor: { sub: string; role: string }, communityId?: string) {
+  async listPending(actor: { sub: string; role: string }) {
     if (!isPlatformAdmin(actor.role)) {
-      if (!communityId) throw new ForbiddenException('Specify a community you manage');
-      // Any manager who can view the dashboard may see the pending queue.
-      await this.assertCommunityCap(communityId, actor, 'VIEW');
+      throw new ForbiddenException('Admin only');
     }
     return this.prisma.opportunity.findMany({
-      where: { approvalStatus: 'PENDING', ...(communityId ? { communityId } : {}) },
+      where: { approvalStatus: 'PENDING' },
       orderBy: { createdAt: 'asc' },
       include: { createdBy: { select: { id: true, profile: { select: { fullName: true } } } } },
     });
   }
 
   async decide(actor: { sub: string; role: string }, id: string, approve: boolean) {
+    if (!isPlatformAdmin(actor.role)) throw new ForbiddenException('Admin only');
     const opportunity = await this.prisma.opportunity.findUnique({ where: { id } });
     if (!opportunity) throw new NotFoundException('Opportunity not found');
-    // Only the Opportunity Head (or Campus Lead / admin) may approve.
-    await this.assertCommunityCap(opportunity.communityId, actor, 'APPROVE_OPPORTUNITY');
     const updated = await this.prisma.opportunity.update({
       where: { id },
       data: { approvalStatus: approve ? 'APPROVED' : 'REJECTED', isActive: approve },
@@ -245,25 +170,12 @@ export class OpportunitiesService {
   async remove(id: string, userId: string, role: string) {
     const opportunity = await this.prisma.opportunity.findUnique({ where: { id } });
     if (!opportunity) throw new NotFoundException('Opportunity not found');
-    if (
-      opportunity.createdById !== userId &&
-      !(await this.canModerate(opportunity.communityId, userId, role))
-    ) {
+    if (opportunity.createdById !== userId && !isPlatformAdmin(role) && role !== 'MODERATOR') {
       throw new ForbiddenException('Cannot delete this opportunity');
     }
     await this.prisma.opportunity.update({ where: { id }, data: { isActive: false } });
     await this.invalidate();
     return { deleted: true };
-  }
-
-  /** Platform admins/mods, or a manager of the opportunity's community, may moderate it. */
-  private async canModerate(communityId: string | null, userId: string, role: string): Promise<boolean> {
-    if (isPlatformAdmin(role) || role === 'MODERATOR') return true;
-    if (!communityId) return false;
-    const member = await this.prisma.communityMember.findUnique({
-      where: { communityId_userId: { communityId, userId } },
-    });
-    return roleHasCapability(member?.role, 'MODERATE');
   }
 
   // ---------------- Applications (save / apply / track) ----------------

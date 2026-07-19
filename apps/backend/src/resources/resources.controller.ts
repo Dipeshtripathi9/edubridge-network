@@ -28,8 +28,8 @@ export class ResourcesController {
 
   @Post()
   @ApiOperation({ summary: 'Create a resource (after upload)' })
-  create(@CurrentUser('sub') userId: string, @CurrentUser('role') role: string, @Body() dto: CreateResourceDto) {
-    return this.resources.create(userId, dto, role);
+  create(@CurrentUser('sub') userId: string, @Body() dto: CreateResourceDto) {
+    return this.resources.create(userId, dto);
   }
 
   @Public()
