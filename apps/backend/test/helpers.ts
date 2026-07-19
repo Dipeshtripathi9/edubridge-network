@@ -64,8 +64,8 @@ export async function registerVerifiedUser(
     .expect(201);
 
   const userId = res.body.data.user.id;
-  // College-verify by default (matches the helper name & lets users join
-  // interest/college communities). Pass { unverified: true } to opt out.
+  // College-verify by default (matches the helper name). Pass { unverified: true }
+  // to opt out.
   if (!opts.unverified) {
     await prisma.profile.update({ where: { userId }, data: { collegeVerification: 'VERIFIED' } });
   }

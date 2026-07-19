@@ -6,19 +6,10 @@ import { buildPaginatedResult, PaginationDto } from '../common/dto/pagination.dt
 export class ComplaintsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /** Any authenticated user (typically a community manager) raises an issue to admins. */
-  async submit(userId: string, body: string, communityId?: string) {
-    // Validate the referenced community up front so a bad id is a clean 404,
-    // not a raw foreign-key 500.
-    if (communityId) {
-      const community = await this.prisma.community.findUnique({
-        where: { id: communityId },
-        select: { id: true },
-      });
-      if (!community) throw new NotFoundException('Community not found');
-    }
+  /** Any authenticated user raises an issue directly to admins. */
+  async submit(userId: string, body: string) {
     return this.prisma.complaint.create({
-      data: { userId, body, communityId: communityId ?? null },
+      data: { userId, body },
     });
   }
 
@@ -30,7 +21,6 @@ export class ComplaintsService {
       take: query.limit,
       include: {
         user: { select: { id: true, email: true, profile: { select: { fullName: true } } } },
-        community: { select: { id: true, name: true, slug: true } },
       },
     });
     return buildPaginatedResult(items, query);

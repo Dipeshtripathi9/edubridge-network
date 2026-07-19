@@ -98,9 +98,9 @@ export class ResolveReportDto {
 }
 
 export class ModerateContentDto {
-  @ApiProperty({ enum: ['post', 'comment', 'review', 'resource'] })
-  @IsIn(['post', 'comment', 'review', 'resource'])
-  type!: 'post' | 'comment' | 'review' | 'resource';
+  @ApiProperty({ enum: ['review', 'resource'] })
+  @IsIn(['review', 'resource'])
+  type!: 'review' | 'resource';
 
   @ApiProperty()
   @IsString()

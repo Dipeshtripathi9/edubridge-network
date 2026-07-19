@@ -36,9 +36,9 @@ export class OpportunitiesController {
   }
 
   @Get('pending')
-  @ApiOperation({ summary: 'Pending opportunities awaiting approval (admin or community manager)' })
-  pending(@CurrentUser() actor: JwtUser, @Query('communityId') communityId?: string) {
-    return this.opportunities.listPending(actor, communityId);
+  @ApiOperation({ summary: 'Pending opportunities awaiting approval (admin only)' })
+  pending(@CurrentUser() actor: JwtUser) {
+    return this.opportunities.listPending(actor);
   }
 
   @Public()
@@ -49,19 +49,19 @@ export class OpportunitiesController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Post / submit an opportunity (community submissions need approval)' })
+  @ApiOperation({ summary: 'Post / submit an opportunity (non-admin submissions need approval)' })
   create(@CurrentUser() actor: JwtUser, @Body() dto: CreateOpportunityDto) {
     return this.opportunities.create(actor, dto);
   }
 
   @Post(':id/approve')
-  @ApiOperation({ summary: 'Approve a pending opportunity (admin or community manager)' })
+  @ApiOperation({ summary: 'Approve a pending opportunity (admin only)' })
   approve(@Param('id') id: string, @CurrentUser() actor: JwtUser) {
     return this.opportunities.decide(actor, id, true);
   }
 
   @Post(':id/reject')
-  @ApiOperation({ summary: 'Reject a pending opportunity (admin or community manager)' })
+  @ApiOperation({ summary: 'Reject a pending opportunity (admin only)' })
   reject(@Param('id') id: string, @CurrentUser() actor: JwtUser) {
     return this.opportunities.decide(actor, id, false);
   }

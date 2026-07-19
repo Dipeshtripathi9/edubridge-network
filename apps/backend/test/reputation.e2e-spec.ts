@@ -7,7 +7,6 @@ describe('Reputation & Badges (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let user: TestUser;
-  let slug: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -25,13 +24,6 @@ describe('Reputation & Badges (e2e)', () => {
       update: {},
       create: { key: 'placement_expert', name: 'Placement Expert', tier: 'GOLD', threshold: 500 },
     });
-
-    const community = await request(app.getHttpServer())
-      .post(`${API}/communities`)
-      .set(auth(user.token))
-      .send({ name: `Rep Topic ${Date.now()}`, type: 'TOPIC', topic: 'Rep' })
-      .expect(201);
-    slug = community.body.data.slug;
   });
   afterAll(async () => {
     await app?.close();
@@ -39,77 +31,6 @@ describe('Reputation & Badges (e2e)', () => {
 
   const myRep = () =>
     request(app.getHttpServer()).get(`${API}/reputation/me`).set(auth(user.token)).expect(200);
-
-  it('awards points for creating a post (+5) and a comment (+2)', async () => {
-    const before = (await myRep()).body.data.points;
-    const post = await request(app.getHttpServer())
-      .post(`${API}/communities/${slug}/posts`)
-      .set(auth(user.token))
-      .send({ body: 'rep post' })
-      .expect(201);
-    await request(app.getHttpServer())
-      .post(`${API}/posts/${post.body.data.id}/comments`)
-      .set(auth(user.token))
-      .send({ body: 'self comment' })
-      .expect(201);
-
-    const after = (await myRep()).body.data.points;
-    expect(after).toBe(before + 7);
-  });
-
-  it('nets zero reputation on a like→unlike loop (no farming)', async () => {
-    const liker = await registerVerifiedUser(app, { fullName: 'Liker' });
-    const post = await request(app.getHttpServer())
-      .post(`${API}/communities/${slug}/posts`)
-      .set(auth(user.token))
-      .send({ body: 'like me' })
-      .expect(201);
-    const before = (await myRep()).body.data.points;
-
-    // Like grants the author +1...
-    await request(app.getHttpServer())
-      .post(`${API}/posts/${post.body.data.id}/like`)
-      .set(auth(liker.token))
-      .expect(201);
-    expect((await myRep()).body.data.points).toBe(before + 1);
-
-    // ...unlike reverses it, so a like/unlike loop can't farm points.
-    await request(app.getHttpServer())
-      .post(`${API}/posts/${post.body.data.id}/like`)
-      .set(auth(liker.token))
-      .expect(201);
-    expect((await myRep()).body.data.points).toBe(before);
-  });
-
-  it('nets zero reputation on a create→delete loop', async () => {
-    const before = (await myRep()).body.data.points;
-    const post = await request(app.getHttpServer())
-      .post(`${API}/communities/${slug}/posts`)
-      .set(auth(user.token))
-      .send({ body: 'delete me' })
-      .expect(201);
-    expect((await myRep()).body.data.points).toBe(before + 5);
-
-    await request(app.getHttpServer())
-      .delete(`${API}/posts/${post.body.data.id}`)
-      .set(auth(user.token))
-      .expect(200);
-    expect((await myRep()).body.data.points).toBe(before);
-  });
-
-  it('grants the Contributor badge when crossing the 50-point threshold', async () => {
-    // Nudge just below the threshold, then a post (+5) crosses it.
-    await prisma.user.update({ where: { id: user.userId }, data: { reputationPoints: 48 } });
-    await request(app.getHttpServer())
-      .post(`${API}/communities/${slug}/posts`)
-      .set(auth(user.token))
-      .send({ body: 'crossing 50' })
-      .expect(201);
-
-    const rep = await myRep();
-    expect(rep.body.data.points).toBeGreaterThanOrEqual(50);
-    expect(rep.body.data.badges.some((b: { key: string }) => b.key === 'contributor')).toBe(true);
-  });
 
   it('grants the Placement Expert badge for a verified placement review', async () => {
     // Make the user a verified student of a college, then post a placement review.
@@ -120,6 +41,10 @@ describe('Reputation & Badges (e2e)', () => {
       where: { userId: user.userId },
       data: { collegeId: college.id, collegeVerification: 'VERIFIED' },
     });
+    // placement_expert also requires >=50 total points; nudge so the review's
+    // +20 (REVIEW_CREATED) crosses the threshold (no post/comment rewards left
+    // to earn points from, now that Posts are gone).
+    await prisma.user.update({ where: { id: user.userId }, data: { reputationPoints: 30 } });
 
     await request(app.getHttpServer())
       .post(`${API}/colleges/${college.id}/reviews`)

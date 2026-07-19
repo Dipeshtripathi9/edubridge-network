@@ -16,7 +16,7 @@ export class ComplaintsController {
   @Post()
   @ApiOperation({ summary: 'Raise a complaint/issue directly to platform admins' })
   submit(@CurrentUser('sub') userId: string, @Body() dto: CreateComplaintDto) {
-    return this.complaints.submit(userId, dto.body, dto.communityId);
+    return this.complaints.submit(userId, dto.body);
   }
 
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)

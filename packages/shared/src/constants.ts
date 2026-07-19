@@ -30,15 +30,6 @@ export const BADGE_KEYS = {
   CAMPUS_EXPERT: 'campus_expert',
   PLACEMENT_EXPERT: 'placement_expert',
   TRANSFER_EXPERT: 'transfer_expert',
-  COMMUNITY_LEADER: 'community_leader',
 } as const;
-
-export const TOPIC_COMMUNITIES = [
-  'AI',
-  'DSA',
-  'Startups',
-  'Placement',
-  'Data Science',
-] as const;
 
 export const API_VERSION = 'v1';

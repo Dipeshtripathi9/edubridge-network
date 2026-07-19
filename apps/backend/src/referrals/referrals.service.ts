@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { isPlatformAdmin } from '../communities/community-permissions';
+import { isPlatformAdmin } from '../common/utils/platform-admin';
 import { CreateReferralDto } from './dto/referral.dto';
 
 const SELECT = {
@@ -17,19 +17,8 @@ const SELECT = {
 export class ReferralsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /** Referrals are a leader perk: only community leaders (or admins) may view them. */
-  private async assertLeader(actor: { sub: string; role: string }) {
-    if (isPlatformAdmin(actor.role)) return;
-    const managed = await this.prisma.communityMember.count({
-      where: { userId: actor.sub, role: { not: 'MEMBER' } },
-    });
-    if (managed === 0) {
-      throw new ForbiddenException('Referrals are available to community leaders');
-    }
-  }
-
-  async list(actor: { sub: string; role: string }) {
-    await this.assertLeader(actor);
+  /** Referrals are open to every authenticated user. */
+  async list() {
     return this.prisma.referral.findMany({ orderBy: { createdAt: 'desc' }, take: 100, select: SELECT });
   }
 

@@ -1,22 +1,9 @@
-// Curated opportunity catalog — each mapped to its matching INTEREST community.
-// Because interest-community opportunities are globally visible, they also appear in
-// the sidebar Opportunities feed AND in every college/university community (college
-// hubs show their own + all globally-visible opportunities). Interest communities show
-// only their category. Replaces the previous 'opportunity-playbook' batch. Idempotent.
+// Curated opportunity catalog — globally visible (no community scoping).
+// Replaces the previous 'opportunity-playbook' batch. Idempotent.
 //   node prisma/seed-opportunity-catalog.mjs   (loads DATABASE_URL from root .env)
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-
-const COMM = {
-  SCH: 'scholarships-and-opportunities',
-  INT: 'placements-and-internships',
-  RES: 'research-and-innovation',
-  HACK: 'hackathons-and-competitions',
-  CERT: 'career-guidance',
-  STARTUP: 'startups-and-entrepreneurship',
-  FELLOW: 'career-guidance',
-};
 
 // [bucket, type, title, eligibility, rewards, url]
 const DATA = [
@@ -87,16 +74,6 @@ const DATA = [
 const SRC = 'opportunity-playbook';
 
 async function main() {
-  // resolve interest-community ids by slug
-  const slugs = [...new Set(Object.values(COMM))];
-  const communities = await prisma.community.findMany({
-    where: { slug: { in: slugs }, type: 'TOPIC' },
-    select: { id: true, slug: true },
-  });
-  const bySlug = Object.fromEntries(communities.map((c) => [c.slug, c.id]));
-  const missing = slugs.filter((s) => !bySlug[s]);
-  if (missing.length) throw new Error('Missing interest communities: ' + missing.join(', '));
-
   const admin = await prisma.user.findFirst({
     where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } },
     select: { id: true },
@@ -108,7 +85,6 @@ async function main() {
   let created = 0;
   const byBucket = {};
   for (const [bucket, type, title, eligibility, rewards, url] of DATA) {
-    const communityId = bySlug[COMM[bucket]];
     await prisma.opportunity.create({
       data: {
         type,
@@ -117,7 +93,6 @@ async function main() {
         eligibility,
         stipend: rewards,
         applyUrl: url,
-        communityId,
         createdById: admin?.id ?? null,
         approvalStatus: 'APPROVED',
         isActive: true,
@@ -130,7 +105,7 @@ async function main() {
     byBucket[bucket] = (byBucket[bucket] || 0) + 1;
   }
 
-  console.log(JSON.stringify({ created, byBucket, mappedTo: COMM }, null, 2));
+  console.log(JSON.stringify({ created, byBucket }, null, 2));
 }
 
 main()

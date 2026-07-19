@@ -26,21 +26,6 @@ export class AdminService {
 
   // ---------------- Reports (user-facing create + admin queue) ----------------
   async createReport(reporterId: string, dto: CreateReportDto) {
-    // Resolve the owning community so heads can see reports for their community.
-    let communityId: string | undefined;
-    if (dto.targetType === 'POST') {
-      const post = await this.prisma.post.findUnique({
-        where: { id: dto.targetId },
-        select: { communityId: true },
-      });
-      communityId = post?.communityId;
-    } else if (dto.targetType === 'COMMENT') {
-      const comment = await this.prisma.comment.findUnique({
-        where: { id: dto.targetId },
-        select: { post: { select: { communityId: true } } },
-      });
-      communityId = comment?.post.communityId;
-    }
     return this.prisma.report.create({
       data: {
         reporterId,
@@ -49,7 +34,6 @@ export class AdminService {
         reportedUserId: dto.reportedUserId,
         reason: dto.reason,
         details: dto.details,
-        communityId,
       },
     });
   }
@@ -184,16 +168,9 @@ export class AdminService {
     // updateMany (not update) so a missing id yields a clean 404 rather than a
     // raw Prisma P2025 surfacing as a 500.
     const result =
-      dto.type === 'post'
-        ? await this.prisma.post.updateMany({
-            where: { id: dto.id },
-            data: { deletedAt: now, status: 'REMOVED' },
-          })
-        : dto.type === 'comment'
-          ? await this.prisma.comment.updateMany({ where: { id: dto.id }, data: { deletedAt: now } })
-          : dto.type === 'review'
-            ? await this.prisma.review.updateMany({ where: { id: dto.id }, data: { deletedAt: now } })
-            : await this.prisma.resource.updateMany({ where: { id: dto.id }, data: { deletedAt: now } });
+      dto.type === 'review'
+        ? await this.prisma.review.updateMany({ where: { id: dto.id }, data: { deletedAt: now } })
+        : await this.prisma.resource.updateMany({ where: { id: dto.id }, data: { deletedAt: now } });
     if (result.count === 0) throw new NotFoundException('Content not found');
     await this.audit.log(adminId, 'content.remove', { entity: dto.type, entityId: dto.id });
     return { removed: true };
@@ -237,15 +214,10 @@ export class AdminService {
       mau,
       newToday,
       newThisWeek,
-      posts,
-      postsThisWeek,
-      comments,
-      communities,
       reviews,
       resources,
       activeOpportunities,
       openReports,
-      topCommunities,
       topColleges,
       topContributors,
     ] = await Promise.all([
@@ -254,19 +226,10 @@ export class AdminService {
       this.prisma.user.count({ where: { deletedAt: null, lastLoginAt: { gte: monthAgo } } }),
       this.prisma.user.count({ where: { deletedAt: null, createdAt: { gte: startOfToday } } }),
       this.prisma.user.count({ where: { deletedAt: null, createdAt: { gte: weekAgo } } }),
-      this.prisma.post.count({ where: { deletedAt: null } }),
-      this.prisma.post.count({ where: { deletedAt: null, createdAt: { gte: weekAgo } } }),
-      this.prisma.comment.count({ where: { deletedAt: null } }),
-      this.prisma.community.count(),
       this.prisma.review.count({ where: { deletedAt: null } }),
       this.prisma.resource.count({ where: { deletedAt: null } }),
       this.prisma.opportunity.count({ where: { isActive: true } }),
       this.prisma.report.count({ where: { status: 'OPEN' } }),
-      this.prisma.community.findMany({
-        orderBy: { memberCount: 'desc' },
-        take: 5,
-        select: { id: true, name: true, slug: true, memberCount: true, type: true },
-      }),
       this.prisma.college.findMany({
         orderBy: { reviewCount: 'desc' },
         take: 5,
@@ -282,9 +245,8 @@ export class AdminService {
 
     return {
       users: { total: totalUsers, dau, mau, newToday, newThisWeek, stickiness: mau ? +(dau / mau).toFixed(2) : 0 },
-      content: { posts, postsThisWeek, comments, communities, reviews, resources, activeOpportunities },
+      content: { reviews, resources, activeOpportunities },
       moderation: { openReports },
-      topCommunities,
       topColleges,
       topContributors,
     };

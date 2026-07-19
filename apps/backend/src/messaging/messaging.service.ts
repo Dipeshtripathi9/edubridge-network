@@ -84,36 +84,11 @@ export class MessagingService {
     });
   }
 
-  async getOrCreateCommunityChat(communityId: string, userId: string) {
-    const membership = await this.prisma.communityMember.findUnique({
-      where: { communityId_userId: { communityId, userId } },
-    });
-    if (!membership) throw new ForbiddenException('Join the community to access its chat');
-
-    const existing = await this.prisma.chat.findFirst({
-      where: { type: 'COMMUNITY', communityId },
-    });
-    const chat =
-      existing ??
-      (await this.prisma.chat.create({
-        data: { type: 'COMMUNITY', communityId },
-      }));
-
-    // Ensure the user is a participant.
-    await this.prisma.chatParticipant.upsert({
-      where: { chatId_userId: { chatId: chat.id, userId } },
-      update: {},
-      create: { chatId: chat.id, userId },
-    });
-    return chat;
-  }
-
   async listMyChats(userId: string) {
     const chats = await this.prisma.chat.findMany({
       where: { participants: { some: { userId } } },
       orderBy: { lastMessageAt: 'desc' },
       include: {
-        community: { select: { id: true, name: true, slug: true, iconUrl: true } },
         participants: { include: { user: SENDER_SELECT } },
         messages: { orderBy: { createdAt: 'desc' }, take: 1 },
       },
@@ -130,6 +105,8 @@ export class MessagingService {
             ...(me?.lastReadAt ? { createdAt: { gt: me.lastReadAt } } : {}),
           },
         });
+        // Legacy (pre-teardown) COMMUNITY-type chats may have >2 participants;
+        // only resolve a 1:1 "other" for DIRECT chats.
         const other =
           chat.type === 'DIRECT'
             ? chat.participants.find((p) => p.userId !== userId)?.user ?? null
@@ -139,8 +116,7 @@ export class MessagingService {
         return {
           id: chat.id,
           type: chat.type,
-          title: chat.type === 'COMMUNITY' ? chat.community?.name : other?.profile?.fullName,
-          community: chat.community,
+          title: chat.title ?? other?.profile?.fullName ?? 'Group chat',
           other,
           otherOnline,
           lastMessage: chat.messages[0] ?? null,

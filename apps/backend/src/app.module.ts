@@ -9,7 +9,6 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { CommunitiesModule } from './communities/communities.module';
 import { TransferModule } from './transfer/transfer.module';
 import { OpportunitiesModule } from './opportunities/opportunities.module';
 import { CollegesModule } from './colleges/colleges.module';
@@ -17,15 +16,12 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { ResourcesModule } from './resources/resources.module';
 import { StorageModule } from './storage/storage.module';
 import { MessagingModule } from './messaging/messaging.module';
-import { PoolsModule } from './pools/pools.module';
 import { ComplaintsModule } from './complaints/complaints.module';
-import { AdsModule } from './ads/ads.module';
 import { ReferralsModule } from './referrals/referrals.module';
 import { AgencyModule } from './agency/agency.module';
 import { RentalsModule } from './rentals/rentals.module';
 import { MentorsModule } from './mentors/mentors.module';
 import { ProfileLeadsModule } from './profile-leads/profile-leads.module';
-import { LeadershipModule } from './leadership/leadership.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReputationModule } from './reputation/reputation.module';
 import { AdminModule } from './admin/admin.module';
@@ -75,7 +71,6 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     RedisModule,
     AuthModule,
     UsersModule,
-    CommunitiesModule,
     TransferModule,
     OpportunitiesModule,
     CollegesModule,
@@ -83,14 +78,11 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     StorageModule,
     ResourcesModule,
     MessagingModule,
-    PoolsModule,
-    AdsModule,
     ReferralsModule,
     AgencyModule,
     RentalsModule,
     MentorsModule,
     ProfileLeadsModule,
-    LeadershipModule,
     ComplaintsModule,
     NotificationsModule,
     ReputationModule,

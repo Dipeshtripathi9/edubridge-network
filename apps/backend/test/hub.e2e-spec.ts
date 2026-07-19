@@ -3,14 +3,13 @@ import request from 'supertest';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { API, auth, createTestApp, registerVerifiedUser, TestUser } from './helpers';
 
-describe('College Community Hub (e2e)', () => {
+describe('College Hub (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let admin: TestUser;
   let student: TestUser;
   let collegeId: string;
   let collegeSlug: string;
-  let communitySlug: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -24,12 +23,6 @@ describe('College Community Hub (e2e)', () => {
       data: { name: `Hub College ${stamp}`, slug: collegeSlug, city: 'Pune', state: 'Maharashtra' },
     });
     collegeId = college.id;
-    communitySlug = `hub-college-${stamp}-community`;
-    const hubCommunity = await prisma.community.create({
-      data: { name: `Hub College ${stamp}`, slug: communitySlug, type: 'COLLEGE', collegeId, memberCount: 0 },
-    });
-    // Student joins so they can post in the community.
-    await prisma.communityMember.create({ data: { communityId: hubCommunity.id, userId: student.userId } });
     // Make the student a verified student of this college (counts toward the header).
     await prisma.profile.update({
       where: { userId: student.userId },
@@ -45,9 +38,9 @@ describe('College Community Hub (e2e)', () => {
       .get(`${API}/colleges/${collegeSlug}/hub`)
       .expect(200);
     expect(res.body.data.college.slug).toBe(collegeSlug);
-    expect(res.body.data.community.slug).toBe(communitySlug);
+    expect(res.body.data).not.toHaveProperty('community');
     expect(res.body.data.counts.verifiedStudents).toBeGreaterThanOrEqual(1);
-    expect(res.body.data.counts).toHaveProperty('members');
+    expect(res.body.data.counts).not.toHaveProperty('members');
     expect(res.body.data.counts).toHaveProperty('faqs');
   });
 
@@ -119,31 +112,5 @@ describe('College Community Hub (e2e)', () => {
       .set(auth(admin.token))
       .expect(201);
     expect(featured.body.data.isFeatured).toBe(true);
-  });
-
-  it('pins a post (community moderator/admin) and surfaces it first', async () => {
-    const post = await request(app.getHttpServer())
-      .post(`${API}/communities/${communitySlug}/posts`)
-      .set(auth(student.token))
-      .send({ body: 'Pin me', kind: 'QUESTION' })
-      .expect(201);
-    const postId = post.body.data.id;
-
-    // Student (not a mod) cannot pin.
-    await request(app.getHttpServer())
-      .post(`${API}/posts/${postId}/pin`)
-      .set(auth(student.token))
-      .expect(403);
-
-    const pinned = await request(app.getHttpServer())
-      .post(`${API}/posts/${postId}/pin`)
-      .set(auth(admin.token))
-      .expect(201);
-    expect(pinned.body.data.isPinned).toBe(true);
-
-    const feed = await request(app.getHttpServer())
-      .get(`${API}/communities/${communitySlug}/posts`)
-      .expect(200);
-    expect(feed.body.data[0].id).toBe(postId); // pinned first
   });
 });

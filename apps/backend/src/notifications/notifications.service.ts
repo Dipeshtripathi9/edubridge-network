@@ -1,10 +1,9 @@
-import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { NotificationType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MessagingGateway } from '../messaging/messaging.gateway';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
-import { isPlatformAdmin, roleHasCapability } from '../communities/community-permissions';
-import { BroadcastDto, CommunityBroadcastDto, NotificationQueryDto } from './dto/notification.dto';
+import { BroadcastDto, NotificationQueryDto } from './dto/notification.dto';
 
 export interface CreateNotificationInput {
   recipientId: string;
@@ -107,55 +106,15 @@ export class NotificationsService {
   }
 
   /**
-   * Admin broadcast (e.g. a new scholarship). Batched; at large scale this
-   * would run as a BullMQ job rather than inline.
+   * Admin broadcast (e.g. a new scholarship), sent to all active users.
+   * Batched; at large scale this would run as a BullMQ job rather than inline.
    */
-  /**
-   * The Campus Lead (or platform admin) broadcasts to their own community's
-   * members. Pushing a notification to every member is an announcement, so it
-   * requires ANNOUNCE — not the dashboard-VIEW capability that Opportunity /
-   * Student-Relations heads and moderators also hold.
-   */
-  async broadcastToCommunity(
-    communityId: string,
-    actor: { sub: string; role: string },
-    dto: CommunityBroadcastDto,
-  ) {
-    const community = await this.prisma.community.findUnique({ where: { id: communityId } });
-    if (!community) throw new NotFoundException('Community not found');
-    if (!isPlatformAdmin(actor.role)) {
-      const member = await this.prisma.communityMember.findUnique({
-        where: { communityId_userId: { communityId, userId: actor.sub } },
-      });
-      if (!roleHasCapability(member?.role, 'ANNOUNCE')) {
-        throw new ForbiddenException('Only this community’s Campus Lead can broadcast to it');
-      }
-    }
-    return this.broadcast({
-      type: 'SYSTEM',
-      title: `${community.name}: ${dto.title}`,
-      body: dto.body,
-      link: dto.link ?? `/communities/${community.slug}`,
-      communityId,
-    });
-  }
-
   async broadcast(dto: BroadcastDto) {
-    let ids: string[];
-    if (dto.communityId) {
-      // Members of a single community.
-      const members = await this.prisma.communityMember.findMany({
-        where: { communityId: dto.communityId, user: { status: 'ACTIVE', deletedAt: null } },
-        select: { userId: true },
-      });
-      ids = members.map((m) => m.userId);
-    } else {
-      const users = await this.prisma.user.findMany({
-        where: { status: 'ACTIVE', deletedAt: null },
-        select: { id: true },
-      });
-      ids = users.map((u) => u.id);
-    }
+    const users = await this.prisma.user.findMany({
+      where: { status: 'ACTIVE', deletedAt: null },
+      select: { id: true },
+    });
+    const ids = users.map((u) => u.id);
     const BATCH = 1000;
     for (let i = 0; i < ids.length; i += BATCH) {
       const slice = ids.slice(i, i + BATCH);

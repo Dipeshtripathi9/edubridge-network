@@ -26,12 +26,6 @@ export class MessagingController {
     return this.messaging.getOrCreateDirectChat(userId, dto.userId);
   }
 
-  @Post('community/:communityId')
-  @ApiOperation({ summary: 'Get or create a community chat (members only)' })
-  community(@CurrentUser('sub') userId: string, @Param('communityId') communityId: string) {
-    return this.messaging.getOrCreateCommunityChat(communityId, userId);
-  }
-
   @Get(':chatId/messages')
   @ApiOperation({ summary: 'Message history (cursor paginated)' })
   messages(

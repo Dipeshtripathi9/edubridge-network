@@ -66,8 +66,8 @@ export class CollegesService {
   }
 
   /**
-   * College Community Hub overview: header data + the linked college community
-   * + the counts shown in the header (members, verified students/admins, posts…).
+   * College Hub overview: header data + the counts shown in the header
+   * (verified students, reviews, resources, opportunities, faqs).
    */
   async getCommunityHub(slug: string) {
     const college = await this.prisma.college.findUnique({
@@ -76,41 +76,20 @@ export class CollegesService {
     });
     if (!college) throw new NotFoundException('College not found');
 
-    // Resolve the dedicated COLLEGE community for this college.
-    const community = await this.prisma.community.findFirst({
-      where: { collegeId: college.id, type: 'COLLEGE' },
-      select: { id: true, slug: true, name: true, description: true, memberCount: true, bannerUrl: true },
-    });
-
-    const [verifiedStudents, verifiedAdmins, postCount, reviewCount, resourceCount, opportunityCount, faqCount] =
-      await Promise.all([
-        this.prisma.profile.count({
-          where: { collegeId: college.id, collegeVerification: 'VERIFIED' },
-        }),
-        community
-          ? this.prisma.communityMember.count({
-              where: { communityId: community.id, role: { not: 'MEMBER' } },
-            })
-          : Promise.resolve(0),
-        community
-          ? this.prisma.post.count({
-              where: { communityId: community.id, deletedAt: null, status: 'PUBLISHED' },
-            })
-          : Promise.resolve(0),
-        this.prisma.review.count({ where: { collegeId: college.id, deletedAt: null } }),
-        this.prisma.resource.count({ where: { collegeId: college.id, deletedAt: null } }),
-        this.prisma.opportunity.count({ where: { collegeId: college.id, isActive: true } }),
-        this.prisma.collegeFaq.count({ where: { collegeId: college.id } }),
-      ]);
+    const [verifiedStudents, reviewCount, resourceCount, opportunityCount, faqCount] = await Promise.all([
+      this.prisma.profile.count({
+        where: { collegeId: college.id, collegeVerification: 'VERIFIED' },
+      }),
+      this.prisma.review.count({ where: { collegeId: college.id, deletedAt: null } }),
+      this.prisma.resource.count({ where: { collegeId: college.id, deletedAt: null } }),
+      this.prisma.opportunity.count({ where: { collegeId: college.id, isActive: true } }),
+      this.prisma.collegeFaq.count({ where: { collegeId: college.id } }),
+    ]);
 
     return {
       college,
-      community,
       counts: {
-        members: community?.memberCount ?? 0,
         verifiedStudents,
-        verifiedAdmins,
-        posts: postCount,
         reviews: reviewCount,
         resources: resourceCount,
         opportunities: opportunityCount,

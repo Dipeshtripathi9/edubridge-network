@@ -1,4 +1,4 @@
-// Seed Delhi-NCR colleges/universities + a linked COLLEGE community for each.
+// Seed Delhi-NCR colleges/universities.
 // Idempotent: upserts by slug, safe to re-run. Usage:
 //   node prisma/seed-ncr-colleges.mjs   (loads DATABASE_URL from the root .env)
 import { PrismaClient } from '@prisma/client';
@@ -91,11 +91,9 @@ function slugify(input) {
 async function main() {
   const colleges = NAMES.filter((n) => !HEADERS.has(n));
   let collegesCreated = 0;
-  let communitiesCreated = 0;
 
   for (const name of colleges) {
     const collegeSlug = slugify(name);
-    const communitySlug = `${collegeSlug}-community`.slice(0, 80);
 
     const college = await prisma.college.upsert({
       where: { slug: collegeSlug },
@@ -104,40 +102,15 @@ async function main() {
     });
     // upsert() returns the record; detect "created" by comparing timestamps
     if (college.createdAt.getTime() === college.updatedAt.getTime()) collegesCreated++;
-
-    const description = `Only verified students of ${name} can join this community to post reviews, opportunities, discussions and resources. Anyone can browse.`;
-
-    const existing = await prisma.community.findUnique({ where: { slug: communitySlug } });
-    if (!existing) {
-      await prisma.community.create({
-        data: {
-          name,
-          slug: communitySlug,
-          type: 'COLLEGE',
-          visibility: 'PUBLIC',
-          collegeId: college.id,
-          description,
-          memberCount: 0,
-        },
-      });
-      communitiesCreated++;
-    } else {
-      // keep description + college link current on re-run
-      await prisma.community.update({
-        where: { id: existing.id },
-        data: { description, collegeId: existing.collegeId ?? college.id },
-      });
-    }
   }
 
-  const totalCollegeCommunities = await prisma.community.count({ where: { type: 'COLLEGE' } });
+  const totalDelhiNcrColleges = await prisma.college.count({ where: { state: 'Delhi NCR' } });
   console.log(
     JSON.stringify(
       {
         processed: colleges.length,
         collegesCreated,
-        communitiesCreated,
-        totalCollegeCommunitiesNow: totalCollegeCommunities,
+        totalDelhiNcrCollegesNow: totalDelhiNcrColleges,
       },
       null,
       2,

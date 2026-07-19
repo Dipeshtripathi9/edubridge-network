@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { PrismaClient, CommunityType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import * as argon2 from 'argon2';
 
 const prisma = new PrismaClient();
@@ -151,109 +151,6 @@ async function main() {
   }
   console.log(`✓ admin + ${students.length} students`);
 
-  // ---------- Communities ----------
-  const communities = [];
-  for (const college of colleges) {
-    const community = await prisma.community.upsert({
-      where: { slug: slugify(college.name) + '-community' },
-      update: {},
-      create: {
-        name: college.name,
-        slug: slugify(college.name) + '-community',
-        description: `Official student community for ${college.name}.`,
-        type: CommunityType.COLLEGE,
-        collegeId: college.id,
-        createdById: admin.id,
-        memberCount: 0,
-      },
-    });
-    communities.push(community);
-  }
-  const topics = ['AI', 'DSA', 'Startups', 'Placement', 'Data Science'];
-  for (const topic of topics) {
-    const community = await prisma.community.upsert({
-      where: { slug: slugify(topic) },
-      update: {},
-      create: {
-        name: topic,
-        slug: slugify(topic),
-        description: `Everything about ${topic}.`,
-        type: CommunityType.TOPIC,
-        topic,
-        createdById: admin.id,
-        memberCount: 0,
-      },
-    });
-    communities.push(community);
-  }
-  console.log(`✓ ${communities.length} communities`);
-
-  // ---------- Memberships ----------
-  for (const student of students) {
-    for (const community of communities.slice(0, 4)) {
-      await prisma.communityMember.upsert({
-        where: { communityId_userId: { communityId: community.id, userId: student.id } },
-        update: {},
-        create: { communityId: community.id, userId: student.id },
-      });
-    }
-  }
-  // Recompute member counts.
-  for (const community of communities) {
-    const count = await prisma.communityMember.count({ where: { communityId: community.id } });
-    await prisma.community.update({ where: { id: community.id }, data: { memberCount: count } });
-  }
-  console.log('✓ memberships');
-
-  // ---------- Posts, poll, comments ----------
-  const dsa = communities.find((c) => c.slug === 'dsa')!;
-  const post1 = await prisma.post.create({
-    data: {
-      communityId: dsa.id,
-      authorId: students[0].id,
-      type: 'TEXT',
-      title: 'How I cracked my first DSA interview',
-      body: 'Sharing my 90-day prep plan that landed me an offer. Consistency over intensity!',
-      hashtags: ['dsa', 'placement', 'interview'],
-      likeCount: 2,
-    },
-  });
-  await prisma.community.update({ where: { id: dsa.id }, data: { postCount: { increment: 1 } } });
-
-  await prisma.post.create({
-    data: {
-      communityId: dsa.id,
-      authorId: students[1].id,
-      type: 'POLL',
-      body: 'Which DSA topic should we cover next?',
-      poll: {
-        create: {
-          question: 'Which DSA topic should we cover next?',
-          options: { create: [{ text: 'Graphs' }, { text: 'Dynamic Programming' }, { text: 'Trees' }] },
-        },
-      },
-    },
-  });
-  await prisma.community.update({ where: { id: dsa.id }, data: { postCount: { increment: 1 } } });
-
-  await prisma.comment.create({
-    data: {
-      postId: post1.id,
-      authorId: students[2].id,
-      body: 'This is super helpful, thanks for sharing!',
-    },
-  });
-  await prisma.post.update({ where: { id: post1.id }, data: { commentCount: { increment: 1 } } });
-
-  await prisma.reaction.createMany({
-    data: [
-      { userId: students[1].id, postId: post1.id, type: 'LIKE' },
-      { userId: students[2].id, postId: post1.id, type: 'LIKE' },
-    ],
-    skipDuplicates: true,
-  });
-  console.log('✓ posts, poll, comments, reactions');
-
   // ---------- Opportunities ----------
   // Intentionally NOT seeded here. Opportunities are added MANUALLY (admins/community
   // heads via the UI), plus the curated batch in seed-opportunity-playbook.mjs.
@@ -381,17 +278,19 @@ async function main() {
       ],
     },
   });
-  if (!existingChat) {
-    const chat = await prisma.chat.create({
+  const chat =
+    existingChat ??
+    (await prisma.chat.create({
       data: {
         type: 'DIRECT',
         lastMessageAt: new Date(),
         participants: { create: [{ userId: students[0].id }, { userId: students[1].id }] },
       },
-    });
+    }));
+  if (!existingChat) {
     await prisma.message.createMany({
       data: [
-        { chatId: chat.id, senderId: students[0].id, body: 'Hey! Saw your post on the DSA community 👋' },
+        { chatId: chat.id, senderId: students[0].id, body: 'Hey! Saw your DSA prep notes on the resources page 👋' },
         { chatId: chat.id, senderId: students[1].id, body: 'Thanks! Happy to share my prep sheet if useful.' },
         { chatId: chat.id, senderId: students[0].id, body: 'That would be amazing 🙌' },
       ],
@@ -409,17 +308,17 @@ async function main() {
         {
           recipientId: students[0].id,
           actorId: students[1].id,
-          type: 'LIKE',
-          title: 'Diya Patel liked your post',
-          data: { postId: post1.id },
+          type: 'MESSAGE',
+          title: 'Diya Patel sent you a message',
+          body: 'Hey! Saw your DSA prep notes on the resources page 👋',
+          data: { chatId: chat.id },
         },
         {
           recipientId: students[0].id,
-          actorId: students[2].id,
-          type: 'COMMENT',
-          title: 'Kabir Singh commented on your post',
-          body: 'This is super helpful, thanks for sharing!',
-          data: { postId: post1.id },
+          type: 'INTERNSHIP_DEADLINE',
+          title: 'Internship application closing soon',
+          body: "Don't miss the deadline for your saved internship.",
+          data: { link: '/opportunities' },
         },
         {
           recipientId: students[0].id,
@@ -434,16 +333,18 @@ async function main() {
   console.log('✓ notifications');
 
   // ---------- A sample open report for the moderation queue ----------
-  const existingReport = await prisma.report.findFirst({ where: { targetId: post1.id } });
+  const existingReport = await prisma.report.findFirst({
+    where: { targetType: 'USER', targetId: students[0].id },
+  });
   if (!existingReport) {
     await prisma.report.create({
       data: {
         reporterId: students[1].id,
-        targetType: 'POST',
-        targetId: post1.id,
+        targetType: 'USER',
+        targetId: students[0].id,
         reportedUserId: students[0].id,
         reason: 'Spam',
-        details: 'Looks like self-promotion.',
+        details: 'Looks like self-promotion in DMs.',
       },
     });
   }
@@ -462,10 +363,8 @@ async function main() {
       create: { userId, badgeId },
     });
   }
-  // admin: community leader (1000 pts)
   await grant(admin.id, 'contributor');
   await grant(admin.id, 'campus_expert');
-  await grant(admin.id, 'community_leader');
   // students by points + activity
   for (const student of students) {
     const u = await prisma.user.findUnique({
@@ -475,7 +374,6 @@ async function main() {
     const pts = u?.reputationPoints ?? 0;
     if (pts >= 50) await grant(student.id, 'contributor');
     if (pts >= 200) await grant(student.id, 'campus_expert');
-    if (pts >= 1000) await grant(student.id, 'community_leader');
     const placement = await prisma.review.count({
       where: { authorId: student.id, category: 'PLACEMENT', deletedAt: null },
     });
@@ -487,64 +385,11 @@ async function main() {
   }
   console.log('✓ badges awarded');
 
-  // ---------- Enriched demo: college-community discussions, heads, stories ----------
-  const collegeCommunities = communities.slice(0, 5); // one per seeded college
-  const alreadyEnriched = await prisma.post.findFirst({
-    where: { communityId: collegeCommunities[0].id },
+  // ---------- Enriched demo: more transfer stories, FAQs ----------
+  const alreadyEnriched = await prisma.transfer.findFirst({
+    where: { userId: students[0].id, fromCollegeId: colleges[1].id, toCollegeId: colleges[0].id },
   });
   if (!alreadyEnriched) {
-    const samplePosts = [
-      { kind: 'PLACEMENT_EXPERIENCE', title: 'My SDE-1 offer journey', body: 'Cleared 5 rounds — DSA, system design, 2 tech + HR. Happy to share my prep sheet!' },
-      { kind: 'QUESTION', title: 'Best electives for ML?', body: 'Which 5th-sem electives actually helped you for ML/AI roles?' },
-      { kind: 'DISCUSSION', title: 'Fest season is here 🎉', body: 'Who is performing this year? Drop your picks and volunteer slots.' },
-    ] as const;
-
-    for (let i = 0; i < collegeCommunities.length; i++) {
-      const community = collegeCommunities[i];
-      const author = students[i % students.length];
-      const other = students[(i + 1) % students.length];
-      for (const u of [author, other]) {
-        await prisma.communityMember.upsert({
-          where: { communityId_userId: { communityId: community.id, userId: u.id } },
-          update: {},
-          create: { communityId: community.id, userId: u.id },
-        });
-      }
-      for (let p = 0; p < samplePosts.length; p++) {
-        const sp = samplePosts[(i + p) % samplePosts.length];
-        const newPost = await prisma.post.create({
-          data: {
-            communityId: community.id,
-            authorId: author.id,
-            type: 'TEXT',
-            kind: sp.kind,
-            title: sp.title,
-            body: sp.body,
-            isPinned: p === 0,
-            likeCount: 1,
-            commentCount: 1,
-          },
-        });
-        await prisma.reaction.create({ data: { userId: other.id, postId: newPost.id, type: 'LIKE' } });
-        await prisma.comment.create({ data: { postId: newPost.id, authorId: other.id, body: 'Really helpful, thanks for sharing!' } });
-      }
-      const mc = await prisma.communityMember.count({ where: { communityId: community.id } });
-      await prisma.community.update({
-        where: { id: community.id },
-        data: { postCount: samplePosts.length, memberCount: mc },
-      });
-    }
-
-    // Appoint community heads (named roles)
-    await prisma.communityMember.updateMany({
-      where: { communityId: collegeCommunities[0].id, userId: students[0].id },
-      data: { role: 'CAMPUS_LEAD' },
-    });
-    await prisma.communityMember.updateMany({
-      where: { communityId: collegeCommunities[2].id, userId: students[1].id },
-      data: { role: 'OPPORTUNITY_HEAD' },
-    });
-
     // More public transfer stories (so college hubs show them)
     await prisma.transfer.create({
       data: { userId: students[0].id, fromCollegeId: colleges[1].id, toCollegeId: colleges[0].id, currentYear: 2, cgpa: 8.1, branch: 'Computer Science and Engineering', status: 'COMPLETED', story: 'Transferred into Bennett in 2nd year — credit transfer was smooth and the CSE peer group is strong.', isStoryPublic: false },
