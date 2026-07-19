@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import {
   BookOpen,
   GraduationCap,
-  LayoutGrid,
   Search as SearchIcon,
   Star,
   Target,
@@ -18,7 +17,6 @@ import { useSearchAll, type SearchHit, type SearchType } from '@/hooks/use-searc
 
 const TYPE_ICON: Record<SearchType, typeof Star> = {
   college: GraduationCap,
-  community: LayoutGrid,
   user: UserIcon,
   opportunity: Target,
   resource: BookOpen,
@@ -89,7 +87,7 @@ export function GlobalSearch() {
             if (e.key === 'Enter') goToFullResults();
             if (e.key === 'Escape') setOpen(false);
           }}
-          placeholder="Search colleges, communities, people…"
+          placeholder="Search colleges, opportunities, people…"
           className="pl-9"
           aria-label="Search"
         />

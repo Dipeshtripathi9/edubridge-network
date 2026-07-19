@@ -4,29 +4,24 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   BarChart3,
+  Briefcase,
   Code2,
-  Crown,
   GraduationCap,
   Headset,
   Home,
   Info,
-  LayoutGrid,
-  LifeBuoy,
   Repeat,
   ShieldCheck,
   Target,
-  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 
 export const NAV = [
   { href: '/home', label: 'Home', icon: Home },
-  { href: '/communities', label: 'Communities', icon: LayoutGrid },
   { href: '/opportunities', label: 'Opportunities', icon: Target },
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
-  { href: '/network', label: 'Network', icon: Users },
-  { href: '/leadership', label: 'Leadership', icon: Crown },
+  { href: '/referral', label: 'Referral', icon: Briefcase },
   { href: '/about', label: 'About', icon: Info },
 ];
 
@@ -34,7 +29,6 @@ export const NAV = [
 export const ADMIN_NAV = [
   { href: '/admin', label: 'Admin', icon: ShieldCheck },
   { href: '/manage/mentors', label: 'Mentors', icon: Headset },
-  { href: '/manage/support', label: 'Manager Requests', icon: LifeBuoy },
   { href: '/analysis', label: 'Analysis', icon: BarChart3 },
   { href: '/manage/99x', label: '99x Developers', icon: Code2 },
   { href: '/manage/ez-rentbuddy', label: 'EZ-Rentbuddy', icon: Home },

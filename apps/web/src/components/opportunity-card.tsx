@@ -26,7 +26,7 @@ import {
   type Opportunity,
 } from '@/hooks/use-opportunities';
 
-// Type → brand-tinted icon tile (same visual language as the community card).
+// Type → brand-tinted icon tile.
 const TYPE_VISUAL: Record<string, { Icon: typeof Briefcase; tone: string; label: string }> = {
   INTERNSHIP: { Icon: Briefcase, tone: 'bg-accent text-primary', label: 'Internship' },
   SCHOLARSHIP: { Icon: GraduationCap, tone: 'bg-green-soft text-green', label: 'Scholarship' },

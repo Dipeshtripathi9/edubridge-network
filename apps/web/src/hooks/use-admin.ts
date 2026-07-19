@@ -13,16 +13,11 @@ export interface Analytics {
     stickiness: number;
   };
   content: {
-    posts: number;
-    postsThisWeek: number;
-    comments: number;
-    communities: number;
     reviews: number;
     resources: number;
     activeOpportunities: number;
   };
   moderation: { openReports: number };
-  topCommunities: { id: string; name: string; slug: string; memberCount: number; type: string }[];
   topColleges: { id: string; name: string; reviewCount: number; avgRating: number }[];
   topContributors: { id: string; reputationPoints: number; profile?: { fullName: string } | null }[];
 }
@@ -141,7 +136,6 @@ export function useBroadcast() {
       title: string;
       body?: string;
       link?: string;
-      communityId?: string;
     }) => api.post<{ sent: number }>('/notifications/broadcast', input),
   });
 }

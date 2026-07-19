@@ -48,7 +48,7 @@ export interface ResourceComment {
 }
 
 export function useResources(
-  filters: { type?: string; q?: string; sort?: string; collegeId?: string; communityId?: string } = {},
+  filters: { type?: string; q?: string; sort?: string; collegeId?: string } = {},
 ) {
   return useInfiniteQuery({
     queryKey: ['resources', filters],
@@ -59,7 +59,6 @@ export function useResources(
       if (filters.q) params.set('q', filters.q);
       if (filters.sort) params.set('sort', filters.sort);
       if (filters.collegeId) params.set('collegeId', filters.collegeId);
-      if (filters.communityId) params.set('communityId', filters.communityId);
       if (pageParam) params.set('cursor', pageParam);
       return api.paginated<Resource>(`/resources?${params.toString()}`);
     },
@@ -94,7 +93,6 @@ export function useUploadResource() {
       description?: string;
       tags?: string[];
       collegeId?: string;
-      communityId?: string;
     }) =>
       api.post<Resource>('/resources', {
         type: input.type,
@@ -103,7 +101,6 @@ export function useUploadResource() {
         externalUrl: input.externalUrl,
         tags: input.tags ?? [],
         collegeId: input.collegeId,
-        communityId: input.communityId,
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['resources'] }),
   });

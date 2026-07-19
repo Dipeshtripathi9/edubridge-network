@@ -16,7 +16,6 @@ import {
 function deeplink(n: Notification): string | null {
   if (n.data?.link) return n.data.link;
   if (n.data?.chatId) return '/messages';
-  if (n.data?.postId) return '/communities';
   return null;
 }
 

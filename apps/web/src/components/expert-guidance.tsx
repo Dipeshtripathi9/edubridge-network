@@ -237,7 +237,7 @@ export function ExpertGuidance() {
             </h1>
 
             <p className="mt-6 max-w-[490px] text-[17px] text-muted-foreground">
-              Not sure which course or college is right for you? Decide with confidence — <b className="font-bold text-foreground">real experts</b>, verified student reviews and actual placement data. And after admission, we stay with you: scholarships, internships, communities &amp; career support.
+              Not sure which course or college is right for you? Decide with confidence — <b className="font-bold text-foreground">real experts</b>, verified student reviews and actual placement data. And after admission, we stay with you: scholarships, internships &amp; career support.
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -247,7 +247,7 @@ export function ExpertGuidance() {
                 </Button>
               )}
               <Button asChild size="lg" variant="outline">
-                <Link href="/communities">Explore communities</Link>
+                <Link href="/opportunities">Explore opportunities</Link>
               </Button>
             </div>
 

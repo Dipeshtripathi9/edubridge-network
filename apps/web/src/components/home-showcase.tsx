@@ -13,7 +13,6 @@ import {
   Info,
   MapPin,
   Phone,
-  Rocket,
   ShieldCheck,
   Share2,
   Star,
@@ -289,8 +288,7 @@ function OpportunityHub() {
 /* 6 — Builders (dark) ----------------------------------------------------- */
 
 const BUILDERS = [
-  { icon: Rocket, flag: 'Step 1 · Pitch', mint: false, title: 'Founders Hub', body: (<>A community for student founders — post your idea, get feedback, find co-founders. <b className="text-white">Genuine ideas get backed by EduBridge itself.</b></>), meta: '13 founders already building', link: 'Pitch your idea', href: '/communities' },
-  { icon: Code2, flag: 'Step 2 · Build', mint: false, title: '99x Developers', body: (<>EduBridge Network&apos;s in-house studio — web design, development &amp; digital marketing. A guaranteed <b className="text-white">30%+ discount</b> for genuine student ideas.</>), meta: 'For shortlisted ideas only', link: 'Visit 99x Developers', href: '/startups/99x-developers' },
+  { icon: Code2, flag: 'Step 1 · Build', mint: false, title: '99x Developers', body: (<>EduBridge Network&apos;s in-house studio — web design, development &amp; digital marketing. A guaranteed <b className="text-white">30%+ discount</b> for genuine student ideas.</>), meta: 'For shortlisted ideas only', link: 'Visit 99x Developers', href: '/startups/99x-developers' },
   { icon: Home, flag: 'Backed by EduBridge', mint: true, title: 'EZ-Rentbuddy', body: (<>Our first backed startup — a student housing platform. Find <b className="text-white">PGs, hostels, flats &amp; rooms</b>, or earn cashback by sharing properties.</>), meta: 'Live & serving students', link: 'Visit EZ-Rentbuddy', href: '/startups/ez-rentbuddy' },
 ];
 
@@ -304,12 +302,12 @@ function Builders() {
           Got a genuine idea?<br /><span className="text-marigold">We&apos;ll get it built.</span>
         </h2>
         <p className="mt-3 max-w-[560px] text-[#C9C1EE]">
-          Pitch your business idea in the Founders Hub. If it&apos;s genuine, our in-house studio builds your website or app — at student pricing.
+          Got a genuine business idea? Our in-house studio builds your website or app — at student pricing.
         </p>
         <span className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[.07] px-4 py-2.5 text-[13.5px] font-semibold text-[#DCD5F7]">
           Just like Zomato built <b className="text-marigold">District</b> — we built <b className="text-marigold">EZ-Rentbuddy</b>.
         </span>
-        <div className="mt-12 grid gap-4 md:grid-cols-3">
+        <div className="mt-12 grid gap-4 md:grid-cols-2">
           {BUILDERS.map((b) => (
             <article key={b.title} className="flex flex-col gap-3.5 rounded-3xl border border-white/[.13] bg-white/[.055] p-6 backdrop-blur transition-all hover:-translate-y-1 hover:border-white/25 hover:bg-white/[.09]">
               <div className="flex items-center justify-between gap-2.5">

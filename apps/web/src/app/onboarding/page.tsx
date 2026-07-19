@@ -177,7 +177,7 @@ export default function OnboardingPage() {
                   <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                   <p className="text-sm text-muted-foreground">
                     Verify with your <span className="font-medium text-foreground">official campus email</span> to
-                    contribute to your campus community — write reviews, join discussions, and create polls &amp; pools.
+                    write reviews, access verified-student resources, and unlock exclusive opportunities.
                     An admin reviews your request. You can also do this later from your dashboard.
                   </p>
                 </div>

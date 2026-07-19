@@ -2,77 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Briefcase, ExternalLink, PartyPopper, Trash2 } from 'lucide-react';
+import { Briefcase, ExternalLink, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { isSafeHttpUrl } from '@/lib/utils';
-import {
-  useClaimDiscount,
-  useCreateReferral,
-  useDeleteReferral,
-  useDiscountStatus,
-  useReferrals,
-} from '@/hooks/use-perks';
+import { useCreateReferral, useDeleteReferral, useReferrals } from '@/hooks/use-perks';
 
-/** Perk 2 — 45%-off web-dev unlock when a community crosses 600 members. */
-export function DiscountUnlock({ slug }: { slug: string }) {
-  const { data } = useDiscountStatus(slug);
-  const claim = useClaimDiscount(slug);
-  if (!data) return null;
-
-  if (data.claim) {
-    return (
-      <Card className="border-green-500/40 bg-green-500/5">
-        <CardContent className="flex items-center gap-2 p-4 text-sm">
-          <PartyPopper className="h-4 w-4 text-green-600" />
-          45% off website development — <strong>claimed</strong>. Our team will reach out to you.
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!data.eligible) {
-    const togo = data.minMembers - data.memberCount;
-    return (
-      <Card>
-        <CardContent className="p-4 text-sm text-muted-foreground">
-          🎯 Grow to <strong>{data.minMembers} members</strong> to unlock <strong>45% off website
-          development</strong> — {togo} to go ({data.memberCount}/{data.minMembers}).
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="border-primary/40 bg-primary/5">
-      <CardContent className="flex flex-wrap items-center justify-between gap-2 p-4">
-        <div className="text-sm">
-          <p className="flex items-center gap-1.5 font-medium">
-            <PartyPopper className="h-4 w-4 text-primary" /> You unlocked 45% off website development!
-          </p>
-          <p className="text-muted-foreground">{data.memberCount}+ members. Claim it and we’ll reach out.</p>
-        </div>
-        <Button
-          size="sm"
-          disabled={claim.isPending}
-          onClick={() =>
-            claim.mutate(undefined, {
-              onSuccess: () => toast.success('Claimed — we’ll be in touch!'),
-              onError: (e) => toast.error((e as Error).message),
-            })
-          }
-        >
-          Claim 45% off
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-/** Perk 3 — career referrals visible to leaders; admins post them. */
+/** Perk — career referrals visible to everyone; admins post them. */
 export function ReferralsSection({ enabled, isAdmin }: { enabled: boolean; isAdmin: boolean }) {
   const { data: referrals, isLoading } = useReferrals(enabled);
   const create = useCreateReferral();

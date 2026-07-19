@@ -28,7 +28,7 @@ const apiOrigin = (() => {
 export const metadata: Metadata = {
   title: 'EduBridge Network — Your Future, Our Network',
   description:
-    'For students already in college: communities, transfers, scholarships, internships, reviews, and more.',
+    'For students already in college: transfers, scholarships, internships, reviews, and more.',
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [

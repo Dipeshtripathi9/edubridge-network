@@ -5,7 +5,6 @@ import { api } from '@/lib/api';
 
 export type SearchType =
   | 'college'
-  | 'community'
   | 'user'
   | 'opportunity'
   | 'resource'

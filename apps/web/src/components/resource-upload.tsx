@@ -20,8 +20,7 @@ const TYPES = [
 
 export function ResourceUpload({
   collegeId,
-  communityId,
-}: { collegeId?: string; communityId?: string } = {}) {
+}: { collegeId?: string } = {}) {
   const upload = useUploadResource();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState('NOTES');
@@ -50,7 +49,6 @@ export function ResourceUpload({
           .map((t) => t.trim())
           .filter(Boolean),
         collegeId,
-        communityId,
       },
       {
         onSuccess: () => {
