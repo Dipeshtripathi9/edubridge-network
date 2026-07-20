@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Headset, IdCard, Phone, Search } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -98,12 +99,18 @@ function ProfileLeadsSection() {
 }
 
 export default function ManageMentorsPage() {
+  const router = useRouter();
+  const hydrated = useAuthStore((s) => s.hydrated);
   const role = useAuthStore((s) => s.user?.role);
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
   const { data, isLoading } = useMentorRequests();
   const [q, setQ] = useState('');
 
-  if (!isAdmin) return <p className="py-16 text-center text-muted-foreground">Admins only.</p>;
+  useEffect(() => {
+    if (hydrated && !isAdmin) router.replace('/home');
+  }, [hydrated, isAdmin, router]);
+
+  if (!hydrated || !isAdmin) return null;
 
   const all = data ?? [];
   const term = q.trim().toLowerCase();
