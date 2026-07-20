@@ -103,7 +103,7 @@ export default function ManageMentorsPage() {
   const hydrated = useAuthStore((s) => s.hydrated);
   const role = useAuthStore((s) => s.user?.role);
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
-  const { data, isLoading } = useMentorRequests();
+  const { data, isLoading } = useMentorRequests(hydrated && isAdmin);
   const [q, setQ] = useState('');
 
   useEffect(() => {

@@ -29,9 +29,10 @@ export function useSubmitMentorRequest() {
   });
 }
 
-export function useMentorRequests() {
+export function useMentorRequests(enabled = true) {
   return useQuery({
     queryKey: ['admin', 'mentor-requests'],
     queryFn: () => api.get<MentorRequest[]>('/mentors/requests'),
+    enabled,
   });
 }
