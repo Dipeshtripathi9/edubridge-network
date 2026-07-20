@@ -26,6 +26,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ReputationModule } from './reputation/reputation.module';
 import { AdminModule } from './admin/admin.module';
 import { VerificationModule } from './verification/verification.module';
+import { InternshipsModule } from './internships/internships.module';
 import { SearchModule } from './search/search.module';
 import { HealthModule } from './health/health.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
@@ -88,6 +89,7 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     ReputationModule,
     AdminModule,
     VerificationModule,
+    InternshipsModule,
     SearchModule,
     HealthModule,
   ],
