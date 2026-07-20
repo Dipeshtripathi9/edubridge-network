@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowUpRight, Briefcase, Code2, FileText, Video } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -51,9 +53,16 @@ function KindPanel({
 }
 
 export default function Manage99xPage() {
+  const router = useRouter();
+  const hydrated = useAuthStore((s) => s.hydrated);
   const role = useAuthStore((s) => s.user?.role);
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
-  if (!isAdmin) return <p className="py-16 text-center text-muted-foreground">Admins only.</p>;
+
+  useEffect(() => {
+    if (hydrated && !isAdmin) router.replace('/home');
+  }, [hydrated, isAdmin, router]);
+
+  if (!hydrated || !isAdmin) return null;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
