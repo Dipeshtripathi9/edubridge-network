@@ -249,7 +249,7 @@ const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/
 const POSTERS = [
   { svg: POSTER_QUIZ, action: { type: 'quiz' as const } },
   { svg: POSTER_COMPARE, action: { type: 'href' as const, href: '/reviews' } },
-  { svg: POSTER_INTERNSHIP, action: { type: 'href' as const, href: '/opportunities' } },
+  { svg: POSTER_INTERNSHIP, action: { type: 'href' as const, href: '/internship' } },
   { svg: POSTER_SCHOLARSHIP, action: { type: 'href' as const, href: '/opportunities' } },
   { svg: POSTER_EXPERT, action: { type: 'quiz' as const } },
 ];

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  Award,
   BarChart3,
   Briefcase,
   Code2,
@@ -11,6 +12,7 @@ import {
   Home,
   Info,
   Repeat,
+  Rocket,
   ShieldCheck,
   Target,
 } from 'lucide-react';
@@ -20,6 +22,7 @@ import { useAuthStore } from '@/stores/auth.store';
 export const NAV = [
   { href: '/home', label: 'Home', icon: Home },
   { href: '/opportunities', label: 'Opportunities', icon: Target },
+  { href: '/internship', label: 'Internship', icon: Rocket },
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
   { href: '/referral', label: 'Referral', icon: Briefcase },
   { href: '/about', label: 'About', icon: Info },
@@ -32,6 +35,7 @@ export const ADMIN_NAV = [
   { href: '/analysis', label: 'Analysis', icon: BarChart3 },
   { href: '/manage/99x', label: '99x Developers', icon: Code2 },
   { href: '/manage/ez-rentbuddy', label: 'EZ-Rentbuddy', icon: Home },
+  { href: '/manage/internship', label: 'Internship', icon: Award },
 ];
 
 export function Sidebar() {

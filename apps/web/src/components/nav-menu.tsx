@@ -16,6 +16,7 @@ const MENU = [
   { href: '/reviews', label: 'Compare Colleges' },
   { href: '/home#direct-admission', label: 'Direct Admission Desk' },
   { href: '/startups/ez-rentbuddy', label: 'Places to Live' },
+  { href: '/internship', label: 'Internship Opportunities' },
 ];
 
 export function NavMenu() {
