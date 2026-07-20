@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Award, ExternalLink, GraduationCap, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,6 +19,15 @@ export default function VerifyCertificatePage({ params }: { params: Promise<{ co
   const { code } = use(params);
   const { data: certificate, isLoading, isError } = usePublicCertificate(code);
 
+  // TanStack Query can already have a settled (error/success) state by the
+  // time the client hydrates — e.g. a fast/cached lookup — while the server
+  // render only ever sees the initial loading state. Deferring the real
+  // branches to post-mount keeps the first client render identical to the
+  // server's, avoiding a hydration mismatch.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const showLoading = !mounted || isLoading;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-accent/20">
       <header className="border-b border-border bg-background/80 backdrop-blur">
@@ -36,9 +45,9 @@ export default function VerifyCertificatePage({ params }: { params: Promise<{ co
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-14">
-        {isLoading && <Skeleton className="h-64 w-full" />}
+        {showLoading && <Skeleton className="h-64 w-full" />}
 
-        {!isLoading && isError && (
+        {!showLoading && isError && (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
               <span className="grid h-14 w-14 place-items-center rounded-2xl bg-destructive/10 text-destructive">
@@ -55,7 +64,7 @@ export default function VerifyCertificatePage({ params }: { params: Promise<{ co
           </Card>
         )}
 
-        {!isLoading && certificate && (
+        {!showLoading && certificate && (
           <Card>
             <CardContent className="space-y-5 p-8 text-center">
               <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-marigold-soft text-amber-600">
