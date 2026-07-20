@@ -99,6 +99,13 @@ enum NotificationType {
   TRANSFER_UPDATE
   BADGE_EARNED
   SYSTEM
+  INTERNSHIP_PAYMENT_CONFIRMED
+  INTERNSHIP_TASK_ASSIGNED
+  INTERNSHIP_TASK_REVIEWED
+  INTERNSHIP_APPLICATION_ALLOCATED
+  INTERNSHIP_APPLICATION_REVIEWED
+  INTERNSHIP_PAYOUT_SENT
+  CERTIFICATE_ISSUED
 }
 
 enum ReputationAction {
@@ -161,6 +168,43 @@ enum VerificationRequestStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum EnrollmentSubtype {
+  GUIDED_LEARNING
+  OWN_PROJECT
+}
+
+enum EnrollmentStatus {
+  PENDING_PAYMENT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum EnrollmentTaskStatus {
+  ASSIGNED
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum TrackBApplicationStatus {
+  PENDING
+  ALLOCATED
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum TrackBAllocationType {
+  PAID_CLIENT_WORK
+  SKILL_BUILDING_TASK
+}
+
+enum CertificateSourceType {
+  TRACK_A_ENROLLMENT
+  TRACK_B_APPLICATION
 }
 
 // ============================================================
@@ -231,6 +275,10 @@ model User {
   verificationRequests VerificationRequest[]
   referralsPosted      Referral[]
   profileLead          ProfileLead?
+
+  trackAEnrollments  TrackAEnrollment[]
+  trackBApplications TrackBApplication[]
+  certificates       Certificate[]
 
   @@index([status])
   @@index([role])
@@ -1003,6 +1051,101 @@ model Notification {
 
   @@index([recipientId, isRead, createdAt(sort: Desc)])
   @@map("notifications")
+}
+
+// ============================================================
+// MODULE 9: INTERNSHIP PROGRAM
+// ============================================================
+
+model TrackAEnrollment {
+  id                   String            @id @default(cuid())
+  userId               String
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subtype              EnrollmentSubtype
+  projectDescription   String
+  feeAmount            Int // snapshot at enroll time; never re-read pricing config later
+  status               EnrollmentStatus  @default(PENDING_PAYMENT)
+  paymentReferenceNote String?
+  paidAt               DateTime?
+  paymentConfirmedById String?
+  mentorNote           String?
+  completedAt          DateTime?
+  completedById        String?
+  maintenanceUntil     DateTime? // OWN_PROJECT only: completedAt + 1 year
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  tasks EnrollmentTask[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("track_a_enrollments")
+}
+
+model EnrollmentTask {
+  id            String               @id @default(cuid())
+  enrollmentId  String
+  enrollment    TrackAEnrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  order         Int                  @default(0)
+  status        EnrollmentTaskStatus @default(ASSIGNED)
+  submissionUrl String?
+  submittedAt   DateTime?
+  reviewNote    String?
+  reviewedById  String?
+  reviewedAt    DateTime?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([enrollmentId, order])
+  @@map("enrollment_tasks")
+}
+
+model TrackBApplication {
+  id             String                  @id @default(cuid())
+  userId         String
+  user           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills         String[]
+  portfolioUrl   String?
+  bio            String?
+  status         TrackBApplicationStatus @default(PENDING)
+  allocationType TrackBAllocationType?
+  allocationNote String?
+  allocatedById  String?
+  allocatedAt    DateTime?
+  submissionUrl  String?
+  submittedAt    DateTime?
+  reviewNote     String?
+  reviewedById   String?
+  reviewedAt     DateTime?
+  payoutAmount   Float? // PAID_CLIENT_WORK only
+  payoutSentAt   DateTime?
+  payoutNote     String?
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("track_b_applications")
+}
+
+model Certificate {
+  id            String                @id @default(cuid())
+  code          String                @unique // e.g. EB-4F7K2QRT
+  recipientId   String
+  recipient     User                  @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  recipientName String // snapshot — survives later profile-name edits
+  title         String // server-generated from subtype/allocationType, not admin-free-typed
+  sourceType    CertificateSourceType
+  sourceId      String // TrackAEnrollment.id or TrackBApplication.id
+  issuedAt      DateTime              @default(now())
+  metadata      Json? // subtype/allocationType/maintenanceUntil, for PDF rendering
+  revokedAt     DateTime?
+
+  @@unique([sourceType, sourceId]) // one certificate per enrollment/application
+  @@index([recipientId])
+  @@map("certificates")
 }
 
 // ============================================================
