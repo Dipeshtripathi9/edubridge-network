@@ -49,7 +49,6 @@ const OFFERS = [
   { icon: Rocket, tone: 'bg-accent text-primary', title: 'Startup opportunities', body: 'Grants, incubation and entrepreneurship programs.' },
   { icon: BadgeCheck, tone: 'bg-green-soft text-green', title: 'Free certifications', body: 'Certifications and skill-development programs.' },
   { icon: Globe, tone: 'bg-accent text-primary', title: 'Fellowships & study abroad', body: 'Fellowships, study-abroad and exchange programs.' },
-  { icon: Users, tone: 'bg-[hsl(252_30%_92%)] text-foreground', title: 'College communities', body: 'Verified students and alumni, college by college.' },
   { icon: Star, tone: 'bg-marigold-soft text-amber-600', title: 'Honest reviews', body: 'Placements, campus life and academic insights.' },
   { icon: MessageCircle, tone: 'bg-accent text-primary', title: 'Discussions & Q&A', body: 'Student discussions, doubts and peer support.' },
   { icon: Sparkles, tone: 'bg-green-soft text-green', title: 'Personal recommendations', body: 'Guidance based on each student’s profile, interests and goals.' },
@@ -61,7 +60,7 @@ const TEAM = [
   { icon: Cpu, title: 'AI & Data Specialists', body: 'Developing personalised recommendations.' },
   { icon: BookOpen, title: 'Content & Research', body: 'Verifying scholarships, internships, competitions and resources.' },
   { icon: MapPin, title: 'Campus Ambassadors', body: 'Representing colleges across India.' },
-  { icon: ShieldCheck, title: 'Community Moderators', body: 'Keeping discussions respectful, safe and authentic.' },
+  { icon: ShieldCheck, title: 'Trust & Safety', body: 'Keeping the platform respectful, safe and authentic.' },
   { icon: TrendingUp, title: 'Marketing & Partnerships', body: 'Collaborating with universities, startups and employers.' },
   { icon: Headphones, title: 'Student Support', body: 'Helping users discover the right opportunities.' },
 ];
@@ -76,7 +75,7 @@ export default function AboutPage() {
           India&apos;s student-first bridge — from <span className="relative inline-block text-primary">admission to career.{ARC}</span>
         </h1>
         <p className="mt-4 max-w-[620px] text-[16.5px] text-muted-foreground">
-          EduBridge Network helps students make informed decisions from college admission to career success — with verified opportunities, authentic college insights, and a supportive community.
+          EduBridge Network helps students make informed decisions from college admission to career success — with verified opportunities, authentic college insights, and trusted expert guidance.
         </p>
         <div className="mt-6 flex flex-wrap gap-2.5">
           {[
@@ -108,7 +107,7 @@ export default function AboutPage() {
             EduBridge Network brings everything together on one verified platform.
           </p>
           <p className="text-[14.5px] text-muted-foreground">
-            Our mission is to empower every student with equal access to opportunities, authentic college insights, and a community that helps them grow — regardless of their background or college.
+            Our mission is to empower every student with equal access to opportunities, authentic college insights, and guidance that helps them grow — regardless of their background or college.
           </p>
         </div>
       </section>
@@ -149,7 +148,7 @@ export default function AboutPage() {
             <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/15 bg-white/10 text-marigold"><Target className="h-6 w-6" /></span>
             <h3 className="mt-4 font-display text-2xl font-extrabold tracking-tight">Our mission</h3>
             <p className="mt-2 text-[#C9C1EE]">
-              To organise educational opportunities and student knowledge into one accessible, verified, community-driven platform that helps students learn, connect and succeed.
+              To organise educational opportunities and student knowledge into one accessible, verified platform that helps students learn, connect and succeed.
             </p>
           </div>
         </div>
@@ -172,7 +171,7 @@ export default function AboutPage() {
             Built by students, <span className="text-primary">for students.</span>
           </h2>
           <p className="mt-3 text-muted-foreground">
-            A team of students, developers, designers, researchers and community leaders who understand the challenges students face — because we&apos;ve lived them. United by one goal: making quality education, opportunities and career guidance accessible to every student.
+            A team of students, developers, designers, researchers and mentors who understand the challenges students face — because we&apos;ve lived them. United by one goal: making quality education, opportunities and career guidance accessible to every student.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -194,7 +193,7 @@ export default function AboutPage() {
             Together, we&apos;re building the bridge<br /><span className="text-[#FFD98A]">between education and opportunity.</span>
           </h2>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <Button asChild size="lg" className="bg-background text-foreground hover:bg-card"><Link href="/communities"><Users className="h-4 w-4" /> Explore communities</Link></Button>
+            <Button asChild size="lg" className="bg-background text-foreground hover:bg-card"><Link href="/reviews"><Users className="h-4 w-4" /> Explore colleges</Link></Button>
             <Button asChild size="lg" className="bg-foreground text-background hover:bg-foreground/90"><Link href="/opportunities">Browse opportunities</Link></Button>
           </div>
           <p className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#DCD5F7]">

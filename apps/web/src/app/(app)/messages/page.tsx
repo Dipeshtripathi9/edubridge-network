@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { MessageSquare, Send, Users } from 'lucide-react';
+import { MessageSquare, Send } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,14 +37,8 @@ function ChatList({
           )}
         >
           <div className="relative">
-            {c.type === 'COMMUNITY' ? (
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Users className="h-5 w-5" />
-              </span>
-            ) : (
-              <Avatar src={c.other?.profile?.avatarUrl} name={c.other?.profile?.fullName} className="h-10 w-10" />
-            )}
-            {c.type === 'DIRECT' && c.otherOnline && (
+            <Avatar src={c.other?.profile?.avatarUrl} name={c.other?.profile?.fullName} className="h-10 w-10" />
+            {c.otherOnline && (
               <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background bg-green-500" />
             )}
           </div>
@@ -93,20 +87,12 @@ function Conversation({ chat }: { chat: ChatSummary }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-border p-3">
-        {chat.type === 'COMMUNITY' ? (
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Users className="h-4 w-4" />
-          </span>
-        ) : (
-          <Avatar src={chat.other?.profile?.avatarUrl} name={chat.other?.profile?.fullName} />
-        )}
+        <Avatar src={chat.other?.profile?.avatarUrl} name={chat.other?.profile?.fullName} />
         <div>
           <p className="font-medium">{chat.title ?? 'Chat'}</p>
-          {chat.type === 'DIRECT' && (
-            <p className="text-xs text-muted-foreground">
-              {chat.otherOnline ? 'Online' : 'Offline'}
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground">
+            {chat.otherOnline ? 'Online' : 'Offline'}
+          </p>
         </div>
       </div>
 
@@ -126,11 +112,6 @@ function Conversation({ chat }: { chat: ChatSummary }) {
                       : 'rounded-bl-sm bg-muted',
                   )}
                 >
-                  {chat.type === 'COMMUNITY' && !mine && (
-                    <p className="mb-0.5 text-xs font-medium opacity-70">
-                      {m.sender?.profile?.fullName ?? 'Student'}
-                    </p>
-                  )}
                   <p className="whitespace-pre-wrap">{m.body}</p>
                   <p className={cn('mt-0.5 text-[10px]', mine ? 'opacity-70' : 'text-muted-foreground')}>
                     {timeAgo(m.createdAt)}
@@ -181,7 +162,7 @@ export default function MessagesPage() {
             </div>
           ) : !chats?.length ? (
             <p className="p-6 text-center text-sm text-muted-foreground">
-              No conversations yet. Start one from a profile or community.
+              No conversations yet. Start one from a profile.
             </p>
           ) : (
             <ChatList chats={chats} activeId={active?.id ?? null} onSelect={setActive} />

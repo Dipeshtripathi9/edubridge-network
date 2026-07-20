@@ -1,6 +1,6 @@
 // The Opportunity Playbook — full guide content (markdown), rendered on
-// /guides/opportunity-playbook and linked from a Resource in every college
-// community + the sidebar Resources feed.
+// /guides/opportunity-playbook and linked from a Resource on every college
+// hub + the sidebar Resources feed.
 export const PLAYBOOK = `# The Opportunity Playbook — For Students at NCR Private Colleges
 
 **Who this is for:** Students at any of the ~70 colleges/universities covered in the two companion reports. The single biggest lesson from all those reviews: *at almost every college on the list, the students who did well used opportunities OUTSIDE the classroom* — the college's average package is not your ceiling.

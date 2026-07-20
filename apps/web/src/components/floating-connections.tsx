@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, GraduationCap, Home, Users } from 'lucide-react';
+import { ArrowUpRight, GraduationCap, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -17,11 +17,10 @@ import { cn } from '@/lib/utils';
  * On scroll-down the bar slides down and the launcher slides right at the same
  * speed; both return on scroll-up.
  */
-// grow weights give unequal widths: Communities ~+15% and Compare ~+5% wider
-// than an equal third (Home takes the remainder).
+// grow weights (their original relative ratio) give Compare ~57% of the row
+// and Home ~43%, rather than an even 50/50 split.
 const PRIMARY = [
   { href: '/home', label: 'Home', Icon: Home, grow: 'grow-[16]' },
-  { href: '/communities', label: 'Communities', Icon: Users, grow: 'grow-[23]' },
   { href: '/reviews', label: 'Compare', Icon: GraduationCap, grow: 'grow-[21]' },
 ];
 

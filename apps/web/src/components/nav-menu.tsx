@@ -14,7 +14,6 @@ import { ADMIN_NAV } from '@/components/sidebar';
 const MENU = [
   { href: '/home', label: 'Home' },
   { href: '/reviews', label: 'Compare Colleges' },
-  { href: '/communities', label: 'Communities' },
   { href: '/home#direct-admission', label: 'Direct Admission Desk' },
   { href: '/startups/ez-rentbuddy', label: 'Places to Live' },
 ];

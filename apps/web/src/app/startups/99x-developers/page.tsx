@@ -261,8 +261,8 @@ const INFLUENCER_BRIEF = [
   },
   {
     icon: Users,
-    title: 'Communities',
-    desc: 'Connect with verified students across colleges — ask questions, share experiences, learn from seniors and collaborate on projects.',
+    title: 'Resources',
+    desc: 'Access notes, roadmaps, placement reports & study material shared by verified students across colleges.',
   },
   {
     icon: Share2,

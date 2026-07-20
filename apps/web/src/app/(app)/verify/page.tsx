@@ -129,7 +129,7 @@ export default function VerifyPage() {
           <ShieldCheck className="h-6 w-6 text-primary" /> Student Verification
         </h1>
         <p className="text-muted-foreground">
-          Verified students can post reviews, lead communities, access exclusive resources and earn higher trust.
+          Verified students can post reviews, access exclusive resources and earn higher trust.
         </p>
       </div>
 

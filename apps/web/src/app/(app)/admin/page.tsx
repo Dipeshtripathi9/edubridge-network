@@ -15,7 +15,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { uniqueById } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -34,22 +33,6 @@ import {
   useVerifyCollege,
 } from '@/hooks/use-admin';
 import { useDecideVerification, useVerificationQueue } from '@/hooks/use-verification';
-import {
-  HEAD_ROLES,
-  useAppointHead,
-  useDecideHeadApp,
-  useHeadAppQueue,
-  useSetCommunityHiring,
-} from '@/hooks/use-heads';
-import Link from 'next/link';
-import {
-  useCommunities,
-  useCreateCommunity,
-  useDeleteCommunity,
-  useMembers,
-  useUpdateCommunity,
-} from '@/hooks/use-communities';
-import { useColleges } from '@/hooks/use-colleges';
 import { useComplaints, useResolveComplaint } from '@/hooks/use-complaints';
 
 function Stat({ label, value }: { label: string; value: number | string }) {
@@ -101,7 +84,7 @@ function ReportDeleteButton({
   );
 }
 
-// Flagged posts/content reported by community leaders & users — shown at the top.
+// Flagged content reported by users — shown at the top.
 function FlaggedReports() {
   const { data } = useReports('OPEN');
   const resolve = useResolveReport();
@@ -114,7 +97,7 @@ function FlaggedReports() {
           <Flag className="h-4 w-4 text-destructive" /> Flagged content ({reports.length})
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Reported by community leaders & members — review and act.
+          Reported by users — review and act.
         </p>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -180,40 +163,24 @@ function Overview() {
         <Stat label="Stickiness (DAU/MAU)" value={data.users.stickiness} />
         <Stat label="New today" value={data.users.newToday} />
         <Stat label="New this week" value={data.users.newThisWeek} />
-        <Stat label="Posts (7d)" value={data.content.postsThisWeek} />
         <Stat label="Open reports" value={data.moderation.openReports} />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Top Communities</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {data.topCommunities.map((c) => (
-              <div key={c.id} className="flex justify-between text-sm">
-                <span className="truncate">{c.name}</span>
-                <span className="text-muted-foreground">{c.memberCount}</span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Top Colleges (reviews)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {data.topColleges.map((c) => (
-              <div key={c.id} className="flex justify-between text-sm">
-                <span className="truncate">{c.name}</span>
-                <span className="text-muted-foreground">
-                  {c.reviewCount} · {c.avgRating.toFixed(1)}★
-                </span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Top Colleges (reviews)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {data.topColleges.map((c) => (
+            <div key={c.id} className="flex justify-between text-sm">
+              <span className="truncate">{c.name}</span>
+              <span className="text-muted-foreground">
+                {c.reviewCount} · {c.avgRating.toFixed(1)}★
+              </span>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -385,41 +352,17 @@ function ReportsTab() {
 
 function BroadcastTab() {
   const broadcast = useBroadcast();
-  const { data: communitiesData } = useCommunities();
-  const communities = uniqueById(communitiesData?.pages.flatMap((p) => p.data) ?? []);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [link, setLink] = useState('');
-  // 'all' = everyone; otherwise a community id.
-  const [target, setTarget] = useState<string>('all');
-
-  const targetName =
-    target === 'all' ? 'all users' : communities.find((c) => c.id === target)?.name ?? 'community';
 
   return (
     <Card className="max-w-xl">
       <CardHeader>
         <CardTitle className="text-base">Broadcast a notification</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Choose the audience: everyone, or members of a specific community.
-        </p>
+        <p className="text-sm text-muted-foreground">Send a notification to all users.</p>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">Send to</label>
-          <select
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
-          >
-            <option value="all">All communities / all users</option>
-            {communities.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({c.memberCount} members)
-              </option>
-            ))}
-          </select>
-        </div>
         <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
         <Textarea placeholder="Body (optional)" value={body} onChange={(e) => setBody(e.target.value)} />
         <Input placeholder="Deeplink, e.g. /opportunities (optional)" value={link} onChange={(e) => setLink(e.target.value)} />
@@ -432,7 +375,6 @@ function BroadcastTab() {
                 title,
                 body: body || undefined,
                 link: link || undefined,
-                communityId: target === 'all' ? undefined : target,
               },
               {
                 onSuccess: (r) => {
@@ -447,7 +389,7 @@ function BroadcastTab() {
           }
         >
           <Megaphone className="h-4 w-4" />
-          Broadcast to {targetName}
+          Broadcast to all users
         </Button>
       </CardContent>
     </Card>
@@ -561,299 +503,6 @@ function VerificationTab() {
   );
 }
 
-const MANAGER_LABELS: Record<string, string> = {
-  ADMIN: 'Admin',
-  CAMPUS_LEAD: 'Campus Lead',
-  OPPORTUNITY_HEAD: 'Opportunity Head',
-  STUDENT_RELATIONS_HEAD: 'Student Relations Head',
-  MODERATOR: 'Moderator',
-};
-
-function CommunityManagers({ slug }: { slug: string }) {
-  const { data, isLoading } = useMembers(slug);
-  if (isLoading) return <Skeleton className="h-10 w-full" />;
-  const managers = (data?.data ?? []).filter((m) => m.role !== 'MEMBER');
-  if (managers.length === 0) {
-    return <p className="rounded-md bg-muted/40 p-2 text-xs text-muted-foreground">No managers appointed yet.</p>;
-  }
-  return (
-    <div className="space-y-1 rounded-md border border-border bg-muted/30 p-2">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Managers</p>
-      {managers.map((m) => (
-        <div key={m.id} className="flex items-center justify-between text-sm">
-          <span>{m.user.profile?.fullName ?? 'Member'}</span>
-          <Badge variant="secondary">{MANAGER_LABELS[m.role] ?? m.role}</Badge>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function AllCommunities() {
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommunities();
-  const appoint = useAppointHead();
-  const setHiring = useSetCommunityHiring();
-  const update = useUpdateCommunity();
-  const del = useDeleteCommunity();
-  const [q, setQ] = useState('');
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState('CAMPUS_LEAD');
-  const [hiringSlug, setHiringSlug] = useState<string | null>(null);
-  const [note, setNote] = useState('');
-  const [managersSlug, setManagersSlug] = useState<string | null>(null);
-  const [editSlug, setEditSlug] = useState<string | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editTopic, setEditTopic] = useState('');
-  const all = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
-  const term = q.trim().toLowerCase();
-  const items = term ? all.filter((c) => c.name.toLowerCase().includes(term)) : all;
-
-  const typeLabel = (t: string) =>
-    t === 'COLLEGE' ? 'College' : t === 'STARTUP' ? 'Startup' : 'Interests';
-
-  const toggle = (slug: string) => {
-    setOpenSlug((cur) => (cur === slug ? null : slug));
-    setHiringSlug(null);
-    setManagersSlug(null);
-    setEmail('');
-    setRole('CAMPUS_LEAD');
-  };
-  const toggleManagers = (slug: string) => {
-    setManagersSlug((cur) => (cur === slug ? null : slug));
-    setOpenSlug(null);
-    setHiringSlug(null);
-    setEditSlug(null);
-  };
-  const toggleHiring = (slug: string, currentNote?: string | null) => {
-    setHiringSlug((cur) => (cur === slug ? null : slug));
-    setOpenSlug(null);
-    setNote(currentNote ?? '');
-  };
-  const toggleEdit = (slug: string, name: string, topic?: string | null) => {
-    setEditSlug((cur) => (cur === slug ? null : slug));
-    setOpenSlug(null);
-    setHiringSlug(null);
-    setEditName(name);
-    setEditTopic(topic ?? '');
-  };
-
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="font-semibold">All communities ({all.length})</h3>
-        <Input
-          placeholder="Search…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          className="h-8 w-48"
-        />
-      </div>
-      {isLoading ? (
-        <Skeleton className="h-40 w-full" />
-      ) : (
-        <div className="space-y-2">
-          {items.map((c) => (
-            <Card key={c.id}>
-              <CardContent className="space-y-2 p-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <p className="text-sm font-medium">
-                      {c.name}{' '}
-                      {c.hiringOpen && (
-                        <span className="ml-1 rounded bg-green-500/15 px-1.5 py-0.5 text-xs text-green-600">
-                          hiring
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {typeLabel(c.type)} · {c.memberCount.toLocaleString()} members
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline" onClick={() => toggleHiring(c.slug, c.hiringNote)}>
-                      {hiringSlug === c.slug ? 'Cancel' : 'Hiring'}
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => toggleManagers(c.slug)}>
-                      {managersSlug === c.slug ? 'Hide' : 'Managers'}
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => toggle(c.slug)}>
-                      {openSlug === c.slug ? 'Cancel' : 'Appoint here'}
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => toggleEdit(c.slug, c.name, c.topic)}>
-                      {editSlug === c.slug ? 'Cancel' : 'Edit'}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-destructive"
-                      onClick={() => {
-                        if (window.confirm(`Delete "${c.name}"? This removes its posts, members & pools.`)) {
-                          del.mutate(c.slug, {
-                            onSuccess: () => toast.success('Community deleted'),
-                            onError: (e) => toast.error((e as Error).message),
-                          });
-                        }
-                      }}
-                    >
-                      Delete
-                    </Button>
-                    <Button asChild size="sm">
-                      <Link href={`/leadership/${c.slug}`}>Manage</Link>
-                    </Button>
-                  </div>
-                </div>
-
-                {managersSlug === c.slug && <CommunityManagers slug={c.slug} />}
-
-                {editSlug === c.slug && (
-                  <div className="space-y-2 rounded-md border border-border p-2">
-                    <Input
-                      placeholder="Community name"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="h-9"
-                    />
-                    {c.type !== 'COLLEGE' && (
-                      <Input
-                        placeholder="Interest (optional)"
-                        value={editTopic}
-                        onChange={(e) => setEditTopic(e.target.value)}
-                        className="h-9"
-                      />
-                    )}
-                    <Button
-                      size="sm"
-                      disabled={!editName.trim() || update.isPending}
-                      onClick={() =>
-                        update.mutate(
-                          { slug: c.slug, name: editName.trim(), topic: editTopic || undefined },
-                          {
-                            onSuccess: () => {
-                              toast.success('Community updated');
-                              setEditSlug(null);
-                            },
-                            onError: (e) => toast.error((e as Error).message),
-                          },
-                        )
-                      }
-                    >
-                      Save changes
-                    </Button>
-                  </div>
-                )}
-
-                {hiringSlug === c.slug && (
-                  <div className="space-y-2 rounded-md border border-border p-2">
-                    <p className="text-xs text-muted-foreground">
-                      Hiring is {c.hiringOpen ? 'OPEN' : 'CLOSED'}. Set the requirement and open/close
-                      applications for this community.
-                    </p>
-                    <Input
-                      placeholder="Requirement, e.g. Looking for an Opportunity Head (active, 2nd yr+)"
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      className="h-9"
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        disabled={setHiring.isPending}
-                        onClick={() =>
-                          setHiring.mutate(
-                            { slug: c.slug, open: true, note: note || undefined },
-                            {
-                              onSuccess: () => {
-                                toast.success(`Hiring opened for ${c.name}`);
-                                setHiringSlug(null);
-                              },
-                              onError: (e) => toast.error((e as Error).message),
-                            },
-                          )
-                        }
-                      >
-                        {c.hiringOpen ? 'Update & keep open' : 'Open hiring'}
-                      </Button>
-                      {c.hiringOpen && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={setHiring.isPending}
-                          onClick={() =>
-                            setHiring.mutate(
-                              { slug: c.slug, open: false },
-                              {
-                                onSuccess: () => {
-                                  toast.success(`Hiring closed for ${c.name}`);
-                                  setHiringSlug(null);
-                                },
-                              },
-                            )
-                          }
-                        >
-                          Close hiring
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {openSlug === c.slug && (
-                  <div className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2">
-                    <Input
-                      placeholder="User email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="h-9 flex-1"
-                    />
-                    <select
-                      value={role}
-                      onChange={(e) => setRole(e.target.value)}
-                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                    >
-                      {HEAD_ROLES.map((r) => (
-                        <option key={r.value} value={r.value}>
-                          {r.label}
-                        </option>
-                      ))}
-                    </select>
-                    <Button
-                      size="sm"
-                      disabled={!email.trim() || appoint.isPending}
-                      onClick={() =>
-                        appoint.mutate(
-                          { slug: c.slug, email: email.trim(), role },
-                          {
-                            onSuccess: () => {
-                              toast.success(`Appointed in ${c.name}`);
-                              setOpenSlug(null);
-                              setEmail('');
-                            },
-                            onError: (e) => toast.error((e as Error).message),
-                          },
-                        )
-                      }
-                    >
-                      Appoint
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-          {hasNextPage && (
-            <div className="flex justify-center">
-              <Button variant="outline" size="sm" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-                {isFetchingNextPage ? 'Loading…' : 'Load more'}
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function ComplaintsTab() {
   const { data, isLoading } = useComplaints();
   const resolve = useResolveComplaint();
@@ -890,178 +539,6 @@ function ComplaintsTab() {
   );
 }
 
-function CommunitiesTab() {
-  const { data, isLoading } = useHeadAppQueue();
-  const decide = useDecideHeadApp();
-  const appoint = useAppointHead();
-  const create = useCreateCommunity();
-  const { data: collegesData } = useColleges({ sort: 'name' });
-  const colleges = uniqueById(collegesData?.pages.flatMap((p) => p.data) ?? []);
-  const [slug, setSlug] = useState('');
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState<string>('CAMPUS_LEAD');
-  // Create-community form
-  const [cName, setCName] = useState('');
-  const [cType, setCType] = useState<'TOPIC' | 'COLLEGE' | 'STARTUP'>('TOPIC');
-  const [cTopic, setCTopic] = useState('');
-  const [cCollegeId, setCCollegeId] = useState('');
-  const apps = data?.data ?? [];
-
-  const submitCreate = () => {
-    if (!cName.trim()) {
-      toast.error('Enter a community name');
-      return;
-    }
-    const payload: Record<string, unknown> = { name: cName, type: cType };
-    if (cType === 'COLLEGE') {
-      if (!cCollegeId) {
-        toast.error('Pick a college');
-        return;
-      }
-      payload.collegeId = cCollegeId;
-    } else if (cType === 'TOPIC') {
-      payload.topic = cTopic || cName;
-    }
-    // STARTUP needs only a name
-    create.mutate(payload, {
-      onSuccess: (community) => {
-        toast.success(`Created "${community.name}" — now appoint its head below`);
-        setSlug(community.slug); // prefill the appoint form
-        setCName('');
-        setCTopic('');
-        setCCollegeId('');
-      },
-      onError: (e) => toast.error((e as Error).message),
-    });
-  };
-
-  return (
-    <div className="space-y-6">
-      <Card className="max-w-xl">
-        <CardHeader>
-          <CardTitle className="text-base">Create a community</CardTitle>
-          <p className="text-sm text-muted-foreground">Spin up a college or topic community.</p>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Input placeholder="Community name" value={cName} onChange={(e) => setCName(e.target.value)} />
-          <div className="flex gap-2">
-            {(['TOPIC', 'COLLEGE', 'STARTUP'] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setCType(t)}
-                className={`flex-1 rounded-md border px-3 py-1.5 text-sm capitalize ${cType === t ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent'}`}
-              >
-                {t === 'TOPIC' ? 'interests' : t.toLowerCase()}
-              </button>
-            ))}
-          </div>
-          {cType === 'TOPIC' ? (
-            <Input placeholder="Interest (e.g. AI, DSA)" value={cTopic} onChange={(e) => setCTopic(e.target.value)} />
-          ) : cType === 'STARTUP' ? null : (
-            <select
-              value={cCollegeId}
-              onChange={(e) => setCCollegeId(e.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
-            >
-              <option value="">Select a college…</option>
-              {colleges.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          )}
-          <Button disabled={create.isPending} onClick={submitCreate}>
-            Create community
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card className="max-w-xl">
-        <CardHeader>
-          <CardTitle className="text-base">Appoint a community head / moderator</CardTitle>
-          <p className="text-sm text-muted-foreground">Assign a verified student a leadership role.</p>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Input placeholder="Community slug (e.g. dsa)" value={slug} onChange={(e) => setSlug(e.target.value)} />
-          <Input placeholder="User email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
-          >
-            {HEAD_ROLES.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
-            ))}
-          </select>
-          <Button
-            disabled={!slug || !email || appoint.isPending}
-            onClick={() =>
-              appoint.mutate(
-                { slug, email, role },
-                {
-                  onSuccess: () => {
-                    toast.success('Head appointed');
-                    setEmail('');
-                  },
-                  onError: (e) => toast.error((e as Error).message),
-                },
-              )
-            }
-          >
-            Appoint
-          </Button>
-        </CardContent>
-      </Card>
-
-      <AllCommunities />
-
-      <div>
-        <h3 className="mb-2 font-semibold">Head applications</h3>
-        {isLoading ? (
-          <Skeleton className="h-32 w-full" />
-        ) : apps.length === 0 ? (
-          <p className="py-8 text-center text-muted-foreground">No pending applications.</p>
-        ) : (
-          <div className="space-y-3">
-            {apps.map((a) => (
-              <Card key={a.id}>
-                <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-                  <div>
-                    <div className="flex items-center gap-2 font-medium">
-                      <span>{a.user?.profile?.fullName ?? a.user?.email}</span>
-                      <Badge variant="secondary">{a.requestedRole.replace(/_/g, ' ').toLowerCase()}</Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{a.community.name}</p>
-                    {a.pitch && <p className="mt-1 text-sm text-muted-foreground">{a.pitch}</p>}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => decide.mutate({ id: a.id, approve: false }, { onSuccess: () => toast.success('Rejected') })}
-                    >
-                      Reject
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => decide.mutate({ id: a.id, approve: true }, { onSuccess: () => toast.success('Approved') })}
-                    >
-                      Approve
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function AdminPage() {
   const router = useRouter();
   const role = useAuthStore((s) => s.user?.role);
@@ -1094,7 +571,6 @@ export default function AdminPage() {
           </TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="verification">Verification</TabsTrigger>
-          <TabsTrigger value="communities">Communities</TabsTrigger>
           <TabsTrigger value="complaints">Complaints</TabsTrigger>
           <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
         </TabsList>
@@ -1109,9 +585,6 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="verification">
           <VerificationTab />
-        </TabsContent>
-        <TabsContent value="communities">
-          <CommunitiesTab />
         </TabsContent>
         <TabsContent value="complaints">
           <ComplaintsTab />

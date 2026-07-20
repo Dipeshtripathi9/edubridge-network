@@ -18,10 +18,7 @@ export interface CollegeHub {
   };
   community: { id: string; slug: string; name: string; description?: string | null } | null;
   counts: {
-    members: number;
     verifiedStudents: number;
-    verifiedAdmins: number;
-    posts: number;
     reviews: number;
     resources: number;
     opportunities: number;

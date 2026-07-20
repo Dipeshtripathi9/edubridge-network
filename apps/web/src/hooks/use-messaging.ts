@@ -8,9 +8,8 @@ import { useAuthStore } from '@/stores/auth.store';
 
 export interface ChatSummary {
   id: string;
-  type: 'DIRECT' | 'COMMUNITY';
+  type: 'DIRECT';
   title?: string | null;
-  community?: { id: string; name: string; slug: string; iconUrl?: string | null } | null;
   other?: { id: string; profile?: { fullName: string; avatarUrl?: string | null } | null } | null;
   otherOnline: boolean;
   lastMessage?: { body: string; createdAt: string } | null;

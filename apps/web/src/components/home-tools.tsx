@@ -195,46 +195,6 @@ const POSTER_SCHOLARSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/
   <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Scholarship</text>
 </svg>`;
 
-const POSTER_RESOURCES = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
-  <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#DFDACB"/>
-  <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
-  <rect x="120" y="200" width="70" height="140" rx="8" fill="#1B1633"/>
-  <line x1="135" y1="230" x2="175" y2="230" stroke="#fff" stroke-width="4" opacity="0.5"/>
-  <line x1="135" y1="245" x2="165" y2="245" stroke="#fff" stroke-width="4" opacity="0.5"/>
-  <path d="M195 165 h90 l25 25 v170 h-115 z" fill="#fff" stroke="#1B1633" stroke-width="6" stroke-linejoin="round"/>
-  <path d="M285 165 v25 h25 z" fill="#EAE7DC" stroke="#1B1633" stroke-width="4"/>
-  <rect x="212" y="205" width="45" height="14" rx="4" fill="#1B1633"/>
-  <line x1="212" y1="235" x2="292" y2="235" stroke="#1B1633" stroke-width="4" opacity="0.3"/>
-  <line x1="212" y1="252" x2="292" y2="252" stroke="#1B1633" stroke-width="4" opacity="0.3"/>
-  <line x1="212" y1="269" x2="270" y2="269" stroke="#1B1633" stroke-width="4" opacity="0.3"/>
-  <circle cx="278" cy="305" r="18" fill="#1B1633"/>
-  <path d="M278 297 v14 M271 304 l7 7 l7 -7" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <g transform="translate(295 250)">
-    <rect x="0" y="0" width="110" height="72" rx="8" fill="#1B1633"/>
-    <rect x="8" y="8" width="94" height="56" rx="4" fill="#F4F1EA"/>
-    <circle cx="55" cy="34" r="15" fill="#5B4FE9"/>
-    <path d="M50 27 l14 7 l-14 7 z" fill="#fff"/>
-    <line x1="20" y1="55" x2="60" y2="55" stroke="#1B1633" stroke-width="3" opacity="0.3"/>
-    <rect x="-8" y="72" width="126" height="10" rx="4" fill="#1B1633"/>
-  </g>
-  <path d="M150 340 q50 -20 90 0 v70 q-45 -18 -90 0 z" fill="#1B1633" stroke="#1B1633" stroke-width="6" stroke-linejoin="round"/>
-  <path d="M240 340 q50 -20 90 0 v70 q-45 -18 -90 0 z" fill="#fff" stroke="#1B1633" stroke-width="6" stroke-linejoin="round"/>
-  <line x1="170" y1="360" x2="215" y2="352" stroke="#fff" stroke-width="3" opacity="0.5"/>
-  <line x1="170" y1="375" x2="215" y2="368" stroke="#fff" stroke-width="3" opacity="0.5"/>
-  <line x1="255" y1="352" x2="300" y2="360" stroke="#1B1633" stroke-width="3" opacity="0.3"/>
-  <line x1="255" y1="368" x2="300" y2="375" stroke="#1B1633" stroke-width="3" opacity="0.3"/>
-  <g transform="translate(340 350)">
-    <circle cx="0" cy="0" r="24" fill="none" stroke="#1B1633" stroke-width="6"/>
-    <rect x="-10" y="20" width="20" height="14" rx="4" fill="#1B1633"/>
-    <line x1="0" y1="-38" x2="0" y2="-28" stroke="#1B1633" stroke-width="4" stroke-linecap="round"/>
-    <line x1="26" y1="-26" x2="19" y2="-19" stroke="#1B1633" stroke-width="4" stroke-linecap="round"/>
-    <line x1="-26" y1="-26" x2="-19" y2="-19" stroke="#1B1633" stroke-width="4" stroke-linecap="round"/>
-  </g>
-  </g>
-  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">Resources</text>
-</svg>`;
-
 const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
   <circle cx="240" cy="230" r="168" fill="#FBE3B8"/>
@@ -291,7 +251,6 @@ const POSTERS = [
   { svg: POSTER_COMPARE, action: { type: 'href' as const, href: '/reviews' } },
   { svg: POSTER_INTERNSHIP, action: { type: 'href' as const, href: '/opportunities' } },
   { svg: POSTER_SCHOLARSHIP, action: { type: 'href' as const, href: '/opportunities' } },
-  { svg: POSTER_RESOURCES, action: { type: 'href' as const, href: '/communities' } },
   { svg: POSTER_EXPERT, action: { type: 'quiz' as const } },
 ];
 const POSTER_TRACK = POSTERS;

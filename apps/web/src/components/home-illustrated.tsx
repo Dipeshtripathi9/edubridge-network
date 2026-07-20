@@ -127,7 +127,7 @@ export function HomeIllustrated() {
           </div>
           <div className="mt-12 flex justify-center">
             <Button asChild size="lg">
-              <Link href="/communities">Join the community</Link>
+              <Link href="/opportunities">Explore opportunities</Link>
             </Button>
           </div>
         </section>
@@ -162,7 +162,6 @@ export function HomeIllustrated() {
             </div>
             <nav className="flex flex-nowrap items-center gap-x-5 overflow-x-auto whitespace-nowrap text-[14px] font-semibold text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <Link href="/reviews" className="hover:text-primary">Colleges</Link>
-              <Link href="/communities" className="hover:text-primary">Communities</Link>
               <Link href="/opportunities" className="hover:text-primary">Opportunities</Link>
               <Link href="/about" className="hover:text-primary">About</Link>
             </nav>

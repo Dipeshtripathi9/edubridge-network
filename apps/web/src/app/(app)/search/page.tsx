@@ -6,7 +6,6 @@ import { useSearchParams } from 'next/navigation';
 import {
   BookOpen,
   GraduationCap,
-  LayoutGrid,
   Search as SearchIcon,
   Star,
   Target,
@@ -26,7 +25,6 @@ import {
 
 const TYPE_META: Record<SearchType, { label: string; icon: typeof Star }> = {
   college: { label: 'Colleges', icon: GraduationCap },
-  community: { label: 'Communities', icon: LayoutGrid },
   user: { label: 'People', icon: UserIcon },
   opportunity: { label: 'Opportunities', icon: Target },
   resource: { label: 'Resources', icon: BookOpen },
@@ -130,7 +128,7 @@ function SearchInner() {
       </div>
 
       {!q ? (
-        <EmptyState icon={SearchIcon} title="Search EduBridge" description="Type a query in the search bar above to find colleges, communities, opportunities & people." />
+        <EmptyState icon={SearchIcon} title="Search EduBridge" description="Type a query in the search bar above to find colleges, opportunities & people." />
       ) : (
         <>
           <div className="flex flex-wrap gap-2">
