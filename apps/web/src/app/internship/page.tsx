@@ -49,52 +49,72 @@ const FAQ = [
   },
 ];
 
+const HERO_TAGS = [
+  { label: 'Track A · Learn', href: '#tracks' },
+  { label: 'Track B · Apply', href: '#tracks' },
+  { label: 'Certification', href: '#why-intern' },
+];
+
 export default function InternshipLandingPage() {
   const { data: pricing } = usePricing();
 
   return (
     <div className="min-h-screen scroll-smooth bg-gradient-to-b from-background to-accent/20">
       {/* Nav */}
-      <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
+      <header className="sticky top-0 z-10 bg-primary text-primary-foreground">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 text-white">
               <GraduationCap className="h-5 w-5" />
             </span>
             <div className="leading-tight">
-              <p className="text-sm font-bold tracking-tight">EduBridge Network</p>
-              <p className="text-xs font-semibold text-primary">Internship Opportunities</p>
+              <p className="text-sm font-bold tracking-tight text-white">EduBridge Network</p>
+              <p className="text-xs font-semibold text-white/75">Internship Opportunities</p>
             </div>
           </Link>
-          <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
+          <nav className="hidden items-center gap-5 text-sm text-white/80 md:flex">
             {NAV.map((n) => (
-              <a key={n} href={`#${n.toLowerCase().replace(/\s+/g, '-')}`} className="hover:text-foreground">
+              <a key={n} href={`#${n.toLowerCase().replace(/\s+/g, '-')}`} className="hover:text-white">
                 {n}
               </a>
             ))}
           </nav>
-          <Button asChild size="sm" variant="outline">
+          <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+          >
             <Link href="/internship/dashboard">Sign in</Link>
           </Button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-16 px-4 py-12 [&_section[id]]:scroll-mt-24">
-        {/* Hero */}
-        <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-marigold/10 px-6 py-14 text-center">
-          <p className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+      {/* Hero — full-bleed tan panel, bold serif headline, outlined tag pills */}
+      <section className="w-screen bg-marigold-soft" style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}>
+        <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+          <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.2em] text-marigold">
             <Sparkles className="h-3.5 w-3.5" /> EduBridge&apos;s own internship program
           </p>
-          <h1 className="mx-auto mt-4 max-w-2xl font-display text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-            Every path from student to{' '}
-            <span className="bg-gradient-to-r from-primary to-marigold bg-clip-text text-transparent">certified</span>,
-            ends here.
+          <h1 className="mx-auto mt-4 max-w-2xl font-display text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl">
+            Every path from student to <span className="text-primary">certified</span>, ends here.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
             Two ways in: pay to learn on a live project with a mentor, or apply and let your skills
             earn you real — sometimes paid — work. Both roads lead to a verifiable certificate.
           </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <div className="mt-6 flex flex-wrap justify-center gap-2.5">
+            {HERO_TAGS.map((t) => (
+              <a
+                key={t.label}
+                href={t.href}
+                className="rounded-full border border-primary/50 px-4 py-1.5 text-sm font-semibold text-primary hover:bg-primary/10"
+              >
+                {t.label}
+              </a>
+            ))}
+          </div>
+          <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
               <a href="#tracks">
                 Choose your track <ArrowRight className="h-4 w-4" />
@@ -104,8 +124,10 @@ export default function InternshipLandingPage() {
               <Link href="/verify-certificate">Verify a certificate</Link>
             </Button>
           </div>
-        </section>
+        </div>
+      </section>
 
+      <main className="mx-auto max-w-6xl space-y-16 px-4 py-12 [&_section[id]]:scroll-mt-24">
         {/* Tracks */}
         <section id="tracks" className="space-y-4">
           <div className="mx-auto max-w-xl text-center">

@@ -43,11 +43,17 @@ export function TrackPicker() {
   return (
     <div className="grid gap-6 sm:grid-cols-2">
       {/* Track A */}
-      <Card className="flex flex-col border-marigold/30">
-        <CardContent className="flex flex-1 flex-col p-7">
-          <span className="mb-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-marigold px-3 py-1 text-xs font-bold text-white">
-            OPTION 1 &nbsp;·&nbsp; Learn &amp; Build with Guidance
+      <Card className="flex flex-col overflow-hidden border-marigold/30 p-0">
+        <div className="flex items-center gap-3 bg-marigold px-6 py-5 text-white sm:px-7">
+          <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-white/15">
+            <GraduationCap className="h-5 w-5" />
           </span>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/80">Option 1</p>
+            <p className="font-display text-lg font-extrabold tracking-tight">Learn &amp; Build with Guidance</p>
+          </div>
+        </div>
+        <CardContent className="flex flex-1 flex-col p-7">
           <h3 className="font-display text-2xl font-extrabold tracking-tight">Learn &amp; Build</h3>
           <p className="mt-2 text-[15px] text-muted-foreground">
             Perfect for students who want to learn, get certified, and grow through guided tasks —
@@ -114,11 +120,17 @@ export function TrackPicker() {
       </Card>
 
       {/* Track B */}
-      <Card className="flex flex-col border-primary/25">
-        <CardContent className="flex flex-1 flex-col p-7">
-          <span className="mb-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
-            OPTION 2 &nbsp;·&nbsp; Work on Live Projects
+      <Card className="flex flex-col overflow-hidden border-primary/25 p-0">
+        <div className="flex items-center gap-3 bg-primary px-6 py-5 text-primary-foreground sm:px-7">
+          <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-white/15">
+            <Send className="h-5 w-5" />
           </span>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-primary-foreground/80">Option 2</p>
+            <p className="font-display text-lg font-extrabold tracking-tight">Work on Live Projects</p>
+          </div>
+        </div>
+        <CardContent className="flex flex-1 flex-col p-7">
           <h3 className="font-display text-2xl font-extrabold tracking-tight">Apply &amp; Get Selected</h3>
           <p className="mt-2 text-[15px] text-muted-foreground">{pricing.trackB.description}</p>
 
