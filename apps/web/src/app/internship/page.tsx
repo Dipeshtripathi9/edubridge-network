@@ -1,12 +1,34 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Award, GraduationCap, ShieldCheck, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  Award,
+  Briefcase,
+  GraduationCap,
+  Globe2,
+  Network,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  TrendingUp,
+  UserCheck,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { TrackPicker } from '@/components/internship/track-picker';
+import { usePricing } from '@/hooks/use-internships';
 
-const NAV = ['Tracks', 'How it works', 'FAQ'];
+const NAV = ['Tracks', 'Why intern', 'FAQ'];
+
+const WHY_INTERN = [
+  { icon: Briefcase, title: 'Real-World Experience', desc: 'Work on live projects, not busywork.' },
+  { icon: UserCheck, title: 'Expert Guidance', desc: 'Mentor feedback on every task you submit.' },
+  { icon: TrendingUp, title: 'Skill Development', desc: 'Structured tasks that build real ability.' },
+  { icon: ShieldCheck, title: 'Verified Certification', desc: 'A certificate anyone can verify online.' },
+  { icon: Award, title: 'Career Growth', desc: 'A credential that stands out on your profile.' },
+  { icon: Network, title: 'Networking Opportunities', desc: 'Connect with mentors, startups & partners.' },
+];
 
 const FAQ = [
   {
@@ -28,6 +50,8 @@ const FAQ = [
 ];
 
 export default function InternshipLandingPage() {
+  const { data: pricing } = usePricing();
+
   return (
     <div className="min-h-screen scroll-smooth bg-gradient-to-b from-background to-accent/20">
       {/* Nav */}
@@ -95,24 +119,70 @@ export default function InternshipLandingPage() {
           <TrackPicker />
         </section>
 
-        {/* How it works */}
+        {/* Premium: build your own project */}
+        <section className="overflow-hidden rounded-3xl border border-marigold/30 bg-marigold-soft">
+          <div className="flex flex-col items-start gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+            <div className="flex items-start gap-4">
+              <span className="inline-flex items-center gap-1 rounded-full bg-marigold px-3 py-1 text-xs font-bold text-white">
+                <Star className="h-3.5 w-3.5" /> PREMIUM SERVICE
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col gap-6 px-6 pb-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+            <div>
+              <h3 className="font-display text-xl font-extrabold tracking-tight sm:text-2xl">
+                Build Your Own Project with Your Own Team
+              </h3>
+              <p className="mt-1.5 max-w-lg text-[15px] text-muted-foreground">
+                Want to build your own project with your own team? We&apos;ll build and ship a
+                professional website for your idea.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-4 text-[13px] font-semibold text-foreground/80">
+                <span className="flex items-center gap-1.5">
+                  <UserCheck className="h-4 w-4 text-marigold" /> Qualified Expert Team
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Globe2 className="h-4 w-4 text-marigold" /> Best-in-Class Website
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="h-4 w-4 text-marigold" /> 1 Year Maintenance
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-none flex-col items-start gap-3 sm:items-end">
+              {pricing && (
+                <div className="rounded-2xl bg-marigold px-4 py-2 text-center text-white">
+                  <p className="text-[10px] font-bold uppercase tracking-wide opacity-90">Starting from</p>
+                  <p className="font-mono text-lg font-extrabold">
+                    ₹{pricing.trackA.OWN_PROJECT.feeAmount.toLocaleString()}
+                  </p>
+                </div>
+              )}
+              <Button asChild className="bg-marigold text-white hover:bg-marigold/90">
+                <Link href="/internship/dashboard/enroll">
+                  Build my project <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Why intern */}
         <section
-          id="how-it-works"
+          id="why-intern"
           className="space-y-6 rounded-3xl border border-border bg-card px-6 py-12 sm:px-10"
         >
           <div className="mx-auto max-w-xl text-center">
-            <p className="text-sm font-bold uppercase tracking-wide text-primary">How it works</p>
-            <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight">Same destination, either way</h2>
+            <p className="text-sm font-bold uppercase tracking-wide text-primary">Why intern with us</p>
+            <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight">
+              Why Intern with EduBridge Network?
+            </h2>
             <p className="mt-2 text-muted-foreground">
               Whichever track you take, you leave with a verifiable, shareable certificate.
             </p>
           </div>
-          <div className="mx-auto grid max-w-3xl gap-3 sm:grid-cols-3">
-            {[
-              { icon: GraduationCap, title: 'Pick a track', desc: 'Enroll in Track A or apply for Track B — both need just a signed-in account.' },
-              { icon: ShieldCheck, title: 'Do the work', desc: 'Complete milestone tasks with a mentor, or the work/task we allocate you.' },
-              { icon: Award, title: 'Get certified', desc: 'A real, verifiable certificate is issued the moment you’re approved.' },
-            ].map((s) => (
+          <div className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-3">
+            {WHY_INTERN.map((s) => (
               <div key={s.title} className="rounded-2xl border border-border bg-background p-5 text-center">
                 <span className="mx-auto grid h-10 w-10 place-items-center rounded-xl bg-accent text-primary">
                   <s.icon className="h-5 w-5" />
@@ -122,6 +192,15 @@ export default function InternshipLandingPage() {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* Mission statement */}
+        <section className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-5 py-4 text-center sm:justify-center">
+          <ShieldCheck className="h-5 w-5 flex-none text-primary" />
+          <p className="text-[14.5px] font-medium text-foreground/90">
+            At EduBridge Network, our mission is to give every student real skills, hands-on
+            experience, and the right guidance for their future.
+          </p>
         </section>
 
         {/* FAQ */}
