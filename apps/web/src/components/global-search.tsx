@@ -8,7 +8,6 @@ import {
   GraduationCap,
   Search as SearchIcon,
   Star,
-  Target,
   User as UserIcon,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -18,7 +17,6 @@ import { useSearchAll, type SearchHit, type SearchType } from '@/hooks/use-searc
 const TYPE_ICON: Record<SearchType, typeof Star> = {
   college: GraduationCap,
   user: UserIcon,
-  opportunity: Target,
   resource: BookOpen,
   review: Star,
 };
@@ -87,7 +85,7 @@ export function GlobalSearch() {
             if (e.key === 'Enter') goToFullResults();
             if (e.key === 'Escape') setOpen(false);
           }}
-          placeholder="Search colleges, opportunities, people…"
+          placeholder="Search colleges, resources, people…"
           className="pl-9"
           aria-label="Search"
         />

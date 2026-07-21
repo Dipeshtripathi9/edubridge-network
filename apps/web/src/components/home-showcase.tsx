@@ -1,21 +1,16 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
   Award,
   BarChart3,
-  Bookmark,
   Code2,
   Headphones,
   Home,
   Info,
-  MapPin,
   Phone,
   ShieldCheck,
-  Share2,
-  Star,
   Target,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -230,61 +225,6 @@ function DataSection() {
   );
 }
 
-/* 5 — Opportunity Hub ----------------------------------------------------- */
-
-const FILTERS = ['All', 'Internships', 'Scholarships', 'Competitions', 'Fellowships', 'Research', 'Certifications'];
-const OPPS = [
-  { title: 'Young India Fellowship', body: 'A transformative year of liberal-arts education, with scholarships available and global networking.', loc: 'Remote', tag2: 'Opportunity playbook' },
-  { title: 'LAMP Fellowship', body: 'Work alongside a Member of Parliament — first-hand experience in policy, research and governance.', loc: 'New Delhi', tag2: 'Policy & governance' },
-  { title: 'SBI Youth for India', body: '13 months in rural India — working with NGOs on grassroots development projects.', loc: 'Pan India', tag2: 'Social impact' },
-];
-
-function OpportunityHub() {
-  const [active, setActive] = useState('All');
-  return (
-    <section>
-      <SectionHead eyebrow="Opportunity Hub" sub="Internships, scholarships, competitions, fellowships & research programs — all in one place, curated for your profile.">
-        After admission, <span className="text-primary">the real game</span> begins.
-      </SectionHead>
-      <div className="mb-6 flex gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {FILTERS.map((f) => (
-          <button
-            key={f}
-            onClick={() => setActive(f)}
-            className={cn(
-              'flex-none rounded-full border px-4 py-2.5 text-[13.5px] font-bold transition-colors',
-              active === f ? 'border-foreground bg-foreground text-background' : 'border-border bg-card text-muted-foreground hover:border-foreground',
-            )}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {OPPS.map((o) => (
-          <article key={o.title} className="flex flex-col gap-3.5 rounded-3xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
-            <span className="self-start rounded-full bg-accent px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[1.4px] text-primary">Fellowship</span>
-            <h3 className="font-display text-xl font-bold tracking-tight">{o.title}</h3>
-            <p className="flex-1 text-[14.5px] text-muted-foreground">{o.body}</p>
-            <div className="flex flex-wrap gap-3.5 text-[12.5px] font-semibold text-muted-foreground">
-              <span className="flex items-center gap-1.5"><MapPin className="h-[15px] w-[15px]" /> {o.loc}</span>
-              <span className="flex items-center gap-1.5"><Star className="h-[15px] w-[15px]" /> {o.tag2}</span>
-            </div>
-            <div className="flex gap-2.5">
-              <Button asChild size="sm" className="flex-1"><Link href="/opportunities">Apply now</Link></Button>
-              <button aria-label="Save" className="grid h-11 w-11 flex-none place-items-center rounded-2xl border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"><Bookmark className="h-[18px] w-[18px]" /></button>
-              <button aria-label="Share" className="grid h-11 w-11 flex-none place-items-center rounded-2xl border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"><Share2 className="h-[18px] w-[18px]" /></button>
-            </div>
-          </article>
-        ))}
-      </div>
-      <div className="mt-8 flex justify-center">
-        <Button asChild variant="outline"><Link href="/opportunities">Browse all opportunities <ArrowRight className="h-4 w-4" /></Link></Button>
-      </div>
-    </section>
-  );
-}
-
 /* 6 — Builders (dark) ----------------------------------------------------- */
 
 const BUILDERS = [
@@ -385,7 +325,6 @@ export function HomeShowcase() {
       <StatsStrip />
       <HowItWorks />
       <DataSection />
-      <OpportunityHub />
       <Builders />
       <Review />
       <FinalCTA />

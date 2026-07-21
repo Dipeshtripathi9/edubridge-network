@@ -250,7 +250,7 @@ const POSTERS = [
   { svg: POSTER_QUIZ, action: { type: 'quiz' as const } },
   { svg: POSTER_COMPARE, action: { type: 'href' as const, href: '/reviews' } },
   { svg: POSTER_INTERNSHIP, action: { type: 'href' as const, href: '/internship' } },
-  { svg: POSTER_SCHOLARSHIP, action: { type: 'href' as const, href: '/opportunities' } },
+  { svg: POSTER_SCHOLARSHIP, action: { type: 'href' as const, href: '/internship' } },
   { svg: POSTER_EXPERT, action: { type: 'quiz' as const } },
 ];
 const POSTER_TRACK = POSTERS;
@@ -372,7 +372,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
 
         <div className="flex snap-x gap-4 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {SCHOLARSHIPS.map((s) => (
-            <Link key={s.name} href="/opportunities" className="group flex w-[240px] flex-none snap-start flex-col">
+            <Link key={s.name} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
               <span className="mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
                 <Ill svg={s.svg} />
               </span>
@@ -386,7 +386,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
           ))}
 
           <Link
-            href="/opportunities"
+            href="/internship"
             className="flex w-[240px] flex-none snap-start items-center gap-3 rounded-xl border-[1.6px] border-foreground bg-card px-5 py-5"
           >
             <b className="flex-1 font-display text-[19px] font-extrabold leading-snug tracking-tight">See All Your Scholarship Matches</b>
@@ -396,7 +396,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
 
         <div className="flex justify-center pt-6">
           <Link
-            href="/opportunities"
+            href="/internship"
             className="inline-flex items-center gap-2.5 rounded-full border-[1.6px] border-foreground bg-card px-7 py-3.5 text-[16px] font-extrabold transition-colors hover:bg-secondary"
           >
             See All Scholarships <ChevronRight className="h-4 w-4" />

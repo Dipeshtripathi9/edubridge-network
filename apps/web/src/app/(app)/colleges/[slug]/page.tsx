@@ -11,7 +11,6 @@ import {
   HelpCircle,
   MapPin,
   Repeat,
-  Target,
   Users,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,19 +18,15 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar } from '@/components/ui/avatar';
-import { OpportunityCard } from '@/components/opportunity-card';
 import { ResourceCard } from '@/components/resource-card';
 import { ResourceUpload } from '@/components/resource-upload';
 import { EmptyState } from '@/components/ui/empty-state';
-import { OpportunitiesSection } from '@/components/opportunities-section';
-import { useOpportunities } from '@/hooks/use-opportunities';
 import { useResources } from '@/hooks/use-resources';
 import {
   useCollegeHub,
   useCollegeTransferStories,
   useFaqs,
 } from '@/hooks/use-college-hub';
-import { useAuthStore } from '@/stores/auth.store';
 
 function StatPill({
   icon: Icon,
@@ -49,21 +44,6 @@ function StatPill({
       <Icon className={`h-[15px] w-[15px] ${tone}`} />{' '}
       <b className="font-display text-foreground">{value.toLocaleString()}</b> {label}
     </span>
-  );
-}
-
-function Opportunities({ collegeId }: { collegeId: string }) {
-  const { data, isLoading } = useOpportunities({ collegeId });
-  const items = uniqueById(data?.pages.flatMap((p) => p.data) ?? []);
-  if (isLoading) return <Skeleton className="h-40 w-full" />;
-  return items.length === 0 ? (
-    <EmptyState icon={Target} title="No opportunities yet" description="Opportunities shared with this college will show up here." />
-  ) : (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {items.map((o) => (
-        <OpportunityCard key={o.id} opportunity={o} />
-      ))}
-    </div>
   );
 }
 
@@ -164,9 +144,6 @@ function Faqs({ collegeId }: { collegeId: string }) {
 export default function CollegeHubPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { data: hub, isLoading } = useCollegeHub(slug);
-  const globalRole = useAuthStore((s) => s.user?.role);
-  const canModerate =
-    globalRole === 'ADMIN' || globalRole === 'SUPER_ADMIN' || globalRole === 'MODERATOR';
 
   if (isLoading) return <Skeleton className="mx-auto h-72 max-w-5xl" />;
   if (!hub) return <p className="py-16 text-center text-muted-foreground">College not found.</p>;
@@ -217,10 +194,9 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
         </div>
       </section>
 
-      {/* Sections — Opportunities, Resources, and college-only Transfers & FAQs */}
-      <Tabs defaultValue="opportunities">
+      {/* Sections — Resources, and college-only Transfers & FAQs */}
+      <Tabs defaultValue="resources">
         <TabsList className="flex-wrap">
-          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
           <TabsTrigger value="resources">Resources ({hub.counts.resources})</TabsTrigger>
           <TabsTrigger value="transfers">Transfers</TabsTrigger>
           <TabsTrigger value="faqs">FAQs ({hub.counts.faqs})</TabsTrigger>
@@ -228,17 +204,6 @@ export default function CollegeHubPage({ params }: { params: Promise<{ slug: str
 
         <TabsContent value="resources">
           <Resources collegeId={c.id} />
-        </TabsContent>
-        <TabsContent value="opportunities">
-          {hub.community ? (
-            <OpportunitiesSection
-              communityId={hub.community.id}
-              canModerate={canModerate}
-              isMember={true}
-            />
-          ) : (
-            <Opportunities collegeId={c.id} />
-          )}
         </TabsContent>
         <TabsContent value="transfers">
           <Transfers collegeId={c.id} />

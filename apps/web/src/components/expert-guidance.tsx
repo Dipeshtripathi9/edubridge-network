@@ -247,7 +247,7 @@ export function ExpertGuidance() {
                 </Button>
               )}
               <Button asChild size="lg" variant="outline">
-                <Link href="/opportunities">Explore opportunities</Link>
+                <Link href="/internship">Explore opportunities</Link>
               </Button>
             </div>
 
