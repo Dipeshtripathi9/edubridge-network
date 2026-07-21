@@ -194,7 +194,7 @@ export default function AboutPage() {
           </h2>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg" className="bg-background text-foreground hover:bg-card"><Link href="/reviews"><Users className="h-4 w-4" /> Explore colleges</Link></Button>
-            <Button asChild size="lg" className="bg-foreground text-background hover:bg-foreground/90"><Link href="/opportunities">Browse opportunities</Link></Button>
+            <Button asChild size="lg" className="bg-foreground text-background hover:bg-foreground/90"><Link href="/internship">Browse opportunities</Link></Button>
           </div>
           <p className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#DCD5F7]">
             <Heart className="h-4 w-4 text-marigold" /> Made with love in Delhi NCR

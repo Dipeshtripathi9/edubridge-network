@@ -21,7 +21,6 @@ export interface CollegeHub {
     verifiedStudents: number;
     reviews: number;
     resources: number;
-    opportunities: number;
     faqs: number;
   };
 }

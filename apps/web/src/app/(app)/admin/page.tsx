@@ -365,7 +365,7 @@ function BroadcastTab() {
       <CardContent className="space-y-3">
         <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
         <Textarea placeholder="Body (optional)" value={body} onChange={(e) => setBody(e.target.value)} />
-        <Input placeholder="Deeplink, e.g. /opportunities (optional)" value={link} onChange={(e) => setLink(e.target.value)} />
+        <Input placeholder="Deeplink, e.g. /internship (optional)" value={link} onChange={(e) => setLink(e.target.value)} />
         <Button
           disabled={!title.trim() || broadcast.isPending}
           onClick={() =>

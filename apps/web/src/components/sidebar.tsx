@@ -14,14 +14,12 @@ import {
   Repeat,
   Rocket,
   ShieldCheck,
-  Target,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 
 export const NAV = [
   { href: '/home', label: 'Home', icon: Home },
-  { href: '/opportunities', label: 'Opportunities', icon: Target },
   { href: '/internship', label: 'Internship', icon: Rocket },
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
   { href: '/referral', label: 'Referral', icon: Briefcase },

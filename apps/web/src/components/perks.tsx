@@ -45,7 +45,7 @@ export function ReferralsSection({ enabled, isAdmin }: { enabled: boolean; isAdm
         <CardContent className="flex flex-wrap items-center justify-between gap-2 p-4">
           <p className="text-sm font-medium">🎯 Priority access to internships & scholarships on EduBridge</p>
           <Button asChild size="sm" variant="outline">
-            <Link href="/opportunities?tab=recommended">Browse opportunities</Link>
+            <Link href="/internship">Browse opportunities</Link>
           </Button>
         </CardContent>
       </Card>

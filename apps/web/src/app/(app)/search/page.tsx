@@ -8,7 +8,6 @@ import {
   GraduationCap,
   Search as SearchIcon,
   Star,
-  Target,
   User as UserIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,7 +25,6 @@ import {
 const TYPE_META: Record<SearchType, { label: string; icon: typeof Star }> = {
   college: { label: 'Colleges', icon: GraduationCap },
   user: { label: 'People', icon: UserIcon },
-  opportunity: { label: 'Opportunities', icon: Target },
   resource: { label: 'Resources', icon: BookOpen },
   review: { label: 'Reviews', icon: Star },
 };
@@ -128,7 +126,7 @@ function SearchInner() {
       </div>
 
       {!q ? (
-        <EmptyState icon={SearchIcon} title="Search EduBridge" description="Type a query in the search bar above to find colleges, opportunities & people." />
+        <EmptyState icon={SearchIcon} title="Search EduBridge" description="Type a query in the search bar above to find colleges, resources & people." />
       ) : (
         <>
           <div className="flex flex-wrap gap-2">

@@ -15,7 +15,6 @@ export interface Analytics {
   content: {
     reviews: number;
     resources: number;
-    activeOpportunities: number;
   };
   moderation: { openReports: number };
   topColleges: { id: string; name: string; reviewCount: number; avgRating: number }[];

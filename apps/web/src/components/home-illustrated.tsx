@@ -88,12 +88,12 @@ export function HomeIllustrated() {
                   <Building2 className="h-4 w-4" strokeWidth={1.75} /> Find College
                 </Button>
                 <Button asChild variant="outline" className="gap-1.5 px-4 text-[13.5px]">
-                  <Link href="/opportunities">
+                  <Link href="/internship">
                     <GraduationCap className="h-4 w-4" strokeWidth={1.75} /> Explore Scholarship
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="gap-1.5 px-4 text-[13.5px]">
-                  <Link href="/opportunities">
+                  <Link href="/internship">
                     <Briefcase className="h-4 w-4" strokeWidth={1.75} /> Find Internship
                   </Link>
                 </Button>
@@ -127,7 +127,7 @@ export function HomeIllustrated() {
           </div>
           <div className="mt-12 flex justify-center">
             <Button asChild size="lg">
-              <Link href="/opportunities">Explore opportunities</Link>
+              <Link href="/internship">Explore opportunities</Link>
             </Button>
           </div>
         </section>
@@ -162,7 +162,7 @@ export function HomeIllustrated() {
             </div>
             <nav className="flex flex-nowrap items-center gap-x-5 overflow-x-auto whitespace-nowrap text-[14px] font-semibold text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <Link href="/reviews" className="hover:text-primary">Colleges</Link>
-              <Link href="/opportunities" className="hover:text-primary">Opportunities</Link>
+              <Link href="/internship" className="hover:text-primary">Internship</Link>
               <Link href="/about" className="hover:text-primary">About</Link>
             </nav>
           </div>
