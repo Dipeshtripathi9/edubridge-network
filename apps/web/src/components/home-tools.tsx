@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ChevronRight, IndianRupee } from 'lucide-react';
+import { ArrowRight, ChevronRight, GraduationCap, IndianRupee } from 'lucide-react';
 import { HomeAdmissionDesk } from '@/components/home-admission-desk';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
@@ -36,6 +36,29 @@ function Ill({ svg, className }: { svg: string; className?: string }) {
 const SCHOLARSHIPS = [
   { svg: ILL_SCH1, amount: '₹2,00,000', name: 'Reliance Foundation UG Scholarship' },
   { svg: ILL_SCH2, amount: '₹12,000', name: 'Central Sector Scholarship — Govt of India' },
+];
+
+const ILL_INTERN1 = `<svg viewBox="0 0 120 100" fill="none" aria-hidden="true" style="width:120px;height:100px">
+  <rect x="30" y="42" width="60" height="38" rx="4" stroke="#1A1433" stroke-width="2.6"/>
+  <rect x="38" y="50" width="44" height="22" fill="#EFEAFF"/>
+  <path d="M60 20 L82 30 L60 40 L38 30 Z" fill="#1A1433"/>
+  <path d="M38 30 v10" stroke="#1A1433" stroke-width="2.2" stroke-linecap="round"/>
+  <circle cx="38" cy="42" r="2.6" fill="#F2A31B"/>
+  <line x1="40" y1="88" x2="80" y2="88" stroke="#1A1433" stroke-width="2.6" stroke-linecap="round"/>
+  <line x1="60" y1="80" x2="60" y2="88" stroke="#1A1433" stroke-width="2.6" stroke-linecap="round"/>
+</svg>`;
+
+const ILL_INTERN2 = `<svg viewBox="0 0 120 100" fill="none" aria-hidden="true" style="width:120px;height:100px">
+  <rect x="28" y="42" width="64" height="40" rx="6" stroke="#1A1433" stroke-width="2.6"/>
+  <path d="M46 42 v-8 a6 6 0 0 1 6 -6 h16 a6 6 0 0 1 6 6 v8" stroke="#1A1433" stroke-width="2.6"/>
+  <line x1="28" y1="58" x2="92" y2="58" stroke="#1A1433" stroke-width="2.2"/>
+  <circle cx="94" cy="34" r="12" fill="#F2A31B"/>
+  <path d="M89 34 l3.5 3.5 L99 30" stroke="#1A1433" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const INTERNSHIPS = [
+  { svg: ILL_INTERN1, label: 'Track A — Learn & Build', desc: 'Guided project with a mentor, from ₹2,999' },
+  { svg: ILL_INTERN2, label: 'Track B — Apply & Get Selected', desc: 'Free to apply — real work or a skill task' },
 ];
 
 // Fanned poster carousel — each poster is a full illustrated SVG card (background +
@@ -364,6 +387,50 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
       {/* Direct Admission Desk */}
       <div className="my-8">
         <HomeAdmissionDesk onApply={onQuiz} />
+      </div>
+
+      {/* Internships */}
+      <div className="mt-6 border-t border-border pt-8">
+        <div className="mb-2 flex items-center gap-2.5">
+          <GraduationCap className="h-6 w-6" />
+          <h2 className="font-display text-[25px] font-extrabold tracking-[-.02em]">Internships</h2>
+        </div>
+        <p className="mb-5 max-w-[520px] text-[15.5px] font-medium text-muted-foreground">
+          Search verified internships, or get matched to the ones you&apos;re actually eligible for.
+        </p>
+
+        <div className="flex snap-x gap-4 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {INTERNSHIPS.map((s) => (
+            <Link key={s.label} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
+              <span className="mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
+                <Ill svg={s.svg} />
+              </span>
+              <p className="text-[16px] font-semibold leading-snug">
+                <b className="font-extrabold">{s.label}</b> — {s.desc}
+              </p>
+              <span className="mt-2 inline-flex items-center gap-2 text-[15px] font-extrabold">
+                Apply Now <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </span>
+            </Link>
+          ))}
+
+          <Link
+            href="/internship"
+            className="flex w-[240px] flex-none snap-start items-center gap-3 rounded-xl border-[1.6px] border-foreground bg-card px-5 py-5"
+          >
+            <b className="flex-1 font-display text-[19px] font-extrabold leading-snug tracking-tight">See All Your Internship Matches</b>
+            <ChevronRight className="h-[18px] w-[18px] flex-none" />
+          </Link>
+        </div>
+
+        <div className="flex justify-center pt-6">
+          <Link
+            href="/internship"
+            className="inline-flex items-center gap-2.5 rounded-full border-[1.6px] border-foreground bg-card px-7 py-3.5 text-[16px] font-extrabold transition-colors hover:bg-secondary"
+          >
+            See All Internships <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
 
       {/* Scholarships */}
