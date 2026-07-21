@@ -216,7 +216,6 @@ export class AdminService {
       newThisWeek,
       reviews,
       resources,
-      activeOpportunities,
       openReports,
       topColleges,
       topContributors,
@@ -228,7 +227,6 @@ export class AdminService {
       this.prisma.user.count({ where: { deletedAt: null, createdAt: { gte: weekAgo } } }),
       this.prisma.review.count({ where: { deletedAt: null } }),
       this.prisma.resource.count({ where: { deletedAt: null } }),
-      this.prisma.opportunity.count({ where: { isActive: true } }),
       this.prisma.report.count({ where: { status: 'OPEN' } }),
       this.prisma.college.findMany({
         orderBy: { reviewCount: 'desc' },
@@ -245,7 +243,7 @@ export class AdminService {
 
     return {
       users: { total: totalUsers, dau, mau, newToday, newThisWeek, stickiness: mau ? +(dau / mau).toFixed(2) : 0 },
-      content: { reviews, resources, activeOpportunities },
+      content: { reviews, resources },
       moderation: { openReports },
       topColleges,
       topContributors,

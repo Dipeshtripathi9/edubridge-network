@@ -5,7 +5,6 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 export const SEARCH_TYPES = [
   'college',
   'user',
-  'opportunity',
   'resource',
   'review',
 ] as const;

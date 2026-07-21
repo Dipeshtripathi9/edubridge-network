@@ -47,23 +47,6 @@ enum CollegeVerificationStatus {
   REJECTED
 }
 
-enum OpportunityType {
-  INTERNSHIP
-  SCHOLARSHIP
-  COMPETITION
-  FELLOWSHIP
-  RESEARCH
-  CERTIFICATION
-}
-
-enum ApplicationStatus {
-  SAVED
-  APPLIED
-  IN_PROGRESS
-  ACCEPTED
-  REJECTED
-}
-
 enum ReviewCategory {
   PLACEMENT
   HOSTEL
@@ -251,9 +234,6 @@ model User {
   resourceBookmarks ResourceBookmark[]
   resourceLikes     ResourceLike[]
   resourceComments  ResourceComment[]
-
-  opportunities Opportunity[] @relation("OpportunityCreator")
-  applications  Application[]
 
   transfers   Transfer[]
   reviews     Review[]
@@ -463,7 +443,6 @@ model College {
   transfersTo          Transfer[]            @relation("TransferToCollege")
   transferRequirements TransferRequirement[]
   resources            Resource[]
-  opportunities        Opportunity[]
   faqs                 CollegeFaq[]
   verificationRequests VerificationRequest[]
 
@@ -543,60 +522,6 @@ model TransferRequirement {
 
   @@index([collegeId])
   @@map("transfer_requirements")
-}
-
-// ============================================================
-// MODULE 3: OPPORTUNITY HUB
-// ============================================================
-
-model Opportunity {
-  id           String          @id @default(cuid())
-  type         OpportunityType
-  title        String
-  organization String?
-  description  String
-  location     String?
-  isRemote     Boolean         @default(false)
-  applyUrl     String?
-  tags         String[]
-  eligibility  String?
-  stipend      String?
-  deadline     DateTime?
-
-  createdById    String?
-  createdBy      User?                     @relation("OpportunityCreator", fields: [createdById], references: [id])
-  collegeId      String?
-  college        College?                  @relation(fields: [collegeId], references: [id])
-  approvalStatus VerificationRequestStatus @default(APPROVED)
-  isActive       Boolean                   @default(true)
-  sourceSystem   String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  applications Application[]
-
-  @@index([type, deadline])
-  @@index([isActive])
-  @@index([tags])
-  @@index([collegeId])
-  @@map("opportunities")
-}
-
-model Application {
-  id            String            @id @default(cuid())
-  opportunityId String
-  opportunity   Opportunity       @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
-  userId        String
-  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status        ApplicationStatus @default(SAVED)
-  notes         String?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-
-  @@unique([opportunityId, userId])
-  @@index([userId, status])
-  @@map("applications")
 }
 
 // ============================================================

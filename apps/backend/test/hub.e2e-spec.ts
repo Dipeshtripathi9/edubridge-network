@@ -70,25 +70,6 @@ describe('College Hub (e2e)', () => {
       .expect(200);
   });
 
-  it('scopes opportunities to the college', async () => {
-    await request(app.getHttpServer())
-      .post(`${API}/opportunities`)
-      .set(auth(admin.token))
-      .send({
-        type: 'INTERNSHIP',
-        title: `College Intern ${Date.now()}`,
-        description: 'Scoped to this college',
-        collegeId,
-      })
-      .expect(201);
-
-    const res = await request(app.getHttpServer())
-      .get(`${API}/opportunities?collegeId=${collegeId}`)
-      .expect(200);
-    expect(res.body.data.length).toBeGreaterThanOrEqual(1);
-    expect(res.body.data.every((o: { id: string }) => !!o.id)).toBe(true);
-  });
-
   it('scopes resources to the college and supports featuring', async () => {
     const created = await request(app.getHttpServer())
       .post(`${API}/resources`)
