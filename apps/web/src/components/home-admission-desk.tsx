@@ -65,15 +65,14 @@ svg{display:block}
     <p>Application forms charge you for <b>answers.</b> Fill one free form — a college counselor calls you with the real details, for any college:</p>
     <div class="cats">
       <span><i></i>Scholarships &amp; aid</span>
-      <span><i></i>Complete fee structure</span>
-      <span><i></i>Seats, deadlines &amp; documents</span>
+      <span><i></i>Fee structure</span>
+      <span><i></i>Seats &amp; deadlines</span>
       <span><i></i>Loans &amp; EMI</span>
-      <span><i></i>Policies &amp; special cases</span>
     </div>
     <div class="trustline">
       <b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>No charges, ever</b>
-      <span>Verified answers, not brochure claims</span>
-      <span>One call — no spam</span>
+      <span>Verified answers</span>
+      <span>No spam</span>
     </div>
   </div>
   <a class="applybtn" href="#" id="applyBtn" aria-label="Apply — free, takes 2 minutes">
