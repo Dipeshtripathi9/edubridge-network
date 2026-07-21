@@ -197,24 +197,6 @@ export class SearchService {
           })),
         };
       }
-      case 'opportunity': {
-        const where = { isActive: true, OR: [{ title: like }, { organization: like }] };
-        const [rows, total] = await Promise.all([
-          this.prisma.opportunity.findMany({ where, skip, take, orderBy: { createdAt: 'desc' } }),
-          this.prisma.opportunity.count({ where }),
-        ]);
-        return {
-          total,
-          items: rows.map((o) => ({
-            type,
-            id: o.id,
-            title: o.title,
-            subtitle: o.organization,
-            url: `/opportunities`,
-            tags: o.tags,
-          })),
-        };
-      }
       case 'resource': {
         const where = { deletedAt: null, title: like };
         const [rows, total] = await Promise.all([
@@ -271,14 +253,13 @@ export class SearchService {
     const docs: Array<SearchHit & { entityType: SearchType; entityId: string }> = [];
     const push = (h: SearchHit) => docs.push({ ...h, entityType: h.type, entityId: h.id });
 
-    const [colleges, profiles, opportunities, resources, reviews] = await Promise.all([
+    const [colleges, profiles, resources, reviews] = await Promise.all([
       this.prisma.college.findMany(),
       // Only index active, non-deleted users so moderation applies to the ES path too.
       this.prisma.profile.findMany({
         where: { user: { status: 'ACTIVE', deletedAt: null } },
         include: { college: { select: { name: true } } },
       }),
-      this.prisma.opportunity.findMany({ where: { isActive: true } }),
       this.prisma.resource.findMany({ where: { deletedAt: null } }),
       this.prisma.review.findMany({ where: { deletedAt: null }, include: { college: { select: { name: true, slug: true } } } }),
     ]);
@@ -288,9 +269,6 @@ export class SearchService {
     );
     profiles.forEach((p) =>
       push({ type: 'user', id: p.userId, title: p.fullName, subtitle: p.college?.name ?? p.username, url: null }),
-    );
-    opportunities.forEach((o) =>
-      push({ type: 'opportunity', id: o.id, title: o.title, subtitle: o.organization, body: o.description, tags: o.tags, url: `/opportunities` }),
     );
     resources.forEach((r) =>
       push({ type: 'resource', id: r.id, title: r.title, subtitle: r.type, body: r.description, tags: r.tags, url: `/resources` }),

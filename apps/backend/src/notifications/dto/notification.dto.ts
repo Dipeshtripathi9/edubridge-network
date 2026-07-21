@@ -27,7 +27,7 @@ export class BroadcastDto {
   @IsString()
   body?: string;
 
-  @ApiPropertyOptional({ description: 'Deeplink path, e.g. /opportunities/:id' })
+  @ApiPropertyOptional({ description: 'Deeplink path, e.g. /reviews/:slug' })
   @IsOptional()
   @IsString()
   link?: string;

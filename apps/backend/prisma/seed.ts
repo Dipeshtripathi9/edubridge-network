@@ -151,12 +151,6 @@ async function main() {
   }
   console.log(`✓ admin + ${students.length} students`);
 
-  // ---------- Opportunities ----------
-  // Intentionally NOT seeded here. Opportunities are added MANUALLY (admins/community
-  // heads via the UI), plus the curated batch in seed-opportunity-playbook.mjs.
-  // Do not re-add demo opportunities — per product decision they must not reappear.
-  console.log('✓ opportunities (none seeded — added manually / via playbook)');
-
   // ---------- Reviews (by verified students of each college) ----------
   // students[0]=Bennett(0), students[1]=VIT(2), students[2]=Thapar(4)
   const reviewSeeds = [
@@ -312,20 +306,6 @@ async function main() {
           title: 'Diya Patel sent you a message',
           body: 'Hey! Saw your DSA prep notes on the resources page 👋',
           data: { chatId: chat.id },
-        },
-        {
-          recipientId: students[0].id,
-          type: 'INTERNSHIP_DEADLINE',
-          title: 'Internship application closing soon',
-          body: "Don't miss the deadline for your saved internship.",
-          data: { link: '/opportunities' },
-        },
-        {
-          recipientId: students[0].id,
-          type: 'SCHOLARSHIP',
-          title: 'New scholarship matches your profile',
-          body: 'Reliance Foundation Scholarship — deadline in 45 days.',
-          data: { link: '/opportunities' },
         },
       ],
     });

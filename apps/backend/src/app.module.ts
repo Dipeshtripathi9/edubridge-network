@@ -10,7 +10,6 @@ import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TransferModule } from './transfer/transfer.module';
-import { OpportunitiesModule } from './opportunities/opportunities.module';
 import { CollegesModule } from './colleges/colleges.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { ResourcesModule } from './resources/resources.module';
@@ -73,7 +72,6 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     AuthModule,
     UsersModule,
     TransferModule,
-    OpportunitiesModule,
     CollegesModule,
     ReviewsModule,
     StorageModule,
