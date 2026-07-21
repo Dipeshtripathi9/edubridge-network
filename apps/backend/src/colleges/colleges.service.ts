@@ -67,7 +67,7 @@ export class CollegesService {
 
   /**
    * College Hub overview: header data + the counts shown in the header
-   * (verified students, reviews, resources, opportunities, faqs).
+   * (verified students, reviews, resources, faqs).
    */
   async getCommunityHub(slug: string) {
     const college = await this.prisma.college.findUnique({
@@ -76,13 +76,12 @@ export class CollegesService {
     });
     if (!college) throw new NotFoundException('College not found');
 
-    const [verifiedStudents, reviewCount, resourceCount, opportunityCount, faqCount] = await Promise.all([
+    const [verifiedStudents, reviewCount, resourceCount, faqCount] = await Promise.all([
       this.prisma.profile.count({
         where: { collegeId: college.id, collegeVerification: 'VERIFIED' },
       }),
       this.prisma.review.count({ where: { collegeId: college.id, deletedAt: null } }),
       this.prisma.resource.count({ where: { collegeId: college.id, deletedAt: null } }),
-      this.prisma.opportunity.count({ where: { collegeId: college.id, isActive: true } }),
       this.prisma.collegeFaq.count({ where: { collegeId: college.id } }),
     ]);
 
@@ -92,7 +91,6 @@ export class CollegesService {
         verifiedStudents,
         reviews: reviewCount,
         resources: resourceCount,
-        opportunities: opportunityCount,
         faqs: faqCount,
       },
     };
