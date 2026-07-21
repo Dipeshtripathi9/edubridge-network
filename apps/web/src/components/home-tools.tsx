@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ChevronRight, IndianRupee } from 'lucide-react';
+import { ArrowRight, ChevronRight, Columns3, Heart, IndianRupee, MessageCircleQuestion } from 'lucide-react';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
 // we don't hand-convert every attribute to JSX.
@@ -346,6 +346,30 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
   );
 }
 
+const DISCOVER_CARDS = [
+  {
+    href: '/ask',
+    icon: MessageCircleQuestion,
+    tone: 'bg-accent text-primary',
+    title: 'Ask verified students',
+    desc: 'Get honest answers on curriculum, placements, and campus life — no charges, ever.',
+  },
+  {
+    href: '/colleges',
+    icon: Heart,
+    tone: 'bg-marigold-soft text-amber-600',
+    title: 'Shortlist colleges',
+    desc: 'Browse by rank, rating, and location, and save the ones worth a closer look.',
+  },
+  {
+    href: '/compare',
+    icon: Columns3,
+    tone: 'bg-accent text-primary',
+    title: 'Compare side by side',
+    desc: 'Put your shortlist head to head on rating, placements, and rank.',
+  },
+] as const;
+
 export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
   return (
     <section aria-label="Tools & scholarships" className="!mt-0 mx-auto w-full max-w-[960px]">
@@ -359,6 +383,30 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
 
       {/* Fanned poster carousel */}
       <PosterStack onQuiz={onQuiz} />
+
+      {/* Choose with confidence */}
+      <div className="mb-8 border-t-2 border-border pt-7 text-center sm:pt-10">
+        <span aria-hidden className="mx-auto block h-[3px] w-10 -translate-y-[calc(50%+1px)] rounded-full bg-marigold" />
+        <h2 className="text-balance font-display text-[clamp(22px,3.4vw,34px)] font-extrabold tracking-[-.02em]">Choose with Confidence</h2>
+        <p className="mx-auto mt-3 max-w-[440px] text-[14.5px] leading-relaxed text-muted-foreground sm:max-w-[560px] sm:text-[15.5px]">
+          Real students, real answers — before you commit to four years and a lot of money.
+        </p>
+      </div>
+      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        {DISCOVER_CARDS.map((c) => (
+          <Link
+            key={c.href}
+            href={c.href}
+            className="flex flex-col items-start gap-3 rounded-[22px] border border-border bg-card p-6 shadow-sm transition-colors hover:border-primary/30"
+          >
+            <span className={`grid h-[64px] w-[64px] place-items-center rounded-full ${c.tone}`}>
+              <c.icon className="h-6 w-6" />
+            </span>
+            <h3 className="font-display text-[18px] font-extrabold tracking-tight">{c.title}</h3>
+            <p className="text-[14px] text-muted-foreground">{c.desc}</p>
+          </Link>
+        ))}
+      </div>
 
       {/* Scholarships */}
       <div className="mt-6 border-t border-border pt-8">

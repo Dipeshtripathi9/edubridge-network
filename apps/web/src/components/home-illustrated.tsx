@@ -6,7 +6,6 @@ import { Briefcase, Building2, CheckCircle2, GraduationCap, ShieldCheck } from '
 import { Button } from '@/components/ui/button';
 import { CollegeQuiz } from '@/components/college-quiz';
 import { HomeExplainer } from '@/components/home-explainer';
-import { HomeAdmissionDesk } from '@/components/home-admission-desk';
 import { HomeTools } from '@/components/home-tools';
 
 const QUESTIONS = [
@@ -107,9 +106,6 @@ export function HomeIllustrated() {
 
         {/* EXPLAINER */}
         <HomeExplainer />
-
-        {/* DIRECT ADMISSION DESK */}
-        <HomeAdmissionDesk onApply={openQuiz} />
 
         {/* STUDENTS FIRST */}
         <section>
