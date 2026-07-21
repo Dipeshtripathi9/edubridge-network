@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronRight, IndianRupee } from 'lucide-react';
+import { HomeAdmissionDesk } from '@/components/home-admission-desk';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
 // we don't hand-convert every attribute to JSX.
@@ -359,6 +360,11 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
 
       {/* Fanned poster carousel */}
       <PosterStack onQuiz={onQuiz} />
+
+      {/* Direct Admission Desk */}
+      <div className="my-8">
+        <HomeAdmissionDesk onApply={onQuiz} />
+      </div>
 
       {/* Scholarships */}
       <div className="mt-6 border-t border-border pt-8">
