@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ChevronRight, Columns3, Heart, IndianRupee, MessageCircleQuestion } from 'lucide-react';
+import { ArrowRight, ChevronRight, Columns3, Heart, IndianRupee, Landmark, MessageCircleQuestion } from 'lucide-react';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
 // we don't hand-convert every attribute to JSX.
@@ -368,6 +368,13 @@ const DISCOVER_CARDS = [
     title: 'Compare side by side',
     desc: 'Put your shortlist head to head on rating, placements, and rank.',
   },
+  {
+    href: '/ask',
+    icon: Landmark,
+    tone: 'bg-marigold-soft text-amber-600',
+    title: 'Direct Admission Desk',
+    desc: "Don't pay just to ask — one free form for fees, scholarships, seats & loans.",
+  },
 ] as const;
 
 export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
@@ -392,7 +399,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
           Real students, real answers — before you commit to four years and a lot of money.
         </p>
       </div>
-      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {DISCOVER_CARDS.map((c) => (
           <Link
             key={c.href}
