@@ -9,7 +9,6 @@ import {
   Globe2,
   Network,
   ShieldCheck,
-  Sparkles,
   Star,
   TrendingUp,
   UserCheck,
@@ -22,12 +21,12 @@ import { usePricing } from '@/hooks/use-internships';
 const NAV = ['Tracks', 'Why intern', 'FAQ'];
 
 const WHY_INTERN = [
-  { icon: Briefcase, title: 'Real-World Experience', desc: 'Work on live projects, not busywork.' },
-  { icon: UserCheck, title: 'Expert Guidance', desc: 'Mentor feedback on every task you submit.' },
-  { icon: TrendingUp, title: 'Skill Development', desc: 'Structured tasks that build real ability.' },
-  { icon: ShieldCheck, title: 'Verified Certification', desc: 'A certificate anyone can verify online.' },
-  { icon: Award, title: 'Career Growth', desc: 'A credential that stands out on your profile.' },
-  { icon: Network, title: 'Networking Opportunities', desc: 'Connect with mentors, startups & partners.' },
+  { icon: Briefcase, title: 'Real-World Experience', desc: 'Work on live projects, not busywork.', tone: 'bg-accent text-primary' },
+  { icon: UserCheck, title: 'Expert Guidance', desc: 'Mentor feedback on every task you submit.', tone: 'bg-marigold-soft text-amber-600' },
+  { icon: TrendingUp, title: 'Skill Development', desc: 'Structured tasks that build real ability.', tone: 'bg-accent text-primary' },
+  { icon: ShieldCheck, title: 'Verified Certification', desc: 'A certificate anyone can verify online.', tone: 'bg-marigold-soft text-amber-600' },
+  { icon: Award, title: 'Career Growth', desc: 'A credential that stands out on your profile.', tone: 'bg-accent text-primary' },
+  { icon: Network, title: 'Networking Opportunities', desc: 'Connect with mentors, startups & partners.', tone: 'bg-marigold-soft text-amber-600' },
 ];
 
 const FAQ = [
@@ -85,64 +84,64 @@ export default function InternshipLandingPage() {
         </div>
       </header>
 
-      {/* Hero — soft gradient panel, bold headline, decorative gradient blob */}
-      <section
-        className="w-screen bg-gradient-to-br from-primary/10 via-background to-marigold/10"
-        style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
-      >
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 lg:grid-cols-2 lg:py-24">
-          <div>
-            <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-              <Sparkles className="h-3.5 w-3.5" /> EduBridge&apos;s own internship program
-            </p>
-            <h1 className="mt-4 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-              Every path from student to certified, ends here.
-            </h1>
-            <p className="mt-4 max-w-lg text-muted-foreground">
-              Two ways in: pay to learn on a live project with a mentor, or apply and let your skills
-              earn you real — sometimes paid — work. Both roads lead to a verifiable certificate.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-2.5">
-              {HERO_TAGS.map((t) => (
-                <a
-                  key={t.label}
-                  href={t.href}
-                  className="rounded-full border border-primary/50 px-4 py-1.5 text-sm font-semibold text-primary hover:bg-primary/10"
-                >
-                  {t.label}
-                </a>
-              ))}
-            </div>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <a href="#tracks">
-                  Choose your track <ArrowRight className="h-4 w-4" />
-                </a>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/verify-certificate">Verify a certificate</Link>
-              </Button>
-            </div>
+      {/* Hero — same typographic system as the homepage: uppercase eyebrow, serif
+          uppercase headline, uppercase label, one solid + outline button row. */}
+      <section className="relative overflow-hidden bg-background">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-6 top-6 hidden grid-cols-4 gap-1.5 text-primary/30 sm:left-10 sm:top-10 lg:grid"
+        >
+          {Array.from({ length: 16 }).map((_, i) => (
+            <span key={i} className="h-1.5 w-1.5 rounded-full bg-current" />
+          ))}
+        </span>
+        <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:py-20">
+          <span className="block text-[13px] font-extrabold uppercase tracking-[.3em] text-primary">
+            EduBridge&apos;s Own
+          </span>
+          <h1 className="mt-2 font-serif text-[clamp(28px,4.6vw,48px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em]">
+            Internship Program
+          </h1>
+          <p className="mx-auto mt-3 max-w-[540px] text-[16px] leading-relaxed text-muted-foreground">
+            Two ways in: pay to learn on a live project with a mentor, or apply and let your skills
+            earn you real — sometimes paid — work. Both roads lead to a verifiable certificate.
+          </p>
+          <p className="mt-4 text-[14px] font-semibold uppercase tracking-[.25em]">Choose your path</p>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <Button asChild size="lg" className="gap-2">
+              <a href="#tracks">
+                Choose your track <ArrowRight className="h-4 w-4" />
+              </a>
+            </Button>
+            <Button asChild variant="outline" className="gap-1.5 px-4 text-[13.5px]">
+              <Link href="/verify-certificate">
+                <ShieldCheck className="h-4 w-4" strokeWidth={1.75} /> Verify a certificate
+              </Link>
+            </Button>
           </div>
-
-          <div className="relative mx-auto hidden w-full max-w-sm lg:block">
-            <span className="absolute -left-3 -top-3 h-14 w-14 rotate-45 rounded-full border-[8px] border-marigold border-b-transparent border-l-transparent" />
-            <div className="aspect-square w-full rounded-full bg-gradient-to-br from-primary to-marigold p-1.5 shadow-xl">
-              <div className="grid h-full w-full place-items-center rounded-full bg-background">
-                <GraduationCap className="h-20 w-20 text-primary" />
-              </div>
-            </div>
+          <div className="mt-6 flex flex-wrap justify-center gap-2.5">
+            {HERO_TAGS.map((t) => (
+              <a
+                key={t.label}
+                href={t.href}
+                className="rounded-full border border-primary/40 px-4 py-1.5 text-sm font-semibold text-primary hover:bg-accent"
+              >
+                {t.label}
+              </a>
+            ))}
           </div>
         </div>
       </section>
 
       <main className="mx-auto max-w-6xl space-y-16 px-4 py-12 [&_section[id]]:scroll-mt-24">
         {/* Tracks */}
-        <section id="tracks" className="space-y-4">
-          <div className="mx-auto max-w-xl text-center">
-            <p className="text-sm font-bold uppercase tracking-wide text-primary">Choose your track</p>
-            <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight">Two ways to earn your certificate</h2>
-            <p className="mt-2 text-muted-foreground">
+        <section id="tracks" className="space-y-8">
+          <div className="mx-auto max-w-xl border-t-2 border-border pt-7 text-center">
+            <span aria-hidden className="mx-auto block h-[3px] w-10 -translate-y-[calc(50%+1px)] rounded-full bg-marigold" />
+            <h2 className="text-balance font-display text-[clamp(22px,3.4vw,34px)] font-extrabold tracking-[-.02em]">
+              Two ways to earn your certificate
+            </h2>
+            <p className="mx-auto mt-3 max-w-[440px] text-[14.5px] leading-relaxed text-muted-foreground sm:text-[15.5px]">
               Pick the one that matches what you have right now: money and time to learn, or skills
               you&apos;re ready to prove.
             </p>
@@ -199,36 +198,39 @@ export default function InternshipLandingPage() {
         </section>
 
         {/* Why intern */}
-        <section id="why-intern" className="space-y-6 rounded-[2rem] bg-muted px-6 py-12 sm:px-10">
-          <div className="mx-auto max-w-xl text-center">
-            <p className="text-sm font-bold uppercase tracking-wide text-primary">Why intern with us</p>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-tight">
+        <section id="why-intern" className="space-y-8">
+          <div className="mx-auto max-w-xl border-t-2 border-border pt-7 text-center">
+            <span aria-hidden className="mx-auto block h-[3px] w-10 -translate-y-[calc(50%+1px)] rounded-full bg-marigold" />
+            <h2 className="text-balance font-display text-[clamp(22px,3.4vw,34px)] font-extrabold tracking-[-.02em]">
               Why Intern with EduBridge Network?
             </h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mx-auto mt-3 max-w-[440px] text-[14.5px] leading-relaxed text-muted-foreground sm:text-[15.5px]">
               Whichever track you take, you leave with a verifiable, shareable certificate.
             </p>
           </div>
-          <div className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-3">
+          <div className="mx-auto grid max-w-4xl gap-6 sm:grid-cols-3">
             {WHY_INTERN.map((s) => (
-              <div key={s.title} className="rounded-2xl bg-background p-5 text-center">
-                <span className="mx-auto grid h-10 w-10 place-items-center rounded-xl bg-accent text-primary">
-                  <s.icon className="h-5 w-5" />
+              <div
+                key={s.title}
+                className="flex flex-col items-center gap-4 rounded-[22px] border border-border bg-card p-6 text-center shadow-sm"
+              >
+                <span className={`grid h-[72px] w-[72px] place-items-center rounded-full ${s.tone}`}>
+                  <s.icon className="h-7 w-7" />
                 </span>
-                <p className="mt-3 font-semibold">{s.title}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
+                <p className="font-display text-lg font-extrabold tracking-tight">{s.title}</p>
+                <p className="text-sm text-muted-foreground">{s.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Closing CTA — gradient blob */}
-        <section className="mx-auto max-w-4xl overflow-hidden rounded-[3rem] bg-gradient-to-br from-primary via-primary to-marigold px-8 py-16 text-center text-white">
-          <ShieldCheck className="mx-auto h-10 w-10 opacity-90" />
-          <h2 className="mx-auto mt-4 max-w-md text-3xl font-extrabold tracking-tight sm:text-4xl">
+        {/* Closing CTA — flat solid, matching the homepage's accent language (no gradients) */}
+        <section className="mx-auto max-w-4xl rounded-[2rem] bg-primary px-8 py-16 text-center text-primary-foreground">
+          <ShieldCheck className="mx-auto h-9 w-9 opacity-90" />
+          <h2 className="mx-auto mt-4 max-w-md font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
             Ready to start your internship?
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-white/85">
+          <p className="mx-auto mt-3 max-w-md text-primary-foreground/85">
             Two tracks, one certificate. Pick the path that fits you and get started today.
           </p>
           <Button asChild size="lg" className="mt-6 bg-white text-primary hover:bg-white/90">
