@@ -59,70 +59,79 @@ export default function InternshipLandingPage() {
   const { data: pricing } = usePricing();
 
   return (
-    <div className="min-h-screen scroll-smooth bg-gradient-to-b from-background to-accent/20">
-      {/* Nav */}
-      <header className="sticky top-0 z-10 bg-primary text-primary-foreground">
+    <div className="min-h-screen scroll-smooth bg-background">
+      {/* Nav — clean minimal white bar */}
+      <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 text-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <GraduationCap className="h-5 w-5" />
             </span>
             <div className="leading-tight">
-              <p className="text-sm font-bold tracking-tight text-white">EduBridge Network</p>
-              <p className="text-xs font-semibold text-white/75">Internship Opportunities</p>
+              <p className="text-sm font-bold tracking-tight">EduBridge Network</p>
+              <p className="text-xs font-semibold text-primary">Internship Opportunities</p>
             </div>
           </Link>
-          <nav className="hidden items-center gap-5 text-sm text-white/80 md:flex">
+          <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
             {NAV.map((n) => (
-              <a key={n} href={`#${n.toLowerCase().replace(/\s+/g, '-')}`} className="hover:text-white">
+              <a key={n} href={`#${n.toLowerCase().replace(/\s+/g, '-')}`} className="hover:text-foreground">
                 {n}
               </a>
             ))}
           </nav>
-          <Button
-            asChild
-            size="sm"
-            variant="outline"
-            className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-          >
+          <Button asChild size="sm" variant="outline">
             <Link href="/internship/dashboard">Sign in</Link>
           </Button>
         </div>
       </header>
 
-      {/* Hero — full-bleed tan panel, bold serif headline, outlined tag pills */}
-      <section className="w-screen bg-marigold-soft" style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}>
-        <div className="mx-auto max-w-3xl px-4 py-16 text-center">
-          <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.2em] text-marigold">
-            <Sparkles className="h-3.5 w-3.5" /> EduBridge&apos;s own internship program
-          </p>
-          <h1 className="mx-auto mt-4 max-w-2xl font-display text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl">
-            Every path from student to <span className="text-primary">certified</span>, ends here.
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Two ways in: pay to learn on a live project with a mentor, or apply and let your skills
-            earn you real — sometimes paid — work. Both roads lead to a verifiable certificate.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-2.5">
-            {HERO_TAGS.map((t) => (
-              <a
-                key={t.label}
-                href={t.href}
-                className="rounded-full border border-primary/50 px-4 py-1.5 text-sm font-semibold text-primary hover:bg-primary/10"
-              >
-                {t.label}
-              </a>
-            ))}
+      {/* Hero — soft gradient panel, bold headline, decorative gradient blob */}
+      <section
+        className="w-screen bg-gradient-to-br from-primary/10 via-background to-marigold/10"
+        style={{ marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}
+      >
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 lg:grid-cols-2 lg:py-24">
+          <div>
+            <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+              <Sparkles className="h-3.5 w-3.5" /> EduBridge&apos;s own internship program
+            </p>
+            <h1 className="mt-4 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
+              Every path from student to certified, ends here.
+            </h1>
+            <p className="mt-4 max-w-lg text-muted-foreground">
+              Two ways in: pay to learn on a live project with a mentor, or apply and let your skills
+              earn you real — sometimes paid — work. Both roads lead to a verifiable certificate.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-2.5">
+              {HERO_TAGS.map((t) => (
+                <a
+                  key={t.label}
+                  href={t.href}
+                  className="rounded-full border border-primary/50 px-4 py-1.5 text-sm font-semibold text-primary hover:bg-primary/10"
+                >
+                  {t.label}
+                </a>
+              ))}
+            </div>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <a href="#tracks">
+                  Choose your track <ArrowRight className="h-4 w-4" />
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/verify-certificate">Verify a certificate</Link>
+              </Button>
+            </div>
           </div>
-          <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <Button asChild size="lg">
-              <a href="#tracks">
-                Choose your track <ArrowRight className="h-4 w-4" />
-              </a>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link href="/verify-certificate">Verify a certificate</Link>
-            </Button>
+
+          <div className="relative mx-auto hidden w-full max-w-sm lg:block">
+            <span className="absolute -left-3 -top-3 h-14 w-14 rotate-45 rounded-full border-[8px] border-marigold border-b-transparent border-l-transparent" />
+            <div className="aspect-square w-full rounded-full bg-gradient-to-br from-primary to-marigold p-1.5 shadow-xl">
+              <div className="grid h-full w-full place-items-center rounded-full bg-background">
+                <GraduationCap className="h-20 w-20 text-primary" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -190,13 +199,10 @@ export default function InternshipLandingPage() {
         </section>
 
         {/* Why intern */}
-        <section
-          id="why-intern"
-          className="space-y-6 rounded-3xl border border-border bg-card px-6 py-12 sm:px-10"
-        >
+        <section id="why-intern" className="space-y-6 rounded-[2rem] bg-muted px-6 py-12 sm:px-10">
           <div className="mx-auto max-w-xl text-center">
             <p className="text-sm font-bold uppercase tracking-wide text-primary">Why intern with us</p>
-            <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight">
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight">
               Why Intern with EduBridge Network?
             </h2>
             <p className="mt-2 text-muted-foreground">
@@ -205,7 +211,7 @@ export default function InternshipLandingPage() {
           </div>
           <div className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-3">
             {WHY_INTERN.map((s) => (
-              <div key={s.title} className="rounded-2xl border border-border bg-background p-5 text-center">
+              <div key={s.title} className="rounded-2xl bg-background p-5 text-center">
                 <span className="mx-auto grid h-10 w-10 place-items-center rounded-xl bg-accent text-primary">
                   <s.icon className="h-5 w-5" />
                 </span>
@@ -216,13 +222,20 @@ export default function InternshipLandingPage() {
           </div>
         </section>
 
-        {/* Mission statement */}
-        <section className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-5 py-4 text-center sm:justify-center">
-          <ShieldCheck className="h-5 w-5 flex-none text-primary" />
-          <p className="text-[14.5px] font-medium text-foreground/90">
-            At EduBridge Network, our mission is to give every student real skills, hands-on
-            experience, and the right guidance for their future.
+        {/* Closing CTA — gradient blob */}
+        <section className="mx-auto max-w-4xl overflow-hidden rounded-[3rem] bg-gradient-to-br from-primary via-primary to-marigold px-8 py-16 text-center text-white">
+          <ShieldCheck className="mx-auto h-10 w-10 opacity-90" />
+          <h2 className="mx-auto mt-4 max-w-md text-3xl font-extrabold tracking-tight sm:text-4xl">
+            Ready to start your internship?
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-white/85">
+            Two tracks, one certificate. Pick the path that fits you and get started today.
           </p>
+          <Button asChild size="lg" className="mt-6 bg-white text-primary hover:bg-white/90">
+            <a href="#tracks">
+              Choose your track <ArrowRight className="h-4 w-4" />
+            </a>
+          </Button>
         </section>
 
         {/* FAQ */}
