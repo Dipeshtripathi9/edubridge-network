@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -47,62 +42,12 @@ export interface ResourceComment {
   };
 }
 
-export function useResources(
-  filters: { type?: string; q?: string; sort?: string; collegeId?: string } = {},
-) {
-  return useInfiniteQuery({
-    queryKey: ['resources', filters],
-    initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam }) => {
-      const params = new URLSearchParams({ limit: '15' });
-      if (filters.type) params.set('type', filters.type);
-      if (filters.q) params.set('q', filters.q);
-      if (filters.sort) params.set('sort', filters.sort);
-      if (filters.collegeId) params.set('collegeId', filters.collegeId);
-      if (pageParam) params.set('cursor', pageParam);
-      return api.paginated<Resource>(`/resources?${params.toString()}`);
-    },
-    getNextPageParam: (last) => (last.meta.hasMore ? last.meta.nextCursor ?? undefined : undefined),
-    // Always fetch fresh on mount so newly-added resources appear immediately
-    // (don't serve a stale/empty persisted list).
-    refetchOnMount: 'always',
-    staleTime: 0,
-  });
-}
-
 export function useMyResourceBookmarks() {
   const token = useAuthStore((s) => s.accessToken);
   return useQuery({
     queryKey: ['resources', 'bookmarks'],
     queryFn: () => api.get<Resource[]>('/resources/bookmarks/me'),
     enabled: !!token,
-  });
-}
-
-/**
- * Full upload flow: request a presigned URL, PUT the file to S3 (when configured),
- * then create the resource record. In dev (no S3) the PUT is skipped.
- */
-export function useUploadResource() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: {
-      externalUrl: string;
-      type: string;
-      title: string;
-      description?: string;
-      tags?: string[];
-      collegeId?: string;
-    }) =>
-      api.post<Resource>('/resources', {
-        type: input.type,
-        title: input.title,
-        description: input.description,
-        externalUrl: input.externalUrl,
-        tags: input.tags ?? [],
-        collegeId: input.collegeId,
-      }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['resources'] }),
   });
 }
 

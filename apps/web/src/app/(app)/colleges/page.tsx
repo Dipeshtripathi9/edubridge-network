@@ -88,9 +88,7 @@ export default function CollegesBrowsePage() {
             {colleges.map((c) => (
               <div key={c.id} className="flex flex-col rounded-2xl border border-border bg-card p-5">
                 <div className="flex items-start justify-between gap-2">
-                  <Link href={`/colleges/${c.slug}`} className="font-display text-[17px] font-extrabold leading-snug tracking-tight hover:text-primary">
-                    {c.name}
-                  </Link>
+                  <span className="font-display text-[17px] font-extrabold leading-snug tracking-tight">{c.name}</span>
                   <button
                     type="button"
                     aria-label={isShortlisted(c.slug) ? 'Remove from shortlist' : 'Add to shortlist'}
