@@ -57,8 +57,8 @@ const ILL_INTERN2 = `<svg viewBox="0 0 120 100" fill="none" aria-hidden="true" s
 </svg>`;
 
 const INTERNSHIPS = [
-  { svg: ILL_INTERN1, label: 'Track A — Learn & Build', desc: 'Guided project with a mentor, from ₹2,999' },
-  { svg: ILL_INTERN2, label: 'Track B — Apply & Get Selected', desc: 'Free to apply — real work or a skill task' },
+  { svg: ILL_INTERN1, hook: 'From ₹2,999', name: 'Track A — Learn & Build with a mentor' },
+  { svg: ILL_INTERN2, hook: 'Free to apply', name: 'Track B — Apply & Get Selected' },
 ];
 
 // Fanned poster carousel — each poster is a full illustrated SVG card (background +
@@ -94,7 +94,7 @@ const POSTER_QUIZ = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/sv
 
 const POSTER_COMPARE = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#DFDACB"/>
+  <circle cx="240" cy="230" r="168" fill="#FBE3B8"/>
   <g transform="translate(240 250) scale(0.74) translate(-240 -250)">
   <g>
     <rect x="115" y="160" width="150" height="230" rx="18" fill="#1B1633" opacity="0.06" transform="rotate(-4 190 275)"/>
@@ -150,7 +150,7 @@ const POSTER_COMPARE = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000
 
 const POSTER_INTERNSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#FBE3B8"/>
+  <circle cx="240" cy="230" r="168" fill="#E4D9FF"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <g transform="translate(105 260)">
     <rect x="0" y="30" width="110" height="90" rx="10" fill="#1B1633"/>
@@ -191,7 +191,7 @@ const POSTER_INTERNSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2
 
 const POSTER_SCHOLARSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#E4D9FF"/>
+  <circle cx="240" cy="230" r="168" fill="#FBE3B8"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <rect x="145" y="150" width="150" height="220" rx="16" fill="#fff" stroke="#1B1633" stroke-width="6"/>
   <text x="220" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="800" fill="#1B1633" letter-spacing="1">SCHOLARSHIP</text>
@@ -221,7 +221,7 @@ const POSTER_SCHOLARSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/
 
 const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <circle cx="240" cy="230" r="168" fill="#FBE3B8"/>
+  <circle cx="240" cy="230" r="168" fill="#E4D9FF"/>
   <g transform="translate(240 250) scale(0.66) translate(-240 -250)">
   <g transform="translate(110 220)">
     <rect x="0" y="0" width="100" height="150" rx="12" fill="#fff" stroke="#1B1633" stroke-width="6"/>
@@ -385,7 +385,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
       <PosterStack onQuiz={onQuiz} />
 
       {/* Direct Admission Desk */}
-      <div className="my-8">
+      <div className="mb-8 mt-6 border-t border-border pt-8">
         <HomeAdmissionDesk onApply={onQuiz} />
       </div>
 
@@ -401,12 +401,12 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
 
         <div className="flex snap-x gap-4 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {INTERNSHIPS.map((s) => (
-            <Link key={s.label} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
+            <Link key={s.name} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
               <span className="mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
                 <Ill svg={s.svg} />
               </span>
               <p className="text-[16px] font-semibold leading-snug">
-                <b className="font-extrabold">{s.label}</b> — {s.desc}
+                <b className="font-extrabold">{s.hook}</b> {s.name}
               </p>
               <span className="mt-2 inline-flex items-center gap-2 text-[15px] font-extrabold">
                 Apply Now <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
