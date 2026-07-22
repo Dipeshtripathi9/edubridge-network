@@ -719,22 +719,6 @@ const SRC = `<!doctype html>
     .chip-strip{ display:flex; }
   }
 
-  /* Wider desktop viewports: let the reels use the full section width
-     instead of an extra 800px cap, and scale up the mini-app content
-     (designed at a fixed 252x448 canvas) to match via transform so
-     none of its many fixed-px rules need touching. */
-  @media (min-width: 861px){
-    .reels{ max-width:1180px; gap:28px; }
-    .mini-app{
-      position:absolute; inset:auto; top:0; left:0;
-      width:252px; height:448px;
-      transform:scale(1.49);
-      transform-origin:top left;
-    }
-    .reel .notch{ top:13px; width:60px; height:7px; border-radius:6px; }
-    .r1-cursor{ width:21px; height:21px; border-width:2px; }
-  }
-
   @media (max-width: 620px){
     .reels{ grid-template-columns:repeat(3,1fr); gap:10px; }
     .reel .icon svg{ width:32px; height:32px; }
@@ -1367,8 +1351,8 @@ const SRC = `<!doctype html>
     const cr = r1app.getBoundingClientRect();
     const r = el.getBoundingClientRect();
     r1cursor.style.opacity = 1;
-    r1cursor.style.left = (r.left + r.width/2 - cr.left - r1cursor.offsetWidth/2) + 'px';
-    r1cursor.style.top  = (r.top + r.height/2 - cr.top - r1cursor.offsetHeight/2) + 'px';
+    r1cursor.style.left = (r.left + r.width/2 - cr.left - 7) + 'px';
+    r1cursor.style.top  = (r.top + r.height/2 - cr.top - 7) + 'px';
     await sleep(560);
   }
   async function r1Tap(el){
@@ -1455,8 +1439,8 @@ const SRC = `<!doctype html>
     const cr = r2app.getBoundingClientRect();
     const r = el.getBoundingClientRect();
     r2cursor.style.opacity = 1;
-    r2cursor.style.left = (r.left + r.width/2 - cr.left - r2cursor.offsetWidth/2) + 'px';
-    r2cursor.style.top  = (r.top + r.height/2 - cr.top - r2cursor.offsetHeight/2) + 'px';
+    r2cursor.style.left = (r.left + r.width/2 - cr.left - 7) + 'px';
+    r2cursor.style.top  = (r.top + r.height/2 - cr.top - 7) + 'px';
     await sleep(560);
   }
   async function r2Tap(el){
@@ -1554,8 +1538,8 @@ const SRC = `<!doctype html>
     const cr = r3app.getBoundingClientRect();
     const r = el.getBoundingClientRect();
     r3cursor.style.opacity = 1;
-    r3cursor.style.left = (r.left + r.width/2 - cr.left - r3cursor.offsetWidth/2) + 'px';
-    r3cursor.style.top  = (r.top + r.height/2 - cr.top - r3cursor.offsetHeight/2) + 'px';
+    r3cursor.style.left = (r.left + r.width/2 - cr.left - 7) + 'px';
+    r3cursor.style.top  = (r.top + r.height/2 - cr.top - 7) + 'px';
     await sleep(560);
   }
   async function r3Tap(el){
