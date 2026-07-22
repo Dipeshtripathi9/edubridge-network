@@ -402,7 +402,10 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
         <div className="flex snap-x gap-4 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {INTERNSHIPS.map((s) => (
             <Link key={s.name} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
-              <span className="mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
+              <span className="relative mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
+                <span className="absolute right-2 top-2 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Example
+                </span>
                 <Ill svg={s.svg} />
               </span>
               <p className="text-[16px] font-semibold leading-snug">
@@ -446,7 +449,10 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
         <div className="flex snap-x gap-4 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {SCHOLARSHIPS.map((s) => (
             <Link key={s.name} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
-              <span className="mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
+              <span className="relative mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
+                <span className="absolute right-2 top-2 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Example
+                </span>
                 <Ill svg={s.svg} />
               </span>
               <p className="text-[16px] font-semibold leading-snug">

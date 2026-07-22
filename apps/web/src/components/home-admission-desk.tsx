@@ -3,18 +3,19 @@
 import { useEffect, useRef, useState } from 'react';
 
 // Direct Admission Desk — a compact problem→solution band for the homepage,
-// embedded in an isolated iframe (like HomeExplainer) so its CSS/JS can't collide
-// with the app. Body + card are transparent, so the site's ivory paper shows
-// through and the handwritten "Apply" button reads as sitting on the page
-// background. The iframe reports its own height (auto-resize) and the Apply
-// button posts a message that opens the College Fit Quiz in the parent.
+// embedded in an isolated iframe (like HomeExplainer) so its CSS/JS can't
+// collide with the app. Styled as a plain white card with a solid-violet CTA
+// pill to match the sharp-cornered card language used by the Internships and
+// Scholarships sections below it. The iframe reports its own height
+// (auto-resize) and the Apply button posts a message that opens the College
+// Fit Quiz in the parent.
 const SRC = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Hanken+Grotesk:wght@500;600;700&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Hanken+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--paper:#F6F4EE;--white:#FFFFFF;--hill:#EDE8DA;--ink:#1A1433;--ink-2:#575170;--ink-3:#8B86A0;--line:#E6E1D3;--violet:#5A31F4;--violet-soft:#EFEAFF;--marigold:#F2A31B;--marigold-soft:#FDF1DA;--green:#0E8A5C;--font-display:"Bricolage Grotesque",system-ui,sans-serif;--font-body:"Hanken Grotesk",system-ui,sans-serif;--font-hand:"Caveat",cursive;--font-mono:ui-monospace,"SF Mono",Menlo,monospace}
+:root{--paper:#F6F4EE;--white:#FFFFFF;--hill:#EDE8DA;--ink:#1A1433;--ink-2:#575170;--ink-3:#8B86A0;--line:#E6E1D3;--violet:#5A31F4;--violet-soft:#EFEAFF;--marigold:#F2A31B;--marigold-soft:#FDF1DA;--green:#0E8A5C;--font-display:"Bricolage Grotesque",system-ui,sans-serif;--font-body:"Hanken Grotesk",system-ui,sans-serif;--font-mono:ui-monospace,"SF Mono",Menlo,monospace}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{background:transparent}
 body{font-family:var(--font-body);color:var(--ink);padding:2px;overflow:hidden;-webkit-font-smoothing:antialiased}
@@ -24,8 +25,7 @@ svg{display:block}
 
 .desk{
   max-width:980px;width:100%;margin:0 auto;
-  background:transparent;border:1px solid var(--line);border-radius:24px;
-  border-left:5px solid var(--marigold);
+  background:var(--white);border:1px solid var(--line);border-radius:20px;
   padding:26px 28px;
   display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center;
 }
@@ -43,17 +43,15 @@ svg{display:block}
 .trustline b{display:inline-flex;align-items:center;gap:5px;color:var(--green)}
 .trustline svg{width:12px;height:12px}
 
-.applybtn{position:relative;text-align:center;padding:6px 18px 14px;justify-self:center}
-.aword{display:block;font-family:var(--font-hand);font-weight:700;font-size:clamp(52px,7vw,64px);line-height:.95;color:var(--ink);transform:rotate(-3deg);transition:color .18s ease,transform .18s ease}
-.applybtn:hover .aword{color:var(--violet);transform:rotate(-3deg) scale(1.04)}
-.swash{width:100%;max-width:190px;height:26px;margin:-4px auto 0;overflow:visible}
-.swash path{fill:none;stroke:var(--marigold);stroke-width:5;stroke-linecap:round;stroke-dasharray:240;stroke-dashoffset:0}
-.applybtn:hover .swash path{animation:swashdraw .6s ease}
-@keyframes swashdraw{from{stroke-dashoffset:240}to{stroke-dashoffset:0}}
-.asub{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-family:var(--font-mono);font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--ink-2);font-weight:700}
-.asub svg{width:13px;height:13px;transition:transform .18s ease}
-.applybtn:hover .asub svg{transform:translateX(4px)}
-@media(prefers-reduced-motion:reduce){.applybtn:hover .swash path{animation:none}.applybtn:hover .aword{transform:rotate(-3deg)}}
+.applybtn{
+  justify-self:center;display:inline-flex;align-items:center;gap:10px;
+  background:var(--violet);color:#fff;border-radius:999px;
+  padding:15px 26px;font-family:var(--font-display);font-weight:800;font-size:15px;
+  transition:background .15s ease,transform .15s ease;
+}
+.applybtn:hover{background:#4A20E4;transform:translateY(-1px)}
+.applybtn svg{width:16px;height:16px;transition:transform .18s ease}
+.applybtn:hover svg{transform:translateX(3px)}
 </style></head>
 <body>
 <section class="desk">
@@ -76,11 +74,8 @@ svg{display:block}
     </div>
   </div>
   <a class="applybtn" href="#" id="applyBtn" aria-label="Apply — free, takes 2 minutes">
-    <span class="aword">Apply</span>
-    <svg class="swash" viewBox="0 0 200 26" preserveAspectRatio="none" aria-hidden="true"><path d="M6 20 C 50 26, 130 22, 194 6"/></svg>
-    <span class="asub">free · 2 minutes
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </span>
+    Apply — free, 2 min
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
   </a>
 </section>
 <script>
