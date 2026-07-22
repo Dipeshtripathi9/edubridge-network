@@ -717,6 +717,34 @@ const SRC = `<!doctype html>
     .bubble{ display:none; }
     .bridge-svg{ display:none; }
     .chip-strip{ display:flex; }
+
+    /* Three 9:16 reels side by side is only legible above ~860px — below
+       that, three simultaneous columns crush the mini-app content into
+       ~170px, which clips and overlaps text (e.g. card headers colliding).
+       Switch to one full-size reel at a time, swipeable, same fixed-canvas
+       + transform-scale technique the desktop enlargement uses. */
+    .reels{
+      display:flex;
+      grid-template-columns:none;
+      gap:16px;
+      max-width:100%;
+      margin:0 0 72px;
+      padding:0 4vw 6px;
+      overflow-x:auto;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+    }
+    .reels::-webkit-scrollbar{ display:none; }
+    .reel{ flex:0 0 auto; width:280px; scroll-snap-align:center; }
+    .mini-app{
+      position:absolute; top:0; left:0;
+      width:252px; height:448px;
+      transform:scale(1.111);
+      transform-origin:top left;
+    }
+    .reel .notch{ top:10px; width:44px; height:6px; }
+    .r1-cursor{ width:16px; height:16px; }
   }
 
   /* Wider desktop viewports: let the reels use the full section width
@@ -733,12 +761,6 @@ const SRC = `<!doctype html>
     }
     .reel .notch{ top:13px; width:60px; height:7px; border-radius:6px; }
     .r1-cursor{ width:21px; height:21px; border-width:2px; }
-  }
-
-  @media (max-width: 620px){
-    .reels{ grid-template-columns:repeat(3,1fr); gap:10px; }
-    .reel .icon svg{ width:32px; height:32px; }
-    .reel .caption{ font-size:10px; left:8px; right:8px; bottom:8px; }
   }
 
   .chip-strip{
