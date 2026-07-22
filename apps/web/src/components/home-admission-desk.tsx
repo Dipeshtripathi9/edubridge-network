@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 // Direct Admission Desk — a compact problem→solution band for the homepage,
-// embedded in an isolated iframe (like HomeExplainer) so its CSS/JS can't
+// embedded in an isolated iframe (like HomeCareerBridge) so its CSS/JS can't
 // collide with the app. Styled as a plain white card with a solid-violet CTA
 // pill to match the sharp-cornered card language used by the Internships and
 // Scholarships sections below it. The iframe reports its own height

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Briefcase, Building2, CheckCircle2, GraduationCap, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CollegeQuiz } from '@/components/college-quiz';
-import { HomeExplainer } from '@/components/home-explainer';
+import { HomeCareerBridge } from '@/components/home-career-bridge';
 import { HomeTools } from '@/components/home-tools';
 
 const QUESTIONS = [
@@ -92,8 +92,8 @@ export function HomeIllustrated() {
         {/* TOOLS + SCHOLARSHIPS */}
         <HomeTools onQuiz={openQuiz} />
 
-        {/* EXPLAINER */}
-        <HomeExplainer />
+        {/* CAREER BRIDGE / COMMUNITY */}
+        <HomeCareerBridge />
 
         {/* STUDENTS FIRST */}
         <section>
