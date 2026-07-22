@@ -275,14 +275,12 @@ const SRC = `<!doctype html>
     width:56px; height:56px;
     border-radius:100%;
     flex:none;
-    display:flex; align-items:center; justify-content:center;
-    color:#fff;
-    font-family:var(--display);
-    font-weight:700;
-    font-size:19px;
+    overflow:hidden;
+    background:var(--panel);
+    border:3px solid transparent;
     box-shadow:0 10px 22px -8px rgba(18,33,59,0.35), 0 0 0 4px var(--parchment);
   }
-  .bubble .avatar svg{ width:24px; height:24px; }
+  .bubble .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
   .bubble .tag-label{
     display:inline-flex;
     align-items:center;
@@ -298,22 +296,24 @@ const SRC = `<!doctype html>
   }
 
   .b1{ top:4%;  left:0%;  }
-  .b1 .avatar, .b1 .tag-label{ background:var(--coral); }
+  .b1 .avatar{ border-color:var(--coral); }
+  .b1 .tag-label{ background:var(--coral); }
 
   .b2{ top:28%; left:-4%; animation-delay:.6s; }
-  .b2 .avatar, .b2 .tag-label{ background:var(--teal); }
+  .b2 .avatar{ border-color:var(--teal); }
+  .b2 .tag-label{ background:var(--teal); }
 
   .b3{ bottom:16%; left:2%; animation-delay:1.2s; }
-  .b3 .avatar, .b3 .tag-label{ background:var(--ink); }
+  .b3 .avatar{ border-color:var(--ink); }
+  .b3 .tag-label{ background:var(--ink); }
 
   .b4{ top:0%; right:2%; animation-delay:.3s; flex-direction:row-reverse; }
-  .b4 .avatar, .b4 .tag-label{ background:var(--amber-deep); }
+  .b4 .avatar{ border-color:var(--amber-deep); }
+  .b4 .tag-label{ background:var(--amber-deep); }
 
   .b5{ top:32%; right:-4%; animation-delay:.9s; flex-direction:row-reverse; }
-  .b5 .avatar, .b5 .tag-label{ background:#7A5FB0; }
-
-  .b6{ bottom:18%; right:0%; animation-delay:1.5s; flex-direction:row-reverse; }
-  .b6 .avatar, .b6 .tag-label{ background:var(--teal); }
+  .b5 .avatar{ border-color:#7A5FB0; }
+  .b5 .tag-label{ background:#7A5FB0; }
 
   @keyframes bob{
     0%,100%{ transform:translateY(0); }
@@ -780,11 +780,8 @@ const SRC = `<!doctype html>
     border-radius:100px;
     color:#fff;
   }
-  .chip .dot{ width:20px;height:20px;border-radius:100%;
-    display:flex;align-items:center;justify-content:center;
-    font-family:var(--display); font-weight:600; font-size:10px;
-    background:rgba(255,255,255,0.25);
-  }
+  .chip .dot{ width:20px;height:20px;border-radius:100%; flex:none; overflow:hidden; background:rgba(255,255,255,0.25); }
+  .chip .dot img{ width:100%; height:100%; object-fit:cover; display:block; }
 
   @media (prefers-reduced-motion: reduce){
     .bubble{ animation:none; }
@@ -816,28 +813,24 @@ const SRC = `<!doctype html>
     </svg>
 
     <div class="bubble b1" aria-hidden="true">
-      <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></span>
+      <span class="avatar"><img src="/community-avatar-1.png" alt="" /></span>
       <span class="tag-label">College Match</span>
     </div>
     <div class="bubble b2" aria-hidden="true">
-      <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>
+      <span class="avatar"><img src="/community-avatar-2.png" alt="" /></span>
       <span class="tag-label">Expert Guide</span>
     </div>
     <div class="bubble b3" aria-hidden="true">
-      <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="avatar"><img src="/community-avatar-3.png" alt="" /></span>
       <span class="tag-label">Community &amp; Blogs</span>
     </div>
     <div class="bubble b4" aria-hidden="true">
-      <span class="avatar">₹</span>
+      <span class="avatar"><img src="/community-avatar-4.png" alt="" /></span>
       <span class="tag-label">Scholarships</span>
     </div>
     <div class="bubble b5" aria-hidden="true">
-      <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+      <span class="avatar"><img src="/community-avatar-5.png" alt="" /></span>
       <span class="tag-label">Internships</span>
-    </div>
-    <div class="bubble b6" aria-hidden="true">
-      <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-      <span class="tag-label">Direct Apply</span>
     </div>
 
     <div class="phone">
@@ -878,12 +871,11 @@ const SRC = `<!doctype html>
     </div>
 
     <div class="chip-strip">
-      <span class="chip" style="background:var(--coral)"><span class="dot">%</span>College Match</span>
-      <span class="chip" style="background:var(--teal)"><span class="dot">G</span>Expert Guide</span>
-      <span class="chip" style="background:var(--ink)"><span class="dot">C</span>Community &amp; Blogs</span>
-      <span class="chip" style="background:var(--amber-deep)"><span class="dot">₹</span>Scholarships</span>
-      <span class="chip" style="background:#7A5FB0"><span class="dot">I</span>Internships</span>
-      <span class="chip" style="background:var(--teal)"><span class="dot">✓</span>Direct Apply</span>
+      <span class="chip" style="background:var(--coral)"><span class="dot"><img src="/community-avatar-1.png" alt="" /></span>College Match</span>
+      <span class="chip" style="background:var(--teal)"><span class="dot"><img src="/community-avatar-2.png" alt="" /></span>Expert Guide</span>
+      <span class="chip" style="background:var(--ink)"><span class="dot"><img src="/community-avatar-3.png" alt="" /></span>Community &amp; Blogs</span>
+      <span class="chip" style="background:var(--amber-deep)"><span class="dot"><img src="/community-avatar-4.png" alt="" /></span>Scholarships</span>
+      <span class="chip" style="background:#7A5FB0"><span class="dot"><img src="/community-avatar-5.png" alt="" /></span>Internships</span>
     </div>
   </div>
 
