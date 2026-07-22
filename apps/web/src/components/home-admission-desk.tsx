@@ -25,11 +25,13 @@ svg{display:block}
 
 .desk{
   max-width:980px;width:100%;margin:0 auto;
-  background:var(--white);border:1px solid var(--line);border-radius:20px;
+  background:var(--white);border:1px solid var(--line);border-radius:16px;
   padding:24px 28px;
   display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;
 }
 @media(max-width:720px){.desk{grid-template-columns:1fr;padding:22px 20px}}
+.desk .krow{display:flex;align-items:center;gap:8px}
+.desk .krow svg{width:18px;height:18px;color:var(--violet);flex:none}
 .desk .k{font-family:var(--font-mono);font-size:11.5px;letter-spacing:2.4px;text-transform:uppercase;color:var(--violet);font-weight:700}
 .desk h2{font-family:var(--font-display);font-weight:800;font-size:clamp(23px,3.4vw,27px);letter-spacing:-.02em;line-height:1.15;margin:8px 0}
 .desk h2 .u{position:relative;display:inline-block;white-space:nowrap}
@@ -38,8 +40,8 @@ svg{display:block}
 .desk p b{color:var(--ink)}
 .cats{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
 .cats span{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--ink-2);background:var(--white);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
-.cats span i{width:5px;height:5px;border-radius:50%;background:var(--marigold);flex:none}
-.trustline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11.5px;font-weight:700;color:var(--ink-3)}
+.cats span i{width:6px;height:6px;border-radius:50%;background:#D98E0A;flex:none}
+.trustline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11.5px;font-weight:700;color:var(--ink-2)}
 .trustline b{display:inline-flex;align-items:center;gap:5px;color:var(--green)}
 .trustline svg{width:12px;height:12px}
 
@@ -56,7 +58,10 @@ svg{display:block}
 <body>
 <section class="desk">
   <div>
-    <span class="k">Direct Admission Desk</span>
+    <div class="krow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h6"/></svg>
+      <span class="k">Direct Admission Desk</span>
+    </div>
     <h2>Don't pay just <span class="u">to ask.
       <svg class="arc" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4 16 C 80 2, 220 2, 296 16" stroke="currentColor" stroke-width="7" stroke-linecap="round" fill="none"/></svg></span>
     </h2>

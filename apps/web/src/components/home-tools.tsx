@@ -385,7 +385,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
       <PosterStack onQuiz={onQuiz} />
 
       {/* Direct Admission Desk */}
-      <div className="mb-8 mt-6 border-t border-border pt-8">
+      <div className="mt-6 border-t border-border pt-8">
         <HomeAdmissionDesk onApply={onQuiz} />
       </div>
 
@@ -403,7 +403,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
           {INTERNSHIPS.map((s) => (
             <Link key={s.name} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
               <span className="relative mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
-                <span className="absolute right-2.5 top-2.5 rounded-full bg-marigold-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
+                <span className="absolute right-3 top-3 rounded-full bg-marigold-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
                   Example
                 </span>
                 <Ill svg={s.svg} />
@@ -431,7 +431,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
             href="/internship"
             className="inline-flex items-center gap-2.5 rounded-full border-[1.6px] border-foreground bg-card px-7 py-3.5 text-[16px] font-extrabold transition-colors hover:bg-secondary"
           >
-            See All Internships <ChevronRight className="h-4 w-4" />
+            Browse All Internships <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
@@ -450,7 +450,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
           {SCHOLARSHIPS.map((s) => (
             <Link key={s.name} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
               <span className="relative mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
-                <span className="absolute right-2.5 top-2.5 rounded-full bg-marigold-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
+                <span className="absolute right-3 top-3 rounded-full bg-marigold-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
                   Example
                 </span>
                 <Ill svg={s.svg} />
@@ -478,7 +478,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
             href="/internship"
             className="inline-flex items-center gap-2.5 rounded-full border-[1.6px] border-foreground bg-card px-7 py-3.5 text-[16px] font-extrabold transition-colors hover:bg-secondary"
           >
-            See All Scholarships <ChevronRight className="h-4 w-4" />
+            Browse All Scholarships <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
