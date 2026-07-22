@@ -1,8 +1,8 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Briefcase, ChevronRight, IndianRupee } from 'lucide-react';
+import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, IndianRupee } from 'lucide-react';
 import { HomeAdmissionDesk } from '@/components/home-admission-desk';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
@@ -278,92 +278,152 @@ const POSTERS = [
   { svg: POSTER_EXPERT, action: { type: 'quiz' as const } },
 ];
 const POSTER_TRACK = POSTERS;
+const POSTER_TITLES = ['College Quiz', 'Compare Colleges', 'Internship', 'Scholarship', 'Expert Guide'];
 
+// Swipeable stacked-card deck: one poster up front, the next two fanned
+// behind it (peek + rotate), matching a card-deck interaction rather than a
+// flat scroll strip. Advance via the chevrons, the dots, arrow keys, or a
+// left/right swipe on the deck itself; the front card is still the real
+// link/button so clicking it behaves exactly like before.
 function PosterStack({ onQuiz }: { onQuiz: () => void }) {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [gutter, setGutter] = useState(16);
+  const total = POSTER_TRACK.length;
+  const [index, setIndex] = useState(0);
+  const dragStartX = useRef<number | null>(null);
 
-  useLayoutEffect(() => {
-    const el = sectionRef.current;
-    if (!el?.parentElement) return;
-    const update = () => setGutter(el.parentElement!.getBoundingClientRect().left);
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
+  const advance = (dir: number) => setIndex((i) => (i + dir + total) % total);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    dragStartX.current = e.clientX;
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (dragStartX.current == null) return;
+    const delta = e.clientX - dragStartX.current;
+    dragStartX.current = null;
+    if (Math.abs(delta) > 32) advance(delta < 0 ? 1 : -1);
+  };
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowRight') advance(1);
+    else if (e.key === 'ArrowLeft') advance(-1);
+  };
 
   return (
-    <div ref={sectionRef} className="stack-section">
-      <div className="stack-outer" style={{ scrollPaddingLeft: gutter }}>
-        <div className="stack-track" style={{ paddingLeft: gutter, paddingRight: gutter }}>
+    <div className="stack-section">
+      <div className="deck-row">
+        <button type="button" className="deck-nav" aria-label="Previous" onClick={() => advance(-1)}>
+          <ChevronLeft className="h-[18px] w-[18px]" />
+        </button>
+
+        <div
+          className="deck"
+          role="group"
+          aria-label="Explore our tools — swipe or use the arrows to browse"
+          tabIndex={0}
+          onKeyDown={onKeyDown}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+        >
           {POSTER_TRACK.map(({ svg, action }, i) => {
+            const dist = (i - index + total) % total;
+            if (dist > 2) return null;
             const photo = <span className="s-photo block" dangerouslySetInnerHTML={{ __html: svg }} />;
-            const className = 'm-item';
+            if (dist !== 0) {
+              return (
+                <div key={i} aria-hidden className={`deck-card peek-${dist}`}>
+                  {photo}
+                </div>
+              );
+            }
+            const label = `Open ${POSTER_TITLES[i]}`;
             return action.type === 'quiz' ? (
-              <button key={i} type="button" className={className} onClick={onQuiz}>
+              <button key={i} type="button" className="deck-card front" aria-label={label} onClick={onQuiz}>
                 {photo}
               </button>
             ) : (
-              <Link key={i} href={action.href} className={className}>
+              <Link key={i} href={action.href} className="deck-card front" aria-label={label}>
                 {photo}
               </Link>
             );
           })}
         </div>
+
+        <button type="button" className="deck-nav" aria-label="Next" onClick={() => advance(1)}>
+          <ChevronRight className="h-[18px] w-[18px]" />
+        </button>
       </div>
-      <div aria-hidden className="mt-4 flex justify-center gap-1.5">
-        {POSTERS.map((_, i) => (
-          <span key={i} className="h-1.5 w-1.5 rounded-full bg-foreground/20" />
+
+      <div className="mt-5 flex justify-center gap-2">
+        {POSTER_TRACK.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={`Show ${POSTER_TITLES[i]}`}
+            aria-current={i === index}
+            className={`dot ${i === index ? 'active' : ''}`}
+            onClick={() => setIndex(i)}
+          />
         ))}
       </div>
+
       <style>{`
         .stack-section {
-          width: 100vw;
-          margin-left: calc(50% - 50vw);
-          margin-right: calc(50% - 50vw);
-          background: hsl(var(--background));
-          padding: 0 0 56px;
-        }
-        .stack-outer {
           width: 100%;
-          overflow-x: auto;
-          overflow-y: hidden;
-          -webkit-overflow-scrolling: touch;
-          scroll-snap-type: x proximity;
-          scrollbar-width: none;
-          mask-image: linear-gradient(to right, black 0%, black 94%, transparent 100%);
-          -webkit-mask-image: linear-gradient(to right, black 0%, black 94%, transparent 100%);
+          padding: 8px 0 0;
         }
-        .stack-outer::-webkit-scrollbar { display: none; }
-        .stack-track { display: flex; width: max-content; gap: 24px; }
-        .m-item {
+        .deck-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
+        .deck-nav {
+          flex: none;
+          width: 38px; height: 38px;
+          border-radius: 999px;
+          border: 1.5px solid hsl(var(--border));
+          background: hsl(var(--card));
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer;
+          transition: background 0.15s ease, border-color 0.15s ease;
+        }
+        .deck-nav:hover { background: hsl(var(--secondary)); border-color: hsl(var(--primary) / 0.4); }
+        .deck-nav:focus-visible { outline: 3px solid hsl(var(--primary)); outline-offset: 2px; }
+        .deck {
           position: relative;
-          flex: 0 0 210px;
+          width: 210px;
+          height: 303px;
+          flex: none;
+          touch-action: pan-y;
+        }
+        .deck:focus-visible { outline: 3px solid hsl(var(--primary)); outline-offset: 6px; border-radius: 22px; }
+        .deck-card {
+          position: absolute;
+          left: 50%; top: 50%;
           width: 210px;
           display: block;
-          border: 0;
-          padding: 0;
-          margin: 0;
+          border: 0; padding: 0; margin: 0;
           background: none;
           font: inherit;
           text-align: left;
           text-decoration: none;
           color: inherit;
-          cursor: pointer;
           appearance: none;
-          scroll-snap-align: start;
+          transition: transform 0.35s cubic-bezier(.2,.8,.2,1), opacity 0.35s ease;
         }
-        .m-item:focus-visible { outline: 3px solid hsl(var(--primary)); outline-offset: 4px; border-radius: 18px; }
-        .m-item .s-photo { transition: transform 0.25s ease, box-shadow 0.25s ease; }
-        .m-item:hover .s-photo, .m-item:focus-visible .s-photo {
+        .deck-card.front { cursor: pointer; z-index: 5; transform: translate(-50%, -50%); }
+        .deck-card.front:hover .s-photo, .deck-card.front:focus-visible .s-photo {
           transform: translateY(-6px) scale(1.03);
           box-shadow: 0 16px 32px rgba(27, 22, 51, 0.24);
         }
-        .s-photo { width: 100%; height: 263px; border-radius: 22px; overflow: hidden; border: 1.5px solid hsl(var(--border)); box-shadow: 0 4px 16px rgba(27, 22, 51, 0.1); }
+        .deck-card.front:focus-visible { outline: none; }
+        .deck-card.peek-1 { z-index: 4; pointer-events: none; transform: translate(-50%, -58%) rotate(4deg) scale(0.94); opacity: 0.9; }
+        .deck-card.peek-2 { z-index: 3; pointer-events: none; transform: translate(-50%, -63%) rotate(-6deg) scale(0.88); opacity: 0.75; }
+        .s-photo { display: block; width: 100%; height: 263px; border-radius: 22px; overflow: hidden; border: 1.5px solid hsl(var(--border)); box-shadow: 0 4px 16px rgba(27, 22, 51, 0.1); transition: transform 0.25s ease, box-shadow 0.25s ease; background: hsl(var(--card)); }
         .s-photo svg { width: 100%; height: 100%; display: block; }
+        .dot { width: 7px; height: 7px; border-radius: 999px; border: 0; padding: 0; background: hsl(var(--foreground) / 0.2); cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; }
+        .dot.active { background: hsl(var(--primary)); transform: scale(1.3); }
         @media (max-width: 700px) {
-          .m-item { flex-basis: 130px; width: 130px; }
-          .s-photo { height: 163px; }
+          .deck, .deck-card { width: 150px; }
+          .deck { height: 223px; }
+          .s-photo { height: 183px; }
+          .deck-nav { width: 32px; height: 32px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .deck-card { transition: none; }
         }
       `}</style>
     </div>
