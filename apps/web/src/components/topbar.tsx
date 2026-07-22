@@ -3,6 +3,7 @@
 import { NavMenu } from '@/components/nav-menu';
 import { BrandLockup } from '@/components/brand-lockup';
 import { AccountMenu } from '@/components/account-menu';
+import { HeaderSearch } from '@/components/header-search';
 
 export function Topbar() {
   return (
@@ -11,7 +12,8 @@ export function Topbar() {
         <NavMenu />
       </div>
       <BrandLockup className="justify-self-center" />
-      <div className="justify-self-end">
+      <div className="flex items-center gap-1 justify-self-end">
+        <HeaderSearch />
         <AccountMenu />
       </div>
     </header>

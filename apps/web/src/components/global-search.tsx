@@ -25,12 +25,17 @@ const TYPES = Object.keys(TYPE_ICON) as SearchType[];
 // Show suggestions only once the user has typed at least this many characters.
 const MIN_CHARS = 3;
 
-export function GlobalSearch() {
+export function GlobalSearch({ autoFocus = false }: { autoFocus?: boolean }) {
   const router = useRouter();
   const [term, setTerm] = useState('');
   const [q, setQ] = useState(''); // debounced query actually sent to the API
   const [open, setOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (autoFocus) inputRef.current?.focus();
+  }, [autoFocus]);
 
   const ready = term.trim().length >= MIN_CHARS;
 
@@ -75,6 +80,7 @@ export function GlobalSearch() {
       <div className="relative">
         <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
+          ref={inputRef}
           value={term}
           onChange={(e) => {
             setTerm(e.target.value);
