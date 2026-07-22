@@ -26,12 +26,12 @@ svg{display:block}
 .desk{
   max-width:980px;width:100%;margin:0 auto;
   background:var(--white);border:1px solid var(--line);border-radius:20px;
-  padding:26px 28px;
-  display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center;
+  padding:24px 28px;
+  display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;
 }
 @media(max-width:720px){.desk{grid-template-columns:1fr;padding:22px 20px}}
-.desk .k{font-family:var(--font-mono);font-size:10.5px;letter-spacing:2.8px;text-transform:uppercase;color:var(--violet)}
-.desk h2{font-family:var(--font-display);font-weight:800;font-size:clamp(21px,3.4vw,27px);letter-spacing:-.02em;line-height:1.15;margin:8px 0}
+.desk .k{font-family:var(--font-mono);font-size:11.5px;letter-spacing:2.4px;text-transform:uppercase;color:var(--violet);font-weight:700}
+.desk h2{font-family:var(--font-display);font-weight:800;font-size:clamp(23px,3.4vw,27px);letter-spacing:-.02em;line-height:1.15;margin:8px 0}
 .desk h2 .u{position:relative;display:inline-block;white-space:nowrap}
 .desk .arc{position:absolute;left:0;right:0;bottom:-4px;height:7px;width:100%;color:var(--marigold)}
 .desk p{font-size:14px;color:var(--ink-2);font-weight:500;max-width:520px}
