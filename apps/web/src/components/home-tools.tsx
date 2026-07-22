@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ChevronRight, GraduationCap, IndianRupee } from 'lucide-react';
+import { ArrowRight, Briefcase, ChevronRight, IndianRupee } from 'lucide-react';
 import { HomeAdmissionDesk } from '@/components/home-admission-desk';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
@@ -35,7 +35,7 @@ function Ill({ svg, className }: { svg: string; className?: string }) {
 
 const SCHOLARSHIPS = [
   { svg: ILL_SCH1, amount: '₹2,00,000', name: 'Reliance Foundation UG Scholarship' },
-  { svg: ILL_SCH2, amount: '₹12,000', name: 'Central Sector Scholarship — Govt of India' },
+  { svg: ILL_SCH2, amount: '₹12,000', name: 'Central Sector Scholarship: Govt of India' },
 ];
 
 const ILL_INTERN1 = `<svg viewBox="0 0 120 100" fill="none" aria-hidden="true" style="width:120px;height:100px">
@@ -392,7 +392,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
       {/* Internships */}
       <div className="mt-6 border-t border-border pt-8">
         <div className="mb-2 flex items-center gap-2.5">
-          <GraduationCap className="h-6 w-6" />
+          <Briefcase className="h-6 w-6" />
           <h2 className="font-display text-[25px] font-extrabold tracking-[-.02em]">Internships</h2>
         </div>
         <p className="mb-5 max-w-[520px] text-[15.5px] font-medium text-muted-foreground">
@@ -411,8 +411,8 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
               <p className="text-[16px] font-semibold leading-snug">
                 <b className="font-extrabold">{s.hook}</b> {s.name}
               </p>
-              <span className="mt-2 inline-flex items-center gap-2 text-[15px] font-extrabold">
-                Apply Now <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <span className="mt-2.5 inline-flex w-fit items-center gap-1.5 rounded-full border border-foreground/15 bg-secondary px-3 py-1 text-[13px] font-bold transition-colors group-hover:bg-secondary/70">
+                Apply Now <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
           ))}
@@ -458,8 +458,8 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
               <p className="text-[16px] font-semibold leading-snug">
                 <b className="font-extrabold">{s.amount}</b> {s.name}
               </p>
-              <span className="mt-2 inline-flex items-center gap-2 text-[15px] font-extrabold">
-                Apply Now <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <span className="mt-2.5 inline-flex w-fit items-center gap-1.5 rounded-full border border-foreground/15 bg-secondary px-3 py-1 text-[13px] font-bold transition-colors group-hover:bg-secondary/70">
+                Apply Now <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
           ))}
