@@ -109,17 +109,215 @@ const SRC = `<!doctype html>
   }
   .comm-header p strong{ color:var(--ink); font-weight:600; }
 
-  /* ---------- stage: hero photo ---------- */
+  /* ---------- stage: phone + floating student badges ---------- */
   .stage{
+    position:relative;
+    height:620px;
     display:flex;
+    align-items:flex-end;
     justify-content:center;
     margin-bottom:12px;
   }
-  .stage-photo{
-    display:block;
+
+  .bridge-svg{
+    position:absolute;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
     width:100%;
-    max-width:820px;
-    height:auto;
+    max-width:920px;
+    height:100%;
+    z-index:1;
+    pointer-events:none;
+  }
+
+  .phone{
+    position:relative;
+    z-index:3;
+    width:250px;
+    height:508px;
+    background:var(--ink);
+    border-radius:38px;
+    padding:10px;
+    box-shadow:
+      0 30px 60px -20px rgba(18,33,59,0.35),
+      0 0 0 1px rgba(18,33,59,0.06);
+    transform: rotate(-2.5deg);
+  }
+
+  .phone::after{
+    content:"";
+    position:absolute;
+    top:24px; left:50%;
+    transform:translateX(-50%);
+    width:66px; height:6px;
+    background:rgba(255,255,255,0.18);
+    border-radius:4px;
+  }
+
+  .phone-screen{
+    width:100%;
+    height:100%;
+    background:linear-gradient(180deg,#17294a, #12213B 40%);
+    border-radius:28px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+
+  .app-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 18px 12px;
+    font-family:var(--display);
+    font-weight:600;
+    font-style:italic;
+    color:#fff;
+    font-size:15px;
+    letter-spacing:.01em;
+  }
+  .app-topbar span:last-child{
+    width:20px;height:20px;
+    border-radius:6px;
+    background:rgba(255,255,255,0.14);
+  }
+
+  .app-card-stack{ position:relative; margin:6px 14px; flex:1; }
+  .stack-ghost{
+    position:absolute; left:5px; right:5px; height:100%;
+    border-radius:16px; background:rgba(255,255,255,0.55);
+    box-shadow:0 2px 6px rgba(18,33,59,0.04);
+  }
+  .stack-ghost.g2{ top:16px; background:rgba(255,255,255,0.4); }
+  .stack-ghost.g1{ top:8px; background:rgba(255,255,255,0.7); }
+
+  .app-card{
+    margin:0;
+    position:relative;
+    z-index:3;
+    background:var(--panel);
+    border-radius:16px;
+    padding:16px 16px 18px;
+    height:100%;
+  }
+  .app-row{ display:flex; gap:12px; margin-bottom:14px; }
+  .app-dial{ position:relative; width:56px; height:56px; flex:0 0 auto; }
+  .app-dial svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .app-dial .trk{ fill:none; stroke:#EDEBE4; stroke-width:5; }
+  .app-dial .fil{ fill:none; stroke:var(--teal); stroke-width:5; stroke-linecap:round; }
+  .app-dial .num{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink); }
+  .app-card .tag{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:9.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--teal);
+    background:rgba(47,122,114,0.1);
+    padding:4px 9px;
+    border-radius:100px;
+    margin-bottom:8px;
+  }
+  .app-card h4{
+    font-family:var(--display);
+    font-size:16.5px;
+    line-height:1.28;
+    font-weight:600;
+    margin:0 0 3px;
+    color:var(--ink);
+  }
+  .app-loc{ font-family:var(--body); font-size:12px; color:var(--muted); margin:0 0 8px; }
+  .app-pills{ display:flex; gap:6px; }
+  .app-pill{ font-size:10px; font-weight:700; padding:3px 8px; border-radius:6px; background:rgba(47,122,114,0.12); color:var(--teal); }
+  .app-pill.v{ background:#EAF1FB; color:#2857A6; }
+  .app-actions{ display:flex; gap:8px; }
+  .app-btn{
+    font-family:var(--body); font-weight:700; font-size:11.5px;
+    padding:9px 12px; border-radius:9px; border:none; cursor:default;
+  }
+  .app-btn.dark{ background:var(--ink); color:#fff; }
+  .app-btn.ghost{ background:#F1F3EC; color:var(--ink); }
+
+  .app-ask{
+    margin:auto 14px 16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:#fff;
+    border-radius:100px;
+    padding:11px 8px 11px 16px;
+    font-size:11.5px;
+    color:var(--muted);
+    font-family:var(--body);
+  }
+  .app-ask .send{
+    margin-left:auto;
+    width:26px;height:26px;
+    border-radius:100px;
+    background:var(--amber);
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .app-ask .send svg{ width:12px; height:12px; }
+
+  /* ---------- floating student badges: avatar + bold pill ---------- */
+  .bubble{
+    position:absolute;
+    z-index:4;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    animation: bob 5.5s ease-in-out infinite;
+  }
+  .bubble .avatar{
+    width:56px; height:56px;
+    border-radius:100%;
+    flex:none;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    font-family:var(--display);
+    font-weight:700;
+    font-size:19px;
+    box-shadow:0 10px 22px -8px rgba(18,33,59,0.35), 0 0 0 4px var(--parchment);
+  }
+  .bubble .avatar svg{ width:24px; height:24px; }
+  .bubble .tag-label{
+    display:inline-flex;
+    align-items:center;
+    font-family:var(--body);
+    font-weight:800;
+    font-size:12px;
+    letter-spacing:.01em;
+    white-space:nowrap;
+    color:#fff;
+    padding:9px 16px;
+    border-radius:100px;
+    box-shadow:0 8px 18px -6px rgba(18,33,59,0.35);
+  }
+
+  .b1{ top:4%;  left:0%;  }
+  .b1 .avatar, .b1 .tag-label{ background:var(--coral); }
+
+  .b2{ top:28%; left:-4%; animation-delay:.6s; }
+  .b2 .avatar, .b2 .tag-label{ background:var(--teal); }
+
+  .b3{ bottom:16%; left:2%; animation-delay:1.2s; }
+  .b3 .avatar, .b3 .tag-label{ background:var(--ink); }
+
+  .b4{ top:0%; right:2%; animation-delay:.3s; flex-direction:row-reverse; }
+  .b4 .avatar, .b4 .tag-label{ background:var(--amber-deep); }
+
+  .b5{ top:32%; right:-4%; animation-delay:.9s; flex-direction:row-reverse; }
+  .b5 .avatar, .b5 .tag-label{ background:#7A5FB0; }
+
+  .b6{ bottom:18%; right:0%; animation-delay:1.5s; flex-direction:row-reverse; }
+  .b6 .avatar, .b6 .tag-label{ background:var(--teal); }
+
+  @keyframes bob{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-10px); }
   }
 
   /* ---------- cta row ---------- */
@@ -511,6 +709,11 @@ const SRC = `<!doctype html>
   /* ---------- responsive ---------- */
   @media (max-width: 860px){
     .section{ padding:80px 20px 72px; }
+    .stage{ height:auto; padding:40px 0 20px; }
+    .phone{ margin:0 auto; }
+    .bubble{ display:none; }
+    .bridge-svg{ display:none; }
+    .chip-strip{ display:flex; }
 
     /* Three 9:16 reels side by side is only legible above ~860px — below
        that, three simultaneous columns crush the mini-app content into
@@ -557,7 +760,34 @@ const SRC = `<!doctype html>
     .r1-cursor{ width:21px; height:21px; border-width:2px; }
   }
 
+  .chip-strip{
+    display:none;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    max-width:520px;
+    margin:36px auto 0;
+  }
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    padding:8px 13px;
+    border-radius:100px;
+    color:#fff;
+  }
+  .chip .dot{ width:20px;height:20px;border-radius:100%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--display); font-weight:600; font-size:10px;
+    background:rgba(255,255,255,0.25);
+  }
+
   @media (prefers-reduced-motion: reduce){
+    .bubble{ animation:none; }
     .reel, .btn-primary{ transition:none; }
   }
 </style>
@@ -576,7 +806,85 @@ const SRC = `<!doctype html>
   </div>
 
   <div class="stage">
-    <img class="stage-photo" src="/career-bridge-hero.png" alt="" aria-hidden="true" />
+    <svg class="bridge-svg" viewBox="0 0 920 640" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+      <path d="M 40 90 C 260 10, 660 10, 880 90" fill="none" stroke="var(--amber)" stroke-width="2.5" stroke-dasharray="1 10" stroke-linecap="round"/>
+      <line x1="60"  y1="80"  x2="60"  y2="150" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="1 6"/>
+      <line x1="110" y1="42"  x2="110" y2="230" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="1 6"/>
+      <line x1="850" y1="80"  x2="850" y2="150" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="1 6"/>
+      <line x1="795" y1="35"  x2="795" y2="245" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="1 6"/>
+      <line x1="460" y1="14"  x2="460" y2="120" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="1 6" opacity="0.5"/>
+    </svg>
+
+    <div class="bubble b1" aria-hidden="true">
+      <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></span>
+      <span class="tag-label">College Match</span>
+    </div>
+    <div class="bubble b2" aria-hidden="true">
+      <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>
+      <span class="tag-label">Expert Guide</span>
+    </div>
+    <div class="bubble b3" aria-hidden="true">
+      <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="tag-label">Community &amp; Blogs</span>
+    </div>
+    <div class="bubble b4" aria-hidden="true">
+      <span class="avatar">₹</span>
+      <span class="tag-label">Scholarships</span>
+    </div>
+    <div class="bubble b5" aria-hidden="true">
+      <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+      <span class="tag-label">Internships</span>
+    </div>
+    <div class="bubble b6" aria-hidden="true">
+      <span class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+      <span class="tag-label">Direct Apply</span>
+    </div>
+
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="app-topbar">
+          <span>edu<em>bridge</em></span>
+          <span></span>
+        </div>
+        <div class="app-card-stack">
+          <div class="stack-ghost g2"></div>
+          <div class="stack-ghost g1"></div>
+          <div class="app-card">
+          <div class="app-row">
+            <div class="app-dial">
+              <svg viewBox="0 0 60 60"><circle class="trk" cx="30" cy="30" r="24"/><circle class="fil" cx="30" cy="30" r="24" stroke-dasharray="150.8" stroke-dashoffset="9"/></svg>
+              <span class="num">94%</span>
+            </div>
+            <div>
+              <span class="tag">Fit for you</span>
+              <h4>Kessler Institute of Design</h4>
+              <p class="app-loc">Jaipur, Rajasthan</p>
+              <div class="app-pills"><span class="app-pill">Design</span><span class="app-pill v">Verified</span></div>
+            </div>
+          </div>
+          <div class="app-actions">
+            <button class="app-btn dark">+ Shortlist</button>
+            <button class="app-btn ghost">Ask Expert Guide</button>
+          </div>
+          </div>
+        </div>
+        <div class="app-ask">
+          Ask an Expert Guide anything
+          <span class="send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#12213B" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chip-strip">
+      <span class="chip" style="background:var(--coral)"><span class="dot">%</span>College Match</span>
+      <span class="chip" style="background:var(--teal)"><span class="dot">G</span>Expert Guide</span>
+      <span class="chip" style="background:var(--ink)"><span class="dot">C</span>Community &amp; Blogs</span>
+      <span class="chip" style="background:var(--amber-deep)"><span class="dot">₹</span>Scholarships</span>
+      <span class="chip" style="background:#7A5FB0"><span class="dot">I</span>Internships</span>
+      <span class="chip" style="background:var(--teal)"><span class="dot">✓</span>Direct Apply</span>
+    </div>
   </div>
 
   <div class="cta-row">
