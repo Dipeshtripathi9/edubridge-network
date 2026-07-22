@@ -70,9 +70,7 @@ export default function ComparePage() {
                 {colleges.map((c) => (
                   <th key={c.id} className="p-4">
                     <div className="flex items-center justify-between gap-2">
-                      <Link href={`/colleges/${c.slug}`} className="font-display font-extrabold hover:text-primary">
-                        {c.name}
-                      </Link>
+                      <span className="font-display font-extrabold">{c.name}</span>
                       <button
                         type="button"
                         aria-label={`Remove ${c.name}`}
