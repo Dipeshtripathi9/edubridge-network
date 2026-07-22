@@ -52,18 +52,6 @@ export function HomeIllustrated() {
                   rendering across mobile browsers/in-app webviews */}
               <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-background to-transparent sm:w-14" />
               <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:w-14" />
-              {/* Decorative accents */}
-              <span aria-hidden className="pointer-events-none absolute left-4 top-4 grid grid-cols-4 gap-1.5 text-primary/40 sm:left-6 sm:top-6">
-                {Array.from({ length: 16 }).map((_, i) => (
-                  <span key={i} className="h-1.5 w-1.5 rounded-full bg-current" />
-                ))}
-              </span>
-              <svg aria-hidden className="pointer-events-none absolute left-[30%] top-3 h-4 w-4 text-marigold sm:top-4" viewBox="0 0 24 24" fill="none">
-                <path d="M4 13 L4.5 19M9 13 L10 19M14 13 L15.5 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              <svg aria-hidden className="pointer-events-none absolute left-[48%] top-1 h-5 w-5 text-primary/70" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2v6M12 16v6M2 12h6M16 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
               {/* Wavy mask into the page background */}
               <svg aria-hidden className="absolute inset-x-0 bottom-0 h-6 w-full text-background sm:h-9" viewBox="0 0 200 24" preserveAspectRatio="none">
                 <path d="M0 12 Q 50 24 100 12 Q 150 0 200 12 V24 H0 Z" fill="currentColor" />
