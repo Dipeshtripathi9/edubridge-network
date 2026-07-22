@@ -57,8 +57,8 @@ const ILL_INTERN2 = `<svg viewBox="0 0 120 100" fill="none" aria-hidden="true" s
 </svg>`;
 
 const INTERNSHIPS = [
-  { svg: ILL_INTERN1, hook: 'From ₹2,999', name: 'Track A — Learn & Build with a mentor' },
-  { svg: ILL_INTERN2, hook: 'Free to apply', name: 'Track B — Apply & Get Selected' },
+  { svg: ILL_INTERN1, hook: '₹2,999', name: 'Track A: Learn & Build with a mentor' },
+  { svg: ILL_INTERN2, hook: 'Free to apply', name: 'Track B: Apply & Get Selected' },
 ];
 
 // Fanned poster carousel — each poster is a full illustrated SVG card (background +
@@ -403,7 +403,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
           {INTERNSHIPS.map((s) => (
             <Link key={s.name} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
               <span className="relative mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
-                <span className="absolute right-2 top-2 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                <span className="absolute right-2.5 top-2.5 rounded-full bg-marigold-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
                   Example
                 </span>
                 <Ill svg={s.svg} />
@@ -450,7 +450,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
           {SCHOLARSHIPS.map((s) => (
             <Link key={s.name} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
               <span className="relative mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
-                <span className="absolute right-2 top-2 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                <span className="absolute right-2.5 top-2.5 rounded-full bg-marigold-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
                   Example
                 </span>
                 <Ill svg={s.svg} />
