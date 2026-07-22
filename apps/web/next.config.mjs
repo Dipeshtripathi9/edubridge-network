@@ -17,13 +17,19 @@ try {
 //   (nonce-based CSP conflicts with static generation). External scripts are still
 //   locked to self + Google, which is the meaningful XSS win.
 // - Google OAuth (@react-oauth/google) loads/iframes/connects to accounts.google.com.
+// - Several homepage sections (Direct Admission Desk, career-bridge community
+//   section) are rendered in isolated srcDoc iframes that load Google Fonts
+//   directly — those iframes inherit this CSP, so fonts.googleapis.com/
+//   fonts.gstatic.com need to be allow-listed too, or the fonts silently fail
+//   to load in production (dev doesn't send this header, so the gap is easy
+//   to miss locally).
 // - Dev needs 'unsafe-eval' (React Refresh / HMR); prod does not.
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ''} https://accounts.google.com https://apis.google.com`,
-  "style-src 'self' 'unsafe-inline' https://accounts.google.com",
+  "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
-  "font-src 'self' data:",
+  "font-src 'self' data: https://fonts.gstatic.com",
   `connect-src 'self' https://accounts.google.com ${apiOrigin} ${apiWsOrigin}`.trim(),
   "frame-src 'self' https://accounts.google.com",
   "worker-src 'self' blob:",
