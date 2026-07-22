@@ -74,12 +74,12 @@ export function HomeIllustrated() {
                 <Button className="w-[70vw] max-w-[220px] gap-2 sm:w-auto" onClick={openQuiz}>
                   <Building2 className="h-4 w-4" strokeWidth={1.75} /> Find College
                 </Button>
-                <Button asChild variant="outline" className="gap-1.5 px-4 text-[13.5px]">
+                <Button asChild variant="outline" className="gap-1.5 border-primary/30 px-4 text-[13.5px] font-semibold hover:border-primary/50">
                   <Link href="/internship">
                     <GraduationCap className="h-4 w-4" strokeWidth={1.75} /> Explore Scholarship
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="gap-1.5 px-4 text-[13.5px]">
+                <Button asChild variant="outline" className="gap-1.5 border-primary/30 px-4 text-[13.5px] font-semibold hover:border-primary/50">
                   <Link href="/internship">
                     <Briefcase className="h-4 w-4" strokeWidth={1.75} /> Find Internship
                   </Link>
