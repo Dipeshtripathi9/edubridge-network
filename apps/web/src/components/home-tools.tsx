@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, IndianRupee } from 'lucide-react';
+import { ArrowRight, Award, Briefcase, ChevronLeft, ChevronRight, ClipboardCheck, GitCompare, Headphones, IndianRupee } from 'lucide-react';
 import { HomeAdmissionDesk } from '@/components/home-admission-desk';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
@@ -430,6 +430,46 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
   );
 }
 
+// Icon + tone shown per poster in the desktop row (index-matched to POSTERS).
+const POSTER_META = [
+  { icon: ClipboardCheck, tone: 'bg-accent text-primary' },
+  { icon: GitCompare, tone: 'bg-marigold-soft text-amber-600' },
+  { icon: Briefcase, tone: 'bg-green-soft text-green' },
+  { icon: Award, tone: 'bg-accent text-primary' },
+  { icon: Headphones, tone: 'bg-marigold-soft text-amber-600' },
+];
+
+// Laptop/tablet layout: all 5 tools visible at once as a static row, no
+// swipe/arrows/dots — those only make sense once space is tight on mobile.
+function PosterRow({ onQuiz }: { onQuiz: () => void }) {
+  const cardClass =
+    'flex flex-col items-center gap-3.5 rounded-[20px] border border-border bg-card px-3 py-7 text-inherit no-underline transition-transform hover:-translate-y-1 hover:shadow-lg';
+  return (
+    <div className="grid grid-cols-5 gap-4">
+      {POSTER_TRACK.map(({ action }, i) => {
+        const { icon: Icon, tone } = POSTER_META[i];
+        const inner = (
+          <>
+            <span className={`grid h-16 w-16 place-items-center rounded-full ${tone}`}>
+              <Icon className="h-8 w-8" strokeWidth={1.75} />
+            </span>
+            <span className="text-center font-display text-[15px] font-extrabold tracking-tight">{POSTER_TITLES[i]}</span>
+          </>
+        );
+        return action.type === 'quiz' ? (
+          <button key={i} type="button" onClick={onQuiz} className={cardClass}>
+            {inner}
+          </button>
+        ) : (
+          <Link key={i} href={action.href} className={cardClass}>
+            {inner}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
 export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
   return (
     <section aria-label="Tools & scholarships" className="!mt-0 mx-auto w-full max-w-[960px]">
@@ -441,8 +481,13 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
         </p>
       </div>
 
-      {/* Fanned poster carousel */}
-      <PosterStack onQuiz={onQuiz} />
+      {/* Mobile: swipeable fanned carousel. Laptop/tablet: static row of all 5. */}
+      <div className="md:hidden">
+        <PosterStack onQuiz={onQuiz} />
+      </div>
+      <div className="hidden md:block">
+        <PosterRow onQuiz={onQuiz} />
+      </div>
 
       {/* Direct Admission Desk */}
       <div className="mt-6 border-t border-border pt-8">

@@ -349,6 +349,23 @@ const SRC = `<!doctype html>
   .btn-primary:hover{ transform:translateY(-2px); }
   .btn-primary svg{ width:14px; height:14px; }
 
+  /* ---------- brand line ---------- */
+  .brand-line{
+    margin:0 0 48px;
+    text-align:center;
+  }
+  .brand-line p{
+    margin:0 auto;
+    max-width:520px;
+    font-family:var(--display);
+    font-size:18px;
+    line-height:1.5;
+    letter-spacing:-.01em;
+    color:var(--ink);
+  }
+  .brand-line-name{ font-size:1.2em; font-weight:800; }
+  .brand-line-em{ font-weight:700; position:relative; white-space:nowrap; }
+
   /* ---------- reels row : animated product-demo screens ---------- */
   .reels{
     display:grid;
@@ -356,6 +373,15 @@ const SRC = `<!doctype html>
     gap:22px;
     max-width:800px;
     margin:0 auto 96px;
+  }
+  .reel-item{ display:flex; flex-direction:column; }
+  .reel-title{
+    margin:0 0 12px;
+    text-align:center;
+    font-family:var(--display);
+    font-weight:600;
+    font-size:15.5px;
+    color:var(--ink);
   }
   .reel{
     position:relative;
@@ -725,7 +751,8 @@ const SRC = `<!doctype html>
       scrollbar-width:none;
     }
     .reels::-webkit-scrollbar{ display:none; }
-    .reel{ flex:0 0 auto; width:280px; scroll-snap-align:center; }
+    .reel-item{ flex:0 0 auto; width:280px; scroll-snap-align:center; }
+    .reel-title{ font-size:14px; }
     .mini-app{
       position:absolute; top:0; left:0;
       width:252px; height:448px;
@@ -878,9 +905,15 @@ const SRC = `<!doctype html>
     </button>
   </div>
 
+  <div class="brand-line">
+    <p><span class="brand-line-name">EduBridge Network</span> — helping thousands of students find <span class="brand-line-em">their fit.</span></p>
+  </div>
+
   <div class="reels">
 
     <!-- Reel 1 — the real discover → shortlist → expert-guide flow -->
+    <div class="reel-item">
+    <h4 class="reel-title">Find the best colleges that fit for you</h4>
     <div class="reel r1">
       <div class="notch"></div>
       <div class="mini-app" id="r1app">
@@ -1025,8 +1058,11 @@ const SRC = `<!doctype html>
       </div>
       <div class="r1-cursor" id="r1cursor"></div>
     </div>
+    </div>
 
     <!-- Reel 2 — full scholarship discovery → detail → apply flow -->
+    <div class="reel-item">
+    <h4 class="reel-title">Find the best scholarships that fit for you</h4>
     <div class="reel r2" style="background:#F1F3EC;">
       <div class="notch" style="background:rgba(18,33,59,0.2);"></div>
       <div class="mini-app" id="r2app">
@@ -1163,8 +1199,11 @@ const SRC = `<!doctype html>
       </div>
       <div class="r1-cursor" id="r2cursor"></div>
     </div>
+    </div>
 
     <!-- Reel 3 — full resume-upload → matched internships → shortlist flow -->
+    <div class="reel-item">
+    <h4 class="reel-title">Find the best internships that fit for you</h4>
     <div class="reel r3" style="background:#F1F3EC;">
       <div class="notch" style="background:rgba(18,33,59,0.2);"></div>
       <div class="mini-app" id="r3app">
@@ -1311,6 +1350,7 @@ const SRC = `<!doctype html>
         </div>
       </div>
       <div class="r1-cursor" id="r3cursor"></div>
+    </div>
     </div>
 
   </div>
