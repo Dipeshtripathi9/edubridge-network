@@ -169,98 +169,58 @@ const SRC = `<!doctype html>
   .app-topbar{
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    padding:22px 18px 12px;
-    font-family:var(--display);
-    font-weight:600;
-    font-style:italic;
+    padding:16px 14px 12px;
     color:#fff;
-    font-size:15px;
-    letter-spacing:.01em;
   }
-  .app-topbar span:last-child{
-    width:20px;height:20px;
-    border-radius:6px;
-    background:rgba(255,255,255,0.14);
+  .app-nav-ic{
+    width:20px; height:20px; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; opacity:0.9;
   }
+  .app-nav-ic svg{ width:15px; height:15px; }
+  .app-brand{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    line-height:1;
+  }
+  .app-brand-row{ display:flex; align-items:center; gap:5px; }
+  .app-brand-mark{
+    width:16px; height:16px; border-radius:5px;
+    background:#6C4FE0;
+    display:flex; align-items:center; justify-content:center;
+    flex:0 0 auto;
+  }
+  .app-brand-mark svg{ width:9px; height:9px; }
+  .app-brand-name{
+    font-family:var(--body); font-weight:800; font-size:11px;
+    letter-spacing:.02em; text-transform:uppercase; color:#fff;
+  }
+  .app-brand-sub{
+    font-family:var(--body); font-weight:600; font-size:6.5px;
+    letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,0.55);
+    margin-top:2px;
+  }
+  .app-nav-icons{ display:flex; align-items:center; gap:9px; flex:0 0 auto; }
+  .app-nav-icons svg{ width:14px; height:14px; color:#fff; opacity:0.9; }
 
-  .app-card-stack{ position:relative; margin:6px 14px; flex:1; }
-  .stack-ghost{
-    position:absolute; left:5px; right:5px; height:100%;
-    border-radius:16px; background:rgba(255,255,255,0.55);
-    box-shadow:0 2px 6px rgba(18,33,59,0.04);
+  .app-feature{ flex:1; display:flex; flex-direction:column; padding:2px 14px 16px; min-height:0; }
+  .app-photo{ border-radius:14px; overflow:hidden; height:148px; flex:0 0 auto; margin-bottom:12px; }
+  .app-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .app-feature-text{
+    font-family:var(--body); font-size:11.3px; line-height:1.5;
+    color:#CBD4E3; margin:0 0 14px;
   }
-  .stack-ghost.g2{ top:16px; background:rgba(255,255,255,0.4); }
-  .stack-ghost.g1{ top:8px; background:rgba(255,255,255,0.7); }
-
-  .app-card{
-    margin:0;
-    position:relative;
-    z-index:3;
-    background:var(--panel);
-    border-radius:16px;
-    padding:16px 16px 18px;
-    height:100%;
-  }
-  .app-row{ display:flex; gap:12px; margin-bottom:14px; }
-  .app-dial{ position:relative; width:56px; height:56px; flex:0 0 auto; }
-  .app-dial svg{ width:100%; height:100%; transform:rotate(-90deg); }
-  .app-dial .trk{ fill:none; stroke:#EDEBE4; stroke-width:5; }
-  .app-dial .fil{ fill:none; stroke:var(--teal); stroke-width:5; stroke-linecap:round; }
-  .app-dial .num{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink); }
-  .app-card .tag{
-    display:inline-block;
-    font-family:var(--mono);
-    font-size:9.5px;
-    letter-spacing:.06em;
-    text-transform:uppercase;
-    color:var(--teal);
-    background:rgba(47,122,114,0.1);
-    padding:4px 9px;
-    border-radius:100px;
-    margin-bottom:8px;
-  }
-  .app-card h4{
-    font-family:var(--display);
-    font-size:16.5px;
-    line-height:1.28;
-    font-weight:600;
-    margin:0 0 3px;
-    color:var(--ink);
-  }
-  .app-loc{ font-family:var(--body); font-size:12px; color:var(--muted); margin:0 0 8px; }
-  .app-pills{ display:flex; gap:6px; }
-  .app-pill{ font-size:10px; font-weight:700; padding:3px 8px; border-radius:6px; background:rgba(47,122,114,0.12); color:var(--teal); }
-  .app-pill.v{ background:#EAF1FB; color:#2857A6; }
-  .app-actions{ display:flex; gap:8px; }
+  .app-feature-actions{ display:flex; flex-direction:column; gap:8px; margin-top:auto; }
   .app-btn{
     font-family:var(--body); font-weight:700; font-size:11.5px;
     padding:9px 12px; border-radius:9px; border:none; cursor:default;
   }
   .app-btn.dark{ background:var(--ink); color:#fff; }
   .app-btn.ghost{ background:#F1F3EC; color:var(--ink); }
-
-  .app-ask{
-    margin:auto 14px 16px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    background:#fff;
-    border-radius:100px;
-    padding:11px 8px 11px 16px;
-    font-size:11.5px;
-    color:var(--muted);
-    font-family:var(--body);
-  }
-  .app-ask .send{
-    margin-left:auto;
-    width:26px;height:26px;
-    border-radius:100px;
-    background:var(--amber);
-    flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .app-ask .send svg{ width:12px; height:12px; }
+  .app-btn.amber{ background:var(--amber); color:#3A2600; }
+  .app-btn.full{ width:100%; text-align:center; padding:11px 12px; }
 
   /* ---------- floating student badges: avatar + bold pill ---------- */
   .bubble{
@@ -836,36 +796,30 @@ const SRC = `<!doctype html>
     <div class="phone">
       <div class="phone-screen">
         <div class="app-topbar">
-          <span>edu<em>bridge</em></span>
-          <span></span>
-        </div>
-        <div class="app-card-stack">
-          <div class="stack-ghost g2"></div>
-          <div class="stack-ghost g1"></div>
-          <div class="app-card">
-          <div class="app-row">
-            <div class="app-dial">
-              <svg viewBox="0 0 60 60"><circle class="trk" cx="30" cy="30" r="24"/><circle class="fil" cx="30" cy="30" r="24" stroke-dasharray="150.8" stroke-dashoffset="9"/></svg>
-              <span class="num">94%</span>
-            </div>
-            <div>
-              <span class="tag">Fit for you</span>
-              <h4>Kessler Institute of Design</h4>
-              <p class="app-loc">Jaipur, Rajasthan</p>
-              <div class="app-pills"><span class="app-pill">Design</span><span class="app-pill v">Verified</span></div>
-            </div>
-          </div>
-          <div class="app-actions">
-            <button class="app-btn dark">+ Shortlist</button>
-            <button class="app-btn ghost">Ask Expert Guide</button>
-          </div>
-          </div>
-        </div>
-        <div class="app-ask">
-          Ask an Expert Guide anything
-          <span class="send">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#12213B" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <span class="app-nav-ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
           </span>
+          <span class="app-brand">
+            <span class="app-brand-row">
+              <span class="app-brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3 1 8l11 5 9-4.09V17h2V8L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+              </span>
+              <span class="app-brand-name">EduBridge</span>
+            </span>
+            <span class="app-brand-sub">Network</span>
+          </span>
+          <span class="app-nav-icons" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+          </span>
+        </div>
+        <div class="app-feature">
+          <div class="app-photo"><img src="/career-guide-photo.png" alt="" /></div>
+          <p class="app-feature-text">Find colleges that fit you, discover scholarships from colleges, government and private organizations, connect with verified students, and build your career through real internships, live projects, and expert guidance.</p>
+          <div class="app-feature-actions">
+            <button class="app-btn amber full">Find Colleges That Fit</button>
+            <button class="app-btn ghost full">Explore Scholarships</button>
+          </div>
         </div>
       </div>
     </div>
