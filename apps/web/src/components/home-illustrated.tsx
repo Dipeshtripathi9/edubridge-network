@@ -8,11 +8,6 @@ import { CollegeQuiz } from '@/components/college-quiz';
 import { HomeCareerBridge } from '@/components/home-career-bridge';
 import { HomeTools } from '@/components/home-tools';
 
-const QUESTIONS = [
-  { tone: 'bg-accent text-primary', q: "What is EduBridge's purpose?", a: 'To help students and parents choose colleges with verified information instead of brochures and rumours — and to stay useful long after admission day.' },
-  { tone: 'bg-marigold-soft text-amber-600', q: "What's our vision?", a: 'A network where every Delhi NCR student decides with proof: real seniors, real numbers, real human guidance — free at the exact moment of confusion.' },
-];
-
 const TESTIMONIALS = [
   { q: "The brochures confused me. My counselor compared real placement data across 3 colleges. Today I'm at Bennett — zero regrets.", by: 'Aarav S.', ok: 'Verified student, Bennett University' },
   { q: 'He compared fees and placements honestly — and told us which college NOT to pick. That honesty decided it for our family.', by: 'Rekha S. · Parent, Shiv Nadar admit ’25' },
@@ -94,27 +89,6 @@ export function HomeIllustrated() {
 
         {/* CAREER BRIDGE / COMMUNITY */}
         <HomeCareerBridge />
-
-        {/* STUDENTS FIRST */}
-        <section>
-          <SectionTitle>Students first. Always.</SectionTitle>
-          <div className="grid gap-6 md:grid-cols-3">
-            {QUESTIONS.map((c) => (
-              <article key={c.q} className="flex flex-col items-start gap-4 rounded-[22px] border border-border bg-card p-8 shadow-sm">
-                <span className={`grid h-[84px] w-[84px] self-center place-items-center rounded-full ${c.tone}`}>
-                  <svg className="h-9 w-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
-                </span>
-                <h3 className="font-display text-[22px] font-extrabold tracking-tight">{c.q}</h3>
-                <p className="text-[15.5px] text-muted-foreground">{c.a}</p>
-              </article>
-            ))}
-          </div>
-          <div className="mt-12 flex justify-center">
-            <Button asChild size="lg">
-              <Link href="/internship">Explore opportunities</Link>
-            </Button>
-          </div>
-        </section>
 
         {/* TESTIMONIALS */}
         <section>

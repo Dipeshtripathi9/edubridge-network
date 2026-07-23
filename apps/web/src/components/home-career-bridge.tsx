@@ -888,10 +888,6 @@ const SRC = `<!doctype html>
 
         <div class="mini-viewport">
           <div class="mview active" id="r1-discover">
-            <div class="mini-topbar">
-              <span class="mini-mark"></span>
-              <span class="mini-brand">edu<b>bridge</b></span>
-            </div>
             <p class="mini-eyebrow">Find your fit</p>
             <p class="mini-head">Search colleges that actually fit you</p>
             <div class="mini-search">
@@ -1038,10 +1034,6 @@ const SRC = `<!doctype html>
 
         <div class="mini-viewport">
           <div class="mview active" id="r2-discover">
-            <div class="mini-topbar">
-              <span class="mini-mark"></span>
-              <span class="mini-brand">edu<b>bridge</b></span>
-            </div>
             <p class="mini-eyebrow">Fund your future</p>
             <p class="mini-head">Scholarships matched to your profile</p>
             <div class="mini-search">
@@ -1180,10 +1172,6 @@ const SRC = `<!doctype html>
 
         <div class="mini-viewport">
           <div class="mview active" id="r3-main">
-            <div class="mini-topbar">
-              <span class="mini-mark"></span>
-              <span class="mini-brand">edu<b>bridge</b></span>
-            </div>
             <p class="mini-eyebrow">Upskill · paid · unpaid · learning phase</p>
             <p class="mini-head">Internships that build your resume</p>
 

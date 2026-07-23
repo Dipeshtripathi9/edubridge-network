@@ -542,22 +542,6 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
           </Link>
         </div>
       </div>
-
-      {/* Brand line (text only, no logo) */}
-      <div className="mt-7 border-t border-border pb-2 pt-9 text-center">
-        <p className="mx-auto max-w-[520px] font-display text-[18px] leading-relaxed tracking-tight text-foreground">
-          <span className="text-[1.2em] font-extrabold">EduBridge Network</span>
-          <span className="font-bold">
-            {' '}— helping thousands of students find{' '}
-            <span className="relative inline-block whitespace-nowrap">
-              their fit.
-              <svg className="absolute -bottom-1 left-0 h-2 w-full text-marigold" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden>
-                <path d="M4 16 C 80 2, 220 2, 296 16" stroke="currentColor" strokeWidth="6" strokeLinecap="round" fill="none" />
-              </svg>
-            </span>
-          </span>
-        </p>
-      </div>
     </section>
   );
 }
