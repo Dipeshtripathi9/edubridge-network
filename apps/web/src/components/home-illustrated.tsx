@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { Briefcase, Building2, CheckCircle2, GraduationCap, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,60 @@ const TESTIMONIALS = [
   { q: 'He compared fees and placements honestly — and told us which college NOT to pick. That honesty decided it for our family.', by: 'Rekha S. · Parent, Shiv Nadar admit ’25' },
   { q: 'I was set on a “famous” college until a senior’s review showed me the placement math. I switched — best decision I’ve made.', by: '', ok: 'Verified student, Galgotias University' },
 ];
+
+function TestimonialCard({ t }: { t: (typeof TESTIMONIALS)[number] }) {
+  return (
+    <article className="flex flex-col gap-5 rounded-[22px] border border-border bg-card p-8 shadow-sm">
+      <span aria-hidden className="font-display text-5xl font-extrabold leading-[.5] text-primary">“</span>
+      <p className="flex-1 text-[17px] font-medium leading-relaxed text-foreground">{t.q}</p>
+      <div className="text-sm font-bold text-muted-foreground">
+        {t.by && <>— {t.by} · </>}
+        {t.ok && (
+          <span className="inline-flex items-center gap-1.5 text-green">
+            <CheckCircle2 className="h-3.5 w-3.5" /> {t.ok}
+          </span>
+        )}
+      </div>
+    </article>
+  );
+}
+
+// Mobile: one testimonial at a time, swipeable, with dot pagination —
+// three full cards stacked vertically was too much scrolling on a phone.
+// Laptop/tablet keeps the existing 3-column grid untouched.
+function TestimonialCarousel() {
+  const total = TESTIMONIALS.length;
+  const [index, setIndex] = useState(0);
+  const dragStartX = useRef<number | null>(null);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    dragStartX.current = e.clientX;
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (dragStartX.current == null) return;
+    const delta = e.clientX - dragStartX.current;
+    dragStartX.current = null;
+    if (Math.abs(delta) > 32) setIndex((i) => (i + (delta < 0 ? 1 : -1) + total) % total);
+  };
+
+  return (
+    <div onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
+      <TestimonialCard t={TESTIMONIALS[index]} />
+      <div className="mt-5 flex justify-center gap-2">
+        {TESTIMONIALS.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={`Show testimonial ${i + 1}`}
+            aria-current={i === index}
+            onClick={() => setIndex(i)}
+            className={`h-2 w-2 rounded-full transition-transform ${i === index ? 'scale-125 bg-primary' : 'bg-foreground/20'}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -93,20 +147,12 @@ export function HomeIllustrated() {
         {/* TESTIMONIALS */}
         <section>
           <SectionTitle>Loved by students and parents</SectionTitle>
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:hidden">
+            <TestimonialCarousel />
+          </div>
+          <div className="hidden gap-6 md:grid md:grid-cols-3">
             {TESTIMONIALS.map((t, i) => (
-              <article key={i} className="flex flex-col gap-5 rounded-[22px] border border-border bg-card p-8 shadow-sm">
-                <span aria-hidden className="font-display text-5xl font-extrabold leading-[.5] text-primary">“</span>
-                <p className="flex-1 text-[17px] font-medium leading-relaxed text-foreground">{t.q}</p>
-                <div className="text-sm font-bold text-muted-foreground">
-                  {t.by && <>— {t.by} · </>}
-                  {t.ok && (
-                    <span className="inline-flex items-center gap-1.5 text-green">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> {t.ok}
-                    </span>
-                  )}
-                </div>
-              </article>
+              <TestimonialCard key={i} t={t} />
             ))}
           </div>
         </section>
