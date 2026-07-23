@@ -25,7 +25,6 @@ const SRC = `<!doctype html>
     --amber-deep:#C97F1F;
     --teal:     #2F7A72;
     --coral:    #E1654B;
-    --indigo:   #4F46E5;
     --line:     rgba(18,33,59,0.14);
     --muted:    #5C6478;
 
@@ -316,7 +315,7 @@ const SRC = `<!doctype html>
   /* ---------- cta row ---------- */
   .cta-row{
     text-align:center;
-    margin: 16px 0 100px;
+    margin: 16px 0 28px;
   }
   .cta-row h3{
     font-family:var(--display);
@@ -362,10 +361,11 @@ const SRC = `<!doctype html>
     font-size:18px;
     line-height:1.5;
     letter-spacing:-.01em;
-    color:var(--indigo);
+    color:var(--ink);
   }
-  .brand-line-name{ font-size:1.2em; font-weight:800; }
+  .brand-line-name{ font-size:1.2em; font-weight:800; color:var(--amber-deep); }
   .brand-line-em{ font-weight:700; position:relative; white-space:nowrap; }
+  .brand-line-em svg{ position:absolute; bottom:-4px; left:0; height:8px; width:100%; color:var(--amber); }
 
   /* ---------- reels row : animated product-demo screens ---------- */
   .reels{
@@ -382,7 +382,7 @@ const SRC = `<!doctype html>
     font-family:var(--display);
     font-weight:600;
     font-size:15.5px;
-    color:var(--indigo);
+    color:var(--amber-deep);
   }
   .reel{
     position:relative;
@@ -907,7 +907,9 @@ const SRC = `<!doctype html>
   </div>
 
   <div class="brand-line">
-    <p><span class="brand-line-name">EduBridge Network</span> — helping thousands of students find <span class="brand-line-em">their fit.</span></p>
+    <p><span class="brand-line-name">EduBridge Network</span> — helping thousands of students find <span class="brand-line-em">their fit.
+      <svg viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4 16 C 80 2, 220 2, 296 16" stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none"/></svg>
+    </span></p>
   </div>
 
   <div class="reels">
