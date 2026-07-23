@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Award, Briefcase, ChevronLeft, ChevronRight, ClipboardCheck, GitCompare, Headphones, IndianRupee } from 'lucide-react';
+import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, IndianRupee } from 'lucide-react';
 import { HomeAdmissionDesk } from '@/components/home-admission-desk';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
@@ -430,28 +430,27 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
   );
 }
 
-// Icon + tone shown per poster in the desktop row (index-matched to POSTERS).
-const POSTER_META = [
-  { icon: ClipboardCheck, tone: 'bg-accent text-primary' },
-  { icon: GitCompare, tone: 'bg-marigold-soft text-amber-600' },
-  { icon: Briefcase, tone: 'bg-green-soft text-green' },
-  { icon: Award, tone: 'bg-accent text-primary' },
-  { icon: Headphones, tone: 'bg-marigold-soft text-amber-600' },
-];
-
 // Laptop/tablet layout: all 5 tools visible at once as a static row, no
 // swipe/arrows/dots — those only make sense once space is tight on mobile.
+// Each icon reuses the same illustrated poster art as the mobile deck
+// (all 5 posters share the same circle at cx=240,cy=230,r=168 in their
+// 480x600 viewBox), cropped to a small circle via scale + negative offset
+// so the poster's own outer card/title never show through.
 function PosterRow({ onQuiz }: { onQuiz: () => void }) {
   const cardClass =
     'flex flex-col items-center gap-3.5 rounded-[20px] border border-border bg-card px-3 py-7 text-inherit no-underline transition-transform hover:-translate-y-1 hover:shadow-lg';
   return (
     <div className="grid grid-cols-5 gap-4">
-      {POSTER_TRACK.map(({ action }, i) => {
-        const { icon: Icon, tone } = POSTER_META[i];
+      {POSTER_TRACK.map(({ svg, action }, i) => {
         const inner = (
           <>
-            <span className={`grid h-16 w-16 place-items-center rounded-full ${tone}`}>
-              <Icon className="h-8 w-8" strokeWidth={1.75} />
+            <span className="relative block h-16 w-16 overflow-hidden rounded-full">
+              <span
+                aria-hidden
+                className="absolute left-[-13.7px] top-[-11.7px] block h-[600px] w-[480px] origin-top-left"
+                style={{ transform: 'scale(0.19)' }}
+                dangerouslySetInnerHTML={{ __html: svg }}
+              />
             </span>
             <span className="text-center font-display text-[15px] font-extrabold tracking-tight">{POSTER_TITLES[i]}</span>
           </>

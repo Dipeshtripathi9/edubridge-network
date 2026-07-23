@@ -25,6 +25,7 @@ const SRC = `<!doctype html>
     --amber-deep:#C97F1F;
     --teal:     #2F7A72;
     --coral:    #E1654B;
+    --indigo:   #4F46E5;
     --line:     rgba(18,33,59,0.14);
     --muted:    #5C6478;
 
@@ -361,7 +362,7 @@ const SRC = `<!doctype html>
     font-size:18px;
     line-height:1.5;
     letter-spacing:-.01em;
-    color:var(--ink);
+    color:var(--indigo);
   }
   .brand-line-name{ font-size:1.2em; font-weight:800; }
   .brand-line-em{ font-weight:700; position:relative; white-space:nowrap; }
@@ -381,7 +382,7 @@ const SRC = `<!doctype html>
     font-family:var(--display);
     font-weight:600;
     font-size:15.5px;
-    color:var(--ink);
+    color:var(--indigo);
   }
   .reel{
     position:relative;
