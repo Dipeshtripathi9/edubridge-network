@@ -143,6 +143,12 @@ const SRC = `<!doctype html>
       0 30px 60px -20px rgba(18,33,59,0.35),
       0 0 0 1px rgba(18,33,59,0.06);
     transform: rotate(-4deg);
+    animation: phone-drift 9s ease-in-out infinite;
+  }
+
+  @keyframes phone-drift{
+    0%,100%{ transform: rotate(-4deg) translateY(0); }
+    50%{ transform: rotate(-2.6deg) translateY(-6px); }
   }
 
   .phone::after{
@@ -244,7 +250,7 @@ const SRC = `<!doctype html>
     display:flex;
     align-items:center;
     gap:10px;
-    animation: bob 5.5s ease-in-out infinite;
+    animation: float 11s ease-in-out infinite;
   }
   .bubble .avatar{
     width:56px; height:56px;
@@ -270,29 +276,33 @@ const SRC = `<!doctype html>
     box-shadow:0 8px 18px -6px rgba(18,33,59,0.35);
   }
 
-  .b1{ top:4%;  left:0%;  }
+  .b1{ top:4%;  left:0%;  animation-duration:10.5s; }
   .b1 .avatar{ border-color:var(--coral); }
   .b1 .tag-label{ background:var(--coral); }
 
-  .b2{ top:28%; left:1%; animation-delay:.6s; }
+  .b2{ top:28%; left:1%; animation-delay:.6s; animation-duration:12.5s; }
   .b2 .avatar{ border-color:var(--teal); }
   .b2 .tag-label{ background:var(--teal); }
 
-  .b3{ bottom:16%; left:2%; animation-delay:1.2s; }
+  .b3{ bottom:16%; left:2%; animation-delay:1.2s; animation-duration:9.5s; }
   .b3 .avatar{ border-color:var(--ink); }
   .b3 .tag-label{ background:var(--ink); }
 
-  .b4{ top:0%; right:2%; animation-delay:.3s; flex-direction:row-reverse; }
+  .b4{ top:0%; right:2%; animation-delay:.3s; flex-direction:row-reverse; animation-duration:13s; }
   .b4 .avatar{ border-color:var(--amber-deep); }
   .b4 .tag-label{ background:var(--amber-deep); }
 
-  .b5{ top:32%; right:1%; animation-delay:.9s; flex-direction:row-reverse; }
+  .b5{ top:32%; right:1%; animation-delay:.9s; flex-direction:row-reverse; animation-duration:10s; }
   .b5 .avatar{ border-color:#7A5FB0; }
   .b5 .tag-label{ background:#7A5FB0; }
 
-  @keyframes bob{
-    0%,100%{ transform:translateY(0); }
-    50%{ transform:translateY(-10px); }
+  /* Slow, organic multi-axis drift (not just up/down) so each badge feels
+     like it's gently floating in its own orbit, rather than bouncing in sync. */
+  @keyframes float{
+    0%,100%{ transform:translate(0,0); }
+    22%{ transform:translate(7px,-11px); }
+    48%{ transform:translate(-6px,-17px); }
+    74%{ transform:translate(-10px,-5px); }
   }
 
   /* ---------- cta row ---------- */
@@ -759,7 +769,7 @@ const SRC = `<!doctype html>
   .chip .dot img{ width:100%; height:100%; object-fit:cover; display:block; }
 
   @media (prefers-reduced-motion: reduce){
-    .bubble{ animation:none; }
+    .bubble, .phone{ animation:none; }
     .reel, .btn-primary{ transition:none; }
   }
 </style>
