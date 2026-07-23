@@ -142,7 +142,7 @@ const SRC = `<!doctype html>
     box-shadow:
       0 30px 60px -20px rgba(18,33,59,0.35),
       0 0 0 1px rgba(18,33,59,0.06);
-    transform: rotate(-2.5deg);
+    transform: rotate(-4deg);
   }
 
   .phone::after{
@@ -171,6 +171,7 @@ const SRC = `<!doctype html>
     align-items:center;
     padding:16px 14px 12px;
     color:#fff;
+    border-bottom:1px solid rgba(255,255,255,0.08);
   }
   .app-nav-ic{
     width:20px; height:20px; flex:0 0 auto;
@@ -187,8 +188,8 @@ const SRC = `<!doctype html>
   }
   .app-brand-row{ display:flex; align-items:center; gap:5px; }
   .app-brand-mark{
-    width:16px; height:16px; border-radius:5px;
-    background:#6C4FE0;
+    width:16px; height:16px; border-radius:50%;
+    background:#4F46E5;
     display:flex; align-items:center; justify-content:center;
     flex:0 0 auto;
   }
@@ -205,12 +206,22 @@ const SRC = `<!doctype html>
   .app-nav-icons{ display:flex; align-items:center; gap:9px; flex:0 0 auto; }
   .app-nav-icons svg{ width:14px; height:14px; color:#fff; opacity:0.9; }
 
-  .app-feature{ flex:1; display:flex; flex-direction:column; padding:2px 14px 16px; min-height:0; }
-  .app-photo{ border-radius:14px; overflow:hidden; height:148px; flex:0 0 auto; margin-bottom:12px; }
+  .app-feature{ flex:1; display:flex; flex-direction:column; padding:2px 14px 20px; min-height:0; }
+  .app-photo{
+    position:relative;
+    border-radius:14px; overflow:hidden; height:148px; flex:0 0 auto; margin-bottom:12px;
+    border:1px solid rgba(255,255,255,0.14);
+    box-shadow:0 10px 20px -8px rgba(0,0,0,0.4);
+  }
   .app-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .app-photo::after{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(23,41,74,0) 65%, rgba(18,33,59,0.5) 100%);
+  }
   .app-feature-text{
     font-family:var(--body); font-size:11.3px; line-height:1.5;
-    color:#CBD4E3; margin:0 0 14px;
+    color:#E3E8F2; margin:0 0 14px;
   }
   .app-feature-actions{ display:flex; flex-direction:column; gap:8px; margin-top:auto; }
   .app-btn{
@@ -220,7 +231,11 @@ const SRC = `<!doctype html>
   .app-btn.dark{ background:var(--ink); color:#fff; }
   .app-btn.ghost{ background:#F1F3EC; color:var(--ink); }
   .app-btn.amber{ background:var(--amber); color:#3A2600; }
-  .app-btn.full{ width:100%; text-align:center; padding:11px 12px; }
+  .app-btn.full{
+    width:100%; border-radius:100px; padding:11px 14px;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .app-btn.full svg{ width:12px; height:12px; flex:0 0 auto; }
 
   /* ---------- floating student badges: avatar + bold pill ---------- */
   .bubble{
@@ -259,7 +274,7 @@ const SRC = `<!doctype html>
   .b1 .avatar{ border-color:var(--coral); }
   .b1 .tag-label{ background:var(--coral); }
 
-  .b2{ top:28%; left:-4%; animation-delay:.6s; }
+  .b2{ top:28%; left:1%; animation-delay:.6s; }
   .b2 .avatar{ border-color:var(--teal); }
   .b2 .tag-label{ background:var(--teal); }
 
@@ -271,7 +286,7 @@ const SRC = `<!doctype html>
   .b4 .avatar{ border-color:var(--amber-deep); }
   .b4 .tag-label{ background:var(--amber-deep); }
 
-  .b5{ top:32%; right:-4%; animation-delay:.9s; flex-direction:row-reverse; }
+  .b5{ top:32%; right:1%; animation-delay:.9s; flex-direction:row-reverse; }
   .b5 .avatar{ border-color:#7A5FB0; }
   .b5 .tag-label{ background:#7A5FB0; }
 
@@ -814,11 +829,14 @@ const SRC = `<!doctype html>
           </span>
         </div>
         <div class="app-feature">
-          <div class="app-photo"><img src="/career-guide-photo.png" alt="" /></div>
+          <div class="app-photo"><img src="/career-guide-photo.png" alt="Student exploring college options on EduBridge Network" /></div>
           <p class="app-feature-text">Find colleges that fit you, discover scholarships from colleges, government and private organizations, connect with verified students, and build your career through real internships, live projects, and expert guidance.</p>
           <div class="app-feature-actions">
-            <button class="app-btn amber full">Find Colleges That Fit</button>
-            <button class="app-btn ghost full">Explore Scholarships</button>
+            <button class="app-btn amber full">
+              Find colleges that fit
+              <svg viewBox="0 0 24 24" fill="none" stroke="#3A2600" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <button class="app-btn ghost full">Discover scholarships</button>
           </div>
         </div>
       </div>
@@ -837,7 +855,7 @@ const SRC = `<!doctype html>
     <h3>Match, shortlist, apply — all in one place</h3>
     <p>Find colleges that actually fit you, scholarships matched to your profile, and internships that build your resume — then apply direct once you're ready.</p>
     <button class="btn-primary">
-      Find your fit
+      Start matching now
       <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
     </button>
   </div>
