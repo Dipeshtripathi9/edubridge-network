@@ -117,6 +117,13 @@ const SRC = `<!doctype html>
     align-items:flex-end;
     justify-content:center;
     margin-bottom:12px;
+    transform: scale(1.16);
+    opacity: 0;
+    transition: transform 1.15s cubic-bezier(.16,1,.3,1), opacity 1s ease-out;
+  }
+  body.revealed .stage{
+    transform: scale(1);
+    opacity: 1;
   }
 
   .bridge-svg{
@@ -771,6 +778,7 @@ const SRC = `<!doctype html>
   @media (prefers-reduced-motion: reduce){
     .bubble, .phone{ animation:none; }
     .reel, .btn-primary{ transition:none; }
+    .stage{ transform:none; opacity:1; transition:none; }
   }
 </style>
 </head>
@@ -1641,6 +1649,13 @@ const SRC = `<!doctype html>
   window.addEventListener('load',post);
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(post);
   if(window.ResizeObserver){new ResizeObserver(post).observe(document.body);}else{setInterval(post,1000);}
+
+  // The bridge stage starts scaled up + hidden; the parent page tells us
+  // when it has scrolled into view so the "zoom out" reveal only plays
+  // once the section is actually visible, not immediately on load.
+  function reveal(){ document.body.classList.add('revealed'); }
+  window.addEventListener('message', function(e){ if (e.data && e.data.bridgeReveal) reveal(); });
+  setTimeout(reveal, 2500);
 })();
 </script>
 
@@ -1658,6 +1673,24 @@ export function HomeCareerBridge() {
     };
     window.addEventListener('message', onMsg);
     return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  // Trigger the iframe's "zoom out" reveal once the section actually
+  // scrolls into view, rather than as soon as the iframe finishes loading.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          el.contentWindow?.postMessage({ bridgeReveal: true }, '*');
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   return (
