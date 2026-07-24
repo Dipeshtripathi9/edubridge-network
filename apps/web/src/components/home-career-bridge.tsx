@@ -914,156 +914,7 @@ const SRC = `<!doctype html>
 
   <div class="reels">
 
-    <!-- Reel 1 — the real discover → shortlist → expert-guide flow -->
-    <div class="reel-item">
-    <h4 class="reel-title">Find the best colleges that fit for you</h4>
-    <div class="reel r1">
-      <div class="notch"></div>
-      <div class="mini-app" id="r1app">
-        <div class="mini-status"><span></span><span>●●●</span></div>
-
-        <div class="mini-viewport">
-          <div class="mview active" id="r1-discover">
-            <p class="mini-eyebrow">Find your fit</p>
-            <p class="mini-head">Search colleges that actually fit you</p>
-            <div class="mini-search">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#12213B" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-              <span class="mini-search-txt" id="r1SearchTxt"></span>
-            </div>
-            <div class="mini-chips">
-              <span class="mchip active" data-c="all">All matches</span>
-              <span class="mchip" data-c="eng">Engineering</span>
-              <span class="mchip" data-c="des">Design</span>
-              <span class="mchip" data-c="biz">Business</span>
-            </div>
-            <div class="mini-list">
-              <div class="mcard">
-                <div class="m-dial"><svg viewBox="0 0 28 28"><circle class="trk" cx="14" cy="14" r="11"/><circle class="fil" cx="14" cy="14" r="11" stroke-dasharray="69" stroke-dashoffset="4"/></svg><span class="num">94%</span></div>
-                <div class="m-main">
-                  <p class="m-name">Meridian Institute of Technology</p>
-                  <p class="m-loc">Pune, Maharashtra</p>
-                  <div class="m-tags"><span class="m-tag">Engineering</span><span class="m-tag v">Verified</span></div>
-                  <div class="m-actions">
-                    <button class="m-btn m-btn-dark" id="mc1-short">+ Shortlist</button>
-                    <button class="m-btn m-btn-ghost" id="mc1-guide">Ask Expert Guide</button>
-                  </div>
-                </div>
-              </div>
-              <div class="mcard">
-                <div class="m-dial"><svg viewBox="0 0 28 28"><circle class="trk" cx="14" cy="14" r="11"/><circle class="fil" cx="14" cy="14" r="11" stroke-dasharray="69" stroke-dashoffset="6.3"/></svg><span class="num">91%</span></div>
-                <div class="m-main">
-                  <p class="m-name">Kessler Institute of Design</p>
-                  <p class="m-loc">Jaipur, Rajasthan</p>
-                  <div class="m-tags"><span class="m-tag">Design</span><span class="m-tag v">Verified</span></div>
-                  <div class="m-actions">
-                    <button class="m-btn m-btn-dark" id="mc2-short">+ Shortlist</button>
-                    <button class="m-btn m-btn-ghost">Ask Expert Guide</button>
-                  </div>
-                </div>
-              </div>
-              <div class="mcard">
-                <div class="m-dial"><svg viewBox="0 0 28 28"><circle class="trk" cx="14" cy="14" r="11"/><circle class="fil" cx="14" cy="14" r="11" stroke-dasharray="69" stroke-dashoffset="7.6"/></svg><span class="num">89%</span></div>
-                <div class="m-main">
-                  <p class="m-name">Sundale University</p>
-                  <p class="m-loc">Ahmedabad, Gujarat</p>
-                  <div class="m-tags"><span class="m-tag">Business</span><span class="m-tag v">Verified</span></div>
-                  <div class="m-actions">
-                    <button class="m-btn m-btn-dark">+ Shortlist</button>
-                    <button class="m-btn m-btn-ghost">Ask Expert Guide</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mview" id="r1-shortlist">
-            <div class="mini-topbar">
-              <span class="mini-mark"></span>
-              <span class="mini-brand">Your <b>shortlist</b></span>
-            </div>
-            <div class="m-banner">
-              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#3A2600" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M6 10v6c0 1.5 2.7 3 6 3s6-1.5 6-3v-6"/></svg></div>
-              <div>
-                <p class="t">EduBridge Network scholarships</p>
-                <p class="d">Matched to your shortlist automatically</p>
-              </div>
-            </div>
-            <div class="m-sccard">
-              <div class="top">
-                <div><p class="name">Meridian Institute of Technology</p><p class="loc">Pune, Maharashtra</p></div>
-                <div class="m-dial-sm"><svg viewBox="0 0 28 28"><circle class="trk" cx="14" cy="14" r="11" fill="none" stroke="#EDEBE4" stroke-width="3.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="var(--teal)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="69" stroke-dashoffset="4"/></svg></div>
-              </div>
-              <div class="sch">+ Up to ₹1.8L / year — merit + need based</div>
-              <div class="m-actions">
-                <button class="m-btn m-btn-amber">Direct Apply</button>
-                <button class="m-btn m-btn-ghost">Ask Expert Guide</button>
-                <button class="m-btn m-btn-ghost">Remove</button>
-              </div>
-            </div>
-            <div class="m-sccard">
-              <div class="top">
-                <div><p class="name">Kessler Institute of Design</p><p class="loc">Jaipur, Rajasthan</p></div>
-                <div class="m-dial-sm"><svg viewBox="0 0 28 28"><circle class="trk" cx="14" cy="14" r="11" fill="none" stroke="#EDEBE4" stroke-width="3.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="var(--teal)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="69" stroke-dashoffset="6.3"/></svg></div>
-              </div>
-              <div class="sch">+ Up to ₹90K / year — portfolio based</div>
-              <div class="m-actions">
-                <button class="m-btn m-btn-amber">Direct Apply</button>
-                <button class="m-btn m-btn-ghost">Ask Expert Guide</button>
-                <button class="m-btn m-btn-ghost">Remove</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="moverlay" id="r1-guide">
-            <div class="mov-header">
-              <span class="mov-back"><svg viewBox="0 0 24 24" fill="none" stroke="#12213B" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></span>
-              <div>
-                <p class="mov-college">Meridian Institute of Technology</p>
-                <p class="mov-title">Expert Guide</p>
-              </div>
-            </div>
-            <div class="mov-hero">
-              <div class="mov-avatar">RS</div>
-              <div>
-                <p class="mov-name">Rhea Sen</p>
-                <p class="mov-role">Alumna, CS '21 · Guide since 2023</p>
-                <p class="mov-stat">482 questions answered</p>
-              </div>
-            </div>
-            <div class="mov-ask">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#9AA598" stroke-width="1.8" width="9" height="9"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
-              <span>Ask Rhea about admissions, fees, life…</span>
-            </div>
-            <div class="mov-tabs"><button class="active">Community</button><button>Blogs</button></div>
-            <div class="mov-block">
-              <p class="t">Meridian CS Aspirants</p>
-              <p class="d">2,300+ students preparing together — mock interviews every Sunday.</p>
-              <p class="m">Active · 340 online now</p>
-            </div>
-            <div class="mov-block">
-              <p class="t">Meridian Alumni Circle</p>
-              <p class="d">Graduates share placement journeys and referral opportunities.</p>
-              <p class="m">1,120 members</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="mini-tabbar">
-          <button class="mtab active" id="r1tab-discover">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-            <span>Discover</span>
-          </button>
-          <button class="mtab" id="r1tab-shortlist">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4.5L6 21V3z"/></svg>
-            <span>Shortlist</span>
-          </button>
-        </div>
-      </div>
-      <div class="r1-cursor" id="r1cursor"></div>
-    </div>
-    </div>
-
-    <!-- Reel 2 — full scholarship discovery → detail → apply flow -->
+    <!-- Reel 1 — full scholarship discovery → detail → apply flow -->
     <div class="reel-item">
     <h4 class="reel-title">Find the best scholarships that fit for you</h4>
     <div class="reel r2" style="background:#F1F3EC;">
@@ -1204,7 +1055,7 @@ const SRC = `<!doctype html>
     </div>
     </div>
 
-    <!-- Reel 3 — full resume-upload → matched internships → shortlist flow -->
+    <!-- Reel 2 — full resume-upload → matched internships → shortlist flow -->
     <div class="reel-item">
     <h4 class="reel-title">Find the best internships that fit for you</h4>
     <div class="reel r3" style="background:#F1F3EC;">
@@ -1353,6 +1204,155 @@ const SRC = `<!doctype html>
         </div>
       </div>
       <div class="r1-cursor" id="r3cursor"></div>
+    </div>
+    </div>
+
+    <!-- Reel 3 — the real discover → shortlist → expert-guide flow -->
+    <div class="reel-item">
+    <h4 class="reel-title">Find the best colleges that fit for you</h4>
+    <div class="reel r1">
+      <div class="notch"></div>
+      <div class="mini-app" id="r1app">
+        <div class="mini-status"><span></span><span>●●●</span></div>
+
+        <div class="mini-viewport">
+          <div class="mview active" id="r1-discover">
+            <p class="mini-eyebrow">Find your fit</p>
+            <p class="mini-head">Search colleges that actually fit you</p>
+            <div class="mini-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#12213B" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+              <span class="mini-search-txt" id="r1SearchTxt"></span>
+            </div>
+            <div class="mini-chips">
+              <span class="mchip active" data-c="all">All matches</span>
+              <span class="mchip" data-c="eng">Engineering</span>
+              <span class="mchip" data-c="des">Design</span>
+              <span class="mchip" data-c="biz">Business</span>
+            </div>
+            <div class="mini-list">
+              <div class="mcard">
+                <div class="m-dial"><svg viewBox="0 0 28 28"><circle class="trk" cx="14" cy="14" r="11"/><circle class="fil" cx="14" cy="14" r="11" stroke-dasharray="69" stroke-dashoffset="4"/></svg><span class="num">94%</span></div>
+                <div class="m-main">
+                  <p class="m-name">Meridian Institute of Technology</p>
+                  <p class="m-loc">Pune, Maharashtra</p>
+                  <div class="m-tags"><span class="m-tag">Engineering</span><span class="m-tag v">Verified</span></div>
+                  <div class="m-actions">
+                    <button class="m-btn m-btn-dark" id="mc1-short">+ Shortlist</button>
+                    <button class="m-btn m-btn-ghost" id="mc1-guide">Ask Expert Guide</button>
+                  </div>
+                </div>
+              </div>
+              <div class="mcard">
+                <div class="m-dial"><svg viewBox="0 0 28 28"><circle class="trk" cx="14" cy="14" r="11"/><circle class="fil" cx="14" cy="14" r="11" stroke-dasharray="69" stroke-dashoffset="6.3"/></svg><span class="num">91%</span></div>
+                <div class="m-main">
+                  <p class="m-name">Kessler Institute of Design</p>
+                  <p class="m-loc">Jaipur, Rajasthan</p>
+                  <div class="m-tags"><span class="m-tag">Design</span><span class="m-tag v">Verified</span></div>
+                  <div class="m-actions">
+                    <button class="m-btn m-btn-dark" id="mc2-short">+ Shortlist</button>
+                    <button class="m-btn m-btn-ghost">Ask Expert Guide</button>
+                  </div>
+                </div>
+              </div>
+              <div class="mcard">
+                <div class="m-dial"><svg viewBox="0 0 28 28"><circle class="trk" cx="14" cy="14" r="11"/><circle class="fil" cx="14" cy="14" r="11" stroke-dasharray="69" stroke-dashoffset="7.6"/></svg><span class="num">89%</span></div>
+                <div class="m-main">
+                  <p class="m-name">Sundale University</p>
+                  <p class="m-loc">Ahmedabad, Gujarat</p>
+                  <div class="m-tags"><span class="m-tag">Business</span><span class="m-tag v">Verified</span></div>
+                  <div class="m-actions">
+                    <button class="m-btn m-btn-dark">+ Shortlist</button>
+                    <button class="m-btn m-btn-ghost">Ask Expert Guide</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mview" id="r1-shortlist">
+            <div class="mini-topbar">
+              <span class="mini-mark"></span>
+              <span class="mini-brand">Your <b>shortlist</b></span>
+            </div>
+            <div class="m-banner">
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#3A2600" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M6 10v6c0 1.5 2.7 3 6 3s6-1.5 6-3v-6"/></svg></div>
+              <div>
+                <p class="t">EduBridge Network scholarships</p>
+                <p class="d">Matched to your shortlist automatically</p>
+              </div>
+            </div>
+            <div class="m-sccard">
+              <div class="top">
+                <div><p class="name">Meridian Institute of Technology</p><p class="loc">Pune, Maharashtra</p></div>
+                <div class="m-dial-sm"><svg viewBox="0 0 28 28"><circle class="trk" cx="14" cy="14" r="11" fill="none" stroke="#EDEBE4" stroke-width="3.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="var(--teal)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="69" stroke-dashoffset="4"/></svg></div>
+              </div>
+              <div class="sch">+ Up to ₹1.8L / year — merit + need based</div>
+              <div class="m-actions">
+                <button class="m-btn m-btn-amber">Direct Apply</button>
+                <button class="m-btn m-btn-ghost">Ask Expert Guide</button>
+                <button class="m-btn m-btn-ghost">Remove</button>
+              </div>
+            </div>
+            <div class="m-sccard">
+              <div class="top">
+                <div><p class="name">Kessler Institute of Design</p><p class="loc">Jaipur, Rajasthan</p></div>
+                <div class="m-dial-sm"><svg viewBox="0 0 28 28"><circle class="trk" cx="14" cy="14" r="11" fill="none" stroke="#EDEBE4" stroke-width="3.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="var(--teal)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="69" stroke-dashoffset="6.3"/></svg></div>
+              </div>
+              <div class="sch">+ Up to ₹90K / year — portfolio based</div>
+              <div class="m-actions">
+                <button class="m-btn m-btn-amber">Direct Apply</button>
+                <button class="m-btn m-btn-ghost">Ask Expert Guide</button>
+                <button class="m-btn m-btn-ghost">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="moverlay" id="r1-guide">
+            <div class="mov-header">
+              <span class="mov-back"><svg viewBox="0 0 24 24" fill="none" stroke="#12213B" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></span>
+              <div>
+                <p class="mov-college">Meridian Institute of Technology</p>
+                <p class="mov-title">Expert Guide</p>
+              </div>
+            </div>
+            <div class="mov-hero">
+              <div class="mov-avatar">RS</div>
+              <div>
+                <p class="mov-name">Rhea Sen</p>
+                <p class="mov-role">Alumna, CS '21 · Guide since 2023</p>
+                <p class="mov-stat">482 questions answered</p>
+              </div>
+            </div>
+            <div class="mov-ask">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#9AA598" stroke-width="1.8" width="9" height="9"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+              <span>Ask Rhea about admissions, fees, life…</span>
+            </div>
+            <div class="mov-tabs"><button class="active">Community</button><button>Blogs</button></div>
+            <div class="mov-block">
+              <p class="t">Meridian CS Aspirants</p>
+              <p class="d">2,300+ students preparing together — mock interviews every Sunday.</p>
+              <p class="m">Active · 340 online now</p>
+            </div>
+            <div class="mov-block">
+              <p class="t">Meridian Alumni Circle</p>
+              <p class="d">Graduates share placement journeys and referral opportunities.</p>
+              <p class="m">1,120 members</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini-tabbar">
+          <button class="mtab active" id="r1tab-discover">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+            <span>Discover</span>
+          </button>
+          <button class="mtab" id="r1tab-shortlist">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4.5L6 21V3z"/></svg>
+            <span>Shortlist</span>
+          </button>
+        </div>
+      </div>
+      <div class="r1-cursor" id="r1cursor"></div>
     </div>
     </div>
 
