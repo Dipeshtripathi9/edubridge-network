@@ -132,7 +132,7 @@ export function AccountMenu() {
         ) : (
           <div className="flex flex-1 flex-col px-5 py-4">
             <button
-              onClick={() => go('/colleges')}
+              onClick={() => go('/reviews')}
               className="flex items-center justify-end rounded-lg px-3 py-3.5 text-[17px] font-bold text-foreground transition-colors hover:text-primary"
             >
               Find my college
