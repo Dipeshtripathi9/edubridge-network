@@ -124,7 +124,7 @@ const SRC = `<!doctype html>
 
   /* ================= SCENE 2: SEARCH RESULTS ================= */
   .panel{
-    position:absolute; top:64px; left:220px; width:840px;
+    position:absolute; top:56px; left:190px; width:900px;
     background:var(--cream); border-radius:20px; padding:28px;
     transition:opacity .5s ease, filter .5s ease;
   }
@@ -132,7 +132,7 @@ const SRC = `<!doctype html>
   .panel h1{ font-family:var(--display); font-weight:700; font-size:27px; color:var(--green-deep); margin-bottom:20px; }
 
   .rrow{
-    display:flex; align-items:center; gap:18px;
+    display:flex; align-items:center; gap:16px;
     background:var(--card); border-radius:16px; padding:14px 18px; margin-bottom:14px;
     box-shadow:0 14px 28px -20px rgba(0,0,0,0.18);
     opacity:0; transform:translateY(10px);
@@ -144,13 +144,35 @@ const SRC = `<!doctype html>
   .thumb{ width:52px; height:52px; border-radius:10px; overflow:hidden; flex:0 0 auto; }
   .thumb svg{ display:block; width:100%; height:100%; }
   .rrow-main{ flex:1; min-width:0; }
-  .rrow-main h3{ font-family:var(--display); font-weight:700; font-size:18px; color:var(--ink); display:inline; }
+  .rrow-main h3{ font-family:var(--display); font-weight:700; font-size:17px; color:var(--ink); display:inline; }
   .type-dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-left:8px; }
   .rrow-bar{ margin-top:9px; height:7px; width:70%; border-radius:6px; background:var(--line); }
   .rrow-bar-sm{ margin-top:6px; height:7px; width:12px; border-radius:6px; background:var(--green); display:inline-block; }
-  .heart-btn{ flex:0 0 auto; width:40px; height:40px; display:flex; align-items:center; justify-content:center; }
-  .heart-btn svg{ width:24px; height:24px; stroke:var(--green); fill:none; stroke-width:2; transition:fill .25s ease, stroke .25s ease; }
-  .heart-btn.filled svg{ fill:var(--green); }
+  .rrow-actions{ flex:0 0 auto; display:flex; align-items:center; gap:16px; }
+
+  /* ---- % match dial ---- */
+  .dial{ position:relative; width:52px; height:52px; flex:0 0 auto; }
+  .dial svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .dial .trk{ fill:none; stroke:var(--mint); stroke-width:6; }
+  .dial .fil{ fill:none; stroke:var(--green); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 1s ease; }
+  .dial .num{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:12.5px; font-weight:600; color:var(--ink); }
+  .dial-sm{ width:38px; height:38px; }
+  .dial-sm .num{ font-size:10px; }
+
+  .shortlist-btn{
+    flex:0 0 auto; display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--body); font-weight:700; font-size:13.5px; color:#fff;
+    background:var(--ink); border-radius:100px; padding:11px 18px;
+    transition:background .3s ease;
+  }
+  .shortlist-btn svg{ width:12px; height:12px; }
+  .shortlist-btn.done{ background:var(--green); }
+  .viewdetail-btn{
+    flex:0 0 auto; display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--body); font-weight:700; font-size:13.5px; color:var(--ink);
+    background:var(--sky); border-radius:100px; padding:11px 16px;
+  }
+  .viewdetail-btn svg{ width:10px; height:10px; }
 
   /* ---- "Your List" chip: lands from above the top edge ---- */
   .yl-chip{
@@ -166,17 +188,17 @@ const SRC = `<!doctype html>
   .yl-chip svg{ width:16px; height:16px; fill:var(--green); }
 
   /* ================= SCENE 3: YOUR LIST (floats directly on green) ================= */
-  .yl-list{ position:absolute; top:96px; left:220px; width:530px; }
+  .yl-list{ position:absolute; top:96px; left:190px; width:590px; }
   .yl-card{
     background:var(--card); border-radius:16px; padding:16px 18px; margin-bottom:16px;
     box-shadow:0 18px 36px -22px rgba(0,0,0,0.3);
     opacity:0; transform:translateY(14px);
     transition:opacity .45s ease, transform .45s ease;
-    display:flex; align-items:center; gap:16px;
+    display:flex; align-items:center; gap:14px;
   }
   .yl-card.show{ opacity:1; transform:translateY(0); }
   .yl-card-main{ flex:1; min-width:0; }
-  .yl-card-main h3{ font-family:var(--display); font-weight:700; font-size:17px; color:var(--ink); }
+  .yl-card-main h3{ font-family:var(--display); font-weight:700; font-size:16.5px; color:var(--ink); }
   .add-status-btn{
     flex:0 0 auto; display:inline-flex; align-items:center; gap:6px;
     font-family:var(--body); font-weight:600; font-size:13.5px; color:var(--ink);
@@ -184,15 +206,15 @@ const SRC = `<!doctype html>
   }
   .add-status-btn svg{ width:11px; height:11px; }
   .status-pill{
-    flex:0 0 auto; font-family:var(--body); font-weight:700; font-size:13px;
-    border-radius:100px; padding:9px 16px;
+    flex:0 0 auto; font-family:var(--body); font-weight:700; font-size:12.5px;
+    border-radius:100px; padding:8px 14px; white-space:nowrap;
   }
   .status-pill.researching{ background:var(--sky); color:var(--navy); }
   .status-pill.touring{ background:var(--sky); color:var(--navy); }
   .status-pill.applied{ background:var(--mint); color:var(--green-deep); }
 
   .dropdown{
-    position:absolute; top:172px; left:355px; width:220px;
+    position:absolute; top:172px; left:405px; width:220px;
     background:var(--card); border-radius:14px; padding:10px;
     box-shadow:0 20px 40px -18px rgba(0,0,0,0.32);
     opacity:0; transform:translateY(-8px) scale(0.97); pointer-events:none;
@@ -211,6 +233,26 @@ const SRC = `<!doctype html>
   .drop-opt.applied{ background:var(--mint); color:var(--green-deep); }
   .drop-opt.accepted{ background:var(--orange); color:var(--ink); }
   .drop-opt.clear{ background:var(--line); color:var(--ink-soft); }
+
+  /* ================= SCENE: COLLEGE DETAILS ================= */
+  .det-header{ position:absolute; top:56px; left:190px; display:flex; align-items:center; gap:16px; }
+  .det-back{ width:42px; height:42px; border-radius:12px; background:var(--card); display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .det-back svg{ width:18px; height:18px; }
+  .det-header .co{ font-family:var(--body); font-size:13px; color:var(--cream); opacity:.75; margin-bottom:2px; }
+  .det-header h1{ font-family:var(--display); font-weight:700; font-size:24px; color:var(--cream); }
+
+  .det-body{ position:absolute; top:132px; left:190px; width:660px; }
+  .det-card{ background:var(--card); border-radius:16px; padding:20px 22px; margin-bottom:14px; box-shadow:0 14px 28px -20px rgba(0,0,0,0.2); }
+  .det-hero{ display:flex; align-items:center; gap:16px; }
+  .det-hero .thumb{ width:56px; height:56px; }
+  .det-hero h3{ font-family:var(--display); font-weight:700; font-size:20px; color:var(--ink); margin-bottom:3px; }
+  .det-hero .meta{ font-family:var(--body); font-size:13.5px; color:var(--ink-soft); margin-bottom:5px; }
+  .det-hero .fit{ font-family:var(--body); font-weight:700; font-size:14px; color:var(--green); }
+
+  .det-card h4{ font-family:var(--display); font-weight:700; font-size:15.5px; color:var(--ink); margin-bottom:8px; }
+  .det-card p{ font-family:var(--body); font-size:14px; color:var(--ink-soft); line-height:1.55; }
+
+  .det-cta{ display:flex; align-items:center; justify-content:center; font-family:var(--body); font-weight:700; font-size:16px; color:var(--green-deep); background:var(--mint); padding:16px 0; border-radius:14px; }
 
   /* ---------- shared: fake cursor ---------- */
   .cursor{
@@ -276,20 +318,58 @@ const SRC = `<!doctype html>
       <div class="rrow" id="rowPace">
         <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#C7E1F6"/><path d="M0 42 L18 20 L30 34 L40 22 L56 42 V56 H0 Z" fill="#234B33"/></svg></div>
         <div class="rrow-main"><h3>Pace University</h3><span class="type-dot" style="background:var(--sky)"></span><div class="rrow-bar"></div></div>
-        <div class="heart-btn" id="heartPace"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.3C.6 8.4 2.5 5 6 5c2 0 3.6 1.2 4.5 2.6C11.4 6.2 13 5 15 5c3.5 0 5.4 3.4 4 6.7C19.5 16.4 12 21 12 21z"/></svg></div>
+        <div class="rrow-actions">
+          <div class="dial"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="182.2"/></svg><span class="num">82%</span></div>
+          <div class="shortlist-btn" id="btnPace"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span id="btnPaceTxt">Shortlist</span></div>
+          <div class="viewdetail-btn" id="viewDetailPace">View Detail<svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+        </div>
       </div>
 
       <div class="rrow" id="rowStony">
         <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#DCD3EE"/><path d="M0 40 L14 26 L26 38 V56 H0 Z" fill="#3E7A4E"/><rect x="30" y="24" width="16" height="16" fill="#C9682F"/><path d="M28 24 L38 15 L48 24 Z" fill="#8A3D1C"/></svg></div>
         <div class="rrow-main"><h3>Stony Brook University</h3><span class="type-dot" style="background:var(--green)"></span><div class="rrow-bar"></div></div>
-        <div class="heart-btn" id="heartStony"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.3C.6 8.4 2.5 5 6 5c2 0 3.6 1.2 4.5 2.6C11.4 6.2 13 5 15 5c3.5 0 5.4 3.4 4 6.7C19.5 16.4 12 21 12 21z"/></svg></div>
+        <div class="rrow-actions">
+          <div class="dial"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="182.2"/></svg><span class="num">90%</span></div>
+          <div class="shortlist-btn" id="btnStony"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span id="btnStonyTxt">Shortlist</span></div>
+          <div class="viewdetail-btn" id="viewDetailStony">View Detail<svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+        </div>
       </div>
 
       <div class="rrow" id="rowAdelphi">
         <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#F6CFDD"/><circle cx="15" cy="14" r="3.5" fill="#D2482F"/><path d="M0 46 L16 22 L26 40 L34 28 L56 46 V56 H0 Z" fill="#E8A23D"/><path d="M22 46 L34 30 L44 46 Z" fill="#2F7A72"/></svg></div>
         <div class="rrow-main"><h3>Adelphi University</h3><span class="type-dot" style="background:var(--sky)"></span><div class="rrow-bar"></div></div>
-        <div class="heart-btn" id="heartAdelphi"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.3C.6 8.4 2.5 5 6 5c2 0 3.6 1.2 4.5 2.6C11.4 6.2 13 5 15 5c3.5 0 5.4 3.4 4 6.7C19.5 16.4 12 21 12 21z"/></svg></div>
+        <div class="rrow-actions">
+          <div class="dial"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="182.2"/></svg><span class="num">78%</span></div>
+          <div class="shortlist-btn" id="btnAdelphi"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span id="btnAdelphiTxt">Shortlist</span></div>
+          <div class="viewdetail-btn" id="viewDetailAdelphi">View Detail<svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+        </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ============ SCENE: COLLEGE DETAILS ============ -->
+  <div class="scene" id="scene-detail">
+    <div class="det-header">
+      <div class="det-back" id="detBack"><svg viewBox="0 0 24 24" fill="none" stroke="#1B2A1D" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></div>
+      <div>
+        <div class="co" id="detCo">New York, NY</div>
+        <h1 id="detTitle">Pace University</h1>
+      </div>
+    </div>
+    <div class="det-body">
+      <div class="det-card">
+        <div class="det-hero">
+          <div class="thumb" id="detThumb"></div>
+          <div>
+            <h3 id="detName">Pace University</h3>
+            <div class="meta" id="detMeta">Private &middot; ~8,900 undergrads</div>
+            <div class="fit" id="detFit">82% fit for your criteria</div>
+          </div>
+        </div>
+      </div>
+      <div class="det-card"><h4>Why it fits</h4><p id="detWhy"></p></div>
+      <div class="det-card"><h4>What to know</h4><p id="detKnow"></p></div>
+      <div class="det-cta" id="detCta">Add to Your List</div>
     </div>
   </div>
 
@@ -298,16 +378,19 @@ const SRC = `<!doctype html>
     <div class="yl-list">
       <div class="yl-card" id="ylStony">
         <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#DCD3EE"/><path d="M0 40 L14 26 L26 38 V56 H0 Z" fill="#3E7A4E"/><rect x="30" y="24" width="16" height="16" fill="#C9682F"/><path d="M28 24 L38 15 L48 24 Z" fill="#8A3D1C"/></svg></div>
+        <div class="dial dial-sm"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="18.2"/></svg><span class="num">90%</span></div>
         <div class="yl-card-main"><h3>Stony Brook University</h3><div class="rrow-bar-sm"></div></div>
         <div class="add-status-btn" id="addStatusBtn">Add Status <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
       </div>
       <div class="yl-card" id="ylPace">
         <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#C7E1F6"/><path d="M0 42 L18 20 L30 34 L40 22 L56 42 V56 H0 Z" fill="#234B33"/></svg></div>
+        <div class="dial dial-sm"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="32.8"/></svg><span class="num">82%</span></div>
         <div class="yl-card-main"><h3>Pace University</h3><div class="rrow-bar-sm"></div></div>
         <span class="status-pill researching" id="paceStatus">Researching</span>
       </div>
       <div class="yl-card" id="ylAdelphi">
         <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#F6CFDD"/><circle cx="15" cy="14" r="3.5" fill="#D2482F"/><path d="M0 46 L16 22 L26 40 L34 28 L56 46 V56 H0 Z" fill="#E8A23D"/><path d="M22 46 L34 30 L44 46 Z" fill="#2F7A72"/></svg></div>
+        <div class="dial dial-sm"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="40.1"/></svg><span class="num">78%</span></div>
         <div class="yl-card-main"><h3>Adelphi University</h3><div class="rrow-bar-sm"></div></div>
         <span class="status-pill touring" id="adelphiStatus">Scheduled Tour</span>
       </div>
@@ -374,11 +457,45 @@ const SRC = `<!doctype html>
     for(const ch of text){ el.textContent += ch; await sleep(45); }
     await sleep(350);
   }
+  function setShortlisted(btn, txt, on){
+    btn.classList.toggle('done', on);
+    txt.textContent = on ? 'Shortlisted' : 'Shortlist';
+    btn.querySelector('svg').innerHTML = on
+      ? '<path d="M5 12l4 4 10-10"/>'
+      : '<path d="M12 5v14M5 12h14"/>';
+  }
+
+  const COLLEGES = {
+    pace: { name:'Pace University', thumb:'thumbPace', loc:'New York, NY', meta:'Private &middot; ~8,900 undergrads', fit:'82% fit for your criteria',
+      why:'Strong finance and CS programs in the middle of Manhattan, with a net price inside your $20,000 budget.',
+      know:'Mid-size classes mean more faculty access than a large state school, but no guaranteed upperclassman housing.' },
+    stony: { name:'Stony Brook University', thumb:'thumbStony', loc:'Stony Brook, NY', meta:'Public &middot; ~17,000 undergrads', fit:'90% fit for your criteria',
+      why:'A top public research university with strong STEM programs and a net price well under your $20,000 target.',
+      know:'Large lecture classes in first-year core courses; research opportunities open up quickly after that.' },
+    adelphi: { name:'Adelphi University', thumb:'thumbAdelphi', loc:'Garden City, NY', meta:'Private &middot; ~5,500 undergrads', fit:'78% fit for your criteria',
+      why:'Small class sizes and a tight-knit campus about 45 minutes from Manhattan.',
+      know:'Net price can run close to your $20,000 ceiling depending on aid — worth a financial aid call before applying.' }
+  };
+  const THUMB_SVG = {
+    thumbPace: '<svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#C7E1F6"/><path d="M0 42 L18 20 L30 34 L40 22 L56 42 V56 H0 Z" fill="#234B33"/></svg>',
+    thumbStony: '<svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#DCD3EE"/><path d="M0 40 L14 26 L26 38 V56 H0 Z" fill="#3E7A4E"/><rect x="30" y="24" width="16" height="16" fill="#C9682F"/><path d="M28 24 L38 15 L48 24 Z" fill="#8A3D1C"/></svg>',
+    thumbAdelphi: '<svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#F6CFDD"/><circle cx="15" cy="14" r="3.5" fill="#D2482F"/><path d="M0 46 L16 22 L26 40 L34 28 L56 46 V56 H0 Z" fill="#E8A23D"/><path d="M22 46 L34 30 L44 46 Z" fill="#2F7A72"/></svg>'
+  };
+  function openDetail(key){
+    const c = COLLEGES[key];
+    document.getElementById('detCo').textContent = c.loc;
+    document.getElementById('detTitle').textContent = c.name;
+    document.getElementById('detName').textContent = c.name;
+    document.getElementById('detMeta').innerHTML = c.meta;
+    document.getElementById('detFit').textContent = c.fit;
+    document.getElementById('detWhy').textContent = c.why;
+    document.getElementById('detKnow').textContent = c.know;
+    document.getElementById('detThumb').innerHTML = THUMB_SVG[c.thumb];
+  }
 
   async function run(){
-    const heartPace = document.getElementById('heartPace');
-    const heartStony = document.getElementById('heartStony');
-    const heartAdelphi = document.getElementById('heartAdelphi');
+    const btnPace = document.getElementById('btnPace'), txtPace = document.getElementById('btnPaceTxt');
+    const btnStony = document.getElementById('btnStony'), txtStony = document.getElementById('btnStonyTxt');
     const resultsPanel = document.getElementById('resultsPanel');
     const rowPace = document.getElementById('rowPace');
     const rowStony = document.getElementById('rowStony');
@@ -395,8 +512,12 @@ const SRC = `<!doctype html>
       document.getElementById('locTxt').textContent = '';
       document.getElementById('costThumb').style.left = '18%';
       ['sizeSmall','sizeMedium','sizeLarge'].forEach(id=>document.getElementById(id).classList.remove('active'));
-      [rowPace,rowStony,rowAdelphi].forEach(r=>r.classList.remove('show','dim','lift'));
-      [heartPace,heartStony,heartAdelphi].forEach(h=>h.classList.remove('filled'));
+      [rowPace,rowStony,rowAdelphi].forEach(r=>{
+        r.classList.remove('show','dim','lift');
+        r.querySelector('.dial .fil').setAttribute('stroke-dashoffset', '182.2');
+      });
+      setShortlisted(btnPace, txtPace, false);
+      setShortlisted(btnStony, txtStony, false);
       resultsPanel.classList.remove('dim');
       ylChip.classList.remove('show');
       dropdown.classList.remove('open');
@@ -440,15 +561,32 @@ const SRC = `<!doctype html>
       showScene('scene-results');
       await sleep(150);
       rowPace.classList.add('show');
+      rowPace.querySelector('.dial .fil').setAttribute('stroke-dashoffset', '32.8');
       await sleep(350);
       rowStony.classList.add('show');
+      rowStony.querySelector('.dial .fil').setAttribute('stroke-dashoffset', '18.2');
       await sleep(350);
       rowAdelphi.classList.add('show');
-      await sleep(750);
+      rowAdelphi.querySelector('.dial .fil').setAttribute('stroke-dashoffset', '40.1');
+      await sleep(700);
 
-      // ---- heart Stony Brook ----
-      await tap(heartStony);
-      heartStony.classList.add('filled');
+      // ---- view details on Pace ----
+      await tap(document.getElementById('viewDetailPace'));
+      openDetail('pace');
+      cursor.style.opacity = 0;
+      showScene('scene-detail');
+      await sleep(1700);
+      await tap(document.getElementById('detBack'));
+      cursor.style.opacity = 0;
+      showScene('scene-results');
+      await sleep(500);
+
+      // ---- shortlist Pace, then Stony Brook ----
+      await tap(btnPace);
+      setShortlisted(btnPace, txtPace, true);
+      await sleep(500);
+      await tap(btnStony);
+      setShortlisted(btnStony, txtStony, true);
       await sleep(500);
 
       // ---- dim the rest, lift the selected row ----
@@ -500,11 +638,11 @@ const SRC = `<!doctype html>
 export function CollegeShortlistDemo() {
   return (
     <iframe
-      title="Build your college list — filter, search, and shortlist walkthrough"
+      title="Build your college list — filter, search, view details, and shortlist walkthrough"
       srcDoc={SRC}
       loading="lazy"
       scrolling="no"
-      className="mx-auto block w-full max-w-[1080px] border-0 bg-transparent"
+      className="mx-auto block w-full max-w-[1180px] border-0 bg-transparent"
       style={{ aspectRatio: '16 / 9' }}
     />
   );
