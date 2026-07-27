@@ -18,7 +18,7 @@ function TestimonialCard({ t }: { t: (typeof TESTIMONIALS)[number] }) {
   return (
     <article className="flex flex-col gap-5 rounded-[22px] border border-border bg-card p-8 shadow-sm">
       <span aria-hidden className="font-accent text-6xl font-semibold leading-[.4] text-primary">“</span>
-      <p className="flex-1 font-accent text-xl leading-relaxed text-foreground">{t.q}</p>
+      <p className="flex-1 text-[17px] font-medium leading-relaxed text-foreground">{t.q}</p>
       <div className="text-sm font-bold text-muted-foreground">
         {t.by && <>— {t.by} · </>}
         {t.ok && (
