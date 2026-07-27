@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { GraduationCap } from 'lucide-react';
 import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
-import { CollegeShortlistDemo } from '@/components/college-shortlist-demo';
+import { OpportunityShortlistDemo } from '@/components/opportunity-shortlist-demo';
 import { usePricing } from '@/hooks/use-internships';
 import styles from './page.module.css';
 
@@ -184,7 +184,7 @@ export default function InternshipLandingPage() {
           </div>
 
           <div className={`${styles.demoFrameWrap} ${styles.reveal}`}>
-            <CollegeShortlistDemo />
+            <OpportunityShortlistDemo />
           </div>
         </div>
         <div className={styles.heroStrip} />

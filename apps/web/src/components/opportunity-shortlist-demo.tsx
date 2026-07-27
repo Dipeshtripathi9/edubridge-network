@@ -1,17 +1,16 @@
 'use client';
 
-// Animated "filter → search → shortlist" walkthrough for the college-list
+// Animated "filter → search → shortlist" walkthrough for the internship
 // hero. Self-contained HTML/CSS/JS in an isolated iframe (same reasoning as
 // HomeCareerBridge): its own fonts/animations can't collide with the app.
 // The frame's own background is transparent so it merges seamlessly into
-// the hero's green — there is no separate "device mockup" card, matching
-// the reference recording.
+// the hero's green — there is no separate "device mockup" card.
 const SRC = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EduBridge — Build Your College List</title>
+<title>EduBridge — Find Your Perfect Opportunity</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -76,27 +75,27 @@ const SRC = `<!doctype html>
   }
   .loc-box svg{ color:var(--green); flex:0 0 auto; }
 
-  .c-cost{ top:210px; left:590px; width:340px; }
-  .cost-val{ font-family:var(--display); font-weight:700; font-size:19px; color:var(--green-deep); margin-bottom:14px; }
-  .cost-track{ position:relative; height:8px; border-radius:8px; background:var(--mint); }
-  .cost-fill{ position:absolute; inset:0 auto 0 0; width:60%; border-radius:8px; background:var(--green); }
-  .cost-thumb{
+  .c-pay{ top:210px; left:590px; width:340px; }
+  .pay-val{ font-family:var(--display); font-weight:700; font-size:19px; color:var(--green-deep); margin-bottom:14px; }
+  .pay-track{ position:relative; height:8px; border-radius:8px; background:var(--mint); }
+  .pay-fill{ position:absolute; inset:0 auto 0 0; width:60%; border-radius:8px; background:var(--green); }
+  .pay-thumb{
     position:absolute; top:50%; left:60%; width:18px; height:18px; border-radius:50%;
     background:var(--navy); border:3px solid var(--card); box-shadow:0 2px 6px rgba(0,0,0,0.3);
     transform:translate(-50%,-50%); transition:left .6s cubic-bezier(.4,0,.2,1);
   }
 
-  .c-size{ top:378px; left:220px; width:290px; }
-  .size-row{ display:flex; gap:10px; }
-  .size-btn{
+  .c-work{ top:378px; left:220px; width:300px; }
+  .work-row{ display:flex; gap:10px; }
+  .work-btn{
     flex:1; text-align:center; font-family:var(--body); font-weight:600; font-size:14px;
     padding:12px 0; border-radius:10px; background:var(--sky); color:var(--navy);
     transition:background .3s ease, color .3s ease;
   }
-  .size-btn.active{ background:var(--navy); color:var(--cream); }
+  .work-btn.active{ background:var(--navy); color:var(--cream); }
 
   .start-wrap{
-    position:absolute; top:388px; left:565px;
+    position:absolute; top:388px; left:575px;
     opacity:0; transform:translateY(10px);
     transition:opacity .5s ease, transform .5s ease;
   }
@@ -141,13 +140,14 @@ const SRC = `<!doctype html>
   .rrow.show{ opacity:1; transform:translateY(0); }
   .rrow.dim{ opacity:.45; filter:grayscale(60%); }
   .rrow.lift{ transform:scale(1.02); box-shadow:0 22px 40px -18px rgba(0,0,0,0.32); z-index:2; }
-  .thumb{ width:52px; height:52px; border-radius:10px; overflow:hidden; flex:0 0 auto; }
-  .thumb svg{ display:block; width:100%; height:100%; }
+  .avatar{
+    width:48px; height:48px; border-radius:50%; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--display); font-weight:700; font-size:19px; color:#fff;
+  }
   .rrow-main{ flex:1; min-width:0; }
-  .rrow-main h3{ font-family:var(--display); font-weight:700; font-size:17px; color:var(--ink); display:inline; }
-  .type-dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-left:8px; }
-  .rrow-bar{ margin-top:9px; height:7px; width:70%; border-radius:6px; background:var(--line); }
-  .rrow-bar-sm{ margin-top:6px; height:7px; width:12px; border-radius:6px; background:var(--green); display:inline-block; }
+  .rrow-main h3{ font-family:var(--display); font-weight:700; font-size:17px; color:var(--ink); }
+  .rrow-co{ margin-top:3px; font-family:var(--body); font-size:13px; color:var(--ink-soft); }
   .rrow-actions{ flex:0 0 auto; display:flex; align-items:center; gap:16px; }
 
   /* ---- % match dial ---- */
@@ -188,7 +188,7 @@ const SRC = `<!doctype html>
   .yl-chip svg{ width:16px; height:16px; fill:var(--green); }
 
   /* ================= SCENE 3: YOUR LIST (floats directly on green) ================= */
-  .yl-list{ position:absolute; top:96px; left:190px; width:590px; }
+  .yl-list{ position:absolute; top:96px; left:190px; width:600px; }
   .yl-card{
     background:var(--card); border-radius:16px; padding:16px 18px; margin-bottom:16px;
     box-shadow:0 18px 36px -22px rgba(0,0,0,0.3);
@@ -210,11 +210,11 @@ const SRC = `<!doctype html>
     border-radius:100px; padding:8px 14px; white-space:nowrap;
   }
   .status-pill.researching{ background:var(--sky); color:var(--navy); }
-  .status-pill.touring{ background:var(--sky); color:var(--navy); }
+  .status-pill.interview{ background:var(--sky); color:var(--navy); }
   .status-pill.applied{ background:var(--mint); color:var(--green-deep); }
 
   .dropdown{
-    position:absolute; top:172px; left:405px; width:220px;
+    position:absolute; top:172px; left:415px; width:220px;
     background:var(--card); border-radius:14px; padding:10px;
     box-shadow:0 20px 40px -18px rgba(0,0,0,0.32);
     opacity:0; transform:translateY(-8px) scale(0.97); pointer-events:none;
@@ -228,13 +228,13 @@ const SRC = `<!doctype html>
     border-radius:100px; padding:9px 14px;
   }
   .drop-opt.researching{ background:var(--sky); color:var(--navy); }
-  .drop-opt.touring{ background:var(--sky); color:var(--navy); }
+  .drop-opt.interview{ background:var(--sky); color:var(--navy); }
   .drop-opt.started{ background:var(--mint); color:var(--green-deep); }
   .drop-opt.applied{ background:var(--mint); color:var(--green-deep); }
   .drop-opt.accepted{ background:var(--orange); color:var(--ink); }
   .drop-opt.clear{ background:var(--line); color:var(--ink-soft); }
 
-  /* ================= SCENE: COLLEGE DETAILS ================= */
+  /* ================= SCENE: OPPORTUNITY DETAILS ================= */
   .det-header{ position:absolute; top:56px; left:190px; display:flex; align-items:center; gap:16px; }
   .det-back{ width:42px; height:42px; border-radius:12px; background:var(--card); display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
   .det-back svg{ width:18px; height:18px; }
@@ -244,7 +244,7 @@ const SRC = `<!doctype html>
   .det-body{ position:absolute; top:132px; left:190px; width:660px; }
   .det-card{ background:var(--card); border-radius:16px; padding:20px 22px; margin-bottom:14px; box-shadow:0 14px 28px -20px rgba(0,0,0,0.2); }
   .det-hero{ display:flex; align-items:center; gap:16px; }
-  .det-hero .thumb{ width:56px; height:56px; }
+  .det-hero .avatar{ width:56px; height:56px; font-size:22px; }
   .det-hero h3{ font-family:var(--display); font-weight:700; font-size:20px; color:var(--ink); margin-bottom:3px; }
   .det-hero .meta{ font-family:var(--body); font-size:13.5px; color:var(--ink-soft); margin-bottom:5px; }
   .det-hero .fit{ font-family:var(--body); font-weight:700; font-size:14px; color:var(--green); }
@@ -285,18 +285,18 @@ const SRC = `<!doctype html>
       </div>
     </div>
 
-    <div class="card c-cost" id="cardCost">
-      <div class="label">School cost (net price)</div>
-      <div class="cost-val">$0 &ndash; $20,000</div>
-      <div class="cost-track"><div class="cost-fill"></div><div class="cost-thumb" id="costThumb"></div></div>
+    <div class="card c-pay" id="cardPay">
+      <div class="label">Pay range (per month)</div>
+      <div class="pay-val">$500 &ndash; $2,500</div>
+      <div class="pay-track"><div class="pay-fill"></div><div class="pay-thumb" id="payThumb"></div></div>
     </div>
 
-    <div class="card c-size" id="cardSize">
-      <div class="label">School size</div>
-      <div class="size-row">
-        <span class="size-btn" id="sizeSmall">Small</span>
-        <span class="size-btn" id="sizeMedium">Medium</span>
-        <span class="size-btn" id="sizeLarge">Large</span>
+    <div class="card c-work" id="cardWork">
+      <div class="label">Work type</div>
+      <div class="work-row">
+        <span class="work-btn" id="workRemote">Remote</span>
+        <span class="work-btn" id="workHybrid">Hybrid</span>
+        <span class="work-btn" id="workOnsite">Onsite</span>
       </div>
     </div>
 
@@ -315,90 +315,90 @@ const SRC = `<!doctype html>
     <div class="panel" id="resultsPanel">
       <h1>Search Results</h1>
 
-      <div class="rrow" id="rowPace">
-        <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#C7E1F6"/><path d="M0 42 L18 20 L30 34 L40 22 L56 42 V56 H0 Z" fill="#234B33"/></svg></div>
-        <div class="rrow-main"><h3>Pace University</h3><span class="type-dot" style="background:var(--sky)"></span><div class="rrow-bar"></div></div>
+      <div class="rrow" id="rowFrontend">
+        <div class="avatar" style="background:var(--green)">L</div>
+        <div class="rrow-main"><h3>Frontend Engineering Intern</h3><div class="rrow-co">Loom Analytics</div></div>
         <div class="rrow-actions">
-          <div class="dial"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="182.2"/></svg><span class="num">82%</span></div>
-          <div class="shortlist-btn" id="btnPace"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span id="btnPaceTxt">Shortlist</span></div>
-          <div class="viewdetail-btn" id="viewDetailPace">View Detail<svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="dial"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="182.2"/></svg><span class="num">92%</span></div>
+          <div class="shortlist-btn" id="btnFrontend"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span id="btnFrontendTxt">Shortlist</span></div>
+          <div class="viewdetail-btn" id="viewDetailFrontend">View Detail<svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
         </div>
       </div>
 
-      <div class="rrow" id="rowStony">
-        <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#DCD3EE"/><path d="M0 40 L14 26 L26 38 V56 H0 Z" fill="#3E7A4E"/><rect x="30" y="24" width="16" height="16" fill="#C9682F"/><path d="M28 24 L38 15 L48 24 Z" fill="#8A3D1C"/></svg></div>
-        <div class="rrow-main"><h3>Stony Brook University</h3><span class="type-dot" style="background:var(--green)"></span><div class="rrow-bar"></div></div>
+      <div class="rrow" id="rowFullstack">
+        <div class="avatar" style="background:#3A6EA5">M</div>
+        <div class="rrow-main"><h3>Full Stack Developer Intern</h3><div class="rrow-co">Microsoft</div></div>
         <div class="rrow-actions">
-          <div class="dial"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="182.2"/></svg><span class="num">90%</span></div>
-          <div class="shortlist-btn" id="btnStony"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span id="btnStonyTxt">Shortlist</span></div>
-          <div class="viewdetail-btn" id="viewDetailStony">View Detail<svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="dial"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="182.2"/></svg><span class="num">88%</span></div>
+          <div class="shortlist-btn" id="btnFullstack"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span id="btnFullstackTxt">Shortlist</span></div>
+          <div class="viewdetail-btn" id="viewDetailFullstack">View Detail<svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
         </div>
       </div>
 
-      <div class="rrow" id="rowAdelphi">
-        <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#F6CFDD"/><circle cx="15" cy="14" r="3.5" fill="#D2482F"/><path d="M0 46 L16 22 L26 40 L34 28 L56 46 V56 H0 Z" fill="#E8A23D"/><path d="M22 46 L34 30 L44 46 Z" fill="#2F7A72"/></svg></div>
-        <div class="rrow-main"><h3>Adelphi University</h3><span class="type-dot" style="background:var(--sky)"></span><div class="rrow-bar"></div></div>
+      <div class="rrow" id="rowWebsite">
+        <div class="avatar" style="background:#6a4fa0">F</div>
+        <div class="rrow-main"><h3>Build a Website for a US Retail Shop</h3><div class="rrow-co">Fiverr &middot; US client</div></div>
         <div class="rrow-actions">
-          <div class="dial"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="182.2"/></svg><span class="num">78%</span></div>
-          <div class="shortlist-btn" id="btnAdelphi"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span id="btnAdelphiTxt">Shortlist</span></div>
-          <div class="viewdetail-btn" id="viewDetailAdelphi">View Detail<svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="dial"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="182.2"/></svg><span class="num">76%</span></div>
+          <div class="shortlist-btn" id="btnWebsite"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span id="btnWebsiteTxt">Shortlist</span></div>
+          <div class="viewdetail-btn" id="viewDetailWebsite">View Detail<svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ============ SCENE: COLLEGE DETAILS ============ -->
+  <!-- ============ SCENE: OPPORTUNITY DETAILS ============ -->
   <div class="scene" id="scene-detail">
     <div class="det-header">
       <div class="det-back" id="detBack"><svg viewBox="0 0 24 24" fill="none" stroke="#1B2A1D" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></div>
       <div>
-        <div class="co" id="detCo">New York, NY</div>
-        <h1 id="detTitle">Pace University</h1>
+        <div class="co" id="detCo">Loom Analytics</div>
+        <h1 id="detTitle">Frontend Engineering Intern</h1>
       </div>
     </div>
     <div class="det-body">
       <div class="det-card">
         <div class="det-hero">
-          <div class="thumb" id="detThumb"></div>
+          <div class="avatar" id="detAvatar" style="background:var(--green)">L</div>
           <div>
-            <h3 id="detName">Pace University</h3>
-            <div class="meta" id="detMeta">Private &middot; ~8,900 undergrads</div>
-            <div class="fit" id="detFit">82% fit for your criteria</div>
+            <h3 id="detName">Frontend Engineering Intern</h3>
+            <div class="meta" id="detMeta">Paid &middot; 12 weeks &middot; remote-friendly</div>
+            <div class="fit" id="detFit">92% fit for your resume</div>
           </div>
         </div>
       </div>
-      <div class="det-card"><h4>Why it fits</h4><p id="detWhy"></p></div>
-      <div class="det-card"><h4>What to know</h4><p id="detKnow"></p></div>
-      <div class="det-cta" id="detCta">Add to Your List</div>
+      <div class="det-card"><h4>What you'll do</h4><p id="detWhat"></p></div>
+      <div class="det-card"><h4>Why it's worth it</h4><p id="detWhy"></p></div>
+      <div class="det-cta" id="detCta">Apply Now</div>
     </div>
   </div>
 
   <!-- ============ SCENE 3: YOUR LIST ============ -->
   <div class="scene" id="scene-yourlist">
     <div class="yl-list">
-      <div class="yl-card" id="ylStony">
-        <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#DCD3EE"/><path d="M0 40 L14 26 L26 38 V56 H0 Z" fill="#3E7A4E"/><rect x="30" y="24" width="16" height="16" fill="#C9682F"/><path d="M28 24 L38 15 L48 24 Z" fill="#8A3D1C"/></svg></div>
-        <div class="dial dial-sm"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="18.2"/></svg><span class="num">90%</span></div>
-        <div class="yl-card-main"><h3>Stony Brook University</h3><div class="rrow-bar-sm"></div></div>
+      <div class="yl-card" id="ylFullstack">
+        <div class="avatar" style="background:#3A6EA5">M</div>
+        <div class="dial dial-sm"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="21.9"/></svg><span class="num">88%</span></div>
+        <div class="yl-card-main"><h3>Full Stack Developer Intern</h3><div class="rrow-co">Microsoft</div></div>
         <div class="add-status-btn" id="addStatusBtn">Add Status <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
       </div>
-      <div class="yl-card" id="ylPace">
-        <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#C7E1F6"/><path d="M0 42 L18 20 L30 34 L40 22 L56 42 V56 H0 Z" fill="#234B33"/></svg></div>
-        <div class="dial dial-sm"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="32.8"/></svg><span class="num">82%</span></div>
-        <div class="yl-card-main"><h3>Pace University</h3><div class="rrow-bar-sm"></div></div>
-        <span class="status-pill researching" id="paceStatus">Researching</span>
+      <div class="yl-card" id="ylFrontend">
+        <div class="avatar" style="background:var(--green)">L</div>
+        <div class="dial dial-sm"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="14.6"/></svg><span class="num">92%</span></div>
+        <div class="yl-card-main"><h3>Frontend Engineering Intern</h3><div class="rrow-co">Loom Analytics</div></div>
+        <span class="status-pill researching" id="frontendStatus">Researching</span>
       </div>
-      <div class="yl-card" id="ylAdelphi">
-        <div class="thumb"><svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#F6CFDD"/><circle cx="15" cy="14" r="3.5" fill="#D2482F"/><path d="M0 46 L16 22 L26 40 L34 28 L56 46 V56 H0 Z" fill="#E8A23D"/><path d="M22 46 L34 30 L44 46 Z" fill="#2F7A72"/></svg></div>
-        <div class="dial dial-sm"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="40.1"/></svg><span class="num">78%</span></div>
-        <div class="yl-card-main"><h3>Adelphi University</h3><div class="rrow-bar-sm"></div></div>
-        <span class="status-pill touring" id="adelphiStatus">Scheduled Tour</span>
+      <div class="yl-card" id="ylWebsite">
+        <div class="avatar" style="background:#6a4fa0">F</div>
+        <div class="dial dial-sm"><svg viewBox="0 0 70 70"><circle class="trk" cx="35" cy="35" r="29"/><circle class="fil" cx="35" cy="35" r="29" stroke-dasharray="182.2" stroke-dashoffset="43.7"/></svg><span class="num">76%</span></div>
+        <div class="yl-card-main"><h3>Build a Website for a US Retail Shop</h3><div class="rrow-co">Fiverr &middot; US client</div></div>
+        <span class="status-pill interview" id="websiteStatus">Interview Scheduled</span>
       </div>
     </div>
 
     <div class="dropdown" id="statusDropdown">
       <span class="drop-opt researching">Researching</span>
-      <span class="drop-opt touring">Scheduled Tour</span>
+      <span class="drop-opt interview">Interview Scheduled</span>
       <span class="drop-opt started">Started Application</span>
       <span class="drop-opt applied" id="dropApplied">Applied</span>
       <span class="drop-opt accepted">Accepted</span>
@@ -465,66 +465,63 @@ const SRC = `<!doctype html>
       : '<path d="M12 5v14M5 12h14"/>';
   }
 
-  const COLLEGES = {
-    pace: { name:'Pace University', thumb:'thumbPace', loc:'New York, NY', meta:'Private &middot; ~8,900 undergrads', fit:'82% fit for your criteria',
-      why:'Strong finance and CS programs in the middle of Manhattan, with a net price inside your $20,000 budget.',
-      know:'Mid-size classes mean more faculty access than a large state school, but no guaranteed upperclassman housing.' },
-    stony: { name:'Stony Brook University', thumb:'thumbStony', loc:'Stony Brook, NY', meta:'Public &middot; ~17,000 undergrads', fit:'90% fit for your criteria',
-      why:'A top public research university with strong STEM programs and a net price well under your $20,000 target.',
-      know:'Large lecture classes in first-year core courses; research opportunities open up quickly after that.' },
-    adelphi: { name:'Adelphi University', thumb:'thumbAdelphi', loc:'Garden City, NY', meta:'Private &middot; ~5,500 undergrads', fit:'78% fit for your criteria',
-      why:'Small class sizes and a tight-knit campus about 45 minutes from Manhattan.',
-      know:'Net price can run close to your $20,000 ceiling depending on aid — worth a financial aid call before applying.' }
-  };
-  const THUMB_SVG = {
-    thumbPace: '<svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#C7E1F6"/><path d="M0 42 L18 20 L30 34 L40 22 L56 42 V56 H0 Z" fill="#234B33"/></svg>',
-    thumbStony: '<svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#DCD3EE"/><path d="M0 40 L14 26 L26 38 V56 H0 Z" fill="#3E7A4E"/><rect x="30" y="24" width="16" height="16" fill="#C9682F"/><path d="M28 24 L38 15 L48 24 Z" fill="#8A3D1C"/></svg>',
-    thumbAdelphi: '<svg viewBox="0 0 56 56"><rect width="56" height="56" fill="#F6CFDD"/><circle cx="15" cy="14" r="3.5" fill="#D2482F"/><path d="M0 46 L16 22 L26 40 L34 28 L56 46 V56 H0 Z" fill="#E8A23D"/><path d="M22 46 L34 30 L44 46 Z" fill="#2F7A72"/></svg>'
+  const OPPS = {
+    frontend: { name:'Frontend Engineering Intern', co:'Loom Analytics', mark:'L', markBg:'var(--green)', meta:'Paid &middot; 12 weeks &middot; remote-friendly', fit:'92% fit for your resume',
+      what:'Ship a real dashboard feature used by 40+ paying clients, working directly with senior engineers on production code.',
+      why:"Real, shipped work you can point to &mdash; not busywork. It's the kind of project that actually strengthens a resume." },
+    fullstack: { name:'Full Stack Developer Intern', co:'Microsoft', mark:'M', markBg:'#3A6EA5', meta:'Paid &middot; 12 weeks &middot; hybrid', fit:'88% fit for your resume',
+      what:'Build features for an internal developer tool used across multiple product teams, paired with a senior mentor.',
+      why:'A Microsoft-scale codebase on your resume, with real code review from engineers who ship to production.' },
+    website: { name:'Build a Website for a US Retail Shop', co:'Fiverr &middot; US client', mark:'F', markBg:'#6a4fa0', meta:'Paid &middot; freelance &middot; fixed-scope', fit:'76% fit for your resume',
+      what:'Design and build a small e-commerce site for a US-based retail shop, from mockup to launch.',
+      why:'A live client project you can link to directly, plus a real testimonial once it ships.' }
   };
   function openDetail(key){
-    const c = COLLEGES[key];
-    document.getElementById('detCo').textContent = c.loc;
-    document.getElementById('detTitle').textContent = c.name;
-    document.getElementById('detName').textContent = c.name;
-    document.getElementById('detMeta').innerHTML = c.meta;
-    document.getElementById('detFit').textContent = c.fit;
-    document.getElementById('detWhy').textContent = c.why;
-    document.getElementById('detKnow').textContent = c.know;
-    document.getElementById('detThumb').innerHTML = THUMB_SVG[c.thumb];
+    const o = OPPS[key];
+    document.getElementById('detCo').innerHTML = o.co;
+    document.getElementById('detTitle').textContent = o.name;
+    document.getElementById('detName').textContent = o.name;
+    document.getElementById('detMeta').innerHTML = o.meta;
+    document.getElementById('detFit').textContent = o.fit;
+    document.getElementById('detWhat').textContent = o.what;
+    document.getElementById('detWhy').innerHTML = o.why;
+    const avatar = document.getElementById('detAvatar');
+    avatar.textContent = o.mark;
+    avatar.style.background = o.markBg;
   }
 
   async function run(){
-    const btnPace = document.getElementById('btnPace'), txtPace = document.getElementById('btnPaceTxt');
-    const btnStony = document.getElementById('btnStony'), txtStony = document.getElementById('btnStonyTxt');
+    const btnFrontend = document.getElementById('btnFrontend'), txtFrontend = document.getElementById('btnFrontendTxt');
+    const btnFullstack = document.getElementById('btnFullstack'), txtFullstack = document.getElementById('btnFullstackTxt');
     const resultsPanel = document.getElementById('resultsPanel');
-    const rowPace = document.getElementById('rowPace');
-    const rowStony = document.getElementById('rowStony');
-    const rowAdelphi = document.getElementById('rowAdelphi');
+    const rowFrontend = document.getElementById('rowFrontend');
+    const rowFullstack = document.getElementById('rowFullstack');
+    const rowWebsite = document.getElementById('rowWebsite');
     const ylChip = document.getElementById('ylChip');
     const dropdown = document.getElementById('statusDropdown');
 
     while(true){
       // ---- reset everything ----
       showScene('scene-filters');
-      ['cardLoc','cardCost','cardSize'].forEach(id=>document.getElementById(id).classList.remove('show'));
+      ['cardLoc','cardPay','cardWork'].forEach(id=>document.getElementById(id).classList.remove('show'));
       document.getElementById('startWrap').classList.remove('show');
       document.getElementById('startBtn').classList.remove('pulse');
       document.getElementById('locTxt').textContent = '';
-      document.getElementById('costThumb').style.left = '18%';
-      ['sizeSmall','sizeMedium','sizeLarge'].forEach(id=>document.getElementById(id).classList.remove('active'));
-      [rowPace,rowStony,rowAdelphi].forEach(r=>{
+      document.getElementById('payThumb').style.left = '18%';
+      ['workRemote','workHybrid','workOnsite'].forEach(id=>document.getElementById(id).classList.remove('active'));
+      [rowFrontend,rowFullstack,rowWebsite].forEach(r=>{
         r.classList.remove('show','dim','lift');
         r.querySelector('.dial .fil').setAttribute('stroke-dashoffset', '182.2');
       });
-      setShortlisted(btnPace, txtPace, false);
-      setShortlisted(btnStony, txtStony, false);
+      setShortlisted(btnFrontend, txtFrontend, false);
+      setShortlisted(btnFullstack, txtFullstack, false);
       resultsPanel.classList.remove('dim');
       ylChip.classList.remove('show');
       dropdown.classList.remove('open');
-      ['ylStony','ylPace','ylAdelphi'].forEach(id=>document.getElementById(id).classList.remove('show'));
+      ['ylFullstack','ylFrontend','ylWebsite'].forEach(id=>document.getElementById(id).classList.remove('show'));
       document.getElementById('addStatusBtn').style.display = 'inline-flex';
-      const stonyStatusExisting = document.getElementById('stonyStatus');
-      if(stonyStatusExisting) stonyStatusExisting.remove();
+      const fullstackStatusExisting = document.getElementById('fullstackStatus');
+      if(fullstackStatusExisting) fullstackStatusExisting.remove();
       cursor.style.opacity = 0;
       await sleep(900);
 
@@ -534,15 +531,15 @@ const SRC = `<!doctype html>
       await typeText(document.getElementById('locTxt'), 'New York');
       await sleep(350);
 
-      document.getElementById('cardCost').classList.add('show');
+      document.getElementById('cardPay').classList.add('show');
       await sleep(500);
-      document.getElementById('costThumb').style.left = '60%';
+      document.getElementById('payThumb').style.left = '60%';
       await sleep(700);
 
-      document.getElementById('cardSize').classList.add('show');
+      document.getElementById('cardWork').classList.add('show');
       await sleep(500);
-      await tap(document.getElementById('sizeMedium'));
-      document.getElementById('sizeMedium').classList.add('active');
+      await tap(document.getElementById('workHybrid'));
+      document.getElementById('workHybrid').classList.add('active');
       await sleep(600);
 
       document.getElementById('startWrap').classList.add('show');
@@ -560,19 +557,19 @@ const SRC = `<!doctype html>
       // ---- SCENE 2: search results, rows reveal one by one ----
       showScene('scene-results');
       await sleep(150);
-      rowPace.classList.add('show');
-      rowPace.querySelector('.dial .fil').setAttribute('stroke-dashoffset', '32.8');
+      rowFrontend.classList.add('show');
+      rowFrontend.querySelector('.dial .fil').setAttribute('stroke-dashoffset', '14.6');
       await sleep(350);
-      rowStony.classList.add('show');
-      rowStony.querySelector('.dial .fil').setAttribute('stroke-dashoffset', '18.2');
+      rowFullstack.classList.add('show');
+      rowFullstack.querySelector('.dial .fil').setAttribute('stroke-dashoffset', '21.9');
       await sleep(350);
-      rowAdelphi.classList.add('show');
-      rowAdelphi.querySelector('.dial .fil').setAttribute('stroke-dashoffset', '40.1');
+      rowWebsite.classList.add('show');
+      rowWebsite.querySelector('.dial .fil').setAttribute('stroke-dashoffset', '43.7');
       await sleep(700);
 
-      // ---- view details on Pace ----
-      await tap(document.getElementById('viewDetailPace'));
-      openDetail('pace');
+      // ---- view details on the Frontend Engineering Intern ----
+      await tap(document.getElementById('viewDetailFrontend'));
+      openDetail('frontend');
       cursor.style.opacity = 0;
       showScene('scene-detail');
       await sleep(1700);
@@ -581,19 +578,19 @@ const SRC = `<!doctype html>
       showScene('scene-results');
       await sleep(500);
 
-      // ---- shortlist Pace, then Stony Brook ----
-      await tap(btnPace);
-      setShortlisted(btnPace, txtPace, true);
+      // ---- shortlist Frontend, then Full Stack ----
+      await tap(btnFrontend);
+      setShortlisted(btnFrontend, txtFrontend, true);
       await sleep(500);
-      await tap(btnStony);
-      setShortlisted(btnStony, txtStony, true);
+      await tap(btnFullstack);
+      setShortlisted(btnFullstack, txtFullstack, true);
       await sleep(500);
 
       // ---- dim the rest, lift the selected row ----
       resultsPanel.classList.add('dim');
-      rowPace.classList.add('dim');
-      rowAdelphi.classList.add('dim');
-      rowStony.classList.add('lift');
+      rowFrontend.classList.add('dim');
+      rowWebsite.classList.add('dim');
+      rowFullstack.classList.add('lift');
       await sleep(450);
 
       // ---- "Your List" chip lands from above the top edge ----
@@ -604,7 +601,7 @@ const SRC = `<!doctype html>
       // ---- swap to the clean "Your List" scene: floats directly on green ----
       showScene('scene-yourlist');
       await sleep(150);
-      document.getElementById('ylStony').classList.add('show');
+      document.getElementById('ylFullstack').classList.add('show');
       await sleep(600);
 
       // ---- open the status dropdown, pick "Applied" ----
@@ -614,19 +611,19 @@ const SRC = `<!doctype html>
       await tap(document.getElementById('dropApplied'));
       dropdown.classList.remove('open');
       document.getElementById('addStatusBtn').style.display = 'none';
-      const stonyCard = document.getElementById('ylStony');
-      const stonyStatus = document.createElement('span');
-      stonyStatus.id = 'stonyStatus';
-      stonyStatus.className = 'status-pill applied';
-      stonyStatus.textContent = 'Applied';
-      stonyCard.appendChild(stonyStatus);
+      const fullstackCard = document.getElementById('ylFullstack');
+      const fullstackStatus = document.createElement('span');
+      fullstackStatus.id = 'fullstackStatus';
+      fullstackStatus.className = 'status-pill applied';
+      fullstackStatus.textContent = 'Applied';
+      fullstackCard.appendChild(fullstackStatus);
       cursor.style.opacity = 0;
       await sleep(700);
 
-      // ---- Pace and Adelphi join the list ----
-      document.getElementById('ylPace').classList.add('show');
+      // ---- Frontend and the Fiverr project join the list ----
+      document.getElementById('ylFrontend').classList.add('show');
       await sleep(450);
-      document.getElementById('ylAdelphi').classList.add('show');
+      document.getElementById('ylWebsite').classList.add('show');
       await sleep(2600);
     }
   }
@@ -635,10 +632,10 @@ const SRC = `<!doctype html>
 </body>
 </html>`;
 
-export function CollegeShortlistDemo() {
+export function OpportunityShortlistDemo() {
   return (
     <iframe
-      title="Build your college list — filter, search, view details, and shortlist walkthrough"
+      title="Find your perfect opportunity — search, view details, and shortlist walkthrough"
       srcDoc={SRC}
       loading="lazy"
       scrolling="no"
