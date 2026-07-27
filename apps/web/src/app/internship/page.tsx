@@ -2,8 +2,9 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { GraduationCap } from 'lucide-react';
 import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
-import { InternshipOpportunitiesDemo } from '@/components/internship-opportunities-demo';
+import { CollegeShortlistDemo } from '@/components/college-shortlist-demo';
 import { usePricing } from '@/hooks/use-internships';
 import styles from './page.module.css';
 
@@ -126,20 +127,15 @@ export default function InternshipLandingPage() {
   return (
     <div className={`${styles.page} ${fraunces.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable}`}>
       <nav className={styles.nav}>
-        <div className={styles.brand}>
-          <span className={styles.brandIcon}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--cream)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 10L12 5 2 10l10 5 10-5Z" />
-              <path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5" />
-            </svg>
+        <Link href="/" className="flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <GraduationCap className="h-5 w-5" />
           </span>
-          <span className={styles.brandText}>
-            <span className={styles.brandName}>EduBridge</span>
-            <a className={styles.brandSub} href="#pricing">
-              Open Career Program
-            </a>
+          <span className="leading-tight">
+            <span className="block text-sm font-bold tracking-tight text-foreground">EduBridge Network</span>
+            <span className="block text-xs font-semibold text-primary">Internship Opportunities</span>
           </span>
-        </div>
+        </Link>
         <div className={styles.links}>
           <a href="#opportunities">Opportunities</a>
           <Link href="/upskill-courses">Upskill Courses</Link>
@@ -153,9 +149,6 @@ export default function InternshipLandingPage() {
               <path d="M4 20c0-3.5 3.6-6 8-6s8 2.5 8 6" />
             </svg>
           </Link>
-          <a className={styles.btn} href="#pricing">
-            Sign up for free
-          </a>
         </div>
       </nav>
 
@@ -191,7 +184,7 @@ export default function InternshipLandingPage() {
           </div>
 
           <div className={`${styles.demoFrameWrap} ${styles.reveal}`}>
-            <InternshipOpportunitiesDemo />
+            <CollegeShortlistDemo />
           </div>
         </div>
         <div className={styles.heroStrip} />
