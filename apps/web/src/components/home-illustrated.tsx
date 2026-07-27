@@ -17,8 +17,8 @@ const TESTIMONIALS = [
 function TestimonialCard({ t }: { t: (typeof TESTIMONIALS)[number] }) {
   return (
     <article className="flex flex-col gap-5 rounded-[22px] border border-border bg-card p-8 shadow-sm">
-      <span aria-hidden className="font-display text-5xl font-extrabold leading-[.5] text-primary">“</span>
-      <p className="flex-1 text-[17px] font-medium leading-relaxed text-foreground">{t.q}</p>
+      <span aria-hidden className="font-accent text-6xl font-semibold leading-[.4] text-primary">“</span>
+      <p className="flex-1 font-accent text-xl leading-relaxed text-foreground">{t.q}</p>
       <div className="text-sm font-bold text-muted-foreground">
         {t.by && <>— {t.by} · </>}
         {t.ok && (
@@ -70,7 +70,7 @@ function TestimonialCarousel() {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-12 text-center font-display text-[clamp(28px,4.2vw,42px)] font-extrabold leading-[1.1] tracking-[-.024em] sm:mb-14">
+    <h2 className="mb-12 text-center font-accent text-[clamp(34px,5vw,52px)] font-semibold leading-[1.1] sm:mb-14">
       {children}
     </h2>
   );
@@ -109,10 +109,10 @@ export function HomeIllustrated() {
 
             {/* Text panel */}
             <div className="relative flex flex-col justify-center px-6 pb-8 pt-8 text-center sm:px-10 sm:pb-10 sm:pt-10 lg:items-start lg:justify-center lg:px-14 lg:pb-0 lg:text-left xl:items-center xl:text-center [@media(max-height:700px)]:py-4">
-              <span className="block text-[13px] font-extrabold uppercase tracking-[.3em] text-primary">
+              <span className="block font-accent text-[clamp(20px,2.6vw,26px)] font-semibold text-primary [@media(max-height:700px)]:text-lg">
                 India&rsquo;s Student
               </span>
-              <h1 className="mt-2 font-serif text-[clamp(28px,4.6vw,48px)] font-extrabold uppercase leading-[1.1] tracking-[-.02em] [@media(max-height:700px)]:mt-1.5">
+              <h1 className="mt-1 font-accent text-[clamp(40px,7vw,68px)] font-semibold leading-[1.05] [@media(max-height:700px)]:mt-0.5 [@media(max-height:700px)]:text-[clamp(32px,6vw,48px)]">
                 Success Network
               </h1>
               <p className="mx-auto mt-3 max-w-[540px] text-[16px] leading-relaxed text-muted-foreground lg:mx-0 xl:mx-auto [@media(max-height:700px)]:mt-2">
