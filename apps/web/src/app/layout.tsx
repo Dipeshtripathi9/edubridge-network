@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Hanken_Grotesk } from 'next/font/google';
+import { Inter, Caveat } from 'next/font/google';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { QueryProvider } from '@/providers/query-provider';
@@ -7,7 +7,13 @@ import { ServiceWorkerRegister } from '@/components/sw-register';
 import { OfflineBanner } from '@/components/offline-banner';
 import './globals.css';
 
-const hanken = Hanken_Grotesk({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
+const caveat = Caveat({
+  subsets: ['latin'],
+  variable: '--font-accent',
+  weight: ['500', '600', '700'],
+  display: 'swap',
+});
 
 // Origin of the API, used to preconnect so the first data request on a slow /
 // high-latency connection doesn't pay for DNS + TCP + TLS setup up front.
@@ -50,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </>
         )}
       </head>
-      <body className={`${hanken.variable} font-sans`}>
+      <body className={`${inter.variable} ${caveat.variable} font-sans`}>
         <ThemeProvider>
           <QueryProvider>
             {children}
