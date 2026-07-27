@@ -165,6 +165,13 @@
 .demoFrameWrap {
   width: 100%;
 }
+@media (max-width: 960px) {
+  .demoFrameWrap {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+}
 .heroCurve {
   position: absolute;
   top: 0;
