@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { GraduationCap } from 'lucide-react';
 import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
+import { AccountMenu } from '@/components/account-menu';
 import { OpportunityShortlistDemo } from '@/components/opportunity-shortlist-demo';
 import { usePricing } from '@/hooks/use-internships';
 import styles from './page.module.css';
@@ -133,7 +134,7 @@ export default function InternshipLandingPage() {
           </span>
           <span className="leading-tight">
             <span className="block text-sm font-bold tracking-tight text-foreground">EduBridge Network</span>
-            <span className="block text-xs font-semibold text-marigold">Open Career Program</span>
+            <span className="block text-xs font-semibold text-foreground">Open Career Program</span>
           </span>
         </Link>
         <div className={styles.links}>
@@ -143,12 +144,7 @@ export default function InternshipLandingPage() {
           <a href="#different">Why EduBridge</a>
         </div>
         <div className={styles.navActions}>
-          <Link className={styles.profileIcon} href="/profile" aria-label="Your profile">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ink)" strokeWidth={2} strokeLinecap="round">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-3.5 3.6-6 8-6s8 2.5 8 6" />
-            </svg>
-          </Link>
+          <AccountMenu />
         </div>
       </nav>
 
