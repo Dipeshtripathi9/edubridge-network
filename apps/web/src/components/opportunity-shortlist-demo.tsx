@@ -287,7 +287,7 @@ const SRC = `<!doctype html>
 
     <div class="card c-pay" id="cardPay">
       <div class="label">Pay range (per month)</div>
-      <div class="pay-val">$500 &ndash; $2,500</div>
+      <div class="pay-val">&#8377;0 &ndash; &#8377;100k</div>
       <div class="pay-track"><div class="pay-fill"></div><div class="pay-thumb" id="payThumb"></div></div>
     </div>
 
@@ -528,7 +528,7 @@ const SRC = `<!doctype html>
       // ---- SCENE 1: filters ----
       document.getElementById('cardLoc').classList.add('show');
       await sleep(450);
-      await typeText(document.getElementById('locTxt'), 'New York');
+      await typeText(document.getElementById('locTxt'), 'Delhi');
       await sleep(350);
 
       document.getElementById('cardPay').classList.add('show');

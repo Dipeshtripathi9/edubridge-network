@@ -133,7 +133,7 @@ export default function InternshipLandingPage() {
           </span>
           <span className="leading-tight">
             <span className="block text-sm font-bold tracking-tight text-foreground">EduBridge Network</span>
-            <span className="block text-xs font-semibold text-primary">Internship Opportunities</span>
+            <span className="block text-xs font-semibold text-marigold">Open Career Program</span>
           </span>
         </Link>
         <div className={styles.links}>
