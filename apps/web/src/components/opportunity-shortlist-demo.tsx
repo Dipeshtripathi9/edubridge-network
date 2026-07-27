@@ -26,22 +26,19 @@ const SRC = `<!doctype html>
   body{
     font-family:var(--body);
     display:flex; align-items:center; justify-content:center;
-    min-height:100vh; padding:8px; overflow-x:hidden;
+    height:100%; padding:0; overflow:hidden;
   }
 
+  /* The outer <iframe> element's own aspect-ratio (set via Tailwind
+     classes on the component, 4:3 on mobile / 16:9 from sm: up) defines
+     the available box — .frame just fills it exactly, so none of the
+     scaled content is ever clipped by a mismatched inner aspect-ratio. */
   .frame{
-    width:min(calc(100vw - 16px), calc(96vh * 4 / 3));
-    aspect-ratio:4/3;
+    width:100%; height:100%;
     position:relative; overflow:hidden;
   }
-  @media (min-width:641px){
-    body{ padding:20px; }
-    .frame{ width:min(calc(100vw - 40px), 1050px, calc(92vh * 16 / 9)); aspect-ratio:1280/720; }
-  }
-  @media (min-width:1024px){
-    body{ padding:24px; }
-    .frame{ width:min(calc(100vw - 48px), 1280px, calc(90vh * 16 / 9)); aspect-ratio:1280/720; }
-  }
+  @media (min-width:641px){ body{ padding:16px; } }
+  @media (min-width:1024px){ body{ padding:20px; } }
   .stage{
     position:absolute; top:0; left:0;
     width:1280px; height:720px;
@@ -419,7 +416,7 @@ const SRC = `<!doctype html>
   function fitFrame(){
     const frame = document.getElementById('frame');
     let scale = frame.getBoundingClientRect().width / 1280;
-    if (window.innerWidth < 641) scale *= 1.15;
+    if (window.innerWidth < 641) scale *= 1.16;
     document.documentElement.style.setProperty('--frame-scale', scale.toFixed(4));
   }
   fitFrame();
@@ -640,8 +637,7 @@ export function OpportunityShortlistDemo() {
       srcDoc={SRC}
       loading="lazy"
       scrolling="no"
-      className="mx-auto block w-full max-w-[1400px] border-0 bg-transparent"
-      style={{ aspectRatio: '16 / 9' }}
+      className="mx-auto block w-full max-w-[1400px] aspect-[4/3] border-0 bg-transparent sm:aspect-[16/9]"
     />
   );
 }
