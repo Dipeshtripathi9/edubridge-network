@@ -16,6 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { TrackPicker } from '@/components/internship/track-picker';
+import { InternshipOpportunitiesDemo } from '@/components/internship-opportunities-demo';
 import { usePricing } from '@/hooks/use-internships';
 
 const NAV = ['Tracks', 'Why intern', 'FAQ'];
@@ -78,9 +79,6 @@ export default function InternshipLandingPage() {
               </a>
             ))}
           </nav>
-          <Button asChild size="sm" variant="outline">
-            <Link href="/internship/dashboard">Sign in</Link>
-          </Button>
         </div>
       </header>
 
@@ -130,6 +128,9 @@ export default function InternshipLandingPage() {
               </a>
             ))}
           </div>
+        </div>
+        <div className="mx-auto max-w-4xl px-4 pb-14 sm:pb-20">
+          <InternshipOpportunitiesDemo />
         </div>
       </section>
 
