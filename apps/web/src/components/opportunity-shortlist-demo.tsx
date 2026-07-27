@@ -26,21 +26,21 @@ const SRC = `<!doctype html>
   body{
     font-family:var(--body);
     display:flex; align-items:center; justify-content:center;
-    min-height:100vh; padding:16px; overflow-x:hidden;
+    min-height:100vh; padding:8px; overflow-x:hidden;
   }
 
   .frame{
-    width:min(calc(100vw - 32px), calc(90vh * 16 / 9));
+    width:min(calc(100vw - 16px), calc(96vh * 16 / 9));
     aspect-ratio:1280/720;
     position:relative; overflow:hidden;
   }
   @media (min-width:641px){
-    body{ padding:24px; }
-    .frame{ width:min(calc(100vw - 48px), 860px, calc(85vh * 16 / 9)); }
+    body{ padding:20px; }
+    .frame{ width:min(calc(100vw - 40px), 1050px, calc(92vh * 16 / 9)); }
   }
   @media (min-width:1024px){
-    body{ padding:32px; }
-    .frame{ width:min(calc(100vw - 64px), 1080px, calc(82vh * 16 / 9)); }
+    body{ padding:24px; }
+    .frame{ width:min(calc(100vw - 48px), 1280px, calc(90vh * 16 / 9)); }
   }
   .stage{
     position:absolute; top:0; left:0;
@@ -418,7 +418,8 @@ const SRC = `<!doctype html>
 <script>
   function fitFrame(){
     const frame = document.getElementById('frame');
-    const scale = frame.getBoundingClientRect().width / 1280;
+    let scale = frame.getBoundingClientRect().width / 1280;
+    if (window.innerWidth < 641) scale *= 1.1;
     document.documentElement.style.setProperty('--frame-scale', scale.toFixed(4));
   }
   fitFrame();
@@ -639,7 +640,7 @@ export function OpportunityShortlistDemo() {
       srcDoc={SRC}
       loading="lazy"
       scrolling="no"
-      className="mx-auto block w-full max-w-[1180px] border-0 bg-transparent"
+      className="mx-auto block w-full max-w-[1400px] border-0 bg-transparent"
       style={{ aspectRatio: '16 / 9' }}
     />
   );

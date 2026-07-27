@@ -141,21 +141,7 @@
   display: flex;
   align-items: center;
   gap: 0.8rem;
-}
-.profileIcon {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 1.5px solid var(--ink);
-  background: var(--cream);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: background 0.15s ease;
-}
-.profileIcon:hover {
-  background: var(--mint);
+  margin-left: auto;
 }
 
 /* HERO */
@@ -164,7 +150,7 @@
   color: var(--cream);
   overflow: hidden;
   display: grid;
-  grid-template-columns: 1fr 1.05fr;
+  grid-template-columns: 0.85fr 1.15fr;
   gap: 3.5rem;
   align-items: center;
   min-height: 82vh;
