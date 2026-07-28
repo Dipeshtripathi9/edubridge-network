@@ -28,7 +28,7 @@ const SRC = `<!DOCTYPE html>
     color:var(--ink);
     padding:2.5rem 0 1.5rem;
   }
-  .wrap{max-width:1400px;margin:0 auto;position:relative;padding:0 24px;}
+  .wrap{max-width:1400px;margin:0 auto;position:relative;}
   h1.headline{
     text-align:center;
     font-size:34px;
@@ -57,8 +57,8 @@ const SRC = `<!DOCTYPE html>
   }
   .navbtn:hover{background:var(--ink);color:#fff;box-shadow:0 10px 26px rgba(0,0,0,0.18);}
   .navbtn:active{transform:translateY(-50%) scale(0.94);}
-  .navbtn.prev{left:0;}
-  .navbtn.next{right:0;}
+  .navbtn.prev{left:-16px;}
+  .navbtn.next{right:-16px;}
   .navbtn[disabled]{opacity:.35;pointer-events:none;}
 
   .track{
