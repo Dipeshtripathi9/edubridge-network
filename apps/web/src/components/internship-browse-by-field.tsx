@@ -29,10 +29,10 @@ const SRC = `<!DOCTYPE html>
   html,body{ background:transparent; }
   body{
     font-family:'Space Grotesk', sans-serif;
-    padding:1.6rem 6vw;
+    padding:1.6rem 0;
     min-height:auto;
   }
-  @media (max-width:720px){ body{ padding:1.2rem 1rem; } }
+  @media (max-width:720px){ body{ padding:1.2rem 0; } }
   .wrap{ max-width:1180px; margin:0 auto; }
 
   .slider-shell{ position:relative; }
@@ -47,16 +47,10 @@ const SRC = `<!DOCTYPE html>
     -ms-overflow-style:none;
     border:none;
     outline:none;
-    padding-left:52px;
-    padding-right:52px;
   }
   .cat-slider::-webkit-scrollbar{ display:none; height:0; }
 
   .cat-track{ display:flex; gap:1.4rem; width:max-content; padding:0.4rem 0.2rem; }
-
-  @media (max-width:720px){
-    .cat-slider{ padding-left:42px; padding-right:42px; }
-  }
 
   .cat-card{
     display:flex; align-items:flex-start; gap:1.1rem; background:var(--card); border:1.5px solid var(--green);
@@ -85,14 +79,14 @@ const SRC = `<!DOCTYPE html>
     cursor:pointer; z-index:2;
   }
   .nav-btn:active{ transform:translateY(-50%) scale(0.94); }
-  .nav-btn.prev{ left:4px; }
-  .nav-btn.next{ right:4px; }
+  .nav-btn.prev{ left:-20px; }
+  .nav-btn.next{ right:-20px; }
   .nav-btn svg{ width:18px; height:18px; }
 
   @media (max-width:720px){
     .nav-btn{ width:34px; height:34px; }
-    .nav-btn.prev{ left:2px; }
-    .nav-btn.next{ right:2px; }
+    .nav-btn.prev{ left:-15px; }
+    .nav-btn.next{ right:-15px; }
     .nav-btn svg{ width:15px; height:15px; }
   }
 </style>
