@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { QueryProvider } from '@/providers/query-provider';
@@ -8,16 +8,6 @@ import { OfflineBanner } from '@/components/offline-banner';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
-// Elegant italic serif accent (matches the "Direct" wordmark treatment on
-// niche.com) — used sparingly for emphasis, always paired with the italic
-// utility class since the upright style alone doesn't carry that character.
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-accent',
-  weight: ['500', '600', '700'],
-  style: ['italic'],
-  display: 'swap',
-});
 
 // Origin of the API, used to preconnect so the first data request on a slow /
 // high-latency connection doesn't pay for DNS + TCP + TLS setup up front.
@@ -60,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </>
         )}
       </head>
-      <body className={`${inter.variable} ${playfair.variable} font-sans`}>
+      <body className={`${inter.variable} font-sans`}>
         <ThemeProvider>
           <QueryProvider>
             {children}

@@ -14,7 +14,7 @@ const SRC = `<!doctype html>
 <title>EduBridge — A Career Bridge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 
   :root{
@@ -28,9 +28,9 @@ const SRC = `<!doctype html>
     --line:     rgba(18,33,59,0.14);
     --muted:    #5C6478;
 
-    --display: 'Fraunces', serif;
+    --display: 'Inter', -apple-system, sans-serif;
     --body:    'Inter', -apple-system, sans-serif;
-    --mono:    'JetBrains Mono', monospace;
+    --mono:    'Inter', -apple-system, sans-serif;
   }
 
   *{ box-sizing:border-box; }
