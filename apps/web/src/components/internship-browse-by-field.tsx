@@ -47,10 +47,16 @@ const SRC = `<!DOCTYPE html>
     -ms-overflow-style:none;
     border:none;
     outline:none;
+    padding-left:52px;
+    padding-right:52px;
   }
   .cat-slider::-webkit-scrollbar{ display:none; height:0; }
 
   .cat-track{ display:flex; gap:1.4rem; width:max-content; padding:0.4rem 0.2rem; }
+
+  @media (max-width:720px){
+    .cat-slider{ padding-left:42px; padding-right:42px; }
+  }
 
   .cat-card{
     display:flex; align-items:flex-start; gap:1.1rem; background:var(--card); border:1.5px solid var(--green);
@@ -79,14 +85,14 @@ const SRC = `<!DOCTYPE html>
     cursor:pointer; z-index:2;
   }
   .nav-btn:active{ transform:translateY(-50%) scale(0.94); }
-  .nav-btn.prev{ left:-21px; }
-  .nav-btn.next{ right:-21px; }
+  .nav-btn.prev{ left:4px; }
+  .nav-btn.next{ right:4px; }
   .nav-btn svg{ width:18px; height:18px; }
 
   @media (max-width:720px){
     .nav-btn{ width:34px; height:34px; }
-    .nav-btn.prev{ left:-17px; }
-    .nav-btn.next{ right:-17px; }
+    .nav-btn.prev{ left:2px; }
+    .nav-btn.next{ right:2px; }
     .nav-btn svg{ width:15px; height:15px; }
   }
 </style>
@@ -207,10 +213,20 @@ const SRC = `<!DOCTYPE html>
   });
 
   (function(){
-    function post(){ try{ parent.postMessage({ bbfHeight: Math.ceil(document.body.getBoundingClientRect().height) + 4 }, '*'); }catch(e){} }
+    function post(){ try{ parent.postMessage({ bbfHeight: Math.ceil(document.body.getBoundingClientRect().height) + 12 }, '*'); }catch(e){} }
     window.addEventListener('load', post);
+    window.addEventListener('resize', post);
+    window.addEventListener('orientationchange', post);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(post);
-    if (window.ResizeObserver) { new ResizeObserver(post).observe(document.body); } else { setTimeout(post, 400); }
+    setTimeout(post, 300);
+    setTimeout(post, 900);
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(post);
+      ro.observe(document.body);
+      ro.observe(track);
+    } else {
+      setTimeout(post, 400);
+    }
   })();
 </script>
 

@@ -57,8 +57,8 @@ const SRC = `<!DOCTYPE html>
   }
   .navbtn:hover{background:var(--ink);color:#fff;box-shadow:0 10px 26px rgba(0,0,0,0.18);}
   .navbtn:active{transform:translateY(-50%) scale(0.94);}
-  .navbtn.prev{left:-4px;}
-  .navbtn.next{right:-4px;}
+  .navbtn.prev{left:0;}
+  .navbtn.next{right:0;}
   .navbtn[disabled]{opacity:.35;pointer-events:none;}
 
   .track{
@@ -418,9 +418,19 @@ const SRC = `<!DOCTYPE html>
   setActive(0);
 
   (function(){
-    function post(){ try{ parent.postMessage({ oplHeight: Math.ceil(document.body.getBoundingClientRect().height) + 4 }, '*'); }catch(e){} }
+    function post(){ try{ parent.postMessage({ oplHeight: Math.ceil(document.body.getBoundingClientRect().height) + 12 }, '*'); }catch(e){} }
     window.addEventListener('load', post);
-    if (window.ResizeObserver) { new ResizeObserver(post).observe(document.body); } else { setTimeout(post, 400); }
+    window.addEventListener('resize', post);
+    window.addEventListener('orientationchange', post);
+    setTimeout(post, 300);
+    setTimeout(post, 900);
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(post);
+      ro.observe(document.body);
+      ro.observe(track);
+    } else {
+      setTimeout(post, 400);
+    }
   })();
 </script>
 
