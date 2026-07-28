@@ -33,9 +33,8 @@ const SRC = `<!DOCTYPE html>
     min-height:auto;
   }
   @media (max-width:720px){ body{ padding:1.2rem 0; } }
+  .shell-outer{ position:relative; }
   .wrap{ max-width:1180px; margin:0 auto; }
-
-  .slider-shell{ position:relative; }
 
   .cat-slider{
     overflow-x:auto;
@@ -54,7 +53,7 @@ const SRC = `<!DOCTYPE html>
 
   .cat-card{
     display:flex; align-items:flex-start; gap:1.1rem; background:var(--card); border:1.5px solid var(--green);
-    border-radius:16px; padding:1.5rem; width:340px; flex-shrink:0;
+    border-radius:16px; padding:1.5rem; width:min(86vw,340px); flex-shrink:0;
     scroll-snap-align:start;
     overflow:hidden;
   }
@@ -79,34 +78,34 @@ const SRC = `<!DOCTYPE html>
     cursor:pointer; z-index:2;
   }
   .nav-btn:active{ transform:translateY(-50%) scale(0.94); }
-  .nav-btn.prev{ left:-20px; }
-  .nav-btn.next{ right:-20px; }
+  .nav-btn.prev{ left:8px; }
+  .nav-btn.next{ right:8px; }
   .nav-btn svg{ width:18px; height:18px; }
 
   @media (max-width:720px){
     .nav-btn{ width:34px; height:34px; }
-    .nav-btn.prev{ left:-15px; }
-    .nav-btn.next{ right:-15px; }
+    .nav-btn.prev{ left:4px; }
+    .nav-btn.next{ right:4px; }
     .nav-btn svg{ width:15px; height:15px; }
   }
 </style>
 </head>
 <body>
 
-<div class="wrap">
-  <div class="slider-shell">
-    <button type="button" class="nav-btn prev" id="prevBtn" aria-label="Scroll left">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#22301F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
+<div class="shell-outer">
+  <button type="button" class="nav-btn prev" id="prevBtn" aria-label="Scroll left">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#22301F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <div class="wrap">
     <div class="cat-slider">
       <div class="cat-track" id="track">
         <!-- cards injected here by script below -->
       </div>
     </div>
-    <button type="button" class="nav-btn next" id="nextBtn" aria-label="Scroll right">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#22301F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
   </div>
+  <button type="button" class="nav-btn next" id="nextBtn" aria-label="Scroll right">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#22301F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
 </div>
 
 <script>

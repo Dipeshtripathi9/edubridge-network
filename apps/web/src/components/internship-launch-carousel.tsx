@@ -37,7 +37,13 @@ const SRC = `<!DOCTYPE html>
     margin:0 0 44px;
   }
 
-  .carousel{position:relative;}
+  .carousel{
+    position:relative;
+    width:100vw;
+    margin-left:calc(50% - 50vw);
+    margin-right:calc(50% - 50vw);
+  }
+  .track-wrap{max-width:1400px;margin:0 auto;}
 
   .navbtn{
     position:absolute;
@@ -57,8 +63,8 @@ const SRC = `<!DOCTYPE html>
   }
   .navbtn:hover{background:var(--ink);color:#fff;box-shadow:0 10px 26px rgba(0,0,0,0.18);}
   .navbtn:active{transform:translateY(-50%) scale(0.94);}
-  .navbtn.prev{left:-16px;}
-  .navbtn.next{right:-16px;}
+  .navbtn.prev{left:8px;}
+  .navbtn.next{right:8px;}
   .navbtn[disabled]{opacity:.35;pointer-events:none;}
 
   .track{
@@ -248,7 +254,7 @@ const SRC = `<!DOCTYPE html>
     <button class="navbtn prev" id="prevBtn" aria-label="Previous">←</button>
     <button class="navbtn next" id="nextBtn" aria-label="Next">→</button>
 
-    <div class="track" id="track">
+    <div class="track-wrap"><div class="track" id="track">
 
       <div class="card">
         <div>
@@ -354,7 +360,7 @@ const SRC = `<!DOCTYPE html>
         </div>
       </div>
 
-    </div>
+    </div></div>
   </div>
 
   <div class="dot-row" id="dotRow">
