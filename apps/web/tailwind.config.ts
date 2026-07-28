@@ -42,7 +42,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         display: ['var(--font-sans)', 'system-ui', 'sans-serif'],
-        accent: ['var(--font-accent)', 'cursive'],
+        accent: ['var(--font-accent)', 'Georgia', 'serif'],
       },
       keyframes: {
         'eb-marquee': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },
