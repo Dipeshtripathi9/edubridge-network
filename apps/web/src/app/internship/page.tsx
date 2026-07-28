@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { GraduationCap } from 'lucide-react';
 import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import { AccountMenu } from '@/components/account-menu';
+import { InternshipBrowseByField } from '@/components/internship-browse-by-field';
+import { InternshipLaunchCarousel } from '@/components/internship-launch-carousel';
 import { OpportunityShortlistDemo } from '@/components/opportunity-shortlist-demo';
 import { usePricing } from '@/hooks/use-internships';
 import styles from './page.module.css';
@@ -24,41 +26,6 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: ['400', '500', '600'],
   variable: '--font-ibm-plex-mono',
 });
-
-const STEPS = [
-  {
-    num: '01',
-    title: 'Create your profile',
-    desc: 'Resume, skills, college, year, interests, portfolio, GitHub, LinkedIn, languages and availability — entered once.',
-  },
-  {
-    num: '02',
-    title: 'AI reads your profile',
-    desc: 'Resume, skills and experience are analysed together to produce a single Career Score out of 100.',
-  },
-  {
-    num: '03',
-    title: 'Opportunities come to you',
-    desc: 'Internships, part-time jobs, freelance work, blogging slots and campus roles are recommended automatically.',
-  },
-  {
-    num: '04',
-    title: 'Not ready? Get a path',
-    desc: 'Short skill challenges unlock the exact internships you were missing — instead of a rejection.',
-  },
-];
-
-const OPPORTUNITIES = [
-  { tag: 'Paid', title: 'Internships', desc: 'Matched on skills, college and resume — not keyword search.' },
-  { tag: 'Paid', title: 'Part-time jobs', desc: 'Campus executive, tutor, content writer, social media, sales, support.' },
-  { tag: 'Paid', title: 'Freelancing', desc: 'Website builds, UI design, Python, video editing, marketing gigs.' },
-  { tag: 'Grow reputation', title: 'Blogging', desc: 'College reviews, placement stories, scholarship guides, campus life.' },
-  { tag: 'Grow reputation', title: 'Campus leader', desc: 'Community head, campus ambassador, moderator roles for trusted students.' },
-  { tag: 'Build', title: 'Startup projects', desc: 'Live briefs from startups — React, design, marketing, content, Python.' },
-  { tag: 'Build', title: 'Open source & research', desc: 'Contribute to real codebases and academic projects, credited on your profile.' },
-  { tag: 'Compete', title: 'Hackathons & competitions', desc: 'Team up and get discovered through what you actually built.' },
-  { tag: 'Belong', title: 'Clubs, mentorship & NGOs', desc: 'Student clubs, fellowships, mentorship and volunteering, all on one profile.' },
-];
 
 const CHECKLIST = [
   { label: 'HTML Challenge', done: true },
@@ -186,41 +153,32 @@ export default function InternshipLandingPage() {
         <div className={styles.heroStrip} />
       </section>
 
-      <section className={styles.journey} id="journey">
+      <section>
         <div className={styles.wrap}>
-          <div className={`${styles.eyebrow} ${styles.onCream}`}>The student journey</div>
-          <h2>From a blank profile to a matched opportunity — in four moves.</h2>
-          <div className={styles.steps}>
-            {STEPS.map((s) => (
-              <div key={s.num} className={`${styles.step} ${styles.reveal}`}>
-                <div className={styles.num}>{s.num}</div>
-                <h3>{s.title}</h3>
-                <p>{s.desc}</p>
-              </div>
-            ))}
+          <div className={`${styles.matchStat} ${styles.reveal}`}>
+            <div className={styles.statCard}>
+              <div className={styles.bigNum}>1,240</div>
+              <div className={styles.statLabel}>live internships</div>
+            </div>
+            <div className={styles.matchCopy}>
+              <h2>Find the right opportunity matching your skills and interests</h2>
+              <p>
+                We search across trusted companies, startups, and career platforms to find the best internships,
+                part-time jobs, freelance gigs, startup projects, blogging opportunities, and more. We carefully
+                shortlist and rank the most relevant opportunities based on your interests, career goals, and
+                skills, helping you build your future faster.
+              </p>
+              <a className={styles.exploreLink} href="#opportunities">
+                &gt; Explore Opportunities
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className={styles.opps} id="opportunities">
-        <div className={styles.wrap}>
-          <div className={`${styles.eyebrow} ${styles.onCream}`}>Career opportunities</div>
-          <h2>Fifteen kinds of opportunity. One inbox.</h2>
-          <p>
-            Instead of a single &ldquo;Internships&rdquo; tab, EOCP treats every way a student earns, learns or builds
-            reputation as one connected category.
-          </p>
-          <div className={styles.oppGrid}>
-            {OPPORTUNITIES.map((o) => (
-              <div key={o.title} className={`${styles.oppCell} ${styles.reveal}`}>
-                <div className={styles.tag}>{o.tag}</div>
-                <h4>{o.title}</h4>
-                <p>{o.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <InternshipBrowseByField />
+
+      <InternshipLaunchCarousel />
 
       <section>
         <div className={styles.wrap}>
