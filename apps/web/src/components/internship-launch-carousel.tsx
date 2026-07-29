@@ -464,7 +464,7 @@ export function InternshipLaunchCarousel() {
         srcDoc={SRC}
         loading="lazy"
         scrolling="no"
-        className="mx-auto block w-full max-w-[1400px] border-0 bg-transparent"
+        className="block w-full border-0 bg-transparent"
         style={{ height }}
       />
     </section>

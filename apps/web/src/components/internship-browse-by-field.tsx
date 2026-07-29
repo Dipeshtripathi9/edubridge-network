@@ -247,7 +247,7 @@ export function InternshipBrowseByField() {
         srcDoc={SRC}
         loading="lazy"
         scrolling="no"
-        className="mx-auto block w-full max-w-[1180px] border-0 bg-transparent"
+        className="block w-full border-0 bg-transparent"
         style={{ height }}
       />
     </section>
