@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Briefcase, Building2, CheckCircle2, GraduationCap, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -89,10 +90,13 @@ export function HeroContent({ onQuiz }: { onQuiz: () => void }) {
     <div className="mx-auto grid grid-cols-1 lg:grid-cols-2 lg:max-w-[1440px]">
       {/* Photo — full-bleed */}
       <div className="relative h-[200px] sm:h-[290px] lg:h-[400px] [@media(max-height:700px)]:h-[140px]">
-        <img
+        <Image
           src="/hero-students-group.webp"
           alt="Four students collaborating on a laptop"
-          className="h-full w-full object-cover object-[center_75%]"
+          fill
+          priority
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          className="object-cover object-[center_75%]"
         />
         {/* Edge fades — plain gradient overlays (not mask-image) for reliable
             rendering across mobile browsers/in-app webviews */}
