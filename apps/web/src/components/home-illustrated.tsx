@@ -6,7 +6,10 @@ import { Briefcase, Building2, CheckCircle2, GraduationCap, ShieldCheck } from '
 import { Button } from '@/components/ui/button';
 import { CollegeQuiz } from '@/components/college-quiz';
 import { HomeCareerBridge } from '@/components/home-career-bridge';
+import { HomeCollegeRanking } from '@/components/home-college-ranking';
 import { HomeTools } from '@/components/home-tools';
+import { HomeWelcomePanel } from '@/components/home-welcome-panel';
+import { useAuthStore } from '@/stores/auth.store';
 
 const TESTIMONIALS = [
   { q: "The brochures confused me. My counselor compared real placement data across 3 colleges. Today I'm at Bennett — zero regrets.", by: 'Aarav S.', ok: 'Verified student, Bennett University' },
@@ -76,67 +79,84 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Photo + heading + CTA buttons, shared between the guest full-bleed hero
+// below and the signed-in welcome panel (home-welcome-panel.tsx), which
+// places this same content next to a "Welcome back" card instead.
+export function HeroContent({ onQuiz }: { onQuiz: () => void }) {
+  return (
+    <div className="mx-auto grid grid-cols-1 lg:grid-cols-2 lg:max-w-[1440px]">
+      {/* Photo — full-bleed */}
+      <div className="relative h-[200px] sm:h-[290px] lg:h-[400px] [@media(max-height:700px)]:h-[140px]">
+        <img
+          src="/hero-students-group.webp"
+          alt="Four students collaborating on a laptop"
+          className="h-full w-full object-cover object-[center_75%]"
+        />
+        {/* Edge fades — plain gradient overlays (not mask-image) for reliable
+            rendering across mobile browsers/in-app webviews */}
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-background to-transparent sm:w-14" />
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:w-14" />
+        {/* Wavy mask into the page background */}
+        <svg aria-hidden className="absolute inset-x-0 bottom-0 h-6 w-full text-background sm:h-9" viewBox="0 0 200 24" preserveAspectRatio="none">
+          <path d="M0 12 Q 50 24 100 12 Q 150 0 200 12 V24 H0 Z" fill="currentColor" />
+        </svg>
+      </div>
+
+      {/* Text panel */}
+      <div className="relative flex flex-col justify-center px-6 pb-8 pt-8 text-center sm:px-10 sm:pb-10 sm:pt-10 lg:items-start lg:justify-center lg:px-14 lg:pb-0 lg:text-left xl:items-center xl:text-center [@media(max-height:700px)]:py-4">
+        <span className="block font-display text-[clamp(18px,2.4vw,24px)] font-semibold text-primary [@media(max-height:700px)]:text-lg">
+          India&rsquo;s Student
+        </span>
+        <h1 className="mt-1 font-display text-[clamp(28px,4vw,42px)] font-semibold leading-[1.15] [@media(max-height:700px)]:mt-0.5 [@media(max-height:700px)]:text-[clamp(24px,3.6vw,34px)]">
+          Success Network
+        </h1>
+        <p className="mx-auto mt-3 max-w-[540px] text-[16px] leading-relaxed text-muted-foreground lg:mx-0 xl:mx-auto [@media(max-height:700px)]:mt-2">
+          Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
+        </p>
+        <p className="mt-4 text-[14px] font-semibold uppercase tracking-[.25em] [@media(max-height:700px)]:mt-3">Start your search</p>
+        <div className="mt-3 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3 lg:justify-start xl:justify-center [@media(max-height:700px)]:mt-1 [@media(max-height:700px)]:gap-1">
+          <Button className="w-[70vw] max-w-[220px] gap-2 sm:w-auto" onClick={onQuiz}>
+            <Building2 className="h-4 w-4" strokeWidth={1.75} /> Find College
+          </Button>
+          <Button asChild variant="outline" className="gap-1.5 border-primary/30 px-4 text-[13.5px] font-semibold hover:border-primary/50">
+            <Link href="/internship">
+              <GraduationCap className="h-4 w-4" strokeWidth={1.75} /> Explore Scholarship
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="gap-1.5 border-primary/30 px-4 text-[13.5px] font-semibold hover:border-primary/50">
+            <Link href="/internship">
+              <Briefcase className="h-4 w-4" strokeWidth={1.75} /> Find Internship
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function HomeIllustrated() {
   const [quizOpen, setQuizOpen] = useState(false);
   const openQuiz = () => setQuizOpen(true);
+  const loggedIn = useAuthStore((s) => !!s.accessToken);
 
   return (
     <>
       <CollegeQuiz open={quizOpen} onClose={() => setQuizOpen(false)} />
       <div className="space-y-12 sm:space-y-16">
-        {/* HERO — full-bleed photo + copy panel */}
-        <section
-          id="get-expert-guidance"
-          className="relative -mt-4 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] w-screen overflow-hidden bg-background sm:-mt-6"
-        >
-          <div className="mx-auto grid grid-cols-1 lg:grid-cols-2 lg:max-w-[1440px]">
-            {/* Photo — full-bleed */}
-            <div className="relative h-[200px] sm:h-[290px] lg:h-[400px] [@media(max-height:700px)]:h-[140px]">
-              <img
-                src="/hero-students-group.webp"
-                alt="Four students collaborating on a laptop"
-                className="h-full w-full object-cover object-[center_75%]"
-              />
-              {/* Edge fades — plain gradient overlays (not mask-image) for reliable
-                  rendering across mobile browsers/in-app webviews */}
-              <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-background to-transparent sm:w-14" />
-              <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:w-14" />
-              {/* Wavy mask into the page background */}
-              <svg aria-hidden className="absolute inset-x-0 bottom-0 h-6 w-full text-background sm:h-9" viewBox="0 0 200 24" preserveAspectRatio="none">
-                <path d="M0 12 Q 50 24 100 12 Q 150 0 200 12 V24 H0 Z" fill="currentColor" />
-              </svg>
-            </div>
-
-            {/* Text panel */}
-            <div className="relative flex flex-col justify-center px-6 pb-8 pt-8 text-center sm:px-10 sm:pb-10 sm:pt-10 lg:items-start lg:justify-center lg:px-14 lg:pb-0 lg:text-left xl:items-center xl:text-center [@media(max-height:700px)]:py-4">
-              <span className="block font-display text-[clamp(18px,2.4vw,24px)] font-semibold text-primary [@media(max-height:700px)]:text-lg">
-                India&rsquo;s Student
-              </span>
-              <h1 className="mt-1 font-display text-[clamp(28px,4vw,42px)] font-semibold leading-[1.15] [@media(max-height:700px)]:mt-0.5 [@media(max-height:700px)]:text-[clamp(24px,3.6vw,34px)]">
-                Success Network
-              </h1>
-              <p className="mx-auto mt-3 max-w-[540px] text-[16px] leading-relaxed text-muted-foreground lg:mx-0 xl:mx-auto [@media(max-height:700px)]:mt-2">
-                Find the right college, discover scholarships and internships, and get guidance from verified students and trusted experts.
-              </p>
-              <p className="mt-4 text-[14px] font-semibold uppercase tracking-[.25em] [@media(max-height:700px)]:mt-3">Start your search</p>
-              <div className="mt-3 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3 lg:justify-start xl:justify-center [@media(max-height:700px)]:mt-1 [@media(max-height:700px)]:gap-1">
-                <Button className="w-[70vw] max-w-[220px] gap-2 sm:w-auto" onClick={openQuiz}>
-                  <Building2 className="h-4 w-4" strokeWidth={1.75} /> Find College
-                </Button>
-                <Button asChild variant="outline" className="gap-1.5 border-primary/30 px-4 text-[13.5px] font-semibold hover:border-primary/50">
-                  <Link href="/internship">
-                    <GraduationCap className="h-4 w-4" strokeWidth={1.75} /> Explore Scholarship
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="gap-1.5 border-primary/30 px-4 text-[13.5px] font-semibold hover:border-primary/50">
-                  <Link href="/internship">
-                    <Briefcase className="h-4 w-4" strokeWidth={1.75} /> Find Internship
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
+        {loggedIn ? (
+          <>
+            <HomeWelcomePanel onQuiz={openQuiz} />
+            <HomeCollegeRanking onQuiz={openQuiz} />
+          </>
+        ) : (
+          /* HERO — full-bleed photo + copy panel */
+          <section
+            id="get-expert-guidance"
+            className="relative -mt-4 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] w-screen overflow-hidden bg-background sm:-mt-6"
+          >
+            <HeroContent onQuiz={openQuiz} />
+          </section>
+        )}
 
         {/* TOOLS + SCHOLARSHIPS */}
         <HomeTools onQuiz={openQuiz} />
