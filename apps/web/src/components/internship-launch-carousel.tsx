@@ -242,6 +242,17 @@ const SRC = `<!DOCTYPE html>
   @media (max-width:759px){
     h1.headline{font-size:26px;padding:0 40px;}
     .navbtn{width:36px;height:36px;font-size:14px;}
+    /* No free swipe/scroll on mobile — exactly one full-width card at a
+       time, advanced only via the dots/arrows (JS sets a transform). */
+    .carousel{overflow:hidden;}
+    .track{
+      overflow-x:hidden;
+      scroll-snap-type:none;
+      gap:0;
+      padding:6px 0 20px;
+      transition:transform .35s ease;
+    }
+    .card{width:100%;flex:0 0 100%;}
   }
 </style>
 </head>
@@ -377,6 +388,8 @@ const SRC = `<!DOCTYPE html>
   var dots = Array.from(document.querySelectorAll('.dot'));
   var prevBtn = document.getElementById('prevBtn');
   var nextBtn = document.getElementById('nextBtn');
+  var mobileMq = window.matchMedia('(max-width:759px)');
+  var mobileIndex = 0;
 
   function setActive(i){
     dots.forEach(function (d, idx) { d.classList.toggle('active', idx === i); });
@@ -384,8 +397,23 @@ const SRC = `<!DOCTYPE html>
     nextBtn.disabled = i === cards.length - 1;
   }
 
+  // Mobile: no free scroll/swipe — exactly one full-width card at a time,
+  // driven only by the dot/arrow buttons via a CSS transform (no native
+  // scrolling, so there's nothing to accidentally drag).
+  function goToIndex(i){
+    i = Math.max(0, Math.min(cards.length - 1, i));
+    if (mobileMq.matches) {
+      mobileIndex = i;
+      track.style.transform = 'translateX(-' + (i * 100) + '%)';
+      setActive(i);
+    } else {
+      cards[i].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    }
+  }
+
   var ticking = false;
   track.addEventListener('scroll', function () {
+    if (mobileMq.matches) return;
     if (!ticking) {
       window.requestAnimationFrame(function () {
         var trackCenter = track.scrollLeft + track.clientWidth / 2;
@@ -404,21 +432,24 @@ const SRC = `<!DOCTYPE html>
 
   dots.forEach(function (dot) {
     dot.addEventListener('click', function () {
-      var i = parseInt(dot.dataset.i);
-      cards[i].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      goToIndex(parseInt(dot.dataset.i));
     });
   });
 
   function currentIndex(){
+    if (mobileMq.matches) return mobileIndex;
     return dots.findIndex(function (d) { return d.classList.contains('active'); });
   }
   prevBtn.addEventListener('click', function () {
-    var i = Math.max(0, currentIndex() - 1);
-    cards[i].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    goToIndex(currentIndex() - 1);
   });
   nextBtn.addEventListener('click', function () {
-    var i = Math.min(cards.length - 1, currentIndex() + 1);
-    cards[i].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    goToIndex(currentIndex() + 1);
+  });
+
+  mobileMq.addEventListener('change', function () {
+    track.style.transform = mobileMq.matches ? 'translateX(-' + (mobileIndex * 100) + '%)' : '';
+    setActive(mobileMq.matches ? mobileIndex : 0);
   });
 
   setActive(0);

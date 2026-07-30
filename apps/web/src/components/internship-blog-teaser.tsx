@@ -88,8 +88,8 @@ function buildSrc(posts: TeaserPost[]) {
 <title>EduBridge — From the community</title>
 <style>
   :root{
-    --cream:#F3EFE3;
-    --card-bg:#F0EDE4;
+    --cream:#F7F2E6;
+    --card-bg:#F7F2E6;
     --card-white:#FFFFFF;
     --text-dark:#1C1C1A;
     --text-body:#6B6C63;
