@@ -26,6 +26,7 @@ const SRC = `<!DOCTYPE html>
     --orange:#E8A23C;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
+  button:focus-visible, a:focus-visible{ outline:2px solid #22301F; outline-offset:2px; }
   html,body{ background:transparent; }
   body{
     font-family:'Space Grotesk', sans-serif;
@@ -46,6 +47,10 @@ const SRC = `<!DOCTYPE html>
     -ms-overflow-style:none;
     border:none;
     outline:none;
+    /* Soft fade at the trailing edge hints there's more to scroll to,
+       instead of a hard clip. */
+    mask-image: linear-gradient(to right, black calc(100% - 36px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 36px), transparent 100%);
   }
   .cat-slider::-webkit-scrollbar{ display:none; height:0; }
 
@@ -74,9 +79,13 @@ const SRC = `<!DOCTYPE html>
     position:absolute; top:50%; transform:translateY(-50%);
     width:42px; height:42px; border-radius:50%;
     background:var(--card); border:1.5px solid var(--green);
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; z-index:2;
+    transition:background .18s ease, transform .18s ease, box-shadow .18s ease;
   }
+  .nav-btn:hover{ background:var(--green); box-shadow:0 10px 26px rgba(0,0,0,0.16); }
+  .nav-btn:hover svg{ stroke:#fff; }
   .nav-btn:active{ transform:translateY(-50%) scale(0.94); }
   .nav-btn.prev{ left:8px; }
   .nav-btn.next{ right:8px; }
@@ -116,6 +125,7 @@ const SRC = `<!DOCTYPE html>
   var categories = [
     {
       name: "Technology",
+      bg: "#E4EAF8",
       desc: "Discover software development, AI, data science, cybersecurity, cloud, DevOps, UI/UX, and mobile development opportunities tailored to your technical skills.",
       icon: icon([
         '<path d="M4 5.5c8-.7 16-.7 24 0" stroke="' + INK + '" stroke-width="1.4" fill="none" stroke-linecap="round"/>',
@@ -129,6 +139,7 @@ const SRC = `<!DOCTYPE html>
     },
     {
       name: "Business",
+      bg: "#F5E9D6",
       desc: "Explore internships and projects in marketing, finance, HR, sales, operations, and business analytics to gain practical business experience.",
       icon: icon([
         '<path d="M5 27V13.5" stroke="' + INK + '" stroke-width="1.4" stroke-linecap="round"/>',
@@ -144,6 +155,7 @@ const SRC = `<!DOCTYPE html>
     },
     {
       name: "Healthcare",
+      bg: "#E3F0EC",
       desc: "Build hands-on experience through clinical, laboratory, radiology, physiotherapy, pharmacy, and hospital administration opportunities.",
       icon: icon([
         '<path d="M8 4v9a7 7 0 0 0 14 0V4" stroke="' + INK + '" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
@@ -156,6 +168,7 @@ const SRC = `<!DOCTYPE html>
     },
     {
       name: "Creative",
+      bg: "#F6E5EC",
       desc: "Grow your creative portfolio with opportunities in graphic design, video editing, content writing, social media, branding, and digital media.",
       icon: icon([
         '<path d="M16 4C8.8 4 3 9.6 3 16.4c0 5.4 4 8 8 8 1.3 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.3-.3-.35-.5-.75-.5-1.2 0-1 .8-1.7 1.8-1.7h3.4c5 0 9.8-3.4 9.8-9C27 8 22.2 4 16 4Z" fill="none" stroke="' + INK + '" stroke-width="1.5" stroke-linejoin="round"/>',
@@ -186,7 +199,7 @@ const SRC = `<!DOCTYPE html>
 
   function cardHTML(c){
     return '<div class="cat-card">' +
-      '<div class="cat-icon">' +
+      '<div class="cat-icon" style="background:' + (c.bg || 'var(--icon-bg)') + '">' +
         '<svg viewBox="0 0 32 30" xmlns="http://www.w3.org/2000/svg">' + c.icon + '</svg>' +
       '</div>' +
       '<div class="cat-body"><h4>' + c.name + '</h4><p>' + c.desc + '</p></div>' +

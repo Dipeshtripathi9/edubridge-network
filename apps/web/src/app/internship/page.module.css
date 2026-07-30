@@ -61,6 +61,16 @@
 }
 .page :global(#opportunities) {
   padding-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+.page :global(#blog-teaser) {
+  padding-top: 1.5rem;
+}
+.page :global(#career-programs) {
+  padding-bottom: 2rem;
+}
+.page :global(#launch-carousel) {
+  padding-top: 1.5rem;
 }
 
 .wrap {
@@ -111,6 +121,11 @@
 .btn:hover {
   transform: translateY(-1px);
   background: #f5b562;
+}
+.page a:focus-visible,
+.page button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
 }
 .ghostOnGreen {
   background: transparent;
