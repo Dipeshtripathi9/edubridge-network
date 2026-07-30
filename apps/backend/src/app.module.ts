@@ -13,6 +13,7 @@ import { TransferModule } from './transfer/transfer.module';
 import { CollegesModule } from './colleges/colleges.module';
 import { ScholarshipsModule } from './scholarships/scholarships.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { BlogModule } from './blog/blog.module';
 import { ResourcesModule } from './resources/resources.module';
 import { StorageModule } from './storage/storage.module';
 import { MessagingModule } from './messaging/messaging.module';
@@ -76,6 +77,7 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     CollegesModule,
     ScholarshipsModule,
     ReviewsModule,
+    BlogModule,
     StorageModule,
     ResourcesModule,
     MessagingModule,

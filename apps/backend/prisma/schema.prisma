@@ -56,6 +56,18 @@ enum ReviewCategory {
   COMMUNITY_MANAGERS
 }
 
+enum BlogCategory {
+  CAREER
+  COLLEGE
+  JOB
+}
+
+enum BlogStatus {
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+}
+
 enum ResourceType {
   NOTES
   PDF
@@ -238,6 +250,7 @@ model User {
   transfers   Transfer[]
   reviews     Review[]
   reviewVotes ReviewVote[]
+  blogPosts   BlogPost[]
 
   reputationEvents       ReputationEvent[]
   userBadges             UserBadge[]
@@ -445,6 +458,7 @@ model College {
   resources            Resource[]
   faqs                 CollegeFaq[]
   verificationRequests VerificationRequest[]
+  blogPosts            BlogPost[]
 
   @@index([state, city])
   @@index([nirfRank])
@@ -598,6 +612,35 @@ model ReviewVote {
   @@unique([reviewId, userId])
   @@index([reviewId])
   @@map("review_votes")
+}
+
+// Student-written blog posts — SEO-indexable public content, gated to
+// verified students at write time. Moderated: PENDING_REVIEW until an admin
+// publishes/rejects it (see BlogModule).
+model BlogPost {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  body        String
+  excerpt     String
+  category    BlogCategory
+  status      BlogStatus   @default(PENDING_REVIEW)
+  readMinutes Int          @default(1)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  collegeId String?
+  college   College? @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  @@index([status, publishedAt])
+  @@index([category])
+  @@index([collegeId])
+  @@map("blog_posts")
 }
 
 // ============================================================
