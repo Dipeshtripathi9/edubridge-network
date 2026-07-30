@@ -25,6 +25,8 @@ const SRC = `<!DOCTYPE html>
     --border:#E4DFD0;
   }
   *{box-sizing:border-box;}
+  button{ font:inherit; margin:0; }
+  button:focus-visible, a:focus-visible{ outline:2px solid var(--terracotta); outline-offset:2px; }
   html,body{background:transparent;}
   body{
     margin:0;
@@ -398,6 +400,9 @@ const SRC = `<!DOCTYPE html>
     cursor:pointer;
     display:inline-block;
     margin-bottom:18px;
+    border:none;
+    background:none;
+    padding:0;
   }
   .plan-grid{
     display:grid;
@@ -576,7 +581,7 @@ const SRC = `<!DOCTYPE html>
         <p class="price-sub">One-time · covers the full 4-month track</p>
         <div class="btn-row">
           <div class="btn">Explore</div>
-          <div class="apply-btn" onclick="openModal()">Join track</div>
+          <button type="button" class="apply-btn" onclick="openModal()">Join track</button>
         </div>
       </div>
     </div>
@@ -585,7 +590,7 @@ const SRC = `<!DOCTYPE html>
 
 <div class="overlay" id="overlay">
   <div class="modal">
-    <div class="modal-close" onclick="closeModal()">&#10005;</div>
+    <button type="button" class="modal-close" aria-label="Close" onclick="closeModal()">&#10005;</button>
 
     <div id="step1">
       <div class="step-dots"><span class="active"></span><span></span></div>
@@ -593,18 +598,18 @@ const SRC = `<!DOCTYPE html>
       <h3>Which track do you want to build in?</h3>
       <p class="modal-sub">Every track follows the same model — learn, build, collaborate, launch — on our own live products.</p>
       <div class="track-grid" id="trackGrid">
-        <div class="track-opt" data-track="Frontend Development">Frontend development</div>
-        <div class="track-opt" data-track="Backend Development">Backend development</div>
-        <div class="track-opt selected" data-track="Full-Stack Development">Full-stack development</div>
-        <div class="track-opt" data-track="UI/UX Design">UI/UX design</div>
+        <button type="button" class="track-opt" data-track="Frontend Development">Frontend development</button>
+        <button type="button" class="track-opt" data-track="Backend Development">Backend development</button>
+        <button type="button" class="track-opt selected" data-track="Full-Stack Development">Full-stack development</button>
+        <button type="button" class="track-opt" data-track="UI/UX Design">UI/UX design</button>
       </div>
       <div class="modal-actions">
-        <div class="btn-cta" onclick="goToStep2()">Continue &rarr;</div>
+        <button type="button" class="btn-cta" onclick="goToStep2()">Continue &rarr;</button>
       </div>
     </div>
 
     <div id="step2" style="display:none;">
-      <span class="back-link" onclick="goToStep1()">&larr; Back to track</span>
+      <button type="button" class="back-link" onclick="goToStep1()">&larr; Back to track</button>
       <h3>How do you want to join?</h3>
       <p class="modal-sub">Same tasks, same curated resources, same live project — pick whether you want mentor-backed review and a verified certificate.</p>
       <div class="plan-grid">
@@ -696,7 +701,7 @@ export function InternshipCareerPrograms() {
   }, []);
 
   return (
-    <section aria-label="Work on our in-house projects">
+    <section id="career-programs" aria-label="Work on our in-house projects">
       <iframe
         ref={ref}
         title="Work on our in-house projects"

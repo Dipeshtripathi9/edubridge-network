@@ -21,6 +21,7 @@ const SRC = `<!DOCTYPE html>
     --line:#E6E3DC;
   }
   *{box-sizing:border-box;}
+  .navbtn:focus-visible, .dot:focus-visible, .learn:focus-visible{ outline:2px solid var(--accent-dark); outline-offset:2px; }
   html,body{background:transparent;}
   body{
     margin:0;
@@ -488,7 +489,7 @@ export function InternshipLaunchCarousel() {
   }, []);
 
   return (
-    <section aria-label="One platform to launch real careers">
+    <section id="launch-carousel" aria-label="One platform to launch real careers">
       <iframe
         ref={ref}
         title="One platform to launch real careers"
