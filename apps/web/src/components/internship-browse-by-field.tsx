@@ -29,10 +29,10 @@ const SRC = `<!DOCTYPE html>
   html,body{ background:transparent; }
   body{
     font-family:'Space Grotesk', sans-serif;
-    padding:1.6rem 0;
+    padding:0.75rem 0 1.6rem;
     min-height:auto;
   }
-  @media (max-width:720px){ body{ padding:1.2rem 0; } }
+  @media (max-width:720px){ body{ padding:0.6rem 0 1.2rem; } }
   .shell-outer{ position:relative; }
   .wrap{ max-width:1180px; margin:0 auto; }
 

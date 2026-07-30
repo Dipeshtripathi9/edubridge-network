@@ -7,6 +7,8 @@ import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import { AccountMenu } from '@/components/account-menu';
 import { InternshipBrowseByField } from '@/components/internship-browse-by-field';
 import { InternshipLaunchCarousel } from '@/components/internship-launch-carousel';
+import { InternshipBlogTeaser } from '@/components/internship-blog-teaser';
+import { InternshipCareerPrograms } from '@/components/internship-career-programs';
 import { OpportunityShortlistDemo } from '@/components/opportunity-shortlist-demo';
 import styles from './page.module.css';
 
@@ -99,7 +101,7 @@ export default function InternshipLandingPage() {
         <div className={styles.heroStrip} />
       </section>
 
-      <section>
+      <section className={styles.exploreSection}>
         <div className={styles.wrap}>
           <div className={`${styles.matchStat} ${styles.reveal}`}>
             <div className={styles.statCard}>
@@ -125,6 +127,10 @@ export default function InternshipLandingPage() {
       <InternshipBrowseByField />
 
       <InternshipLaunchCarousel />
+
+      <InternshipBlogTeaser />
+
+      <InternshipCareerPrograms />
 
       <footer className={styles.siteFooter}>
         <div>EduBridge Open Career Program</div>
