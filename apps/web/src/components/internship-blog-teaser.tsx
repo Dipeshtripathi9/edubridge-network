@@ -99,6 +99,7 @@ function buildSrc(posts: TeaserPost[]) {
     --border:#E4DFD0;
   }
   *{box-sizing:border-box;}
+  button:focus-visible, a:focus-visible{ outline:2px solid var(--accent-circle); outline-offset:2px; }
   html,body{background:transparent;}
   body{
     margin:0;
@@ -298,7 +299,7 @@ export function InternshipBlogTeaser() {
   const src = useMemo(() => buildSrc(posts), [posts]);
 
   return (
-    <section aria-label="From the community — student blogs">
+    <section id="blog-teaser" aria-label="From the community — student blogs">
       <iframe
         ref={ref}
         title="From the community — student blogs"

@@ -292,8 +292,8 @@ const SRC = `<!doctype html>
   .b2 .tag-label{ background:var(--teal); }
 
   .b3{ bottom:16%; left:2%; animation-delay:1.2s; animation-duration:9.5s; }
-  .b3 .avatar{ border-color:var(--ink); }
-  .b3 .tag-label{ background:var(--ink); }
+  .b3 .avatar{ border-color:#3B6EA5; }
+  .b3 .tag-label{ background:#3B6EA5; }
 
   .b4{ top:0%; right:2%; animation-delay:.3s; flex-direction:row-reverse; animation-duration:13s; }
   .b4 .avatar{ border-color:var(--amber-deep); }
@@ -816,7 +816,7 @@ const SRC = `<!doctype html>
 
   <div class="comm-header">
     <span class="eyebrow">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M4 6h16M4 18h10"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       A growing community of students
     </span>
     <h2>A career bridge,<br><em>not a cliff edge.</em></h2>
