@@ -494,6 +494,8 @@ const SRC = `<!DOCTYPE html>
   @media (max-width:820px){
     .header-row{flex-direction:column;align-items:flex-start;}
     .grid{grid-template-columns:1fr;}
+    .side-card{order:1;}
+    .feature-card{order:2;}
     h2{font-size:30px;}
     .track-grid,.plan-grid{grid-template-columns:1fr;}
     .modal{padding:32px 24px 28px;}

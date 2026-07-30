@@ -126,11 +126,11 @@ export default function InternshipLandingPage() {
 
       <InternshipBrowseByField />
 
-      <InternshipLaunchCarousel />
-
       <InternshipBlogTeaser />
 
       <InternshipCareerPrograms />
+
+      <InternshipLaunchCarousel />
 
       <footer className={styles.siteFooter}>
         <div>EduBridge Open Career Program</div>

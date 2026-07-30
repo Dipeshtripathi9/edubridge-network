@@ -51,15 +51,15 @@
   }
 }
 
-.exploreSection {
+.page .exploreSection {
   padding-bottom: 2rem;
 }
 @media (max-width: 720px) {
-  .exploreSection {
+  .page .exploreSection {
     padding-bottom: 1.25rem;
   }
 }
-.page section#opportunities {
+.page :global(#opportunities) {
   padding-top: 1.5rem;
 }
 
