@@ -4,6 +4,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
 import { ScholarshipQueryDto } from './dto/scholarship-query.dto';
+import { CreateScholarshipDto, UpdateScholarshipDto } from './dto/scholarship.dto';
+
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 @Injectable()
 export class ScholarshipsService {
@@ -57,5 +65,41 @@ export class ScholarshipsService {
       orderBy: { category: 'asc' },
     });
     return rows.map((r) => r.category);
+  }
+
+  private async uniqueSlug(title: string) {
+    const base = slugify(title) || 'scholarship';
+    let slug = base;
+    for (let i = 2; await this.prisma.scholarship.findUnique({ where: { slug } }); i++) {
+      slug = `${base}-${i}`;
+    }
+    return slug;
+  }
+
+  async create(dto: CreateScholarshipDto) {
+    const scholarship = await this.prisma.scholarship.create({
+      data: { ...dto, deadline: new Date(dto.deadline), slug: await this.uniqueSlug(dto.title) },
+    });
+    await this.redis.delPattern('scholarship:list:*');
+    return scholarship;
+  }
+
+  async update(id: string, dto: UpdateScholarshipDto) {
+    const existing = await this.prisma.scholarship.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Scholarship not found');
+    const scholarship = await this.prisma.scholarship.update({
+      where: { id },
+      data: { ...dto, ...(dto.deadline ? { deadline: new Date(dto.deadline) } : {}) },
+    });
+    await this.redis.delPattern('scholarship:list:*');
+    return scholarship;
+  }
+
+  async remove(id: string) {
+    const existing = await this.prisma.scholarship.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Scholarship not found');
+    await this.prisma.scholarship.delete({ where: { id } });
+    await this.redis.delPattern('scholarship:list:*');
+    return { success: true };
   }
 }

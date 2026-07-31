@@ -499,6 +499,33 @@ model Scholarship {
   @@map("scholarships")
 }
 
+// A browsable internship catalog entry (admin-curated listing) — distinct
+// from TrackAEnrollment/TrackBApplication, which are workflow records for
+// students applying to *our own* internship program, not external postings.
+model InternshipListing {
+  id       String  @id @default(cuid())
+  title    String
+  slug     String  @unique
+  company  String
+  location String
+  isRemote Boolean @default(false)
+
+  stipend  Int? // monthly, INR; null = unpaid
+  duration String // e.g. "3 months"
+
+  category    String // e.g. "Engineering", "Design", "Marketing"
+  description String
+  applyUrl    String
+  deadline    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([deadline])
+  @@map("internship_listings")
+}
+
 model CollegeCutoff {
   id           String  @id @default(cuid())
   collegeId    String

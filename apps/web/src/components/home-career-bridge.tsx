@@ -47,7 +47,7 @@ const SRC = `<!doctype html>
     position:relative;
     max-width:1180px;
     margin:0 auto;
-    padding:104px 32px 96px;
+    padding:64px 32px 96px;
     overflow:hidden;
   }
 
@@ -727,7 +727,7 @@ const SRC = `<!doctype html>
 
   /* ---------- responsive ---------- */
   @media (max-width: 860px){
-    .section{ padding:80px 20px 72px; }
+    .section{ padding:48px 20px 72px; }
     .stage{ height:auto; padding:40px 0 20px; }
     .phone{ margin:0 auto; }
     .bubble{ display:none; }

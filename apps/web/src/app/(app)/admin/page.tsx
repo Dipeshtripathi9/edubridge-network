@@ -34,6 +34,7 @@ import {
 } from '@/hooks/use-admin';
 import { useDecideVerification, useVerificationQueue } from '@/hooks/use-verification';
 import { useComplaints, useResolveComplaint } from '@/hooks/use-complaints';
+import { CatalogManager } from '@/components/admin/catalog-manager';
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
@@ -572,6 +573,7 @@ export default function AdminPage() {
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="verification">Verification</TabsTrigger>
           <TabsTrigger value="complaints">Complaints</TabsTrigger>
+          <TabsTrigger value="catalog">Catalog</TabsTrigger>
           <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
@@ -588,6 +590,9 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="complaints">
           <ComplaintsTab />
+        </TabsContent>
+        <TabsContent value="catalog">
+          <CatalogManager />
         </TabsContent>
         <TabsContent value="broadcast">
           <BroadcastTab />

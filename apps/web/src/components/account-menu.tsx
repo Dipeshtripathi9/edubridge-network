@@ -13,10 +13,7 @@ import { useProfileProgress } from '@/stores/profile-progress.store';
 import { useLogout } from '@/hooks/use-auth';
 import { useMe } from '@/hooks/use-profile';
 import { useUnreadCount } from '@/hooks/use-notifications';
-
-function firstNameOf(full?: string | null) {
-  return (full ?? 'Student').trim().split(/\s+/)[0];
-}
+import { firstNameOf } from '@/lib/format-name';
 
 export function AccountMenu() {
   const logout = useLogout();

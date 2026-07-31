@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
+import { stripLeadingHonorific } from '../common/utils/sanitize-name';
 import { UpdateProfileDto } from './dto/profile.dto';
 
 @Injectable()
@@ -62,7 +63,11 @@ export class UsersService {
 
     const profile = await this.prisma.profile.update({
       where: { userId },
-      data: { ...dto, ...(resetVerification ? { collegeVerification: 'UNVERIFIED' as const } : {}) },
+      data: {
+        ...dto,
+        ...(dto.fullName?.trim() ? { fullName: stripLeadingHonorific(dto.fullName.trim()) } : {}),
+        ...(resetVerification ? { collegeVerification: 'UNVERIFIED' as const } : {}),
+      },
       include: { college: true, university: true },
     });
     await this.redis.del(this.profileCacheKey(userId));
