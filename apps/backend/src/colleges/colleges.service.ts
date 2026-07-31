@@ -56,6 +56,7 @@ export class CollegesService {
           reviewCount: true,
           avgPlacementPackage: true,
           logoUrl: true,
+          coverUrl: true,
         },
       });
       return buildPaginatedResult(items, query);

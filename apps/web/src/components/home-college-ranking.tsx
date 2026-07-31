@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Bookmark, BookmarkCheck, GraduationCap } from 'lucide-react';
+import { Bookmark, BookmarkCheck, ChevronRight, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -64,8 +64,10 @@ export function HomeCollegeRanking({ onQuiz }: { onQuiz: () => void }) {
             ))}
           </div>
           <div className="mt-5 text-center lg:hidden">
-            <Button variant="outline" asChild>
-              <Link href="/colleges/recommended">See more</Link>
+            <Button variant="outline" className="gap-1.5" asChild>
+              <Link href="/colleges/recommended">
+                See more recommendations <ChevronRight className="h-4 w-4" />
+              </Link>
             </Button>
           </div>
 
