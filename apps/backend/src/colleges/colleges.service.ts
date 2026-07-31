@@ -1,9 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
 import { CollegeQueryDto } from './dto/college-query.dto';
+import { CreateCollegeDto, UpdateCollegeDto } from './dto/college.dto';
+
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 @Injectable()
 export class CollegesService {
@@ -94,5 +102,47 @@ export class CollegesService {
         faqs: faqCount,
       },
     };
+  }
+
+  private async uniqueSlug(name: string) {
+    const base = slugify(name) || 'college';
+    let slug = base;
+    for (let i = 2; await this.prisma.college.findUnique({ where: { slug } }); i++) {
+      slug = `${base}-${i}`;
+    }
+    return slug;
+  }
+
+  async create(dto: CreateCollegeDto) {
+    const college = await this.prisma.college.create({
+      data: { ...dto, slug: await this.uniqueSlug(dto.name), sourceSystem: 'manual' },
+    });
+    await this.redis.delPattern('college:list:*');
+    return college;
+  }
+
+  async update(id: string, dto: UpdateCollegeDto) {
+    const existing = await this.prisma.college.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('College not found');
+    const college = await this.prisma.college.update({ where: { id }, data: dto });
+    await this.redis.delPattern('college:list:*');
+    return college;
+  }
+
+  async remove(id: string) {
+    const existing = await this.prisma.college.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('College not found');
+    try {
+      await this.prisma.college.delete({ where: { id } });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2003') {
+        throw new BadRequestException(
+          'This college still has students, cutoffs, or other records linked to it and cannot be deleted.',
+        );
+      }
+      throw err;
+    }
+    await this.redis.delPattern('college:list:*');
+    return { success: true };
   }
 }

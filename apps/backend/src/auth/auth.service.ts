@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { AuthProvider, Prisma, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { stripLeadingHonorific } from '../common/utils/sanitize-name';
 import { TokenService, TokenPair } from './services/token.service';
 import { OtpService } from './services/otp.service';
 import { GoogleService } from './services/google.service';
@@ -74,7 +75,7 @@ export class AuthService {
         authProvider: AuthProvider.EMAIL,
         status: autoVerify ? 'ACTIVE' : 'PENDING_VERIFICATION',
         emailVerifiedAt: autoVerify ? new Date() : null,
-        profile: { create: { fullName: dto.fullName, gender: dto.gender?.trim() || null } },
+        profile: { create: { fullName: stripLeadingHonorific(dto.fullName), gender: dto.gender?.trim() || null } },
       },
     });
 
@@ -286,7 +287,12 @@ export class AuthService {
               authProvider: AuthProvider.GOOGLE,
               status: 'ACTIVE',
               emailVerifiedAt: profile.emailVerified ? new Date() : null,
-              profile: { create: { fullName: profile.name ?? 'Student', avatarUrl: profile.picture } },
+              profile: {
+                create: {
+                  fullName: profile.name ? stripLeadingHonorific(profile.name) : 'Student',
+                  avatarUrl: profile.picture,
+                },
+              },
             },
           });
         } catch (err) {
@@ -390,7 +396,7 @@ export class AuthService {
             email,
             authProvider: AuthProvider.EMAIL,
             status: 'ACTIVE',
-            profile: { create: { fullName: dto.fullName?.trim() || 'Student' } },
+            profile: { create: { fullName: dto.fullName?.trim() ? stripLeadingHonorific(dto.fullName.trim()) : 'Student' } },
           },
         });
       } catch (err) {

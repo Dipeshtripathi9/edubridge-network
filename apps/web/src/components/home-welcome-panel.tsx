@@ -1,18 +1,15 @@
 'use client';
 
 import Link from 'next/link';
+import { Briefcase, Building2, Compass, IndianRupee, Star } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
-import { HeroContent } from '@/components/home-illustrated';
 import { useMe } from '@/hooks/use-profile';
 import { useProfileProgress } from '@/stores/profile-progress.store';
+import { firstNameOf } from '@/lib/format-name';
 
-function firstNameOf(full?: string | null) {
-  return (full ?? 'Student').trim().split(/\s+/)[0];
-}
-
-// Signed-in top band on /home: a "Welcome back" card (always visible) paired
-// with the same hero content shown to guests, but only from `lg:` up — on
-// small screens only the welcome card shows, matching the reference layout.
+// Signed-in top band on /home: one unified card — welcome block + progress on
+// the left, a row of quick-action shortcuts on the right (desktop only; on
+// mobile just the welcome block shows, recommendations follow below it).
 export function HomeWelcomePanel({ onQuiz }: { onQuiz: () => void }) {
   const { data: me } = useMe();
   const profilePct = useProfileProgress((s) => s.pct);
@@ -22,10 +19,18 @@ export function HomeWelcomePanel({ onQuiz }: { onQuiz: () => void }) {
     .filter(Boolean)
     .join(' · ');
 
+  const quickActions = [
+    { label: 'Career Quiz', icon: Compass, onClick: onQuiz },
+    { label: 'Compare Colleges', icon: Building2, href: '/colleges/recommended' },
+    { label: 'Scholarships', icon: IndianRupee, href: '/scholarships' },
+    { label: 'Internships', icon: Briefcase, href: '/internship' },
+    { label: 'Reviews', icon: Star, href: '/reviews' },
+  ] as const;
+
   return (
     <div className="space-y-4">
-      <section className="flex flex-col gap-6 lg:flex-row lg:items-stretch">
-        <div className="flex shrink-0 items-center gap-4 rounded-[22px] border border-border bg-card p-6 shadow-sm lg:w-[320px]">
+      <section className="flex flex-col overflow-hidden rounded-[22px] border border-border bg-card shadow-sm lg:flex-row lg:items-stretch">
+        <div className="flex items-center gap-4 p-6 lg:w-[320px] lg:shrink-0">
           <Avatar src={profile?.avatarUrl} name={profile?.fullName} className="h-14 w-14 shrink-0 text-lg" />
           <div className="min-w-0 flex-1">
             <h2 className="font-display text-[22px] font-semibold leading-tight">
@@ -47,8 +52,26 @@ export function HomeWelcomePanel({ onQuiz }: { onQuiz: () => void }) {
           </div>
         </div>
 
-        <div className="hidden overflow-hidden rounded-[22px] border border-border bg-background lg:block lg:flex-1">
-          <HeroContent onQuiz={onQuiz} />
+        <div className="hidden border-t border-border lg:flex lg:flex-1 lg:items-center lg:justify-around lg:gap-2 lg:border-l lg:border-t-0 lg:px-6">
+          {quickActions.map(({ label, icon: Icon, ...action }) => {
+            const content = (
+              <>
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span className="text-center text-xs font-semibold leading-tight text-muted-foreground">{label}</span>
+              </>
+            );
+            return 'href' in action ? (
+              <Link key={label} href={action.href} className="group flex flex-col items-center gap-2 py-4">
+                {content}
+              </Link>
+            ) : (
+              <button key={label} type="button" onClick={action.onClick} className="group flex flex-col items-center gap-2 py-4">
+                {content}
+              </button>
+            );
+          })}
         </div>
       </section>
 
