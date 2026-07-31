@@ -67,7 +67,7 @@ const SRC = `<!doctype html>
     position:relative;
     text-align:center;
     max-width:640px;
-    margin:0 auto 88px;
+    margin:0 auto 48px;
   }
 
   .eyebrow{

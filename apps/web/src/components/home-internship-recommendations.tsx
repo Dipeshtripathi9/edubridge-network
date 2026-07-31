@@ -1,10 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Bookmark, BookmarkCheck, Briefcase } from 'lucide-react';
+import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EmptyState } from '@/components/ui/empty-state';
 import { InternshipListingCard } from '@/components/internship-listing-card';
 import { useInternshipListings, type InternshipListing } from '@/hooks/use-internship-listings';
 import { useInternshipListingShortlist } from '@/hooks/use-internship-listing-shortlist';
@@ -18,6 +17,10 @@ export function HomeInternshipRecommendations() {
   const { isShortlisted, toggle } = useInternshipListingShortlist();
 
   const listings = data?.pages.flatMap((p) => p.data) ?? [];
+
+  // No catalog data yet — skip the section entirely rather than showing an
+  // empty-state placeholder on the home page.
+  if (!isLoading && listings.length === 0) return null;
 
   const cardActions = (l: InternshipListing) => {
     const shortlisted = isShortlisted(l.slug);
@@ -48,10 +51,6 @@ export function HomeInternshipRecommendations() {
           <Skeleton className="h-28 w-full rounded-[18px]" />
           <Skeleton className="h-28 w-full rounded-[18px]" />
         </div>
-      )}
-
-      {!isLoading && listings.length === 0 && (
-        <EmptyState icon={Briefcase} title="No internships yet" description="Check back soon — we're adding more listings." />
       )}
 
       {listings.length > 0 && (
