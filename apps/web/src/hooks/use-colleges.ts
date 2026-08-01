@@ -14,6 +14,7 @@ export interface College {
   reviewCount: number;
   avgPlacementPackage?: number | null;
   logoUrl?: string | null;
+  coverUrl?: string | null;
   university?: { id: string; name: string } | null;
 }
 
