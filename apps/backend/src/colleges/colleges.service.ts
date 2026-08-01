@@ -57,6 +57,14 @@ export class CollegesService {
           avgPlacementPackage: true,
           logoUrl: true,
           coverUrl: true,
+          type: true,
+          website: true,
+          accreditation: true,
+          admissionPrimary: true,
+          admissionSecondary: true,
+          tuitionFeePerYear: true,
+          verified: true,
+          hasScholarship: true,
         },
       });
       return buildPaginatedResult(items, query);

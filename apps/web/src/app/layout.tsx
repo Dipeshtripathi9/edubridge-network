@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Fraunces, Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { QueryProvider } from '@/providers/query-provider';
@@ -8,6 +8,9 @@ import { OfflineBanner } from '@/components/offline-banner';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
+// Serif display font used by the redesigned home welcome panel + college
+// recommendation cards — kept as an opt-in variable, not the site's default.
+const fraunces = Fraunces({ subsets: ['latin'], weight: ['500', '600', '700'], variable: '--font-fraunces', display: 'swap' });
 
 // Origin of the API, used to preconnect so the first data request on a slow /
 // high-latency connection doesn't pay for DNS + TCP + TLS setup up front.
@@ -50,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </>
         )}
       </head>
-      <body className={`${inter.variable} font-sans`}>
+      <body className={`${inter.variable} ${fraunces.variable} font-sans`}>
         <ThemeProvider>
           <QueryProvider>
             {children}

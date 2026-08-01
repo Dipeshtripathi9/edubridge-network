@@ -42,6 +42,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         display: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        fraunces: ['var(--font-fraunces)', 'serif'],
       },
       keyframes: {
         'eb-marquee': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },

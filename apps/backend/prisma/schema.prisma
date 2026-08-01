@@ -437,6 +437,14 @@ model College {
   website  String?
   nirfRank Int?
 
+  // Recommendation-card detail fields (admin-entered)
+  accreditation      String?
+  admissionPrimary   String?
+  admissionSecondary String?
+  tuitionFeePerYear  Int?
+  verified           Boolean @default(false)
+  hasScholarship     Boolean @default(false)
+
   // Aggregated metrics (denormalized for fast reads)
   avgPlacementPackage Float?
   reviewCount         Int    @default(0)
