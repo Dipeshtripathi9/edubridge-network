@@ -9,7 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { College, CollegeCourse } from '@/hooks/use-colleges';
 import { useCollege } from '@/hooks/use-colleges';
-import { COURSE_TAXONOMY, COURSE_FIELDS } from '@/lib/course-taxonomy';
+import { useScholarshipCategories } from '@/hooks/use-scholarships';
+import { useInternshipCategories } from '@/hooks/use-internship-listings';
+import { CoursePathSelector } from '@/components/ui/course-path-selector';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
   useAdminColleges,
   useCreateCollege,
@@ -556,8 +559,6 @@ function CollegeCourseForm({
   const set = <K extends keyof ReturnType<typeof emptyCourseForm>>(key: K, value: ReturnType<typeof emptyCourseForm>[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  const degreeOptions = form.field ? Object.keys(COURSE_TAXONOMY[form.field] ?? {}) : [];
-
   const submit = () => {
     if (!form.field.trim() || !form.degree.trim()) return toast.error('Field and degree are required');
     const str = (v: string) => v.trim() || undefined;
@@ -646,41 +647,12 @@ function CollegeCourseForm({
 
   return (
     <div className="grid gap-3 rounded-lg border border-dashed border-border bg-background p-4 sm:grid-cols-2">
-      <Field label="Field">
-        <select
-          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-          value={form.field}
-          onChange={(e) => {
-            set('field', e.target.value);
-            set('degree', '');
-          }}
-        >
-          <option value="">Select field</option>
-          {COURSE_FIELDS.map((f) => (
-            <option key={f} value={f}>
-              {f}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Degree">
-        <select
-          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-          value={form.degree}
-          onChange={(e) => set('degree', e.target.value)}
-          disabled={!form.field}
-        >
-          <option value="">Select degree</option>
-          {degreeOptions.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Specialization (optional)">
-        <Input value={form.specialization} onChange={(e) => set('specialization', e.target.value)} />
-      </Field>
+      <div className="sm:col-span-2">
+        <CoursePathSelector
+          value={{ field: form.field, degree: form.degree, specialization: form.specialization }}
+          onChange={(v) => setForm((f) => ({ ...f, field: v.field, degree: v.degree, specialization: v.specialization }))}
+        />
+      </div>
 
       <SectionLabel>1. Admissions</SectionLabel>
       <Field label="Eligibility">
@@ -1021,6 +993,7 @@ function ScholarshipForm({ initial, onDone }: { initial?: Scholarship; onDone: (
   const create = useCreateScholarship();
   const update = useUpdateScholarship();
   const pending = create.isPending || update.isPending;
+  const { data: categories } = useScholarshipCategories();
 
   const submit = () => {
     if (!form.title.trim() || !form.provider.trim() || !form.deadline) {
@@ -1064,7 +1037,14 @@ function ScholarshipForm({ initial, onDone }: { initial?: Scholarship; onDone: (
         />
       </Field>
       <Field label="Category">
-        <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Merit, Need-based…" />
+        <SearchableSelect
+          label="Category"
+          value={form.category}
+          onChange={(v) => setForm({ ...form, category: v })}
+          options={categories ?? []}
+          placeholder="Select or type a category"
+          searchPlaceholder="Search or type: Merit, Need-based…"
+        />
       </Field>
       <Field label="Apply URL">
         <Input value={form.applyUrl} onChange={(e) => setForm({ ...form, applyUrl: e.target.value })} />
@@ -1179,6 +1159,7 @@ function InternshipListingForm({ initial, onDone }: { initial?: InternshipListin
   const create = useCreateInternshipListing();
   const update = useUpdateInternshipListing();
   const pending = create.isPending || update.isPending;
+  const { data: categories } = useInternshipCategories();
 
   const submit = () => {
     if (!form.title.trim() || !form.company.trim() || !form.applyUrl.trim()) {
@@ -1234,7 +1215,14 @@ function InternshipListingForm({ initial, onDone }: { initial?: InternshipListin
         <Input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} placeholder="3 months" />
       </Field>
       <Field label="Category">
-        <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Engineering, Design…" />
+        <SearchableSelect
+          label="Category"
+          value={form.category}
+          onChange={(v) => setForm({ ...form, category: v })}
+          options={categories ?? []}
+          placeholder="Select or type a category"
+          searchPlaceholder="Search or type: Engineering, Design…"
+        />
       </Field>
       <Field label="Apply URL">
         <Input value={form.applyUrl} onChange={(e) => setForm({ ...form, applyUrl: e.target.value })} />
