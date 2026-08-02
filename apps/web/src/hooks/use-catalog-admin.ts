@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import type { College } from '@/hooks/use-colleges';
+import type { College, CollegeCourse } from '@/hooks/use-colleges';
 
 export interface Scholarship {
   id: string;
@@ -74,6 +74,34 @@ export function useDeleteCollege() {
       qc.invalidateQueries({ queryKey: ['admin', 'colleges'] });
       qc.invalidateQueries({ queryKey: ['colleges'] });
     },
+  });
+}
+
+// ---------- College courses (Field -> Degree -> Specialization per college) ----------
+
+export function useCreateCollegeCourse(collegeId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: Partial<CollegeCourse> & { field: string; degree: string }) =>
+      api.post(`/colleges/${collegeId}/courses`, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['college'] }),
+  });
+}
+
+export function useUpdateCollegeCourse(collegeId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: Partial<CollegeCourse> & { id: string }) =>
+      api.patch(`/colleges/${collegeId}/courses/${id}`, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['college'] }),
+  });
+}
+
+export function useDeleteCollegeCourse(collegeId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (courseId: string) => api.delete(`/colleges/${collegeId}/courses/${courseId}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['college'] }),
   });
 }
 

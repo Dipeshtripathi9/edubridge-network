@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Bookmark, BookmarkCheck, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { isSafeHttpUrl } from '@/lib/utils';
@@ -66,7 +67,9 @@ export function CollegeRecommendationCard({
 
       <div className="min-w-0">
         <h3 className="m-0 mb-[3px] truncate font-fraunces text-[19px] font-semibold leading-tight tracking-tight">
-          {college.name}
+          <Link href={`/colleges/${college.slug}`} className="hover:underline">
+            {college.name}
+          </Link>
         </h3>
         {(college.city || college.state) && (
           <p className="m-0 mb-2.5 text-[13.5px] text-muted-foreground">

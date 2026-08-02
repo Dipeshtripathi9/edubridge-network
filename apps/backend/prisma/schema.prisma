@@ -445,6 +445,83 @@ model College {
   verified           Boolean @default(false)
   hasScholarship     Boolean @default(false)
 
+  // ---------- Fixed college info (same regardless of course selected) ----------
+
+  // 1. College Profile
+  aboutCollege      String?
+  establishmentYear Int?
+  ownership         String?
+  affiliation       String?
+  campusSize        String?
+  contactDetails    String?
+  brochureUrl       String?
+
+  // 2. Location
+  address              String?
+  googleMapsUrl        String?
+  nearbyMetro          String?
+  nearbyRailwayStation String?
+  nearbyAirport        String?
+  nearbyRestaurants    String?
+  nearbyHospitals      String?
+  nearbyShoppingAreas  String?
+  costOfLiving         String?
+
+  // 3. Rankings (nirfRank above; these are the rest)
+  qsRank         Int?
+  naacGrade      String?
+  nbaStatus      String?
+  indiaTodayRank Int?
+  outlookRank    Int?
+  theWeekRank    Int?
+
+  // 4. Infrastructure
+  hasLibrary         Boolean @default(false)
+  hasLabs            Boolean @default(false)
+  hasSmartClassrooms Boolean @default(false)
+  hasSportsComplex   Boolean @default(false)
+  hasAuditorium      Boolean @default(false)
+  hasCafeteria       Boolean @default(false)
+  hasMedicalCentre   Boolean @default(false)
+  hasBankAtm         Boolean @default(false)
+  hasWifi            Boolean @default(false)
+  hasSecurity        Boolean @default(false)
+
+  // 5. Hostel
+  hostelAvailable    Boolean @default(false)
+  boysHostel         Boolean @default(false)
+  girlsHostel        Boolean @default(false)
+  hostelFoodQuality  String?
+  hostelLaundry      Boolean @default(false)
+  hostelHousekeeping Boolean @default(false)
+  hostelCurfew       String?
+  hostelSecurity     String?
+  hostelRules        String?
+  nearbyPG           String?
+  nearbyFlats        String?
+
+  // 6. Student Life
+  clubs          String?
+  societies      String?
+  technicalClubs String?
+  culturalClubs  String?
+  annualFest     String?
+  sports         String?
+  ncc            Boolean @default(false)
+  nss            Boolean @default(false)
+  studentEvents  String?
+
+  // 7. College Culture
+  attendancePolicy String?
+  academicPressure String?
+  codingCulture    String?
+  startupCulture   String?
+  researchCulture  String?
+  diversity        String?
+  campusSafety     String?
+  antiRagging      String?
+  studentSupport   String?
+
   // Aggregated metrics (denormalized for fast reads)
   avgPlacementPackage Float?
   reviewCount         Int    @default(0)
@@ -467,12 +544,99 @@ model College {
   faqs                 CollegeFaq[]
   verificationRequests VerificationRequest[]
   blogPosts            BlogPost[]
+  courses              CollegeCourse[]
 
   @@index([state, city])
   @@index([nirfRank])
   @@index([avgRating(sort: Desc)])
   @@index([sourceSystem, externalId])
   @@map("colleges")
+}
+
+// One row per Field -> Degree -> Specialization path a college offers.
+// Everything here changes depending on which course the student selects on
+// the college hub page — as opposed to College's fixed fields above, which
+// stay the same regardless of course.
+model CollegeCourse {
+  id        String  @id @default(cuid())
+  collegeId String
+  college   College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  field          String
+  degree         String
+  specialization String?
+
+  // 1. Admissions
+  eligibility      String?
+  entranceExam     String?
+  cutoff           String?
+  admissionProcess String?
+  documents        String?
+  seatMatrix       String?
+  reservation      String?
+  counselling      String?
+  managementQuota  String?
+
+  // 2. Fees
+  tuitionFee             Int?
+  registrationFee        Int?
+  examFee                Int?
+  hostelFee              Int?
+  otherCharges           Int?
+  totalCost              Int?
+  refundPolicy           String?
+  emiAvailable           Boolean @default(false)
+  educationLoanAvailable Boolean @default(false)
+
+  // 3. Placements
+  placementPct       Float?
+  avgPackage         Float?
+  medianPackage      Float?
+  highestPackage     Float?
+  branchWisePlacement String?
+  internshipPct      Float?
+  ppoPct             Float?
+  topRecruiters      String?
+
+  // 4. ROI
+  totalInvestment Int?
+  averageSalary   Float?
+  expectedRoi     String?
+  breakEvenTime   String?
+
+  // 5. Opportunities
+  scholarshipsInfo String?
+  internshipsInfo  String?
+  hackathons       String?
+  researchProjects String?
+  exchangeProgram  String?
+  startupCell      String?
+  incubation       String?
+
+  // 6. Career Opportunities
+  jobRoles         String?
+  governmentJobs   String?
+  higherStudies    String?
+  certifications   String?
+  studyAbroad      String?
+  entrepreneurship String?
+
+  // 7. Reviews (curated aggregate for this course — distinct from the
+  // sitewide Review model, which is per-college not per-course)
+  facultyRating        Float?
+  placementRating      Float?
+  courseRating         Float?
+  curriculumRating     Float?
+  verifiedReviewsCount Int?
+
+  // 8. Course-specific Q&A — array of { question, answer }
+  qna Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([collegeId])
+  @@map("college_courses")
 }
 
 model Scholarship {

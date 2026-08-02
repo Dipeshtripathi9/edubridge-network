@@ -5,6 +5,7 @@ import { RedisService } from '../redis/redis.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
 import { CollegeQueryDto } from './dto/college-query.dto';
 import { CreateCollegeDto, UpdateCollegeDto } from './dto/college.dto';
+import { CreateCollegeCourseDto, UpdateCollegeCourseDto } from './dto/college-course.dto';
 
 function slugify(s: string): string {
   return s
@@ -76,7 +77,10 @@ export class CollegesService {
   async getBySlug(slug: string) {
     const college = await this.prisma.college.findUnique({
       where: { slug },
-      include: { university: { select: { id: true, name: true } } },
+      include: {
+        university: { select: { id: true, name: true } },
+        courses: { orderBy: [{ field: 'asc' }, { degree: 'asc' }, { specialization: 'asc' }] },
+      },
     });
     if (!college) throw new NotFoundException('College not found');
     return college;
@@ -152,6 +156,30 @@ export class CollegesService {
       throw err;
     }
     await this.redis.delPattern('college:list:*');
+    return { success: true };
+  }
+
+  async addCourse(collegeId: string, dto: CreateCollegeCourseDto) {
+    const college = await this.prisma.college.findUnique({ where: { id: collegeId } });
+    if (!college) throw new NotFoundException('College not found');
+    return this.prisma.collegeCourse.create({
+      data: { ...dto, collegeId, qna: dto.qna as unknown as Prisma.InputJsonValue },
+    });
+  }
+
+  async updateCourse(collegeId: string, courseId: string, dto: UpdateCollegeCourseDto) {
+    const existing = await this.prisma.collegeCourse.findFirst({ where: { id: courseId, collegeId } });
+    if (!existing) throw new NotFoundException('Course not found');
+    return this.prisma.collegeCourse.update({
+      where: { id: courseId },
+      data: { ...dto, qna: dto.qna as unknown as Prisma.InputJsonValue },
+    });
+  }
+
+  async removeCourse(collegeId: string, courseId: string) {
+    const existing = await this.prisma.collegeCourse.findFirst({ where: { id: courseId, collegeId } });
+    if (!existing) throw new NotFoundException('Course not found');
+    await this.prisma.collegeCourse.delete({ where: { id: courseId } });
     return { success: true };
   }
 }
