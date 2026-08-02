@@ -15,6 +15,14 @@ export interface College {
   avgPlacementPackage?: number | null;
   logoUrl?: string | null;
   coverUrl?: string | null;
+  type?: string | null;
+  website?: string | null;
+  accreditation?: string | null;
+  admissionPrimary?: string | null;
+  admissionSecondary?: string | null;
+  tuitionFeePerYear?: number | null;
+  verified?: boolean;
+  hasScholarship?: boolean;
   university?: { id: string; name: string } | null;
 }
 

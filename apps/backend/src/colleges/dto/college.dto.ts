@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class CreateCollegeDto {
   @IsString()
@@ -41,6 +41,39 @@ export class CreateCollegeDto {
   @IsOptional()
   @IsUrl()
   coverUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  accreditation?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  admissionPrimary?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  admissionSecondary?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  tuitionFeePerYear?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  verified?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  hasScholarship?: boolean;
 }
 
 export class UpdateCollegeDto {
@@ -84,4 +117,37 @@ export class UpdateCollegeDto {
   @IsOptional()
   @IsUrl()
   coverUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  accreditation?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  admissionPrimary?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  admissionSecondary?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  tuitionFeePerYear?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  verified?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  hasScholarship?: boolean;
 }

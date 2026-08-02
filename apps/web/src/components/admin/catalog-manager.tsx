@@ -41,7 +41,14 @@ function CollegeForm({ initial, onDone }: { initial?: College; onDone: () => voi
     name: initial?.name ?? '',
     state: initial?.state ?? '',
     city: initial?.city ?? '',
+    type: initial?.type ?? '',
     nirfRank: initial?.nirfRank?.toString() ?? '',
+    accreditation: initial?.accreditation ?? '',
+    admissionPrimary: initial?.admissionPrimary ?? '',
+    admissionSecondary: initial?.admissionSecondary ?? '',
+    tuitionFeePerYear: initial?.tuitionFeePerYear?.toString() ?? '',
+    verified: initial?.verified ?? false,
+    hasScholarship: initial?.hasScholarship ?? false,
   });
   const create = useCreateCollege();
   const update = useUpdateCollege();
@@ -53,7 +60,14 @@ function CollegeForm({ initial, onDone }: { initial?: College; onDone: () => voi
       name: form.name.trim(),
       state: form.state.trim() || undefined,
       city: form.city.trim() || undefined,
+      type: form.type.trim() || undefined,
       nirfRank: form.nirfRank ? Number(form.nirfRank) : undefined,
+      accreditation: form.accreditation.trim() || undefined,
+      admissionPrimary: form.admissionPrimary.trim() || undefined,
+      admissionSecondary: form.admissionSecondary.trim() || undefined,
+      tuitionFeePerYear: form.tuitionFeePerYear ? Number(form.tuitionFeePerYear) : undefined,
+      verified: form.verified,
+      hasScholarship: form.hasScholarship,
     };
     const onSettled = {
       onSuccess: () => {
@@ -80,6 +94,55 @@ function CollegeForm({ initial, onDone }: { initial?: College; onDone: () => voi
       <Field label="State">
         <Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
       </Field>
+      <Field label="Type">
+        <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="Engineering, Design…" />
+      </Field>
+      <Field label="Accreditation">
+        <Input
+          value={form.accreditation}
+          onChange={(e) => setForm({ ...form, accreditation: e.target.value })}
+          placeholder="UGC · AICTE Approved"
+        />
+      </Field>
+      <Field label="Admission criteria (line 1)">
+        <Input
+          value={form.admissionPrimary}
+          onChange={(e) => setForm({ ...form, admissionPrimary: e.target.value })}
+          placeholder="Direct Admission"
+        />
+      </Field>
+      <Field label="Admission criteria (line 2)">
+        <Input
+          value={form.admissionSecondary}
+          onChange={(e) => setForm({ ...form, admissionSecondary: e.target.value })}
+          placeholder="Board score >50%"
+        />
+      </Field>
+      <Field label="Tuition fee / year (₹)">
+        <Input
+          type="number"
+          value={form.tuitionFeePerYear}
+          onChange={(e) => setForm({ ...form, tuitionFeePerYear: e.target.value })}
+        />
+      </Field>
+      <div className="flex items-end gap-4">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={form.verified}
+            onChange={(e) => setForm({ ...form, verified: e.target.checked })}
+          />
+          Verified
+        </label>
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={form.hasScholarship}
+            onChange={(e) => setForm({ ...form, hasScholarship: e.target.checked })}
+          />
+          Scholarship available
+        </label>
+      </div>
       <div className="flex gap-2 sm:col-span-2">
         <Button size="sm" onClick={submit} disabled={pending}>
           {initial ? 'Save' : 'Add college'}
