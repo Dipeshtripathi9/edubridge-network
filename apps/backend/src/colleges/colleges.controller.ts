@@ -4,6 +4,7 @@ import { UserRole } from '@prisma/client';
 import { CollegesService } from './colleges.service';
 import { CollegeQueryDto } from './dto/college-query.dto';
 import { CreateCollegeDto, UpdateCollegeDto } from './dto/college.dto';
+import { CreateCollegeCourseDto, UpdateCollegeCourseDto } from './dto/college-course.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 
@@ -61,5 +62,30 @@ export class CollegesController {
   @ApiOperation({ summary: 'College Community Hub overview (header + counts)' })
   hub(@Param('slug') slug: string) {
     return this.colleges.getCommunityHub(slug);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Post(':collegeId/courses')
+  @ApiOperation({ summary: 'Add a course path to a college (platform admin only)' })
+  addCourse(@Param('collegeId') collegeId: string, @Body() dto: CreateCollegeCourseDto) {
+    return this.colleges.addCourse(collegeId, dto);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Patch(':collegeId/courses/:courseId')
+  @ApiOperation({ summary: 'Update a college course path (platform admin only)' })
+  updateCourse(
+    @Param('collegeId') collegeId: string,
+    @Param('courseId') courseId: string,
+    @Body() dto: UpdateCollegeCourseDto,
+  ) {
+    return this.colleges.updateCourse(collegeId, courseId, dto);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Delete(':collegeId/courses/:courseId')
+  @ApiOperation({ summary: 'Delete a college course path (platform admin only)' })
+  removeCourse(@Param('collegeId') collegeId: string, @Param('courseId') courseId: string) {
+    return this.colleges.removeCourse(collegeId, courseId);
   }
 }

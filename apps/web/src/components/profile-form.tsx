@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useProfileProgress } from '@/stores/profile-progress.store';
 import { useMyProfileLead, useUpsertProfileStep } from '@/hooks/use-profile-leads';
+import { COURSE_TAXONOMY } from '@/lib/course-taxonomy';
 
 // The 4-step EduBridge Profile form, embedded in an isolated iframe (its own
 // fonts/CSS/JS). Each completed step posts its % to the parent so the progress
@@ -62,6 +63,37 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
 .fbox .clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:26px;height:26px;display:none;align-items:center;justify-content:center;color:var(--ink-2)}
 .fbox .clear svg{width:14px;height:14px}
 .addmore{display:block;width:100%;text-align:center;background:var(--hill);border-radius:8px;border:1px solid var(--bord);font-size:15.5px;font-weight:700;text-decoration:underline;color:var(--ink);padding:14px;margin-top:2px}
+.crs-card{position:relative;border:1px solid var(--bord);border-radius:8px;background:#FAF8F2;padding:14px 14px 12px;margin-bottom:12px}
+.crs-card .rm{position:absolute;top:12px;right:12px;font-size:12.5px;font-weight:700;color:#B4470B;text-decoration:underline;background:none;border:none;cursor:pointer;padding:0}
+.crs-row{display:grid;grid-template-columns:1fr;gap:8px;margin-top:6px}
+.crs-field{position:relative;min-width:0}
+.crs-trig{width:100%;min-width:0;text-align:left;font:inherit;font-size:14.5px;padding:13px 12px;background:var(--white);border:1.5px solid var(--bord);border-radius:8px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.crs-trig .ph{color:var(--ink-2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crs-trig .ch{font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crs-trig:disabled{cursor:not-allowed;color:var(--ink-3)}
+.crs-trig.open{border-color:var(--violet)}
+.crs-chev{font-size:10px;color:var(--ink-2);flex-shrink:0}
+.crs-panel{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--white);border:1.5px solid var(--bord);border-radius:8px;box-shadow:0 12px 28px -12px rgba(26,20,51,.25);z-index:30;overflow:hidden;display:none}
+.crs-panel.show{display:block}
+.crs-panel-head{display:none;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px}
+.crs-panel-close{font-size:22px;line-height:1;background:none;border:none;color:var(--ink-2);cursor:pointer;padding:2px 6px}
+.crs-search{padding:8px;border-bottom:1px solid var(--line)}
+.crs-search input{width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1.5px solid var(--bord);border-radius:7px;outline:none}
+.crs-search input:focus{border-color:var(--violet)}
+.crs-list{max-height:220px;overflow-y:auto}
+.crs-opt{padding:11px 14px;font-size:14.5px;cursor:pointer;border-bottom:1px solid var(--line)}
+.crs-opt:last-child{border-bottom:none}
+.crs-opt:hover{background:var(--violet-soft)}
+.crs-empty{padding:12px 14px;font-size:13.5px;color:var(--ink-2);font-style:italic}
+@media(max-width:680px){
+  .crs-panel{position:fixed;top:0;left:0;right:0;bottom:0;border-radius:0;border:none;box-shadow:none;z-index:1000;display:none;flex-direction:column}
+  .crs-panel.show{display:flex}
+  .crs-panel-head{display:flex}
+  .crs-search{padding:16px}
+  .crs-search input{font-size:16px;padding:13px 14px}
+  .crs-list{flex:1 1 auto;max-height:none}
+  .crs-opt{font-size:16px;padding:16px 16px}
+}
 .up{display:flex;align-items:center;gap:11px;border:1.6px dashed var(--bord);border-radius:8px;background:var(--white);padding:12px 14px;cursor:pointer;transition:border-color .15s ease;margin-bottom:12px}
 .up:hover{border-color:var(--violet)}
 .up .uic{width:34px;height:34px;border-radius:8px;flex:none;background:var(--violet-soft);color:var(--violet);display:flex;align-items:center;justify-content:center}
@@ -141,9 +173,8 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     <div class="step-k">Step 3 of 4</div>
     <h1>Personalize your recommendations</h1>
     <p class="sub">We use your <i>EduBridge Profile</i> to match you with best-fit colleges and scholarships.</p>
-    <div class="stat"><b>All</b><span>verified matches, checked by a human counselor — never a guess.</span></div>
     <div class="flab">Add courses you're interested in</div>
-    <div id="crsBoxes"></div>
+    <div id="crsCards"></div>
     <button class="addmore" id="addCrs">Add another course</button>
     <div class="flab" style="margin-top:22px">Add cities you're interested in <small>By default, we'll search across Delhi NCR.</small></div>
     <div id="ctyBoxes"></div>
@@ -236,7 +267,8 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
 </div>
 <script>
 (function(){
-  var COURSES=['B.Tech CSE','B.Tech (AI & ML)','B.Tech ECE','B.Tech Mechanical','BBA','B.Com (Hons)','BCA','BA LLB','B.Des','B.Sc Nursing','B.Pharm','BJMC','B.Arch','BHM'];
+  var COURSE_TAXONOMY=${JSON.stringify(COURSE_TAXONOMY)};
+  var COURSE_FIELDS=Object.keys(COURSE_TAXONOMY);
   var CITIES=['Greater Noida','Noida','Ghaziabad','Gurugram','Faridabad','Delhi','Sonipat','Meerut'];
   var MB2=2*1024*1024;
   var P={purpose:null,studying:null,courses:[],cities:[]};
@@ -274,9 +306,84 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     wrap.querySelector('.clear').addEventListener('click',function(){var idx=arr.indexOf(inp.value);if(idx>-1)arr.splice(idx,1);inp.readOnly=false;inp.value='';wrap.classList.remove('filled');inp.focus();});
     container.appendChild(wrap);
   }
-  var crsBoxes=document.getElementById('crsBoxes');
-  makeTABox(crsBoxes,COURSES,'Enter a course',P.courses);makeTABox(crsBoxes,COURSES,'Enter a course',P.courses);
-  document.getElementById('addCrs').addEventListener('click',function(){if(crsBoxes.children.length<5){makeTABox(crsBoxes,COURSES,'Enter a course',P.courses);postH();}});
+  function renderOpts(container2,items,onPick){
+    container2.innerHTML='';
+    if(items.length===0){container2.innerHTML='<div class="crs-empty">No matches</div>';return;}
+    items.forEach(function(item){var d=document.createElement('div');d.className='crs-opt';d.textContent=item;d.addEventListener('mousedown',function(e){e.preventDefault();onPick(item);});container2.appendChild(d);});
+  }
+  function makeCourseCard(container,courseObj){
+    var card=document.createElement('div');card.className='crs-card';
+    card.innerHTML='<button class="rm" type="button">Remove</button><div class="crs-row">'+
+      '<div class="crs-field"><button class="crs-trig" type="button"><span class="ph">Select field</span><span class="crs-chev">▾</span></button>'+
+        '<div class="crs-panel"><div class="crs-panel-head"><span>Field</span><button class="crs-panel-close" type="button">×</button></div><div class="crs-search"><input type="text" placeholder="Search field..."></div><div class="crs-list"></div></div></div>'+
+      '<div class="crs-field"><button class="crs-trig" type="button" disabled><span class="ph">Select field first</span><span class="crs-chev">▾</span></button>'+
+        '<div class="crs-panel"><div class="crs-panel-head"><span>Degree</span><button class="crs-panel-close" type="button">×</button></div><div class="crs-search"><input type="text" placeholder="Search degree..."></div><div class="crs-list"></div></div></div>'+
+      '<div class="crs-field"><button class="crs-trig" type="button" disabled><span class="ph">Select degree first</span><span class="crs-chev">▾</span></button>'+
+        '<div class="crs-panel"><div class="crs-panel-head"><span>Specialization</span><button class="crs-panel-close" type="button">×</button></div><div class="crs-search"><input type="text" placeholder="Search specialization..."></div><div class="crs-list"></div></div></div>'+
+      '</div>';
+    container.appendChild(card);
+
+    var groups=card.querySelectorAll('.crs-field');
+    var trigField=groups[0].querySelector('.crs-trig'),panelField=groups[0].querySelector('.crs-panel'),listField=groups[0].querySelector('.crs-list'),searchField=groups[0].querySelector('.crs-search input');
+    var trigDegree=groups[1].querySelector('.crs-trig'),panelDegree=groups[1].querySelector('.crs-panel'),listDegree=groups[1].querySelector('.crs-list'),searchDegree=groups[1].querySelector('.crs-search input');
+    var trigSpec=groups[2].querySelector('.crs-trig'),panelSpec=groups[2].querySelector('.crs-panel'),listSpec=groups[2].querySelector('.crs-list'),searchSpec=groups[2].querySelector('.crs-search input');
+
+    function closeAll(){[panelField,panelDegree,panelSpec].forEach(function(p){p.classList.remove('show');});[trigField,trigDegree,trigSpec].forEach(function(t){t.classList.remove('open');});}
+    function openPanel(trig,panel,fillFn,searchInp){var willOpen=!panel.classList.contains('show');closeAllPanelsGlobal();if(willOpen){panel.classList.add('show');trig.classList.add('open');searchInp.value='';fillFn();searchInp.focus();}}
+
+    function fillFieldList(){renderOpts(listField,COURSE_FIELDS,pickField);}
+    function fillDegreeList(){if(!courseObj.field)return;renderOpts(listDegree,Object.keys(COURSE_TAXONOMY[courseObj.field]),pickDegree);}
+    function fillSpecList(){if(!courseObj.field||!courseObj.degree)return;renderOpts(listSpec,COURSE_TAXONOMY[courseObj.field][courseObj.degree],pickSpec);}
+
+    function pickField(f){
+      courseObj.field=f;courseObj.degree=null;courseObj.specialization=null;
+      trigField.innerHTML='<span class="ch">'+esc(f)+'</span><span class="crs-chev">▾</span>';
+      trigDegree.disabled=false;trigDegree.innerHTML='<span class="ph">Select degree</span><span class="crs-chev">▾</span>';
+      trigSpec.disabled=true;trigSpec.innerHTML='<span class="ph">Select degree first</span><span class="crs-chev">▾</span>';
+      closeAll();postH();
+    }
+    function pickDegree(d){
+      courseObj.degree=d;courseObj.specialization=null;
+      trigDegree.innerHTML='<span class="ch">'+esc(d)+'</span><span class="crs-chev">▾</span>';
+      var specs=COURSE_TAXONOMY[courseObj.field][d];
+      if(specs.length===0){trigSpec.disabled=true;trigSpec.innerHTML='<span class="ph">Not applicable</span><span class="crs-chev">▾</span>';}
+      else{trigSpec.disabled=false;trigSpec.innerHTML='<span class="ph">Select specialization</span><span class="crs-chev">▾</span>';}
+      closeAll();postH();
+    }
+    function pickSpec(s){
+      courseObj.specialization=s;
+      trigSpec.innerHTML='<span class="ch">'+esc(s)+'</span><span class="crs-chev">▾</span>';
+      closeAll();postH();
+    }
+
+    trigField.addEventListener('click',function(e){e.stopPropagation();openPanel(trigField,panelField,fillFieldList,searchField);});
+    trigDegree.addEventListener('click',function(e){e.stopPropagation();if(trigDegree.disabled)return;openPanel(trigDegree,panelDegree,fillDegreeList,searchDegree);});
+    trigSpec.addEventListener('click',function(e){e.stopPropagation();if(trigSpec.disabled)return;openPanel(trigSpec,panelSpec,fillSpecList,searchSpec);});
+
+    searchField.addEventListener('input',function(){var q=searchField.value.toLowerCase();renderOpts(listField,COURSE_FIELDS.filter(function(f){return f.toLowerCase().indexOf(q)>-1;}),pickField);});
+    searchDegree.addEventListener('input',function(){if(!courseObj.field)return;var q=searchDegree.value.toLowerCase();renderOpts(listDegree,Object.keys(COURSE_TAXONOMY[courseObj.field]).filter(function(d){return d.toLowerCase().indexOf(q)>-1;}),pickDegree);});
+    searchSpec.addEventListener('input',function(){if(!courseObj.field||!courseObj.degree)return;var q=searchSpec.value.toLowerCase();renderOpts(listSpec,COURSE_TAXONOMY[courseObj.field][courseObj.degree].filter(function(s){return s.toLowerCase().indexOf(q)>-1;}),pickSpec);});
+
+    card.querySelectorAll('.crs-panel-close').forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();closeAll();});});
+    card.querySelector('.rm').addEventListener('click',function(){
+      var idx=P.courses.indexOf(courseObj);if(idx>-1)P.courses.splice(idx,1);
+      card.remove();postH();
+    });
+  }
+  function closeAllPanelsGlobal(){
+    document.querySelectorAll('.crs-panel.show').forEach(function(p){p.classList.remove('show');});
+    document.querySelectorAll('.crs-trig.open').forEach(function(t){t.classList.remove('open');});
+  }
+  document.addEventListener('click',function(e){if(!e.target.closest('.crs-field'))closeAllPanelsGlobal();});
+  var crsCards=document.getElementById('crsCards');
+  function addCourseCard(){
+    if(P.courses.length>=5)return;
+    var obj={field:null,degree:null,specialization:null};
+    P.courses.push(obj);
+    makeCourseCard(crsCards,obj);
+  }
+  addCourseCard();addCourseCard();
+  document.getElementById('addCrs').addEventListener('click',function(){if(crsCards.children.length<5){addCourseCard();postH();}});
   var ctyBoxes=document.getElementById('ctyBoxes');
   makeTABox(ctyBoxes,CITIES,'Enter a city',P.cities);makeTABox(ctyBoxes,CITIES,'Enter a city',P.cities);
   function wireUpload(inpId,boxId,txtId,subId,clrId,key){
@@ -306,7 +413,7 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
       if(!/^[6-9]\d{9}$/.test(ph))return void err(2,'Enter a valid 10-digit number.');
       if(!document.getElementById('c2').checked)return void err(2,'Please tick the consent box.');
       err(2);P.email=em;P.city=city;P.state=st;P.pin=pin;P.phone=ph;postStep(2,50,{email:em,city:city,state:st,pin:pin,phone:ph},{eduName:((P.firstName||'')+' '+(P.lastName||'')).trim(),eduPhone:ph,eduEmail:em});}
-    if(n===4){if(!P.courses.length)return void err(3,'Add at least one course you\'re interested in.');if(!document.getElementById('budget').value)return void err(3,'Please select your budget.');err(3);P.mode=document.getElementById('mode').value;P.degree=document.getElementById('degree').value;P.hostel=document.getElementById('hostel').value;P.budget=document.getElementById('budget').value;postStep(3,75,{courses:P.courses,cities:P.cities,mode:P.mode,degree:P.degree,hostel:P.hostel,budget:P.budget},{});}
+    if(n===4){var validCourses=P.courses.filter(function(c){return c.field&&c.degree;});if(!validCourses.length)return void err(3,'Add at least one course you\'re interested in.');if(!document.getElementById('budget').value)return void err(3,'Please select your budget.');err(3);P.mode=document.getElementById('mode').value;P.degree=document.getElementById('degree').value;P.hostel=document.getElementById('hostel').value;P.budget=document.getElementById('budget').value;postStep(3,75,{courses:validCourses,cities:P.cities,mode:P.mode,degree:P.degree,hostel:P.hostel,budget:P.budget},{});}
     go(n);
   });});
   document.getElementById('finish').addEventListener('click',function(){
