@@ -2,9 +2,11 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, Compass, IndianRupee } from 'lucide-react';
+import { ArrowRight, Bookmark, Briefcase, ChevronLeft, ChevronRight, Compass, GraduationCap, Heart, IndianRupee } from 'lucide-react';
 import { HomeAdmissionDesk } from '@/components/home-admission-desk';
 import { useBlogPosts, type BlogCategory, type BlogListItem } from '@/hooks/use-blog';
+import { useCollege } from '@/hooks/use-colleges';
+import { useCollegeShortlist } from '@/hooks/use-college-shortlist';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
 // we don't hand-convert every attribute to JSX.
@@ -53,28 +55,28 @@ function ResourceCard({ post }: { post: BlogListItem }) {
   return (
     <Link
       href={post.slug ? `/blog/${post.slug}` : '/blog'}
-      className="group flex w-[210px] flex-none snap-start flex-col"
+      className="group flex w-[240px] flex-none snap-start flex-col"
     >
-      <span className={`relative mb-3 flex h-[100px] items-center justify-center rounded-[10px] border border-border ${tag.bg}`}>
+      <span className={`relative mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border ${tag.bg}`}>
         <span className={`rounded-full bg-white/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${tag.text}`}>
           {tag.label}
         </span>
       </span>
-      <p className="line-clamp-2 text-[15px] font-semibold leading-snug">{post.title}</p>
-      <p className="mt-1 text-[12.5px] text-muted-foreground">{post.readMinutes} min read</p>
+      <p className="line-clamp-2 text-[16px] font-semibold leading-snug">{post.title}</p>
+      <p className="mt-1.5 text-[13px] text-muted-foreground">{post.readMinutes} min read</p>
     </Link>
   );
 }
 
 function ResourcesStrip() {
-  const { data, isLoading } = useBlogPosts(6);
+  const { data, isLoading } = useBlogPosts(8);
   const posts = data?.data && data.data.length > 0 ? data.data : FALLBACK_RESOURCES;
 
   if (isLoading) {
     return (
       <div className="flex gap-4 overflow-hidden pb-1.5">
-        <div className="h-[152px] w-[210px] flex-none animate-pulse rounded-[10px] bg-secondary" />
-        <div className="h-[152px] w-[210px] flex-none animate-pulse rounded-[10px] bg-secondary" />
+        <div className="h-[192px] w-[240px] flex-none animate-pulse rounded-[10px] bg-secondary" />
+        <div className="h-[192px] w-[240px] flex-none animate-pulse rounded-[10px] bg-secondary" />
       </div>
     );
   }
@@ -84,6 +86,94 @@ function ResourcesStrip() {
       {posts.map((p, i) => (
         <ResourceCard key={p.slug || i} post={p} />
       ))}
+    </div>
+  );
+}
+
+// "My Shortlist" — colleges the student has already saved, shown between the
+// Admission Desk and Scholarships so it reads as "here's what you've already
+// picked" before the browse-more sections. Hidden entirely when empty.
+function MyShortlistCard({ slug }: { slug: string }) {
+  const { data: college, isLoading } = useCollege(slug);
+  const { toggle } = useCollegeShortlist();
+  const [applied, setApplied] = useState(false);
+
+  if (isLoading) return <div className="h-[236px] w-full animate-pulse rounded-[20px] bg-secondary" />;
+  if (!college) return null;
+
+  return (
+    <div className="overflow-hidden rounded-[20px] border border-border bg-card">
+      <div className="relative h-[140px] w-full bg-secondary">
+        {college.coverUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={college.coverUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <GraduationCap className="h-10 w-10 text-muted-foreground/40" />
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => toggle(college.slug)}
+          aria-label={`Remove ${college.name} from shortlist`}
+          className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-[#1C4736] shadow-sm transition-transform hover:scale-105"
+        >
+          <Heart className="h-4 w-4 fill-current" />
+        </button>
+      </div>
+      <div className="p-4">
+        <h3 className="m-0 mb-1 truncate font-fraunces text-[17px] font-semibold leading-tight">
+          <Link href={`/colleges/${college.slug}`} className="hover:underline">
+            {college.name}
+          </Link>
+        </h3>
+        {(college.city || college.state) && (
+          <p className="m-0 mb-3 text-[13px] text-muted-foreground">
+            {[college.city, college.state].filter(Boolean).join(', ')}
+          </p>
+        )}
+        <div className="border-t border-border pt-3">
+          <p className="m-0 mb-1.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground/70">Up next</p>
+          <button
+            type="button"
+            disabled={applied}
+            onClick={() => setApplied(true)}
+            className={`flex items-center gap-1 bg-transparent p-0 font-sans text-[15px] font-bold ${
+              applied ? 'cursor-default text-[#1C4736]' : 'cursor-pointer text-foreground'
+            }`}
+          >
+            {applied ? (
+              '✓ Applied'
+            ) : (
+              <>
+                Apply <ChevronRight className="h-4 w-4" />
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MyShortlist() {
+  const { slugs } = useCollegeShortlist();
+  if (slugs.length === 0) return null;
+
+  return (
+    <div className="mt-6 border-t border-border pt-8">
+      <div className="mb-2 flex items-center gap-2.5">
+        <Bookmark className="h-6 w-6" />
+        <h2 className="font-display text-[25px] font-extrabold tracking-[-.02em]">My Shortlist</h2>
+      </div>
+      <p className="mb-5 max-w-[520px] text-[15.5px] font-medium text-muted-foreground">
+        Colleges you&apos;ve saved to track and compare.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {slugs.map((slug) => (
+          <MyShortlistCard key={slug} slug={slug} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -376,6 +466,8 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
       <div className="mt-6 border-t border-border pt-8">
         <HomeAdmissionDesk onApply={onQuiz} />
       </div>
+
+      <MyShortlist />
 
       {/* Scholarships */}
       <div className="mt-6 border-t border-border pt-8">
