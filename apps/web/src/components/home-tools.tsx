@@ -2,13 +2,14 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Bookmark, Briefcase, ChevronLeft, ChevronRight, Compass, GraduationCap, Heart, IndianRupee } from 'lucide-react';
+import { ArrowRight, Bookmark, Briefcase, ChevronLeft, ChevronRight, Compass, IndianRupee } from 'lucide-react';
 import { HomeAdmissionDesk } from '@/components/home-admission-desk';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { CollegeRecommendationCard } from '@/components/college-recommendation-card';
 import { useBlogPosts, type BlogCategory, type BlogListItem } from '@/hooks/use-blog';
 import { useCollege } from '@/hooks/use-colleges';
 import { useCollegeShortlist } from '@/hooks/use-college-shortlist';
-import { useCollegeApplied } from '@/hooks/use-college-applied';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
 // we don't hand-convert every attribute to JSX.
@@ -65,7 +66,9 @@ function ResourceCard({ post }: { post: BlogListItem }) {
         </span>
       </span>
       <p className="line-clamp-2 text-[16px] font-semibold leading-snug">{post.title}</p>
-      <p className="mt-1.5 text-[13px] text-muted-foreground">{post.readMinutes} min read</p>
+      <span className="mt-2.5 inline-flex w-fit items-center gap-1.5 rounded-full border border-foreground/15 bg-secondary px-3 py-1 text-[13px] font-bold transition-colors group-hover:bg-secondary/70">
+        Read More <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+      </span>
     </Link>
   );
 }
@@ -94,72 +97,17 @@ function ResourcesStrip() {
 
 // "My Shortlist" — colleges the student has already saved, shown between the
 // Admission Desk and Scholarships so it reads as "here's what you've already
-// picked" before the browse-more sections. Hidden entirely when empty.
-function MyShortlistCard({ slug }: { slug: string }) {
+// picked" before the browse-more sections. Hidden entirely when empty. Uses
+// the same CollegeRecommendationCard as every other college list for
+// consistency, rather than a bespoke card design.
+function MyShortlistCollege({ slug, onQuiz }: { slug: string; onQuiz: () => void }) {
   const { data: college, isLoading } = useCollege(slug);
-  const { toggle } = useCollegeShortlist();
-  const { isApplied, markApplied } = useCollegeApplied();
-
-  if (isLoading) return <div className="h-[236px] w-full animate-pulse rounded-[20px] bg-secondary" />;
+  if (isLoading) return <Skeleton className="h-28 w-full rounded-[20px]" />;
   if (!college) return null;
-  const applied = isApplied(college.slug);
-
-  return (
-    <div className="overflow-hidden rounded-[20px] border border-border bg-card">
-      <div className="relative h-[140px] w-full bg-secondary">
-        {college.coverUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={college.coverUrl} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <GraduationCap className="h-10 w-10 text-muted-foreground/40" />
-          </div>
-        )}
-        <button
-          type="button"
-          onClick={() => toggle(college.slug)}
-          aria-label={`Remove ${college.name} from shortlist`}
-          className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-[#1C4736] shadow-sm transition-transform hover:scale-105"
-        >
-          <Heart className="h-4 w-4 fill-current" />
-        </button>
-      </div>
-      <div className="p-4">
-        <h3 className="m-0 mb-1 truncate font-fraunces text-[17px] font-semibold leading-tight">
-          <Link href={`/colleges/${college.slug}`} className="hover:underline">
-            {college.name}
-          </Link>
-        </h3>
-        {(college.city || college.state) && (
-          <p className="m-0 mb-3 text-[13px] text-muted-foreground">
-            {[college.city, college.state].filter(Boolean).join(', ')}
-          </p>
-        )}
-        <div className="border-t border-border pt-3">
-          <p className="m-0 mb-1.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground/70">Up next</p>
-          <button
-            type="button"
-            disabled={applied}
-            onClick={() => markApplied(college.slug)}
-            className={`flex items-center gap-1 bg-transparent p-0 font-sans text-[15px] font-bold ${
-              applied ? 'cursor-default text-[#1C4736]' : 'cursor-pointer text-foreground'
-            }`}
-          >
-            {applied ? (
-              '✓ Applied'
-            ) : (
-              <>
-                Apply <ChevronRight className="h-4 w-4" />
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  return <CollegeRecommendationCard college={college} onQuiz={onQuiz} />;
 }
 
-function MyShortlist() {
+function MyShortlist({ onQuiz }: { onQuiz: () => void }) {
   const { slugs } = useCollegeShortlist();
   if (slugs.length === 0) return null;
 
@@ -172,9 +120,9 @@ function MyShortlist() {
       <p className="mb-5 max-w-[520px] text-[15.5px] font-medium text-muted-foreground">
         Colleges you&apos;ve saved to track and compare.
       </p>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-col gap-3">
         {slugs.slice(0, 3).map((slug) => (
-          <MyShortlistCard key={slug} slug={slug} />
+          <MyShortlistCollege key={slug} slug={slug} onQuiz={onQuiz} />
         ))}
       </div>
       <div className="mt-6 text-center">
@@ -486,7 +434,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
         <HomeAdmissionDesk onApply={onQuiz} />
       </div>
 
-      <MyShortlist />
+      <MyShortlist onQuiz={onQuiz} />
 
       {/* Scholarships */}
       <div className="mt-6 border-t border-border pt-8">
