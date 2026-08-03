@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { ChevronRight } from 'lucide-react';
+import { isSafeHttpUrl } from '@/lib/utils';
 import type { Scholarship } from '@/hooks/use-scholarships';
 
 function daysLeft(deadline: string) {
@@ -6,64 +8,57 @@ function daysLeft(deadline: string) {
   return Math.ceil(ms / (1000 * 60 * 60 * 24));
 }
 
-function MatchRing({ percent }: { percent: number }) {
-  const r = 18;
-  const c = 2 * Math.PI * r;
-  const offset = c - (percent / 100) * c;
-  return (
-    <svg viewBox="0 0 44 44" className="h-11 w-11 shrink-0 -rotate-90">
-      <circle cx="22" cy="22" r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="4" />
-      <circle
-        cx="22"
-        cy="22"
-        r={r}
-        fill="none"
-        stroke="hsl(var(--green))"
-        strokeWidth="4"
-        strokeDasharray={c}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-      />
-      <text x="22" y="22" textAnchor="middle" dominantBaseline="central" className="rotate-90" style={{ transformOrigin: '22px 22px' }} fontSize="11" fontWeight="700" fill="hsl(var(--green))">
-        {percent}%
-      </text>
-    </svg>
-  );
-}
-
-// Real fields only, plus an honestly-computed match-% ring (see
-// lib/scholarship-match.ts) that's simply omitted when nothing about the
-// student's profile can be checked against this scholarship's criteria.
-export function ScholarshipCard({
-  scholarship,
-  matchPct,
-  actions,
-}: {
-  scholarship: Scholarship;
-  matchPct: number | null;
-  actions: ReactNode;
-}) {
+// Same rich card layout as CollegeRecommendationCard for visual consistency
+// across the site — minus the fit/rating ring (not requested here) and with
+// "View details" in place of "Ask Expert Guide".
+export function ScholarshipCard({ scholarship, actions }: { scholarship: Scholarship; actions: ReactNode }) {
   const left = daysLeft(scholarship.deadline);
 
   return (
-    <article className="flex flex-col gap-3 rounded-[18px] border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex min-w-0 items-center gap-4">
-        {matchPct != null && <MatchRing percent={matchPct} />}
-        <div className="min-w-0">
-          <p className="font-display text-[17px] font-semibold">{scholarship.title}</p>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {scholarship.provider} · ₹{scholarship.amountPerYear.toLocaleString()} / year
-            {scholarship.renewalYears ? ` · renewable for ${scholarship.renewalYears} years` : ''}
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px] font-semibold">
-            <span className="rounded-full bg-accent px-2.5 py-1 text-primary">{scholarship.category}</span>
-            <span className={`rounded-full px-2.5 py-1 ${left <= 14 ? 'bg-marigold-soft text-amber-700' : 'bg-muted text-muted-foreground'}`}>
-              {left > 0 ? `Due ${new Date(scholarship.deadline).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}` : 'Closed'}
-            </span>
-          </div>
+    <article className="grid grid-cols-1 gap-y-3 rounded-[20px] border border-border bg-card p-[18px] shadow-[0_1px_2px_rgba(24,35,51,0.04),0_8px_24px_rgba(24,35,51,0.06)] min-[900px]:grid-cols-[1fr_1fr_1fr_168px] min-[900px]:items-center min-[900px]:gap-x-5 min-[900px]:p-[22px_26px]">
+      <div className="min-w-0">
+        <h3 className="m-0 mb-[3px] truncate font-fraunces text-[19px] font-semibold leading-tight tracking-tight">{scholarship.title}</h3>
+        <p className="m-0 mb-2.5 text-[13.5px] text-muted-foreground">{scholarship.provider}</p>
+        <div className="flex flex-wrap gap-1.5">
+          <span className="rounded-full bg-[#E7F1EB] px-2.5 py-1 text-[11.5px] font-semibold text-[#1C4736]">{scholarship.category}</span>
+          <span
+            className={`rounded-full px-2.5 py-1 text-[11.5px] font-semibold ${
+              left <= 14 ? 'bg-marigold-soft text-amber-700' : 'bg-[#EFEBDE] text-muted-foreground'
+            }`}
+          >
+            {left > 0 ? `Due ${new Date(scholarship.deadline).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}` : 'Closed'}
+          </span>
         </div>
       </div>
-      <div className="flex shrink-0 gap-2">{actions}</div>
+
+      <div className="hidden min-w-0 min-[900px]:block">
+        <p className="m-0 mb-1.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground/70">Amount</p>
+        <p className="m-0 mb-1 font-fraunces text-[17px] font-semibold">₹{scholarship.amountPerYear.toLocaleString()} / yr</p>
+        {scholarship.renewalYears && (
+          <p className="m-0 text-[13px] text-muted-foreground">Renewable for {scholarship.renewalYears} years</p>
+        )}
+      </div>
+
+      <div className="hidden min-w-0 min-[900px]:block">
+        <p className="m-0 mb-1.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground/70">Eligibility</p>
+        <p className="m-0 line-clamp-2 text-[13.5px] text-muted-foreground">{scholarship.eligibilityText}</p>
+      </div>
+
+      <div className="col-span-1 flex flex-wrap gap-2 min-[900px]:flex-col min-[900px]:gap-2">{actions}</div>
+
+      {isSafeHttpUrl(scholarship.applyUrl) && (
+        <div className="col-span-1 border-t border-border pt-3.5 min-[900px]:col-span-full">
+          <p className="m-0 mb-2 text-[10.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground/70">Up next</p>
+          <a
+            href={scholarship.applyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 font-sans text-[16px] font-bold text-foreground"
+          >
+            Apply <ChevronRight className="h-[17px] w-[17px]" />
+          </a>
+        </div>
+      )}
     </article>
   );
 }
