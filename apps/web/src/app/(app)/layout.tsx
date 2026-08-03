@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { Topbar } from '@/components/topbar';
 import { VerifyBanner } from '@/components/verify-banner';
 import { FloatingConnections } from '@/components/floating-connections';
+import { AdminCatalogPanel } from '@/components/admin/admin-catalog-panel';
 import { useNotificationStream } from '@/hooks/use-notifications';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -25,6 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <FloatingConnections />
+      <AdminCatalogPanel />
     </div>
   );
 }

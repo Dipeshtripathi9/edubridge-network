@@ -40,3 +40,10 @@ export function useInternshipListing(slug: string) {
     enabled: !!slug,
   });
 }
+
+export function useInternshipCategories() {
+  return useQuery({
+    queryKey: ['internship-listing-categories'],
+    queryFn: () => api.get<string[]>('/internship-listings/categories'),
+  });
+}
