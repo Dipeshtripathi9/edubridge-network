@@ -8,7 +8,6 @@ import { CollegeQuiz } from '@/components/college-quiz';
 import { HomeCareerBridge } from '@/components/home-career-bridge';
 import { HomeCollegeRanking } from '@/components/home-college-ranking';
 import { HomeInternshipRecommendations } from '@/components/home-internship-recommendations';
-import { HomeShortlistedColleges } from '@/components/home-shortlisted-colleges';
 import { HomeTools } from '@/components/home-tools';
 import { HomeWelcomePanel } from '@/components/home-welcome-panel';
 import { useAuthStore } from '@/stores/auth.store';
@@ -148,7 +147,6 @@ export function HomeIllustrated() {
         {loggedIn ? (
           <>
             <HomeWelcomePanel onQuiz={openQuiz} />
-            <HomeShortlistedColleges />
             <HomeCollegeRanking onQuiz={openQuiz} />
           </>
         ) : (
@@ -167,8 +165,12 @@ export function HomeIllustrated() {
         {/* INTERNSHIP RECOMMENDATIONS */}
         <HomeInternshipRecommendations />
 
-        {/* CAREER BRIDGE / COMMUNITY */}
-        <HomeCareerBridge />
+        {/* CAREER BRIDGE / COMMUNITY — negative margin cancels the outer
+            space-y gap above, since the iframe already reserves its own top
+            padding; without this the two stack into a double-wide gap. */}
+        <div className="-mt-12 sm:-mt-16">
+          <HomeCareerBridge />
+        </div>
 
         {/* TESTIMONIALS */}
         <section>
