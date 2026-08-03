@@ -67,7 +67,7 @@ export function HomeCollegeRanking({ onQuiz }: { onQuiz: () => void }) {
               className="gap-1.5 rounded-full border-[#1C4736] px-6 text-[#1C4736] hover:bg-[#E7F1EB] hover:text-[#1C4736]"
               asChild
             >
-              <Link href="/colleges/recommended">
+              <Link href="/colleges/recommended?tab=all">
                 See more recommendations <ChevronRight className="h-4 w-4" />
               </Link>
             </Button>

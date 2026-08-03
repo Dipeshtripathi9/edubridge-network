@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { isSafeHttpUrl, cn } from '@/lib/utils';
 import type { College } from '@/hooks/use-colleges';
 import { useCollegeShortlist } from '@/hooks/use-college-shortlist';
+import { useCollegeApplied } from '@/hooks/use-college-applied';
 
 const RING_R = 34;
 const RING_CIRC = 2 * Math.PI * RING_R;
@@ -68,7 +69,8 @@ export function CollegeRecommendationCard({
 }) {
   const { isShortlisted, toggle } = useCollegeShortlist();
   const shortlisted = isShortlisted(college.slug);
-  const [applied, setApplied] = useState(false);
+  const { isApplied, markApplied } = useCollegeApplied();
+  const applied = isApplied(college.slug);
 
   return (
     <article className="grid grid-cols-[72px_1fr] gap-x-4 gap-y-3 rounded-[20px] border border-border bg-card p-[18px_18px_16px] shadow-[0_1px_2px_rgba(24,35,51,0.04),0_8px_24px_rgba(24,35,51,0.06)] min-[900px]:grid-cols-[84px_220px_1fr_1fr_1fr_140px] min-[900px]:items-center min-[900px]:gap-x-5 min-[900px]:p-[22px_26px]">
@@ -200,7 +202,7 @@ export function CollegeRecommendationCard({
         <button
           type="button"
           disabled={applied}
-          onClick={() => setApplied(true)}
+          onClick={() => markApplied(college.slug)}
           className={cn(
             'flex items-center gap-1 bg-transparent p-0 font-sans text-[16px] font-bold',
             applied ? 'cursor-default text-[#1C4736]' : 'cursor-pointer text-foreground',
