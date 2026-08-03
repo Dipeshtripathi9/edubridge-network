@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { College, CollegeCourse } from '@/hooks/use-colleges';
 import { useCollege } from '@/hooks/use-colleges';
 import { useScholarshipCategories } from '@/hooks/use-scholarships';
-import { useInternshipCategories } from '@/hooks/use-internship-listings';
+import { useInternshipCategories, OPPORTUNITY_TYPE_LABEL, type OpportunityType } from '@/hooks/use-internship-listings';
 import { CoursePathSelector } from '@/components/ui/course-path-selector';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
@@ -1150,6 +1150,7 @@ function InternshipListingForm({ initial, onDone }: { initial?: InternshipListin
     company: initial?.company ?? '',
     location: initial?.location ?? '',
     isRemote: initial?.isRemote ?? false,
+    type: initial?.type ?? 'INTERNSHIP',
     stipend: initial?.stipend?.toString() ?? '',
     duration: initial?.duration ?? '',
     category: initial?.category ?? '',
@@ -1170,6 +1171,7 @@ function InternshipListingForm({ initial, onDone }: { initial?: InternshipListin
       company: form.company.trim(),
       location: form.location.trim() || 'Remote',
       isRemote: form.isRemote,
+      type: form.type,
       stipend: form.stipend ? Number(form.stipend) : undefined,
       duration: form.duration.trim() || 'Flexible',
       category: form.category.trim() || 'General',
@@ -1206,6 +1208,19 @@ function InternshipListingForm({ initial, onDone }: { initial?: InternshipListin
         >
           <option value="no">No</option>
           <option value="yes">Yes</option>
+        </select>
+      </Field>
+      <Field label="Opportunity type">
+        <select
+          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+          value={form.type}
+          onChange={(e) => setForm({ ...form, type: e.target.value as OpportunityType })}
+        >
+          {Object.entries(OPPORTUNITY_TYPE_LABEL).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
         </select>
       </Field>
       <Field label="Stipend (₹/month, blank = unpaid)">
@@ -1283,7 +1298,7 @@ function InternshipListingsSection() {
                       {l.title} · {l.company}
                     </p>
                     <p className="text-muted-foreground">
-                      {l.isRemote ? 'Remote' : l.location} · {l.category} ·{' '}
+                      {OPPORTUNITY_TYPE_LABEL[l.type]} · {l.isRemote ? 'Remote' : l.location} · {l.category} ·{' '}
                       {l.stipend ? `₹${l.stipend.toLocaleString()}/mo` : 'Unpaid'}
                     </p>
                   </div>

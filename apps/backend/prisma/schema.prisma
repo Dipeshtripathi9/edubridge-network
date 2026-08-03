@@ -671,16 +671,28 @@ model Scholarship {
   @@map("scholarships")
 }
 
+// Covers internships plus the other opportunity kinds the "Open Career
+// Program" surfaces (part-time work, freelance gigs, blogging, startup
+// projects) — one broad catalog rather than a separate model per kind.
+enum OpportunityType {
+  INTERNSHIP
+  PART_TIME
+  FREELANCE
+  BLOGGING
+  STARTUP
+}
+
 // A browsable internship catalog entry (admin-curated listing) — distinct
 // from TrackAEnrollment/TrackBApplication, which are workflow records for
 // students applying to *our own* internship program, not external postings.
 model InternshipListing {
-  id       String  @id @default(cuid())
+  id       String          @id @default(cuid())
   title    String
-  slug     String  @unique
+  slug     String          @unique
   company  String
   location String
-  isRemote Boolean @default(false)
+  isRemote Boolean         @default(false)
+  type     OpportunityType @default(INTERNSHIP)
 
   stipend  Int? // monthly, INR; null = unpaid
   duration String // e.g. "3 months"
@@ -695,6 +707,7 @@ model InternshipListing {
 
   @@index([category])
   @@index([deadline])
+  @@index([type])
   @@map("internship_listings")
 }
 

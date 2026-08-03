@@ -34,6 +34,7 @@ export class InternshipListingsService {
           }
         : {}),
       ...(query.category ? { category: { equals: query.category, mode: 'insensitive' } } : {}),
+      ...(query.type ? { type: query.type } : {}),
     };
     const orderBy: Prisma.InternshipListingOrderByWithRelationInput[] = [{ createdAt: 'desc' }, { id: 'asc' }];
 
