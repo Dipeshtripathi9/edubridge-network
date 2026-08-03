@@ -177,35 +177,35 @@ const POSTER_QUIZ = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/sv
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
   <defs><clipPath id="clip-quiz"><circle cx="240" cy="230" r="168"/></clipPath></defs>
   <image href="/poster-quiz.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-quiz)"/>
-  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">College Quiz</text>
+  <text x="240" y="524" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">College Quiz</text>
 </svg>`;
 
 const POSTER_COMPARE = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
   <defs><clipPath id="clip-compare"><circle cx="240" cy="230" r="168"/></clipPath></defs>
   <image href="/poster-compare.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-compare)"/>
-  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Compare Colleges</text>
+  <text x="240" y="524" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Compare Colleges</text>
 </svg>`;
 
 const POSTER_INTERNSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
   <defs><clipPath id="clip-internship"><circle cx="240" cy="230" r="168"/></clipPath></defs>
   <image href="/poster-internship.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-internship)"/>
-  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">Internship</text>
+  <text x="240" y="524" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">Internship</text>
 </svg>`;
 
 const POSTER_SCHOLARSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
   <defs><clipPath id="clip-scholarship"><circle cx="240" cy="230" r="168"/></clipPath></defs>
   <image href="/poster-scholarship.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-scholarship)"/>
-  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Scholarship</text>
+  <text x="240" y="524" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Scholarship</text>
 </svg>`;
 
 const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
   <defs><clipPath id="clip-expert"><circle cx="240" cy="230" r="168"/></clipPath></defs>
   <image href="/poster-expert-guide.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-expert)"/>
-  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Reviews</text>
+  <text x="240" y="524" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Reviews</text>
 </svg>`;
 
 // Each poster is a clickable card — "quiz" opens the lead-gen quiz modal,
