@@ -493,53 +493,6 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
         <HomeAdmissionDesk onApply={onQuiz} />
       </div>
 
-      {/* Internships */}
-      <div className="mt-6 border-t border-border pt-8">
-        <div className="mb-2 flex items-center gap-2.5">
-          <Briefcase className="h-6 w-6" />
-          <h2 className="font-display text-[25px] font-extrabold tracking-[-.02em]">Internships</h2>
-        </div>
-        <p className="mb-5 max-w-[520px] text-[15.5px] font-medium text-muted-foreground">
-          Search verified internships, or get matched to the ones you&apos;re actually eligible for.
-        </p>
-
-        <div className="flex snap-x gap-4 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {INTERNSHIPS.map((s) => (
-            <Link key={s.name} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
-              <span className="relative mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
-                <span className="absolute right-3 top-3 rounded-full bg-marigold-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
-                  Example
-                </span>
-                <Ill svg={s.svg} />
-              </span>
-              <p className="text-[16px] font-semibold leading-snug">
-                <b className="font-extrabold">{s.hook}</b> {s.name}
-              </p>
-              <span className="mt-2.5 inline-flex w-fit items-center gap-1.5 rounded-full border border-foreground/15 bg-secondary px-3 py-1 text-[13px] font-bold transition-colors group-hover:bg-secondary/70">
-                Apply Now <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-              </span>
-            </Link>
-          ))}
-
-          <Link
-            href="/internship"
-            className="flex w-[240px] flex-none snap-start items-center gap-3 rounded-xl border-[1.6px] border-foreground bg-card px-5 py-5"
-          >
-            <b className="flex-1 font-display text-[19px] font-extrabold leading-snug tracking-tight">See All Your Internship Matches</b>
-            <ChevronRight className="h-[18px] w-[18px] flex-none" />
-          </Link>
-        </div>
-
-        <div className="flex justify-center pt-6">
-          <Link
-            href="/internship"
-            className="inline-flex items-center gap-2.5 rounded-full border-[1.6px] border-foreground bg-card px-7 py-3.5 text-[16px] font-extrabold transition-colors hover:bg-secondary"
-          >
-            Browse All Internships <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-
       {/* Scholarships */}
       <div className="mt-6 border-t border-border pt-8">
         <div className="mb-2 flex items-center gap-2.5">
@@ -583,6 +536,53 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
             className="inline-flex items-center gap-2.5 rounded-full border-[1.6px] border-foreground bg-card px-7 py-3.5 text-[16px] font-extrabold transition-colors hover:bg-secondary"
           >
             Browse All Scholarships <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+
+      {/* Internships */}
+      <div className="mt-6 border-t border-border pt-8">
+        <div className="mb-2 flex items-center gap-2.5">
+          <Briefcase className="h-6 w-6" />
+          <h2 className="font-display text-[25px] font-extrabold tracking-[-.02em]">Internships</h2>
+        </div>
+        <p className="mb-5 max-w-[520px] text-[15.5px] font-medium text-muted-foreground">
+          Search verified internships, or get matched to the ones you&apos;re actually eligible for.
+        </p>
+
+        <div className="flex snap-x gap-4 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {INTERNSHIPS.map((s) => (
+            <Link key={s.name} href="/internship" className="group flex w-[240px] flex-none snap-start flex-col">
+              <span className="relative mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
+                <span className="absolute right-3 top-3 rounded-full bg-marigold-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
+                  Example
+                </span>
+                <Ill svg={s.svg} />
+              </span>
+              <p className="text-[16px] font-semibold leading-snug">
+                <b className="font-extrabold">{s.hook}</b> {s.name}
+              </p>
+              <span className="mt-2.5 inline-flex w-fit items-center gap-1.5 rounded-full border border-foreground/15 bg-secondary px-3 py-1 text-[13px] font-bold transition-colors group-hover:bg-secondary/70">
+                Apply Now <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              </span>
+            </Link>
+          ))}
+
+          <Link
+            href="/internship"
+            className="flex w-[240px] flex-none snap-start items-center gap-3 rounded-xl border-[1.6px] border-foreground bg-card px-5 py-5"
+          >
+            <b className="flex-1 font-display text-[19px] font-extrabold leading-snug tracking-tight">See All Your Internship Matches</b>
+            <ChevronRight className="h-[18px] w-[18px] flex-none" />
+          </Link>
+        </div>
+
+        <div className="flex justify-center pt-6">
+          <Link
+            href="/internship"
+            className="inline-flex items-center gap-2.5 rounded-full border-[1.6px] border-foreground bg-card px-7 py-3.5 text-[16px] font-extrabold transition-colors hover:bg-secondary"
+          >
+            Browse All Internships <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
