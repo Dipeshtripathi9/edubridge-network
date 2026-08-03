@@ -4,9 +4,11 @@ import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Bookmark, Briefcase, ChevronLeft, ChevronRight, Compass, GraduationCap, Heart, IndianRupee } from 'lucide-react';
 import { HomeAdmissionDesk } from '@/components/home-admission-desk';
+import { Button } from '@/components/ui/button';
 import { useBlogPosts, type BlogCategory, type BlogListItem } from '@/hooks/use-blog';
 import { useCollege } from '@/hooks/use-colleges';
 import { useCollegeShortlist } from '@/hooks/use-college-shortlist';
+import { useCollegeApplied } from '@/hooks/use-college-applied';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
 // we don't hand-convert every attribute to JSX.
@@ -96,10 +98,11 @@ function ResourcesStrip() {
 function MyShortlistCard({ slug }: { slug: string }) {
   const { data: college, isLoading } = useCollege(slug);
   const { toggle } = useCollegeShortlist();
-  const [applied, setApplied] = useState(false);
+  const { isApplied, markApplied } = useCollegeApplied();
 
   if (isLoading) return <div className="h-[236px] w-full animate-pulse rounded-[20px] bg-secondary" />;
   if (!college) return null;
+  const applied = isApplied(college.slug);
 
   return (
     <div className="overflow-hidden rounded-[20px] border border-border bg-card">
@@ -137,7 +140,7 @@ function MyShortlistCard({ slug }: { slug: string }) {
           <button
             type="button"
             disabled={applied}
-            onClick={() => setApplied(true)}
+            onClick={() => markApplied(college.slug)}
             className={`flex items-center gap-1 bg-transparent p-0 font-sans text-[15px] font-bold ${
               applied ? 'cursor-default text-[#1C4736]' : 'cursor-pointer text-foreground'
             }`}
@@ -170,9 +173,20 @@ function MyShortlist() {
         Colleges you&apos;ve saved to track and compare.
       </p>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {slugs.map((slug) => (
+        {slugs.slice(0, 3).map((slug) => (
           <MyShortlistCard key={slug} slug={slug} />
         ))}
+      </div>
+      <div className="mt-6 text-center">
+        <Button
+          variant="outline"
+          className="gap-1.5 rounded-full border-[#1C4736] px-6 text-[#1C4736] hover:bg-[#E7F1EB] hover:text-[#1C4736]"
+          asChild
+        >
+          <Link href="/colleges/recommended?tab=shortlist">
+            See more recommendations <ChevronRight className="h-4 w-4" />
+          </Link>
+        </Button>
       </div>
     </div>
   );
@@ -213,32 +227,37 @@ const INTERNSHIPS = [
 // PosterRow relies on (cx=240,cy=230,r=168), and baked title stay identical.
 const POSTER_QUIZ = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <image href="/poster-quiz.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid meet"/>
+  <defs><clipPath id="clip-quiz"><circle cx="240" cy="230" r="168"/></clipPath></defs>
+  <image href="/poster-quiz.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-quiz)"/>
   <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">College Quiz</text>
 </svg>`;
 
 const POSTER_COMPARE = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <image href="/poster-compare.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid meet"/>
+  <defs><clipPath id="clip-compare"><circle cx="240" cy="230" r="168"/></clipPath></defs>
+  <image href="/poster-compare.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-compare)"/>
   <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Compare Colleges</text>
 </svg>`;
 
 const POSTER_INTERNSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <image href="/poster-internship.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid meet"/>
-  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">Opportunities</text>
+  <defs><clipPath id="clip-internship"><circle cx="240" cy="230" r="168"/></clipPath></defs>
+  <image href="/poster-internship.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-internship)"/>
+  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">Internship</text>
 </svg>`;
 
 const POSTER_SCHOLARSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <image href="/poster-scholarship.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid meet"/>
+  <defs><clipPath id="clip-scholarship"><circle cx="240" cy="230" r="168"/></clipPath></defs>
+  <image href="/poster-scholarship.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-scholarship)"/>
   <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Scholarship</text>
 </svg>`;
 
 const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <image href="/poster-expert-guide.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid meet"/>
-  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Expert Guide</text>
+  <defs><clipPath id="clip-expert"><circle cx="240" cy="230" r="168"/></clipPath></defs>
+  <image href="/poster-expert-guide.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-expert)"/>
+  <text x="240" y="492" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Reviews</text>
 </svg>`;
 
 // Each poster is a clickable card — "quiz" opens the lead-gen quiz modal,
@@ -252,7 +271,7 @@ const POSTERS = [
   { svg: POSTER_EXPERT, action: { type: 'quiz' as const } },
 ];
 const POSTER_TRACK = POSTERS;
-const POSTER_TITLES = ['College Quiz', 'Compare Colleges', 'Opportunities', 'Scholarship', 'Expert Guide'];
+const POSTER_TITLES = ['College Quiz', 'Compare Colleges', 'Internship', 'Scholarship', 'Reviews'];
 
 // Swipeable stacked-card deck: one poster up front, the next two fanned
 // behind it (peek + rotate), matching a card-deck interaction rather than a

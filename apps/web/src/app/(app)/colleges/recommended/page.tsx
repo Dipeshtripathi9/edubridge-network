@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Bookmark, GraduationCap, Search as SearchIcon } from 'lucide-react';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Bookmark, CheckCircle2, GraduationCap, Search as SearchIcon } from 'lucide-react';
 import { PageHero } from '@/components/page-hero';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,17 @@ import { CollegeRecommendationCard } from '@/components/college-recommendation-c
 import { CollegeQuiz } from '@/components/college-quiz';
 import { useColleges, useCollege } from '@/hooks/use-colleges';
 import { useCollegeShortlist } from '@/hooks/use-college-shortlist';
+import { useCollegeApplied } from '@/hooks/use-college-applied';
 import { cn } from '@/lib/utils';
+
+type Tab = 'all' | 'shortlist' | 'applied';
+
+function CollegeBySlug({ slug, onQuiz }: { slug: string; onQuiz: () => void }) {
+  const { data: college, isLoading } = useCollege(slug);
+  if (isLoading) return <Skeleton className="h-28 w-full rounded-[20px]" />;
+  if (!college) return null;
+  return <CollegeRecommendationCard college={college} onQuiz={onQuiz} />;
+}
 
 function ShortlistTab({ onQuiz }: { onQuiz: () => void }) {
   const { slugs } = useCollegeShortlist();
@@ -29,17 +40,32 @@ function ShortlistTab({ onQuiz }: { onQuiz: () => void }) {
   return (
     <div className="flex flex-col gap-3">
       {slugs.map((slug) => (
-        <ShortlistedCollege key={slug} slug={slug} onQuiz={onQuiz} />
+        <CollegeBySlug key={slug} slug={slug} onQuiz={onQuiz} />
       ))}
     </div>
   );
 }
 
-function ShortlistedCollege({ slug, onQuiz }: { slug: string; onQuiz: () => void }) {
-  const { data: college, isLoading } = useCollege(slug);
-  if (isLoading) return <Skeleton className="h-28 w-full rounded-[20px]" />;
-  if (!college) return null;
-  return <CollegeRecommendationCard college={college} onQuiz={onQuiz} />;
+function AppliedTab({ onQuiz }: { onQuiz: () => void }) {
+  const { slugs } = useCollegeApplied();
+
+  if (slugs.length === 0) {
+    return (
+      <EmptyState
+        icon={CheckCircle2}
+        title="No applications yet"
+        description="Once you apply to a college, it'll show up here."
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {slugs.map((slug) => (
+        <CollegeBySlug key={slug} slug={slug} onQuiz={onQuiz} />
+      ))}
+    </div>
+  );
 }
 
 function AllCollegesTab({ onQuiz }: { onQuiz: () => void }) {
@@ -85,11 +111,22 @@ function AllCollegesTab({ onQuiz }: { onQuiz: () => void }) {
   );
 }
 
-export default function RecommendedCollegesPage() {
+function RecommendedCollegesPageInner() {
   const [quizOpen, setQuizOpen] = useState(false);
   const openQuiz = () => setQuizOpen(true);
-  const [tab, setTab] = useState<'shortlist' | 'all'>('shortlist');
-  const { slugs } = useCollegeShortlist();
+  const params = useSearchParams();
+  const initialTab = params.get('tab');
+  const [tab, setTab] = useState<Tab>(
+    initialTab === 'shortlist' || initialTab === 'applied' ? initialTab : 'all',
+  );
+  const { slugs: shortlistSlugs } = useCollegeShortlist();
+  const { slugs: appliedSlugs } = useCollegeApplied();
+
+  const TABS: { key: Tab; label: string }[] = [
+    { key: 'all', label: 'All Colleges' },
+    { key: 'shortlist', label: `Shortlist${shortlistSlugs.length > 0 ? ` (${shortlistSlugs.length})` : ''}` },
+    { key: 'applied', label: `Applied${appliedSlugs.length > 0 ? ` (${appliedSlugs.length})` : ''}` },
+  ];
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -103,32 +140,35 @@ export default function RecommendedCollegesPage() {
           stays visible while either list scrolls underneath it. */}
       <div className="sticky top-16 z-20 -mx-4 mb-6 mt-6 bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6">
         <div className="flex gap-2 rounded-full border border-border bg-card p-1">
-          <button
-            type="button"
-            onClick={() => setTab('shortlist')}
-            className={cn(
-              'flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors',
-              tab === 'shortlist' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            Your Shortlist{slugs.length > 0 ? ` (${slugs.length})` : ''}
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('all')}
-            className={cn(
-              'flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors',
-              tab === 'all' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            All Colleges
-          </button>
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setTab(t.key)}
+              className={cn(
+                'flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors',
+                tab === t.key ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
       </div>
 
       <div className="pb-10">
-        {tab === 'shortlist' ? <ShortlistTab onQuiz={openQuiz} /> : <AllCollegesTab onQuiz={openQuiz} />}
+        {tab === 'all' && <AllCollegesTab onQuiz={openQuiz} />}
+        {tab === 'shortlist' && <ShortlistTab onQuiz={openQuiz} />}
+        {tab === 'applied' && <AppliedTab onQuiz={openQuiz} />}
       </div>
     </div>
+  );
+}
+
+export default function RecommendedCollegesPage() {
+  return (
+    <Suspense fallback={null}>
+      <RecommendedCollegesPageInner />
+    </Suspense>
   );
 }
