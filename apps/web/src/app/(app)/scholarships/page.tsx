@@ -11,15 +11,12 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ScholarshipCard } from '@/components/scholarship-card';
 import { useScholarships, useScholarshipCategories } from '@/hooks/use-scholarships';
 import { useScholarshipShortlist } from '@/hooks/use-scholarship-shortlist';
-import { useMe } from '@/hooks/use-profile';
-import { matchPercent } from '@/lib/scholarship-match';
 import { cn } from '@/lib/utils';
 
 export default function ScholarshipsPage() {
   const [q, setQ] = useState('');
   const [category, setCategory] = useState<string | undefined>(undefined);
 
-  const { data: me } = useMe();
   const { data: categories } = useScholarshipCategories();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useScholarships({ q, category, sort: 'deadline' });
   const { isShortlisted, toggle } = useScholarshipShortlist();
@@ -77,12 +74,10 @@ export default function ScholarshipsPage() {
         <div className="flex flex-col gap-3">
           {scholarships.map((s) => {
             const shortlisted = isShortlisted(s.slug);
-            const pct = matchPercent(s, me?.profile);
             return (
               <ScholarshipCard
                 key={s.id}
                 scholarship={s}
-                matchPct={pct}
                 actions={
                   <>
                     <Button size="sm" variant={shortlisted ? 'default' : 'outline'} className="gap-1.5" onClick={() => toggle(s.slug)}>
