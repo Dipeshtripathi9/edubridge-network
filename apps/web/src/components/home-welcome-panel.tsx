@@ -7,11 +7,11 @@ import { useProfileProgress } from '@/stores/profile-progress.store';
 import { firstNameOf } from '@/lib/format-name';
 
 const QUICK_ACTIONS = [
-  { label: 'Career Quiz', icon: '/poster-quiz.jpg' },
+  { label: 'College Quiz', icon: '/poster-quiz.jpg' },
   { label: 'Compare Colleges', icon: '/poster-compare.jpg', href: '/colleges/recommended' },
-  { label: 'Scholarships', icon: '/poster-scholarship.jpg', href: '/scholarships' },
-  { label: 'Internships', icon: '/poster-internship.jpg', href: '/internship' },
-  { label: 'Reviews', icon: '/poster-expert-guide.jpg', href: '/reviews' },
+  { label: 'All Colleges', icon: '/poster-all-colleges.jpg', href: '/colleges/recommended?tab=all' },
+  { label: 'My Shortlist', icon: '/poster-my-shortlist.jpg', href: '/colleges/recommended?tab=shortlist' },
+  { label: 'Applied', icon: '/poster-applied.jpg', href: '/colleges/recommended?tab=applied' },
 ] as const;
 
 // Signed-in top band on /home. Pixel-matched to the requested reference
