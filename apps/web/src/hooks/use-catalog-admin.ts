@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import type { College, CollegeCourse } from '@/hooks/use-colleges';
+import type { OpportunityType } from '@/hooks/use-internship-listings';
 
 export interface Scholarship {
   id: string;
@@ -27,6 +28,7 @@ export interface InternshipListingAdmin {
   company: string;
   location: string;
   isRemote: boolean;
+  type: OpportunityType;
   stipend?: number | null;
   duration: string;
   category: string;

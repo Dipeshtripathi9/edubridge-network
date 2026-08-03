@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { OpportunityType } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsDateString, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class InternshipListingQueryDto extends PaginationDto {
@@ -13,6 +14,11 @@ export class InternshipListingQueryDto extends PaginationDto {
   @IsOptional()
   @IsString()
   category?: string;
+
+  @ApiPropertyOptional({ enum: OpportunityType, description: 'Filter by opportunity type' })
+  @IsOptional()
+  @IsEnum(OpportunityType)
+  type?: OpportunityType;
 }
 
 export class CreateInternshipListingDto {
@@ -32,6 +38,11 @@ export class CreateInternshipListingDto {
   @IsOptional()
   @IsBoolean()
   isRemote?: boolean;
+
+  @ApiPropertyOptional({ enum: OpportunityType, default: OpportunityType.INTERNSHIP })
+  @IsOptional()
+  @IsEnum(OpportunityType)
+  type?: OpportunityType;
 
   @ApiPropertyOptional({ description: 'Monthly stipend in INR; omit for unpaid' })
   @IsOptional()
@@ -82,6 +93,11 @@ export class UpdateInternshipListingDto {
   @IsOptional()
   @IsBoolean()
   isRemote?: boolean;
+
+  @ApiPropertyOptional({ enum: OpportunityType })
+  @IsOptional()
+  @IsEnum(OpportunityType)
+  type?: OpportunityType;
 
   @ApiPropertyOptional()
   @IsOptional()
