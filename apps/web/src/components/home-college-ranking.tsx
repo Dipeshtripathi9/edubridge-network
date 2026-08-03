@@ -19,7 +19,10 @@ export function HomeCollegeRanking({ onQuiz }: { onQuiz: () => void }) {
   const colleges = data?.pages.flatMap((p) => p.data) ?? [];
 
   return (
-    <section>
+    // pb-8: HomeTools' own top divider cancels the outer space-y gap before
+    // it (needed for the logged-out hero->tools flush transition), which
+    // otherwise leaves this section's "See more" button flush against it.
+    <section className="pb-8">
       <div className="mb-7 border-b border-border pb-7">
         <div className="mb-2 flex items-center gap-2 text-[#1C4736]">
           <GraduationCap className="h-5 w-5" />
