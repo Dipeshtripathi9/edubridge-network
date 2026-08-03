@@ -160,7 +160,7 @@ export function HomeIllustrated() {
         )}
 
         {/* TOOLS + SCHOLARSHIPS */}
-        <HomeTools onQuiz={openQuiz} />
+        <HomeTools onQuiz={openQuiz} loggedIn={loggedIn} />
 
         {/* INTERNSHIP RECOMMENDATIONS */}
         <HomeInternshipRecommendations />
