@@ -107,9 +107,9 @@ function MyShortlistCollege({ slug, onQuiz }: { slug: string; onQuiz: () => void
   return <CollegeRecommendationCard college={college} onQuiz={onQuiz} />;
 }
 
-function MyShortlist({ onQuiz }: { onQuiz: () => void }) {
+function MyShortlist({ onQuiz, loggedIn }: { onQuiz: () => void; loggedIn: boolean }) {
   const { slugs } = useCollegeShortlist();
-  if (slugs.length === 0) return null;
+  if (!loggedIn || slugs.length === 0) return null;
 
   return (
     <div className="mt-6 border-t border-border pt-8">
@@ -410,7 +410,7 @@ function PosterRow({ onQuiz }: { onQuiz: () => void }) {
   );
 }
 
-export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
+export function HomeTools({ onQuiz, loggedIn }: { onQuiz: () => void; loggedIn: boolean }) {
   return (
     <section aria-label="Tools & scholarships" className="!mt-0 mx-auto w-full max-w-[960px]">
       <div className="mb-8 border-t-2 border-border pt-7 text-center sm:pt-10 [@media(max-height:700px)]:mb-4 [@media(max-height:700px)]:pt-4">
@@ -434,7 +434,7 @@ export function HomeTools({ onQuiz }: { onQuiz: () => void }) {
         <HomeAdmissionDesk onApply={onQuiz} />
       </div>
 
-      <MyShortlist onQuiz={onQuiz} />
+      <MyShortlist onQuiz={onQuiz} loggedIn={loggedIn} />
 
       {/* Scholarships */}
       <div className="mt-6 border-t border-border pt-8">
