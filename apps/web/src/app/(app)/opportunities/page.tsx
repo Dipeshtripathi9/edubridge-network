@@ -11,11 +11,14 @@ import {
   Code2,
   HeartPulse,
   Palette,
+  Search as SearchIcon,
   TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
+import { PageHero } from '@/components/page-hero';
 import { OpportunityCard } from '@/components/opportunity-card';
 import { InternshipBlogTeaser } from '@/components/internship-blog-teaser';
 import { CollegeQuiz } from '@/components/college-quiz';
@@ -90,12 +93,18 @@ function useCardActions() {
 }
 
 function AllTab({ category }: { category?: string }) {
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInternshipListings({ category });
+  const [q, setQ] = useState('');
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInternshipListings({ category, q: q || undefined });
   const listings = data?.pages.flatMap((p) => p.data) ?? [];
   const cardActions = useCardActions();
 
   return (
     <div>
+      <div className="relative mb-4">
+        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search opportunities by name…" className="pl-9" />
+      </div>
+
       {isLoading && (
         <div className="flex flex-col gap-3">
           <Skeleton className="h-28 w-full rounded-[20px]" />
@@ -268,7 +277,13 @@ function OpenCareerProgramInner() {
 
       {/* Opportunities list */}
       <div id="opportunities-list" className="mt-10 scroll-mt-20">
-        <h2 className="mb-4 font-display text-[25px] font-extrabold tracking-[-.02em]">Opportunities</h2>
+        <PageHero
+          eyebrow="Recommended"
+          title="Find opportunities that"
+          accent="fit you."
+          sub="Your shortlist, plus every opportunity matched to your profile."
+          className="mb-6"
+        />
 
         <div className="sticky top-16 z-20 -mx-4 mb-6 bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6">
           <div className="flex gap-2 rounded-full border border-border bg-card p-1">
