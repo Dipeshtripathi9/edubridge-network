@@ -55,6 +55,36 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p className="mt-3 text-xs font-bold uppercase tracking-wide text-muted-foreground sm:col-span-2">{children}</p>;
 }
 
+// Inline confirm instead of window.confirm — native confirm() dialogs are
+// blocking and inconsistent with the rest of the UI.
+function ConfirmDeleteButton({ onConfirm }: { onConfirm: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  if (confirming) {
+    return (
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="destructive"
+          onClick={() => {
+            setConfirming(false);
+            onConfirm();
+          }}
+        >
+          Confirm delete
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => setConfirming(false)}>
+          Cancel
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <Button size="sm" variant="outline" onClick={() => setConfirming(true)}>
+      Delete
+    </Button>
+  );
+}
+
 // ---------- Colleges ----------
 
 const emptyCollegeForm = (initial?: College) => ({
@@ -873,20 +903,14 @@ function CollegeCoursesManager({ college }: { college: College }) {
                   <Button size="sm" variant="outline" onClick={() => setEditing(c)}>
                     Edit
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      if (window.confirm('Delete this course? This can’t be undone.')) {
-                        del.mutate(c.id, {
-                          onSuccess: () => toast.success('Course deleted'),
-                          onError: (e) => toast.error((e as Error).message),
-                        });
-                      }
-                    }}
-                  >
-                    Delete
-                  </Button>
+                  <ConfirmDeleteButton
+                    onConfirm={() =>
+                      del.mutate(c.id, {
+                        onSuccess: () => toast.success('Course deleted'),
+                        onError: (e) => toast.error((e as Error).message),
+                      })
+                    }
+                  />
                 </div>
               </div>
             ),
@@ -951,20 +975,14 @@ function CollegesSection() {
                       <Button size="sm" variant="outline" onClick={() => setEditing(c)}>
                         Edit
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          if (window.confirm(`Delete ${c.name}? This can’t be undone.`)) {
-                            del.mutate(c.id, {
-                              onSuccess: () => toast.success('College deleted'),
-                              onError: (e) => toast.error((e as Error).message),
-                            });
-                          }
-                        }}
-                      >
-                        Delete
-                      </Button>
+                      <ConfirmDeleteButton
+                        onConfirm={() =>
+                          del.mutate(c.id, {
+                            onSuccess: () => toast.success('College deleted'),
+                            onError: (e) => toast.error((e as Error).message),
+                          })
+                        }
+                      />
                     </div>
                   </div>
                   {managingCourses === c.id && <CollegeCoursesManager college={c} />}
@@ -1117,20 +1135,14 @@ function ScholarshipsSection() {
                     <Button size="sm" variant="outline" onClick={() => setEditing(s)}>
                       Edit
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (window.confirm(`Delete ${s.title}? This can’t be undone.`)) {
-                          del.mutate(s.id, {
-                            onSuccess: () => toast.success('Scholarship deleted'),
-                            onError: (e) => toast.error((e as Error).message),
-                          });
-                        }
-                      }}
-                    >
-                      Delete
-                    </Button>
+                    <ConfirmDeleteButton
+                      onConfirm={() =>
+                        del.mutate(s.id, {
+                          onSuccess: () => toast.success('Scholarship deleted'),
+                          onError: (e) => toast.error((e as Error).message),
+                        })
+                      }
+                    />
                   </div>
                 </div>
               ),
@@ -1306,20 +1318,14 @@ function InternshipListingsSection() {
                     <Button size="sm" variant="outline" onClick={() => setEditing(l)}>
                       Edit
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (window.confirm(`Delete ${l.title}? This can’t be undone.`)) {
-                          del.mutate(l.id, {
-                            onSuccess: () => toast.success('Internship listing deleted'),
-                            onError: (e) => toast.error((e as Error).message),
-                          });
-                        }
-                      }}
-                    >
-                      Delete
-                    </Button>
+                    <ConfirmDeleteButton
+                      onConfirm={() =>
+                        del.mutate(l.id, {
+                          onSuccess: () => toast.success('Internship listing deleted'),
+                          onError: (e) => toast.error((e as Error).message),
+                        })
+                      }
+                    />
                   </div>
                 </div>
               ),
