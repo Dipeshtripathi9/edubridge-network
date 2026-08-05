@@ -16,6 +16,18 @@ const TYPE_ICON: Record<OpportunityType, typeof Briefcase> = {
   STARTUP: Rocket,
 };
 
+const TYPE_TAG_CLASS: Record<OpportunityType, string> = {
+  INTERNSHIP: 'bg-[#E7F1EB] text-[#1C4736]',
+  PART_TIME: 'bg-[#F7EEDD] text-[#A9761F]',
+  FREELANCE: 'bg-[#EFEAF9] text-[#5B3FA8]',
+  BLOGGING: 'bg-[#FBE9EF] text-[#A83F65]',
+  STARTUP: 'bg-[#FDEDE3] text-[#B5622F]',
+};
+
+function formatDeadline(deadline: string) {
+  return new Date(deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 // Same left-badge/actions/"Up next" layout as CollegeRecommendationCard, for
 // visual consistency with /colleges/recommended — but the badge shows the
 // listing's real type instead of a fabricated fit score (no rating exists
@@ -42,7 +54,7 @@ function DetailsLink({ slug, className }: { slug: string; className?: string }) 
   );
 }
 
-export function OpportunityRecommendationCard({ listing, onQuiz }: { listing: InternshipListing; onQuiz: () => void }) {
+export function OpportunityRecommendationCard({ listing }: { listing: InternshipListing }) {
   const { isShortlisted, toggle } = useInternshipListingShortlist();
   const shortlisted = isShortlisted(listing.slug);
   const { isApplied, markApplied } = useInternshipListingApplied();
@@ -71,30 +83,34 @@ export function OpportunityRecommendationCard({ listing, onQuiz }: { listing: In
           {listing.company} · {listing.isRemote ? 'Remote' : listing.location}
         </p>
         <div className="flex flex-wrap gap-1.5">
-          <span className="rounded-full bg-[#E7F1EB] px-2.5 py-1 text-[11.5px] font-semibold text-[#1C4736]">{listing.category}</span>
-          <span className="rounded-full bg-[#EFEBDE] px-2.5 py-1 text-[11.5px] font-semibold text-muted-foreground">{listing.duration}</span>
+          <span className={cn('rounded-full px-2.5 py-1 text-[11.5px] font-semibold', TYPE_TAG_CLASS[listing.type])}>
+            {OPPORTUNITY_TYPE_LABEL[listing.type]}
+          </span>
+          <span className="rounded-full bg-[#EFEBDE] px-2.5 py-1 text-[11.5px] font-semibold text-muted-foreground">
+            {listing.isRemote ? 'Remote' : 'On-site'}
+          </span>
         </div>
       </div>
 
       <div className="hidden min-w-0 min-[900px]:block">
-        <p className="m-0 mb-1.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground/70">Stipend</p>
+        <p className="m-0 mb-1.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground/70">Category</p>
+        <p className="m-0 mb-1 text-[14.5px] font-semibold">{listing.category}</p>
+        <p className="m-0 text-[13px] text-muted-foreground">{listing.duration}</p>
+      </div>
+
+      <div className="hidden min-w-0 min-[900px]:block">
+        <p className="m-0 mb-1.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground/70">Compensation</p>
         <p className="m-0 font-fraunces text-[17px] font-semibold">
           {listing.stipend ? `₹${listing.stipend.toLocaleString()} / mo` : 'Unpaid'}
         </p>
       </div>
 
-      <div className="hidden min-w-0 min-[900px]:block">
-        <p className="m-0 mb-1.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground/70">About</p>
-        <p className="m-0 line-clamp-2 text-[13.5px] text-muted-foreground">{listing.description}</p>
+      <div className="col-span-2 flex flex-wrap items-center gap-2.5 min-[900px]:hidden">
+        <span className="rounded-full bg-[#EFEBDE] px-2.5 py-1 text-[11.5px] font-semibold text-muted-foreground">{listing.category}</span>
+        <span className="rounded-full bg-[#E7F1EB] px-2.5 py-1 font-fraunces text-[13px] font-semibold text-[#1C4736]">
+          {listing.stipend ? `₹${listing.stipend.toLocaleString()} / mo` : 'Unpaid'}
+        </span>
       </div>
-
-      {listing.stipend != null && (
-        <div className="col-span-2 flex items-center gap-2.5 min-[900px]:hidden">
-          <span className="rounded-full bg-[#E7F1EB] px-2.5 py-1 font-fraunces text-[13px] font-semibold text-[#1C4736]">
-            ₹{listing.stipend.toLocaleString()} / mo
-          </span>
-        </div>
-      )}
 
       <div className="col-span-2 flex flex-wrap gap-2 min-[900px]:col-span-1 min-[900px]:flex-col min-[900px]:gap-2">
         <DetailsLink
@@ -110,13 +126,13 @@ export function OpportunityRecommendationCard({ listing, onQuiz }: { listing: In
           {shortlisted ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
           {shortlisted ? 'Shortlisted' : 'Shortlist'}
         </Button>
-        <Button size="sm" variant="outline" className="flex-none" onClick={onQuiz}>
-          Ask Expert Guide
-        </Button>
       </div>
 
       <div className="col-span-2 border-t border-border pt-3.5 min-[900px]:col-span-full">
         <p className="m-0 mb-2 text-[10.5px] font-bold uppercase tracking-[0.1em] text-muted-foreground/70">Up next</p>
+        {listing.deadline && !applied && (
+          <p className="m-0 mb-1.5 text-[12px] text-muted-foreground">Apply by {formatDeadline(listing.deadline)}</p>
+        )}
         {canApply ? (
           <a
             href={listing.applyUrl}
