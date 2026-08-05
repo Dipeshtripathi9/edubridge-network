@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Bookmark,
@@ -130,6 +130,24 @@ function AllTab({ category, onCategoryChange }: { category?: string; onCategoryC
   const listings: InternshipListing[] = data?.pages.flatMap((p) => p.data) ?? [];
   const sliderRef = useRef<HTMLDivElement>(null);
   const scrollByStep = (dir: 1 | -1) => sliderRef.current?.scrollBy({ left: dir * 340, behavior: 'smooth' });
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  useEffect(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+    const updateScrollState = () => {
+      setCanScrollLeft(el.scrollLeft > 4);
+      setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    };
+    updateScrollState();
+    el.addEventListener('scroll', updateScrollState);
+    window.addEventListener('resize', updateScrollState);
+    return () => {
+      el.removeEventListener('scroll', updateScrollState);
+      window.removeEventListener('resize', updateScrollState);
+    };
+  }, []);
 
   return (
     <div>
@@ -141,14 +159,16 @@ function AllTab({ category, onCategoryChange }: { category?: string; onCategoryC
       {/* Category filter row — horizontally scrollable, tap a card to filter/unfilter,
           or use the arrow buttons to scroll without touch/trackpad. */}
       <div className="relative mb-8">
-        <button
-          type="button"
-          aria-label="Scroll categories left"
-          onClick={() => scrollByStep(-1)}
-          className="absolute -left-3.5 top-1/2 z-10 hidden h-[42px] w-[42px] -translate-y-1/2 items-center justify-center rounded-full border-[1.5px] border-border bg-card shadow-lg transition-colors hover:bg-accent sm:flex"
-        >
-          <ChevronLeft className="h-[18px] w-[18px]" />
-        </button>
+        {canScrollLeft && (
+          <button
+            type="button"
+            aria-label="Scroll categories left"
+            onClick={() => scrollByStep(-1)}
+            className="absolute -left-3.5 top-1/2 z-10 hidden h-[42px] w-[42px] -translate-y-1/2 items-center justify-center rounded-full border-[1.5px] border-border bg-card shadow-lg transition-colors hover:bg-accent sm:flex"
+          >
+            <ChevronLeft className="h-[18px] w-[18px]" />
+          </button>
+        )}
 
         <div ref={sliderRef} className="flex gap-3.5 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {CATEGORIES.map(({ key, icon: Icon, accent, tint, ring, description }) => {
@@ -175,14 +195,16 @@ function AllTab({ category, onCategoryChange }: { category?: string; onCategoryC
           })}
         </div>
 
-        <button
-          type="button"
-          aria-label="Scroll categories right"
-          onClick={() => scrollByStep(1)}
-          className="absolute -right-3.5 top-1/2 z-10 hidden h-[42px] w-[42px] -translate-y-1/2 items-center justify-center rounded-full border-[1.5px] border-border bg-card shadow-lg transition-colors hover:bg-accent sm:flex"
-        >
-          <ChevronRight className="h-[18px] w-[18px]" />
-        </button>
+        {canScrollRight && (
+          <button
+            type="button"
+            aria-label="Scroll categories right"
+            onClick={() => scrollByStep(1)}
+            className="absolute -right-3.5 top-1/2 z-10 hidden h-[42px] w-[42px] -translate-y-1/2 items-center justify-center rounded-full border-[1.5px] border-border bg-card shadow-lg transition-colors hover:bg-accent sm:flex"
+          >
+            <ChevronRight className="h-[18px] w-[18px]" />
+          </button>
+        )}
       </div>
 
       <div className="mb-3.5 flex flex-wrap items-baseline justify-between gap-1.5">
