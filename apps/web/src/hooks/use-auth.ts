@@ -48,12 +48,13 @@ export function useVerifyEmail() {
   const setSession = useAuthStore((s) => s.setSession);
   const router = useRouter();
   return useMutation({
-    mutationFn: (token: string) => api.post<AuthResult>('/auth/verify-email', { token }, { auth: false }),
+    mutationFn: ({ token }: { token: string; redirectTo?: string }) =>
+      api.post<AuthResult>('/auth/verify-email', { token }, { auth: false }),
     // Verifying the email activates the account AND signs the user in — they go
     // straight into the app, never back to a manual login screen.
-    onSuccess: (res) => {
+    onSuccess: (res, variables) => {
       setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
-      router.push('/home');
+      router.push(variables.redirectTo ?? '/home');
     },
   });
 }

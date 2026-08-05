@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { BadgeCheck, Lock } from 'lucide-react';
+import { BadgeCheck, Briefcase, GraduationCap, Lock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,10 +12,13 @@ import { GoogleVerifyButton, googleEnabled } from '@/components/social-auth';
 import { useSignup } from '@/hooks/use-auth';
 import { useAuthStore } from '@/stores/auth.store';
 
+type Intent = 'college' | 'jobs';
+
 export default function SignupPage() {
   const signup = useSignup();
   const setSession = useAuthStore((s) => s.setSession);
   const router = useRouter();
+  const [intent, setIntent] = useState<Intent | null>(null);
   const [googleToken, setGoogleToken] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -48,19 +51,20 @@ export default function SignupPage() {
       },
       {
         onSuccess: (res) => {
+          const destination = intent === 'college' ? '/profile' : '/onboarding/jobs';
           // Google-verified signup returns tokens — sign the user straight in and
-          // drop them right into the app (profile setup / campus verification stay
-          // optional and can be done later from the dashboard).
+          // drop them right into the flow matching why they signed up.
           if (res.tokens) {
             setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
             toast.success('Account created 🎉');
-            router.push('/home');
+            router.push(destination);
             return;
           }
-          // Fallback (no Google configured): email-verification flow.
+          // Fallback (no Google configured): email-verification flow. Carry the
+          // intent through the query string so it survives the emailed-link round-trip.
           if (res.devLink) sessionStorage.setItem('ebd_verify_devlink', res.devLink);
           toast.success('Account created — verify your email to continue.');
-          router.push(`/verify-email?email=${encodeURIComponent(email.trim())}`);
+          router.push(`/verify-email?email=${encodeURIComponent(email.trim())}&intent=${intent}`);
         },
         onError: (err) => toast.error((err as Error).message),
       },
@@ -76,9 +80,41 @@ export default function SignupPage() {
         </p>
       </CardHeader>
       <CardContent>
-        {googleEnabled && !verified ? (
+        {!intent ? (
+          // Step 0 — what brought them here, before any account details.
+          <div className="space-y-4 py-2">
+            <p className="text-center text-sm font-medium">What brings you to EduBridge today?</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setIntent('college')}
+                className="flex flex-col items-center gap-2 rounded-lg border border-border p-4 text-center transition-colors hover:border-primary hover:bg-primary/5"
+              >
+                <GraduationCap className="h-6 w-6 text-primary" />
+                <span className="font-medium">🏫 College Admissions</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIntent('jobs')}
+                className="flex flex-col items-center gap-2 rounded-lg border border-border p-4 text-center transition-colors hover:border-primary hover:bg-primary/5"
+              >
+                <Briefcase className="h-6 w-6 text-primary" />
+                <span className="font-medium">💼 Internships &amp; Jobs</span>
+              </button>
+            </div>
+            <p className="text-center text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <Link href="/login" className="text-primary hover:underline">
+                Log in
+              </Link>
+            </p>
+          </div>
+        ) : googleEnabled && !verified ? (
           // Step 1 — mandatory Google verification.
           <div className="space-y-4 py-2 text-center">
+            <button type="button" onClick={() => setIntent(null)} className="text-xs text-muted-foreground hover:underline">
+              ‹ Change
+            </button>
             <p className="text-sm text-muted-foreground">
               Verify with your Google account to continue.
             </p>
@@ -93,6 +129,9 @@ export default function SignupPage() {
         ) : (
           // Step 2 — complete the account.
           <form onSubmit={onSubmit} className="space-y-3">
+            <button type="button" onClick={() => setIntent(null)} className="text-xs text-muted-foreground hover:underline">
+              ‹ Change
+            </button>
             {googleToken && (
               <div className="flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 text-sm text-green-700 dark:text-green-300">
                 <BadgeCheck className="h-4 w-4" /> Verified with Google
