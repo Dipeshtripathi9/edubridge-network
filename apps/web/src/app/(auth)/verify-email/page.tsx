@@ -9,16 +9,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useResendVerification, useVerifyEmail } from '@/hooks/use-auth';
 
-function VerifyByToken({ token }: { token: string }) {
+function VerifyByToken({ token, redirectTo }: { token: string; redirectTo?: string }) {
   const verify = useVerifyEmail();
   const ran = useRef(false);
 
   useEffect(() => {
     if (ran.current) return;
     ran.current = true;
-    // On success the hook signs the user in and redirects to /onboarding.
-    verify.mutate(token);
-  }, [token, verify]);
+    // On success the hook signs the user in and redirects to `redirectTo` (defaults to /home).
+    verify.mutate({ token, redirectTo });
+  }, [token, redirectTo, verify]);
 
   if (verify.isError) {
     return (
@@ -108,7 +108,9 @@ function VerifyEmailInner() {
   const params = useSearchParams();
   const token = params.get('token');
   const email = params.get('email') ?? '';
-  return token ? <VerifyByToken token={token} /> : <CheckInbox email={email} />;
+  const intent = params.get('intent');
+  const redirectTo = intent === 'college' ? '/profile' : intent === 'jobs' ? '/onboarding/jobs' : undefined;
+  return token ? <VerifyByToken token={token} redirectTo={redirectTo} /> : <CheckInbox email={email} />;
 }
 
 export default function VerifyEmailPage() {
