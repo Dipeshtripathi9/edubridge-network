@@ -2,14 +2,13 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Bookmark, Briefcase, CheckCircle2, Search as SearchIcon } from 'lucide-react';
+import { Bookmark, Briefcase, CheckCircle2, Code2, HeartPulse, Palette, Search as SearchIcon, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHero } from '@/components/page-hero';
 import { OpportunityRecommendationCard } from '@/components/opportunity-recommendation-card';
-import { CollegeQuiz } from '@/components/college-quiz';
 import { useInternshipListings, useInternshipListing, type InternshipListing } from '@/hooks/use-internship-listings';
 import { useInternshipListingShortlist } from '@/hooks/use-internship-listing-shortlist';
 import { useInternshipListingApplied } from '@/hooks/use-internship-listing-applied';
@@ -18,14 +17,53 @@ import { cn } from '@/lib/utils';
 
 type Tab = 'all' | 'shortlist' | 'applied';
 
-function OpportunityBySlug({ slug, onQuiz }: { slug: string; onQuiz: () => void }) {
+const CATEGORIES = [
+  {
+    key: 'Technology',
+    icon: Code2,
+    accent: 'text-[#5B5FE9]',
+    tint: 'bg-[#EDECFC]',
+    ring: 'ring-[#5B5FE9]',
+    description:
+      'Discover software development, AI, data science, cybersecurity, cloud, DevOps, UI/UX, and mobile development opportunities tailored to your technical skills.',
+  },
+  {
+    key: 'Business',
+    icon: TrendingUp,
+    accent: 'text-[#D9972C]',
+    tint: 'bg-[#FBF0DC]',
+    ring: 'ring-[#D9972C]',
+    description:
+      'Explore internships and projects in marketing, finance, HR, sales, operations, and business analytics to gain practical business experience.',
+  },
+  {
+    key: 'Healthcare',
+    icon: HeartPulse,
+    accent: 'text-[#E0587A]',
+    tint: 'bg-[#FBE8ED]',
+    ring: 'ring-[#E0587A]',
+    description:
+      'Build hands-on experience through clinical, laboratory, radiology, physiotherapy, pharmacy, and hospital administration opportunities.',
+  },
+  {
+    key: 'Creative',
+    icon: Palette,
+    accent: 'text-[#9B59D0]',
+    tint: 'bg-[#F1E8FA]',
+    ring: 'ring-[#9B59D0]',
+    description:
+      'Grow your creative portfolio with opportunities in graphic design, video editing, content writing, social media, branding, and digital media.',
+  },
+];
+
+function OpportunityBySlug({ slug }: { slug: string }) {
   const { data: listing, isLoading } = useInternshipListing(slug);
   if (isLoading) return <Skeleton className="h-28 w-full rounded-[20px]" />;
   if (!listing) return null;
-  return <OpportunityRecommendationCard listing={listing} onQuiz={onQuiz} />;
+  return <OpportunityRecommendationCard listing={listing} />;
 }
 
-function ShortlistTab({ onQuiz }: { onQuiz: () => void }) {
+function ShortlistTab() {
   const { slugs } = useInternshipListingShortlist();
 
   if (slugs.length === 0) {
@@ -41,13 +79,13 @@ function ShortlistTab({ onQuiz }: { onQuiz: () => void }) {
   return (
     <div className="flex flex-col gap-3">
       {slugs.map((slug) => (
-        <OpportunityBySlug key={slug} slug={slug} onQuiz={onQuiz} />
+        <OpportunityBySlug key={slug} slug={slug} />
       ))}
     </div>
   );
 }
 
-function AppliedTab({ onQuiz }: { onQuiz: () => void }) {
+function AppliedTab() {
   const { slugs } = useInternshipListingApplied();
 
   if (slugs.length === 0) {
@@ -59,15 +97,15 @@ function AppliedTab({ onQuiz }: { onQuiz: () => void }) {
   return (
     <div className="flex flex-col gap-3">
       {slugs.map((slug) => (
-        <OpportunityBySlug key={slug} slug={slug} onQuiz={onQuiz} />
+        <OpportunityBySlug key={slug} slug={slug} />
       ))}
     </div>
   );
 }
 
-function AllTab({ onQuiz }: { onQuiz: () => void }) {
+function AllTab({ category, onCategoryChange }: { category?: string; onCategoryChange: (c?: string) => void }) {
   const [q, setQ] = useState('');
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInternshipListings({ q: q || undefined });
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInternshipListings({ category, q: q || undefined });
   const listings: InternshipListing[] = data?.pages.flatMap((p) => p.data) ?? [];
 
   return (
@@ -75,6 +113,41 @@ function AllTab({ onQuiz }: { onQuiz: () => void }) {
       <div className="relative mb-4">
         <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search opportunities by name…" className="pl-9" />
+      </div>
+
+      {/* Category filter row — horizontally scrollable, tap to filter/unfilter */}
+      <div className="mb-8 flex gap-3.5 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {CATEGORIES.map(({ key, icon: Icon, accent, tint, ring, description }) => {
+          const active = category === key;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onCategoryChange(active ? undefined : key)}
+              className={cn(
+                'flex w-[260px] flex-none items-start gap-3.5 rounded-[16px] border-[1.5px] border-border bg-card p-[18px] text-left transition-all hover:-translate-y-0.5 hover:shadow-lg sm:w-[280px]',
+                active && `${ring} ring-2 ring-offset-0`,
+              )}
+            >
+              <span className={cn('flex h-[46px] w-[46px] flex-none items-center justify-center rounded-[13px]', tint, accent)}>
+                <Icon className="h-5 w-5" />
+              </span>
+              <span>
+                <span className="mb-1 block text-[15.5px] font-bold">{key}</span>
+                <span className="block text-[12.5px] leading-relaxed text-muted-foreground">{description}</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mb-3.5 flex flex-wrap items-baseline justify-between gap-1.5">
+        <h2 className="m-0 font-fraunces text-[20px] font-bold">{category ? `${category} opportunities` : 'All opportunities'}</h2>
+        {!isLoading && (
+          <span className="text-[13px] text-muted-foreground">
+            {listings.length} {listings.length === 1 ? 'match' : 'matches'}
+          </span>
+        )}
       </div>
 
       {isLoading && (
@@ -96,7 +169,7 @@ function AllTab({ onQuiz }: { onQuiz: () => void }) {
       {listings.length > 0 && (
         <div className="flex flex-col gap-3">
           {listings.map((l) => (
-            <OpportunityRecommendationCard key={l.id} listing={l} onQuiz={onQuiz} />
+            <OpportunityRecommendationCard key={l.id} listing={l} />
           ))}
         </div>
       )}
@@ -116,10 +189,9 @@ function OpenCareerProgramInner() {
   const { data: me, isLoading: meLoading } = useMe();
   const params = useSearchParams();
   const router = useRouter();
-  const [quizOpen, setQuizOpen] = useState(false);
-  const openQuiz = () => setQuizOpen(true);
   const initialTab = params.get('tab');
   const [tab, setTab] = useState<Tab>(initialTab === 'shortlist' || initialTab === 'applied' ? initialTab : 'all');
+  const [category, setCategory] = useState<string | undefined>(undefined);
   const { slugs: shortlistSlugs } = useInternshipListingShortlist();
   const { slugs: appliedSlugs } = useInternshipListingApplied();
 
@@ -148,14 +220,12 @@ function OpenCareerProgramInner() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <CollegeQuiz open={quizOpen} onClose={() => setQuizOpen(false)} />
-
       <div className="space-y-6">
         <PageHero
           eyebrow="Recommended"
           title="Find opportunities that"
           accent="fit you."
-          sub="Your shortlist, plus every opportunity matched to your profile."
+          sub="Your shortlist, plus every internship, gig, and project matched to your profile."
         />
       </div>
 
@@ -180,9 +250,9 @@ function OpenCareerProgramInner() {
       </div>
 
       <div className="pb-10">
-        {tab === 'all' && <AllTab onQuiz={openQuiz} />}
-        {tab === 'shortlist' && <ShortlistTab onQuiz={openQuiz} />}
-        {tab === 'applied' && <AppliedTab onQuiz={openQuiz} />}
+        {tab === 'all' && <AllTab category={category} onCategoryChange={setCategory} />}
+        {tab === 'shortlist' && <ShortlistTab />}
+        {tab === 'applied' && <AppliedTab />}
       </div>
     </div>
   );
