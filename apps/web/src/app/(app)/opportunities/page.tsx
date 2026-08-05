@@ -235,7 +235,10 @@ function OpenCareerProgramInner() {
   const router = useRouter();
   const initialTab = params.get('tab');
   const [tab, setTab] = useState<Tab>(initialTab === 'shortlist' || initialTab === 'applied' ? initialTab : 'all');
-  const [category, setCategory] = useState<string | undefined>(undefined);
+  const initialCategory = params.get('category');
+  const [category, setCategory] = useState<string | undefined>(
+    initialCategory && CATEGORIES.some((c) => c.key === initialCategory) ? initialCategory : undefined,
+  );
   const { slugs: shortlistSlugs } = useInternshipListingShortlist();
   const { slugs: appliedSlugs } = useInternshipListingApplied();
 
