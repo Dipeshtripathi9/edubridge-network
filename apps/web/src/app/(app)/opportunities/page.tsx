@@ -1,8 +1,20 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Bookmark, Briefcase, CheckCircle2, Code2, HeartPulse, Palette, Search as SearchIcon, TrendingUp } from 'lucide-react';
+import {
+  Bookmark,
+  Briefcase,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Code2,
+  Globe,
+  HeartPulse,
+  Palette,
+  Search as SearchIcon,
+  TrendingUp,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -53,6 +65,15 @@ const CATEGORIES = [
     ring: 'ring-[#9B59D0]',
     description:
       'Grow your creative portfolio with opportunities in graphic design, video editing, content writing, social media, branding, and digital media.',
+  },
+  {
+    key: 'General',
+    icon: Globe,
+    accent: 'text-[#8C8676]',
+    tint: 'bg-[#EFEDE7]',
+    ring: 'ring-[#8C8676]',
+    description:
+      'Expand your experience through campus ambassador programs, research, startup internships, volunteering, and remote opportunities across diverse industries.',
   },
 ];
 
@@ -107,6 +128,8 @@ function AllTab({ category, onCategoryChange }: { category?: string; onCategoryC
   const [q, setQ] = useState('');
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInternshipListings({ category, q: q || undefined });
   const listings: InternshipListing[] = data?.pages.flatMap((p) => p.data) ?? [];
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const scrollByStep = (dir: 1 | -1) => sliderRef.current?.scrollBy({ left: dir * 340, behavior: 'smooth' });
 
   return (
     <div>
@@ -115,30 +138,51 @@ function AllTab({ category, onCategoryChange }: { category?: string; onCategoryC
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search opportunities by name…" className="pl-9" />
       </div>
 
-      {/* Category filter row — horizontally scrollable, tap to filter/unfilter */}
-      <div className="mb-8 flex gap-3.5 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {CATEGORIES.map(({ key, icon: Icon, accent, tint, ring, description }) => {
-          const active = category === key;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => onCategoryChange(active ? undefined : key)}
-              className={cn(
-                'flex w-[260px] flex-none items-start gap-3.5 rounded-[16px] border-[1.5px] border-border bg-card p-[18px] text-left transition-all hover:-translate-y-0.5 hover:shadow-lg sm:w-[280px]',
-                active && `${ring} ring-2 ring-offset-0`,
-              )}
-            >
-              <span className={cn('flex h-[46px] w-[46px] flex-none items-center justify-center rounded-[13px]', tint, accent)}>
-                <Icon className="h-5 w-5" />
-              </span>
-              <span>
-                <span className="mb-1 block text-[15.5px] font-bold">{key}</span>
-                <span className="block text-[12.5px] leading-relaxed text-muted-foreground">{description}</span>
-              </span>
-            </button>
-          );
-        })}
+      {/* Category filter row — horizontally scrollable, tap a card to filter/unfilter,
+          or use the arrow buttons to scroll without touch/trackpad. */}
+      <div className="relative mb-8">
+        <button
+          type="button"
+          aria-label="Scroll categories left"
+          onClick={() => scrollByStep(-1)}
+          className="absolute -left-3.5 top-1/2 z-10 hidden h-[42px] w-[42px] -translate-y-1/2 items-center justify-center rounded-full border-[1.5px] border-border bg-card shadow-lg transition-colors hover:bg-accent sm:flex"
+        >
+          <ChevronLeft className="h-[18px] w-[18px]" />
+        </button>
+
+        <div ref={sliderRef} className="flex gap-3.5 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {CATEGORIES.map(({ key, icon: Icon, accent, tint, ring, description }) => {
+            const active = category === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => onCategoryChange(active ? undefined : key)}
+                className={cn(
+                  'flex w-[260px] flex-none items-start gap-3.5 rounded-[16px] border-[1.5px] border-border bg-card p-[18px] text-left transition-all hover:-translate-y-0.5 hover:shadow-lg sm:w-[280px]',
+                  active && `${ring} ring-2 ring-offset-0`,
+                )}
+              >
+                <span className={cn('flex h-[46px] w-[46px] flex-none items-center justify-center rounded-[13px]', tint, accent)}>
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span>
+                  <span className="mb-1 block text-[15.5px] font-bold">{key}</span>
+                  <span className="block text-[12.5px] leading-relaxed text-muted-foreground">{description}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          aria-label="Scroll categories right"
+          onClick={() => scrollByStep(1)}
+          className="absolute -right-3.5 top-1/2 z-10 hidden h-[42px] w-[42px] -translate-y-1/2 items-center justify-center rounded-full border-[1.5px] border-border bg-card shadow-lg transition-colors hover:bg-accent sm:flex"
+        >
+          <ChevronRight className="h-[18px] w-[18px]" />
+        </button>
       </div>
 
       <div className="mb-3.5 flex flex-wrap items-baseline justify-between gap-1.5">
