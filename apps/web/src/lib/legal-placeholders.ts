@@ -1,22 +1,19 @@
 /**
- * Single source of truth for the business/legal details that Contact, Privacy,
- * Terms and Refund-Cancellation currently reference as placeholders. Fill these
- * in once real values exist (legal entity, registered address, support inbox,
- * grievance officer, GSTIN) and every page picks them up.
+ * Single source of truth for the business/legal details referenced across
+ * Contact, Privacy, Terms and Refund-Cancellation. Update here to update
+ * every page at once.
  */
 export const LEGAL = {
-  entityName: '[Legal entity name — e.g. EduBridge Network Pvt. Ltd.]',
-  registeredAddress: '[Registered business address]',
-  operatingAddress: '[Operating / correspondence address, if different]',
-  supportEmail: '[support email address]',
-  supportPhone: '[support phone number]',
-  supportHours: '[support hours, e.g. Mon–Sat, 10am–7pm IST]',
-  grievanceOfficerName: '[Grievance officer name]',
-  grievanceOfficerEmail: '[grievance officer email]',
-  gstin: '[GSTIN, if registered]',
-  cin: '[CIN / registration number, if applicable]',
-  jurisdiction: '[City], India',
-  refundWindowDays: '[X]',
-  refundProcessingDays: '[X]',
-  lastUpdated: '[DD Month YYYY]',
+  entityName: 'EduBridge Network (proprietorship, currently unregistered)',
+  registeredAddress: '2/F, Block 329, Sector Mu-2, Greater Noida, Gautam Budh Nagar, Uttar Pradesh, India – 201310',
+  supportEmail: '365edubridge@gmail.com',
+  supportPhone: '+91 88518 69281',
+  supportHours: '24/7',
+  grievanceOfficerName: 'EduBridge Network (Proprietor)',
+  grievanceOfficerEmail: '365edubridge@gmail.com',
+  gstin: '09BYZPT9200R1Z0',
+  jurisdiction: 'Gautam Budh Nagar, Uttar Pradesh',
+  refundWindowDays: '7',
+  refundProcessingDays: '7',
+  lastUpdated: '6 August 2026',
 } as const;
