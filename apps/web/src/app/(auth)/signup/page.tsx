@@ -49,6 +49,7 @@ export default function SignupPage() {
         fullName: fullName.trim(),
         gender: gender || undefined,
         googleIdToken: googleToken ?? undefined,
+        intent: intent === 'college' ? 'COLLEGE_ADMISSIONS' : 'INTERNSHIPS_JOBS',
       },
       {
         onSuccess: (res) => {

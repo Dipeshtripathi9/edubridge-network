@@ -7,11 +7,18 @@ import { Button } from '@/components/ui/button';
 import { ProfileForm } from '@/components/profile-form';
 import { useProfileProgress } from '@/stores/profile-progress.store';
 import { useAuthStore } from '@/stores/auth.store';
+import { useMe } from '@/hooks/use-profile';
+
+const SIGNUP_INTENT_LABEL: Record<string, string> = {
+  COLLEGE_ADMISSIONS: '🏫 College Admissions',
+  INTERNSHIPS_JOBS: '💼 Internships & Jobs',
+};
 
 export default function ProfilePage() {
   const router = useRouter();
   const loggedIn = useAuthStore((s) => !!s.accessToken);
   const pct = useProfileProgress((s) => s.pct);
+  const { data: me } = useMe();
 
   // Close the page: go back if there's history, otherwise fall back to Home.
   const close = () => {
@@ -54,6 +61,11 @@ export default function ProfilePage() {
           </h1>
           <span className="font-display text-lg font-extrabold tabular-nums text-primary">{pct}%</span>
         </div>
+        {me?.profile?.signupIntent && (
+          <p className="mb-2 text-sm text-muted-foreground">
+            Signed up for: <span className="font-semibold text-foreground">{SIGNUP_INTENT_LABEL[me.profile.signupIntent]}</span>
+          </p>
+        )}
         <div className="h-2.5 w-full overflow-hidden rounded-full bg-accent">
           <div
             className="h-full rounded-full bg-gradient-to-r from-primary to-marigold transition-[width] duration-700 ease-out"
