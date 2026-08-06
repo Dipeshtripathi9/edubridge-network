@@ -4,10 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import {
-  ArrowRight,
   Award,
-  Bookmark,
-  Briefcase,
   Calendar,
   ChevronDown,
   ChevronRight,
@@ -21,8 +18,10 @@ import {
   Users,
 } from 'lucide-react';
 import { AccountMenu } from '@/components/account-menu';
-import { isSafeHttpUrl, cn } from '@/lib/utils';
-import { useInternshipListings, OPPORTUNITY_TYPE_LABEL } from '@/hooks/use-internship-listings';
+import { Button } from '@/components/ui/button';
+import { OpportunityRecommendationCard } from '@/components/opportunity-recommendation-card';
+import { cn } from '@/lib/utils';
+import { useInternshipListings } from '@/hooks/use-internship-listings';
 import styles from './page.module.css';
 
 const fraunces = Fraunces({
@@ -202,56 +201,23 @@ function GigsSection() {
           </p>
         </div>
 
-        <div className={styles.gigsGrid}>
-          {listings.map((gig) => {
-            const canApply = isSafeHttpUrl(gig.applyUrl);
-            return (
-              <div key={gig.id} className={styles.gigCard}>
-                <div className={styles.gigIconCircle}>
-                  <Briefcase className="h-6 w-6" />
-                </div>
-                <div>
-                  <div className={styles.gigNameRow}>
-                    <div>
-                      <h3>{gig.title}</h3>
-                      <p className={styles.gigSub}>
-                        {gig.company} · {gig.isRemote ? 'Remote' : gig.location}
-                      </p>
-                    </div>
-                    <Link href={`/internship/${gig.slug}`} className={cn(styles.btn, styles.btnGhost)}>
-                      View details <ChevronRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-                  <div className={styles.gigTagsRow}>
-                    <span className={cn(styles.gigTag, styles.gigTagType)}>{OPPORTUNITY_TYPE_LABEL[gig.type]}</span>
-                    <span className={cn(styles.gigTag, styles.gigTagMode)}>{gig.isRemote ? 'Remote' : 'On-site'}</span>
-                  </div>
-                </div>
-
-                <div className={styles.gigActionsRow}>
-                  <button type="button" className={cn(styles.btn, styles.btnGhost)}>
-                    <Bookmark className="h-3.5 w-3.5" /> Shortlist
-                  </button>
-                </div>
-
-                <div className={styles.gigUpnext}>
-                  <p className={styles.label}>Up next</p>
-                  {canApply ? (
-                    <a href={gig.applyUrl} target="_blank" rel="noopener noreferrer" className={styles.applyLink}>
-                      Apply <ChevronRight className="h-3.5 w-3.5" />
-                    </a>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">Application link unavailable</span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <div className="flex flex-col gap-3">
+          {listings.map((gig) => (
+            <OpportunityRecommendationCard key={gig.id} listing={gig} />
+          ))}
         </div>
 
-        <Link href="/opportunities" className={styles.exploreMoreLink}>
-          Explore more recommendations from all companies <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+        <div className="mt-6 text-center">
+          <Button
+            variant="outline"
+            className="gap-1.5 rounded-full border-[#1C4736] px-6 text-[#1C4736] hover:bg-[#E7F1EB] hover:text-[#1C4736]"
+            asChild
+          >
+            <Link href="/opportunities">
+              See more recommendations <ChevronRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </div>
     </section>
   );

@@ -195,12 +195,20 @@ export function HomeIllustrated() {
             <nav className="flex flex-nowrap items-center gap-x-5 overflow-x-auto whitespace-nowrap text-[14px] font-semibold text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <Link href="/reviews" className="hover:text-primary">Colleges</Link>
               <Link href="/internship" className="hover:text-primary">Internship</Link>
+              <Link href="/services" className="hover:text-primary">Services</Link>
+              <Link href="/pricing" className="hover:text-primary">Pricing</Link>
               <Link href="/about" className="hover:text-primary">About</Link>
+              <Link href="/contact" className="hover:text-primary">Contact</Link>
             </nav>
           </div>
-          <div className="flex flex-wrap justify-between gap-3 pt-6 text-[13.5px] font-semibold text-muted-foreground">
-            <span>© 2026 EduBridge Network. All rights reserved.</span>
-            <span>Made in India</span>
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-6">
+            <span className="text-[13.5px] font-semibold text-muted-foreground">© 2026 EduBridge Network. All rights reserved.</span>
+            <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] font-semibold text-muted-foreground">
+              <Link href="/privacy" className="hover:text-primary">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-primary">Terms &amp; Conditions</Link>
+              <Link href="/refund-policy" className="hover:text-primary">Refund &amp; Cancellation</Link>
+            </nav>
+            <span className="text-[13.5px] font-semibold text-muted-foreground">Made in India</span>
           </div>
         </footer>
       </div>
