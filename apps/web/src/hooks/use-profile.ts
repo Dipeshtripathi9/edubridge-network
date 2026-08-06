@@ -22,6 +22,7 @@ export interface Me {
     city?: string | null;
     interests: string[];
     collegeVerification?: string;
+    signupIntent?: 'COLLEGE_ADMISSIONS' | 'INTERNSHIPS_JOBS' | null;
     college?: { id: string; name: string } | null;
   } | null;
   userBadges?: { badge: { name: string; tier: string } }[];

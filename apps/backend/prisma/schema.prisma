@@ -47,6 +47,11 @@ enum CollegeVerificationStatus {
   REJECTED
 }
 
+enum SignupIntent {
+  COLLEGE_ADMISSIONS
+  INTERNSHIPS_JOBS
+}
+
 enum ReviewCategory {
   PLACEMENT
   HOSTEL
@@ -304,6 +309,7 @@ model Profile {
   city   String?
 
   collegeVerification CollegeVerificationStatus @default(UNVERIFIED)
+  signupIntent         SignupIntent? // why they signed up — set once at signup, never re-asked
 
   interests String[] // tags: Placement, DSA, AI, Startups...
 

@@ -32,6 +32,7 @@ export function useSignup() {
       fullName: string;
       gender?: string;
       googleIdToken?: string;
+      intent?: 'COLLEGE_ADMISSIONS' | 'INTERNSHIPS_JOBS';
     }) =>
       api.post<{
         user: AuthUser;
