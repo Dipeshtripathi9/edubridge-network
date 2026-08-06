@@ -175,6 +175,11 @@ enum EnrollmentSubtype {
   OWN_PROJECT
 }
 
+enum VirtualInternshipTrack {
+  FOUR_WEEK
+  FOUR_MONTH
+}
+
 enum EnrollmentStatus {
   PENDING_PAYMENT
   ACTIVE
@@ -274,9 +279,10 @@ model User {
   referralsPosted      Referral[]
   profileLead          ProfileLead?
 
-  trackAEnrollments  TrackAEnrollment[]
-  trackBApplications TrackBApplication[]
-  certificates       Certificate[]
+  trackAEnrollments            TrackAEnrollment[]
+  trackBApplications           TrackBApplication[]
+  certificates                 Certificate[]
+  virtualInternshipEnrollments VirtualInternshipEnrollment[]
 
   @@index([status])
   @@index([role])
@@ -1318,6 +1324,24 @@ model EnrollmentTask {
 
   @@index([enrollmentId, order])
   @@map("enrollment_tasks")
+}
+
+model VirtualInternshipEnrollment {
+  id                   String                 @id @default(cuid())
+  userId               String
+  user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track                VirtualInternshipTrack
+  feeAmount            Int // snapshot at enroll time; never re-read pricing config later
+  status               EnrollmentStatus       @default(PENDING_PAYMENT)
+  paymentReferenceNote String?
+  paidAt               DateTime?
+  paymentConfirmedById String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("virtual_internship_enrollments")
 }
 
 model TrackBApplication {
