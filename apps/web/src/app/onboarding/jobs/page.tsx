@@ -101,7 +101,13 @@ export default function InternshipsJobsOnboardingPage() {
             )}
             <CardContent className="space-y-4">
               {step === 'gate' && (
-                <div className="space-y-4 py-2 text-center">
+                <m.div
+                  key="gate"
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-4 py-2 text-center"
+                >
                   <p className="text-sm text-muted-foreground">
                     Internships &amp; Jobs on EduBridge is only open to students who are already enrolled in a college.
                   </p>
@@ -114,11 +120,17 @@ export default function InternshipsJobsOnboardingPage() {
                       Yes, I&apos;m in college
                     </Button>
                   </div>
-                </div>
+                </m.div>
               )}
 
               {step === 'blocked' && (
-                <div className="space-y-4 py-2 text-center">
+                <m.div
+                  key="blocked"
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-4 py-2 text-center"
+                >
                   <p className="text-sm text-muted-foreground">
                     Internships &amp; Jobs on EduBridge is only open to students who are already enrolled in a college —
                     check back once you&apos;ve started college.
@@ -129,27 +141,35 @@ export default function InternshipsJobsOnboardingPage() {
                       Go there →
                     </Link>
                   </p>
-                </div>
+                </m.div>
               )}
 
               {step === 'college' && (
-                <div className="space-y-3">
+                <m.div
+                  key="college"
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-3"
+                >
                   <CollegePicker value={college} onChange={setCollege} />
                   <p className="text-xs text-muted-foreground">
                     Pick from the list — a directory match is required to verify your college email next.
                   </p>
-                  <Button
-                    className="w-full"
-                    disabled={!college?.collegeId}
-                    onClick={() => setStep('course')}
-                  >
+                  <Button className="w-full" disabled={!college?.collegeId} onClick={() => setStep('course')}>
                     Continue
                   </Button>
-                </div>
+                </m.div>
               )}
 
               {step === 'course' && (
-                <div className="space-y-3">
+                <m.div
+                  key="course"
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-3"
+                >
                   <Input placeholder="Course / branch (e.g. B.Tech CSE)" value={course} onChange={(e) => setCourse(e.target.value)} />
                   <div className="flex gap-2">
                     <Button variant="outline" className="flex-1" onClick={() => setStep('college')}>
@@ -159,11 +179,17 @@ export default function InternshipsJobsOnboardingPage() {
                       Continue
                     </Button>
                   </div>
-                </div>
+                </m.div>
               )}
 
               {step === 'year' && (
-                <div className="space-y-3">
+                <m.div
+                  key="year"
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-3"
+                >
                   <select
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
@@ -184,11 +210,17 @@ export default function InternshipsJobsOnboardingPage() {
                       Continue
                     </Button>
                   </div>
-                </div>
+                </m.div>
               )}
 
               {step === 'verify' && (
-                <div className="space-y-3">
+                <m.div
+                  key="verify"
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-3"
+                >
                   {emailVerified ? (
                     <div className="flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 text-sm text-green-700 dark:text-green-300">
                       <CheckCircle2 className="h-4 w-4 shrink-0" />
@@ -213,7 +245,7 @@ export default function InternshipsJobsOnboardingPage() {
                       {submitVerification.isPending ? 'Saving…' : 'Finish'}
                     </Button>
                   </div>
-                </div>
+                </m.div>
               )}
             </CardContent>
           </Card>
