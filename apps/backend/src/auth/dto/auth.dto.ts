@@ -1,8 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { SignupIntent } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
@@ -55,6 +57,11 @@ export class SignupDto {
   @IsOptional()
   @IsString()
   googleIdToken?: string;
+
+  @ApiPropertyOptional({ enum: SignupIntent, description: 'Why the student signed up — set once, never re-asked' })
+  @IsOptional()
+  @IsIn(['COLLEGE_ADMISSIONS', 'INTERNSHIPS_JOBS'])
+  intent?: SignupIntent;
 }
 
 export class LoginDto {
