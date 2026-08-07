@@ -9,6 +9,7 @@ import {
   useCompleteVirtualInternshipEnrollment,
   useConfirmVirtualInternshipPayment,
   useEvaluateVirtualInternshipEnrollment,
+  useRejectVirtualInternshipPayment,
   type VirtualInternshipEnrollment,
 } from '@/hooks/use-virtual-internship';
 
@@ -36,15 +37,17 @@ function InlinePanel({
 }
 
 export function VirtualInternshipAdminActions({ enrollment }: { enrollment: VirtualInternshipEnrollment }) {
-  const [panel, setPanel] = useState<'confirm' | 'evaluate' | null>(null);
+  const [panel, setPanel] = useState<'confirm' | 'reject' | 'evaluate' | null>(null);
   const [mentorNote, setMentorNote] = useState('');
+  const [rejectNote, setRejectNote] = useState('');
   const [evalNote, setEvalNote] = useState('');
 
   const confirmPayment = useConfirmVirtualInternshipPayment();
+  const rejectPayment = useRejectVirtualInternshipPayment();
   const evaluate = useEvaluateVirtualInternshipEnrollment();
   const complete = useCompleteVirtualInternshipEnrollment();
 
-  const togglePanel = (p: 'confirm' | 'evaluate') => setPanel((cur) => (cur === p ? null : p));
+  const togglePanel = (p: 'confirm' | 'reject' | 'evaluate') => setPanel((cur) => (cur === p ? null : p));
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -68,6 +71,35 @@ export function VirtualInternshipAdminActions({ enrollment }: { enrollment: Virt
             }
           >
             Confirm
+          </Button>
+        </InlinePanel>
+      )}
+
+      {enrollment.status === 'PENDING_PAYMENT' && (
+        <InlinePanel label="Reject payment" open={panel === 'reject'} onToggle={() => togglePanel('reject')}>
+          <Textarea
+            placeholder="Optional note shown to the student (e.g. UTR didn't match any transfer)"
+            value={rejectNote}
+            onChange={(e) => setRejectNote(e.target.value)}
+          />
+          <Button
+            size="sm"
+            variant="destructive"
+            disabled={rejectPayment.isPending}
+            onClick={() =>
+              rejectPayment.mutate(
+                { id: enrollment.id, note: rejectNote.trim() || undefined },
+                {
+                  onSuccess: () => {
+                    toast.success('Payment rejected — student can join the track again');
+                    setPanel(null);
+                  },
+                  onError: (e) => toast.error((e as Error).message),
+                },
+              )
+            }
+          >
+            Reject
           </Button>
         </InlinePanel>
       )}

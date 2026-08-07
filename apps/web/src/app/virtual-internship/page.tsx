@@ -1,23 +1,23 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import {
+  ArrowLeft,
   Award,
-  Calendar,
+  Check,
   ChevronDown,
   ChevronRight,
   ClipboardCheck,
-  Code2,
+  Clock,
   FileText,
   GraduationCap,
   LineChart,
   MessageCircle,
   Share2,
-  ShieldCheck,
   Sparkles,
-  UserPlus,
+  Target,
   Users,
 } from 'lucide-react';
 import { AccountMenu } from '@/components/account-menu';
@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { OpportunityRecommendationCard } from '@/components/opportunity-recommendation-card';
 import { cn } from '@/lib/utils';
 import { useInternshipListings } from '@/hooks/use-internship-listings';
+import { useVirtualInternshipPricing, useVirtualInternshipTasks } from '@/hooks/use-virtual-internship';
 import styles from './page.module.css';
 
 const fraunces = Fraunces({
@@ -44,30 +45,10 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 const HOW_STEPS = [
-  {
-    icon: UserPlus,
-    tone: 'mint',
-    title: 'Enroll',
-    desc: 'Pick your track — 4-week or 4-month — and pay via UPI.',
-  },
-  {
-    icon: Code2,
-    tone: 'orange',
-    title: 'Build',
-    desc: 'Get matched to a team and start shipping real projects.',
-  },
-  {
-    icon: Award,
-    tone: 'mint',
-    title: 'Get certified',
-    desc: 'Finish all projects, get mentor sign-off, receive your certificate.',
-  },
-  {
-    icon: Share2,
-    tone: 'orange',
-    title: 'Referral support',
-    desc: 'Unlock referral access and paid remote gigs once you finish.',
-  },
+  { img: '/virtual-internship-step-enroll.png', title: 'Enroll' },
+  { img: '/virtual-internship-step-build.png', title: 'Build' },
+  { img: '/virtual-internship-step-certified.png', title: 'Get Certified' },
+  { img: '/virtual-internship-step-referral.png', title: 'Job Referral' },
 ];
 
 const MENTORS = [
@@ -79,77 +60,49 @@ const SUPPORT_TEAM = [
   { initials: 'V', name: 'Vikram', info: 'B.Tech CSE · IIIT Guna' },
 ];
 
-const MONTH_SCHEDULE = [
-  {
-    num: 1,
-    title: 'Month 1',
-    sub: 'Foundations + Project 1 — get matched to your team and ship your first minor project.',
-    weeks: [
-      { accent: 'var(--mint-deep)', title: 'Week 1 — Onboarding & team matching', desc: 'Get matched with your team and your project (your idea, or one we assign). Set up your repo and tools.' },
-      { accent: 'var(--green)', title: 'Week 2 — Planning & architecture', desc: 'Scope the build, define milestones, and lock the architecture for Project 1.' },
-      { accent: 'var(--orange)', title: 'Week 3 — Core build', desc: 'Build the core features of Project 1, with mentor check-ins along the way.' },
-      { accent: 'var(--mint-deep)', title: 'Week 4 — Review & submit Project 1', desc: 'Finalize the project, get mentor review, and sign-off before moving to Month 2.' },
-    ],
-  },
-  {
-    num: 2,
-    title: 'Month 2',
-    sub: 'Project 2 — build in public, with weekly progress updates keeping you accountable.',
-    weeks: [
-      { accent: 'var(--green)', title: 'Week 1 — Kickoff Project 2', desc: 'New scope, new problem — apply what you learned from Project 1 from day one.' },
-      { accent: 'var(--orange)', title: 'Week 2 — Feature development', desc: 'Build out the main functionality. Weekly progress update is due at the end of this week.' },
-      { accent: 'var(--mint-deep)', title: 'Week 3 — Testing & iteration', desc: 'Fix bugs, refine based on mentor feedback, and tighten up rough edges.' },
-      { accent: 'var(--green)', title: 'Week 4 — Review & submit Project 2', desc: 'Mentor review and sign-off before you move into the deployment-focused month.' },
-    ],
-  },
-  {
-    num: 3,
-    title: 'Month 3',
-    sub: 'Project 3 — deployment focus. This is where it goes live on a real server.',
-    weeks: [
-      { accent: 'var(--orange)', title: 'Week 1 — Kickoff Project 3', desc: "Scope a project that's specifically meant to go live — not just run on your laptop." },
-      { accent: 'var(--mint-deep)', title: 'Week 2 — Build + deployment setup', desc: 'Develop the core features while setting up hosting/server infrastructure in parallel.' },
-      { accent: 'var(--green)', title: 'Week 3 — Go live', desc: 'Deploy to a real live server and work through whatever production actually throws at you.' },
-      { accent: 'var(--orange)', title: 'Week 4 — Review & submit Project 3', desc: 'Mentor review of the live deployment before moving into your final month.' },
-    ],
-  },
-  {
-    num: 4,
-    title: 'Month 4',
-    sub: 'Project 4 + wrap-up — final project, resume review, certificate & LOR.',
-    weeks: [
-      { accent: 'var(--mint-deep)', title: 'Week 1 — Kickoff Project 4', desc: 'Your final project of the track — the most ambitious one yet.' },
-      { accent: 'var(--green)', title: 'Week 2 — Build & polish', desc: 'Core development plus real attention to UI/UX polish — this is the project people will actually see.' },
-      { accent: 'var(--orange)', title: 'Week 3 — Resume & LinkedIn review', desc: 'Mentors personally rework your resume and LinkedIn around the 4 projects you actually shipped.' },
-      { accent: 'var(--mint-deep)', title: 'Week 4 — Final review, certificate & LOR', desc: 'Submit your final project and receive your verified internship certificate plus a signed Letter of Recommendation.' },
-    ],
-  },
+// Decorative week-accent rotation only — actual schedule content (title,
+// objective, deliverable, steps, hours) is admin-editable, sourced live from
+// the backend via useVirtualInternshipTasks() below.
+const WEEK_ACCENTS = ['var(--mint-deep)', 'var(--green)', 'var(--orange)', 'var(--mint-deep)'];
+
+interface ScheduleMonthData {
+  num: number;
+  title: string;
+  sub: string;
+  duration: string;
+  focus: string;
+  weeks: { accent: string; title: string; desc: string }[];
+}
+
+interface ScheduleWeekData {
+  accent: string;
+  duration: string;
+  hours: string;
+  title: string;
+  desc: string;
+}
+
+const FOUR_MONTH_FEATURES = [
+  'Verified students only',
+  '4-month guided track · mentor-reviewed',
+  '1:1 mentorship throughout the track',
+  'Letter of recommendation',
+  'Virtual internship certificate',
+  'Job referral, if a suitable match is found',
 ];
 
-const WEEK_SCHEDULE = [
-  { accent: 'var(--mint-deep)', title: 'Week 1 — Onboarding & team matching', desc: 'Get matched with your team and your project (your idea, or one we assign). Set up your repo and tools.' },
-  { accent: 'var(--green)', title: 'Week 2 — Planning & architecture', desc: 'Scope the build, define milestones, and lock the architecture for your project.' },
-  { accent: 'var(--orange)', title: 'Week 3 — Core build', desc: 'Build the core features of your project, with mentor check-ins along the way.' },
-  { accent: 'var(--mint-deep)', title: 'Week 4 — Review, submit & certify', desc: 'Finalize the project, get mentor review, and receive your verified certificate + LOR.' },
-];
-
-const CERTIFICATE_SAMPLES = [
-  {
-    src: '/virtual-internship-certificate-4week.png',
-    alt: 'Sample 4-Week Track completion certificate',
-    title: '4-Week Track Certificate',
-  },
-  {
-    src: '/virtual-internship-certificate-4month.png',
-    alt: 'Sample 4-Month Track completion certificate',
-    title: '4-Month Track Certificate',
-  },
+const FOUR_WEEK_FEATURES = [
+  'Verified students only',
+  '4-week guided track · mentor-reviewed',
+  '1:1 mentorship throughout the track',
+  'Letter of recommendation',
+  'Virtual internship certificate',
 ];
 
 const FAQS = [
   {
     q: 'Is this a paid course, or a real internship?',
-    a: 'Both — the fee (₹2,790 for the 4-week track, ₹7,890 for the 4-month track) covers structured mentorship, review, and certification (like a course), but the actual work is a real internship: you build and deploy real projects with a team, on the same track past students have used to land roles.',
+    a: 'Both — the track fee (plus GST) covers structured mentorship, review, and certification (like a course), but the actual work is a real internship: you build and deploy real projects with a team, on the same track past students have used to land roles.',
   },
   {
     q: 'What happens if I miss a week?',
@@ -181,12 +134,34 @@ function MentorAvatars({ people }: { people: { initials: string; name: string; i
   );
 }
 
+function MetaChip({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className={styles.schMeta}>
+      <span className={styles.schMetaIcon}>
+        <Icon className="h-3 w-3" />
+      </span>
+      <span className={styles.schMetaTextWrap}>
+        <span className={styles.metaKey}>{label}</span>
+        <span className={styles.metaVal}>{value}</span>
+      </span>
+    </div>
+  );
+}
+
 function ScheduleMonth({
   month,
   open,
   onToggle,
 }: {
-  month: (typeof MONTH_SCHEDULE)[number];
+  month: ScheduleMonthData;
   open: boolean;
   onToggle: () => void;
 }) {
@@ -198,6 +173,10 @@ function ScheduleMonth({
           <div className={styles.monthHeadingText}>
             <h5>{month.title}</h5>
             <span>{month.sub}</span>
+            <div className={styles.schMetaRow}>
+              <MetaChip icon={Clock} label="Duration" value={month.duration} />
+              <MetaChip icon={Target} label="Focus" value={month.focus} />
+            </div>
           </div>
         </div>
         <span className={cn(styles.monthChev, open && styles.monthChevOpen)}>
@@ -264,12 +243,44 @@ export default function VirtualInternshipPage() {
   const [openMonth, setOpenMonth] = useState<number | null>(1);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showSticky, setShowSticky] = useState(false);
-  const trackSectionRef = useRef<HTMLDivElement>(null);
+  const { data: pricing } = useVirtualInternshipPricing();
+  const { data: monthTaskList } = useVirtualInternshipTasks('FOUR_MONTH');
+  const { data: weekTaskList } = useVirtualInternshipTasks('FOUR_WEEK');
 
-  const exploreTrackFromCta = () => {
-    setOpenTrack('month');
-    trackSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  const monthSchedule = useMemo<ScheduleMonthData[]>(() => {
+    if (!monthTaskList) return [];
+    return [1, 2, 3, 4]
+      .map((num) => {
+        const tasks = monthTaskList.filter((t) => t.monthNum === num).sort((a, b) => a.weekNum - b.weekNum);
+        if (!tasks.length) return null;
+        return {
+          num,
+          title: `Month ${num}`,
+          sub: tasks[0].monthDesc ?? '',
+          duration: '1 month',
+          focus: tasks[0].monthTitle ?? '',
+          weeks: tasks.map((t, i) => ({
+            accent: WEEK_ACCENTS[i % WEEK_ACCENTS.length],
+            title: `Week ${t.weekNum} — ${t.title}`,
+            desc: t.objective,
+          })),
+        };
+      })
+      .filter((m): m is ScheduleMonthData => m !== null);
+  }, [monthTaskList]);
+
+  const weekSchedule = useMemo<ScheduleWeekData[]>(() => {
+    if (!weekTaskList) return [];
+    return [...weekTaskList]
+      .sort((a, b) => a.weekNum - b.weekNum)
+      .map((t, i) => ({
+        accent: WEEK_ACCENTS[i % WEEK_ACCENTS.length],
+        duration: '1 week',
+        hours: t.hours,
+        title: `Week ${t.weekNum} — ${t.title}`,
+        desc: t.objective,
+      }));
+  }, [weekTaskList]);
 
   useEffect(() => {
     const onScroll = () => setShowSticky(window.scrollY > 480);
@@ -285,13 +296,42 @@ export default function VirtualInternshipPage() {
     [],
   );
 
+  const monthPricing = pricing?.find((p) => p.track === 'FOUR_MONTH');
+  const weekPricing = pricing?.find((p) => p.track === 'FOUR_WEEK');
+  const activePricing = openTrack === 'month' ? monthPricing : openTrack === 'week' ? weekPricing : undefined;
+  const activeEnrollHref = openTrack === 'month' ? enrollHref.month : enrollHref.week;
+
+  const showDetail = (track: 'month' | 'week') => {
+    setOpenTrack(track);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+  const showLanding = () => {
+    setOpenTrack(null);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const faqs = useMemo(() => {
+    if (!weekPricing || !monthPricing) return FAQS;
+    const list = [...FAQS];
+    list[0] = {
+      ...list[0],
+      a: `Both — the fee (₹${weekPricing.totalAmount.toLocaleString()} for the 4-week track, ₹${monthPricing.totalAmount.toLocaleString()} for the 4-month track, GST included) covers structured mentorship, review, and certification (like a course), but the actual work is a real internship: you build and deploy real projects with a team, on the same track past students have used to land roles.`,
+    };
+    return list;
+  }, [weekPricing, monthPricing]);
+
   return (
     <div className={`${styles.page} ${fraunces.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable}`}>
       <div className={cn(styles.stickyBar, showSticky && styles.stickyBarShow)}>
         <div className={styles.stickyBarInner}>
           <div className={styles.stickyBarTitle}>
             Virtual Internship
-            <span>4-week ₹2,790 · 4-month ₹7,890</span>
+            {weekPricing && monthPricing && (
+              <span>
+                4-week ₹{weekPricing.totalAmount.toLocaleString()} · 4-month ₹
+                {monthPricing.totalAmount.toLocaleString()}
+              </span>
+            )}
           </div>
           <Link href={enrollHref.week} className={cn(styles.btn)}>
             Join track
@@ -314,6 +354,8 @@ export default function VirtualInternshipPage() {
         </div>
       </nav>
 
+      {!openTrack && (
+      <>
       <div className={styles.wrap}>
         <section className={styles.hero}>
           <span className={styles.eyebrow}>Virtual Internship</span>
@@ -327,16 +369,15 @@ export default function VirtualInternshipPage() {
         </section>
 
         <section className={styles.howSection}>
+          <h2>How it works</h2>
           <div className={styles.howScroller}>
             <div className={styles.howGrid}>
               {HOW_STEPS.map((step) => (
                 <div key={step.title} className={styles.howStep}>
-                  <span className={cn(styles.howStepIcon, step.tone === 'orange' && styles.howStepIconOrange)}>
-                    <step.icon className="h-5 w-5" />
-                  </span>
+                  <div className={styles.howStepImgWrap}>
+                    <img src={step.img} alt={step.title} />
+                  </div>
                   <h4>{step.title}</h4>
-                  <p>{step.desc}</p>
-                  <ChevronRight className={styles.howArrow} width={20} height={20} />
                 </div>
               ))}
             </div>
@@ -344,38 +385,36 @@ export default function VirtualInternshipPage() {
           </div>
         </section>
 
-        <section className={styles.trackSection} ref={trackSectionRef}>
+        <section className={styles.trackSection}>
           <h2>Choose your track</h2>
           <div className={styles.trackCards}>
             {/* 4-Month */}
             <div className={styles.trackCard}>
-              <span className={styles.ribbonOnline}>Online</span>
-              <div className={styles.trackCardHead}>
-                <h3>4-Month Track</h3>
+              <div className={styles.trackTop}>
+                <span className={styles.onlineBadge}>Online</span>
                 <span className={styles.fastBadge}>New</span>
               </div>
+              <h3>4-Month Track</h3>
               <p className={styles.tagline}>
                 The full track — 4 real projects, deployed live, with mentors reviewing every month.
               </p>
-              <div className={styles.metaRow}>
-                <ShieldCheck className="h-3.5 w-3.5" /> Verified students only
-              </div>
-              <div className={styles.metaRow}>
-                <Calendar className="h-3.5 w-3.5" /> 4-month guided track · mentor-reviewed
+              <div className={styles.featureList}>
+                {FOUR_MONTH_FEATURES.map((f) => (
+                  <div key={f} className={styles.featureRow}>
+                    <Check className="h-3.5 w-3.5" />
+                    <span>{f}</span>
+                  </div>
+                ))}
               </div>
               <div className={styles.priceBlock}>
-                <span className="now">₹7,890</span>
-                <span className="was">₹12,999</span>
+                <span className="now">{monthPricing ? `₹${monthPricing.totalAmount.toLocaleString()}` : '···'}</span>
               </div>
-              <span className={styles.discountTag}>✓ Save ₹5,109</span>
+              <span className={styles.discountTag}>
+                ✓ Includes {monthPricing?.gstPercent ?? 18}% GST
+              </span>
               <div className={styles.trackCardBtns}>
-                <button
-                  type="button"
-                  className={cn(styles.btn, styles.btnGhost, openTrack === 'month' && styles.exploreOpen)}
-                  onClick={() => setOpenTrack(openTrack === 'month' ? null : 'month')}
-                >
-                  {openTrack === 'month' ? 'Hide details' : 'Explore'}
-                  <ChevronDown className={styles.exploreChev} width={12} height={12} />
+                <button type="button" className={cn(styles.btn, styles.btnGhost)} onClick={() => showDetail('month')}>
+                  Explore
                 </button>
                 <Link href={enrollHref.month} className={cn(styles.btn, styles.btnDark)}>
                   Join track
@@ -385,33 +424,31 @@ export default function VirtualInternshipPage() {
 
             {/* 4-Week */}
             <div className={styles.trackCard}>
-              <span className={styles.ribbonOnline}>Online</span>
-              <div className={styles.trackCardHead}>
-                <h3>4-Week Track</h3>
+              <div className={styles.trackTop}>
+                <span className={styles.onlineBadge}>Online</span>
                 <span className={styles.fastBadge}>Fast track</span>
               </div>
+              <h3>4-Week Track</h3>
               <p className={styles.tagline}>
                 The fast-track version — same outcome, same certificate, in a quarter of the time.
               </p>
-              <div className={styles.metaRow}>
-                <ShieldCheck className="h-3.5 w-3.5" /> Verified students only
-              </div>
-              <div className={styles.metaRow}>
-                <Calendar className="h-3.5 w-3.5" /> 4-week guided track · mentor-reviewed
+              <div className={styles.featureList}>
+                {FOUR_WEEK_FEATURES.map((f) => (
+                  <div key={f} className={styles.featureRow}>
+                    <Check className="h-3.5 w-3.5" />
+                    <span>{f}</span>
+                  </div>
+                ))}
               </div>
               <div className={styles.priceBlock}>
-                <span className="now">₹2,790</span>
-                <span className="was">₹4,999</span>
+                <span className="now">{weekPricing ? `₹${weekPricing.totalAmount.toLocaleString()}` : '···'}</span>
               </div>
-              <span className={styles.discountTag}>✓ Save ₹2,209</span>
+              <span className={styles.discountTag}>
+                ✓ Includes {weekPricing?.gstPercent ?? 18}% GST
+              </span>
               <div className={styles.trackCardBtns}>
-                <button
-                  type="button"
-                  className={cn(styles.btn, styles.btnGhost, openTrack === 'week' && styles.exploreOpen)}
-                  onClick={() => setOpenTrack(openTrack === 'week' ? null : 'week')}
-                >
-                  {openTrack === 'week' ? 'Hide details' : 'Explore'}
-                  <ChevronDown className={styles.exploreChev} width={12} height={12} />
+                <button type="button" className={cn(styles.btn, styles.btnGhost)} onClick={() => showDetail('week')}>
+                  Explore
                 </button>
                 <Link href={enrollHref.week} className={cn(styles.btn, styles.btnDark)}>
                   Join track
@@ -420,260 +457,15 @@ export default function VirtualInternshipPage() {
             </div>
           </div>
 
-          {/* 4-Month details */}
-          <div className={cn(styles.trackDetails, openTrack === 'month' && styles.trackDetailsOpen)}>
-            <div className={styles.trackDetailsInner}>
-              <p className={styles.featureGroupLabel}>What you build</p>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <ClipboardCheck className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>4 real projects, 4 months</h4>
-                  <p>
-                    One minor project every month for 4 months — your own idea, or one of the most in-demand
-                    projects currently used in the market if you don&apos;t have one. Built with a team, deployed on
-                    a live server, and reviewed and signed off before you move to the next — so you leave with a
-                    real portfolio, not just a certificate.
-                  </p>
-                </div>
-              </div>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <LineChart className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Weekly progress updates</h4>
-                  <p>
-                    You report progress every week, so mentors can catch you drifting off track early — not after
-                    you&apos;ve already lost a month.
-                  </p>
-                </div>
-              </div>
-
-              <p className={styles.featureGroupLabel}>Who supports you</p>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <Sparkles className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Designed by people who&apos;ve actually built this</h4>
-                  <p>The curriculum is built by:</p>
-                  <MentorAvatars people={MENTORS} />
-                </div>
-              </div>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <MessageCircle className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Doubts solved on WhatsApp</h4>
-                  <p>
-                    Stuck on something? You&apos;re in direct touch with your doubt-support team, plus regular
-                    check-ins with industry experts:
-                  </p>
-                  <MentorAvatars people={SUPPORT_TEAM} />
-                </div>
-              </div>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <Users className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Weekly live doubt-solving sessions</h4>
-                  <p>
-                    A live group session every week for the full 4 months — beyond the WhatsApp support, so nothing
-                    you&apos;re stuck on waits until next month.
-                  </p>
-                </div>
-              </div>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <Users className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Monthly 1:1 mentor call</h4>
-                  <p>
-                    One-on-one with your mentor at the end of every month to review your project, your progress,
-                    and what to focus on next.
-                  </p>
-                </div>
-              </div>
-
-              <p className={styles.featureGroupLabel}>What you get</p>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <FileText className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Resume &amp; LinkedIn review</h4>
-                  <p>
-                    Your mentors personally review and rework your resume and LinkedIn once you&apos;re through the
-                    track — built around the projects you actually shipped.
-                  </p>
-                </div>
-              </div>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <Award className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Certificate + Letter of Recommendation</h4>
-                  <p>
-                    Finish all 4 projects and you get a verified internship certificate plus a signed LOR from your
-                    mentors — not just a PDF, something you can actually use.
-                  </p>
-                </div>
-              </div>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <Share2 className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Referral program included</h4>
-                  <p>
-                    Finish the track and get access to our referral program — a real head start when you&apos;re
-                    applying for your next role.
-                  </p>
-                </div>
-              </div>
-
-              <div className={styles.scheduleSection}>
-                <h4>Track Schedule</h4>
-                {MONTH_SCHEDULE.map((m) => (
-                  <ScheduleMonth
-                    key={m.num}
-                    month={m}
-                    open={openMonth === m.num}
-                    onToggle={() => setOpenMonth(openMonth === m.num ? null : m.num)}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 4-Week details */}
-          <div className={cn(styles.trackDetails, openTrack === 'week' && styles.trackDetailsOpen)}>
-            <div className={styles.trackDetailsInner}>
-              <p className={styles.featureGroupLabel}>What you build</p>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <ClipboardCheck className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>4 real projects, 4 weeks</h4>
-                  <p>
-                    You&apos;ll be assigned a real-world project we&apos;re already running — no idea-hunting, no
-                    scoping from scratch. Submit one minor project every week for 4 consecutive weeks, each one
-                    reviewed before you move to the next, so you build a real portfolio, not just a certificate. The
-                    fast-track version of the internship, for students who want the same outcome in a quarter of the
-                    time.
-                  </p>
-                </div>
-              </div>
-
-              <p className={styles.featureGroupLabel}>Who supports you</p>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <Sparkles className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Track designed by IITians</h4>
-                  <p>The curriculum is built by:</p>
-                  <MentorAvatars people={MENTORS} />
-                </div>
-              </div>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <MessageCircle className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Doubts solved on WhatsApp</h4>
-                  <p>
-                    Stuck on something? You&apos;re in direct touch with your doubt-support team, plus regular
-                    check-ins with industry experts:
-                  </p>
-                  <MentorAvatars people={SUPPORT_TEAM} />
-                </div>
-              </div>
-
-              <p className={styles.featureGroupLabel}>What you get</p>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <Award className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Certificate + Letter of Recommendation</h4>
-                  <p>
-                    Finish all 4 projects and you get a verified internship certificate plus a signed LOR from your
-                    mentors — not just a PDF, something you can actually use.
-                  </p>
-                </div>
-              </div>
-              <div className={styles.feature}>
-                <span className={styles.featureIcon}>
-                  <Share2 className="h-4 w-4" />
-                </span>
-                <div>
-                  <h4>Referral program included</h4>
-                  <p>
-                    Finish the track and get access to our referral program — a real head start when you&apos;re
-                    applying for your next role.
-                  </p>
-                </div>
-              </div>
-
-              <div className={styles.scheduleSection}>
-                <h4>Track Schedule</h4>
-                <div className={styles.flatWeekList}>
-                  {WEEK_SCHEDULE.map((w) => (
-                    <div key={w.title} className={styles.weekRow} style={{ '--accent': w.accent } as React.CSSProperties}>
-                      <div className={styles.weekMain}>
-                        <h5>{w.title}</h5>
-                        <p>{w.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
         </section>
       </div>
 
       <GigsSection />
 
-      <section className={styles.certSection}>
-        <div className={styles.wrap}>
-          <div className={styles.certHead}>
-            <h2>
-              Official <span>Internship Certificate</span>
-            </h2>
-            <p>Get your official certificate — issued once you complete the track, verifiable online anytime.</p>
-          </div>
-          <div className={styles.certGrid}>
-            {CERTIFICATE_SAMPLES.map((c) => (
-              <div key={c.title} className={styles.certCard}>
-                <img src={c.src} alt={c.alt} />
-                <div className={styles.certCaption}>
-                  <p>{c.title}</p>
-                  <span>
-                    <ShieldCheck className="h-3.5 w-3.5" /> Official certificate · Verifiable online
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <Link href="/verify-certificate" className={cn(styles.btn, styles.btnGhost, styles.certVerifyLink)}>
-            Verify a certificate <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-      </section>
-
       <div className={styles.wrap}>
         <section className={styles.faqSection}>
           <h2>Common questions</h2>
-          {FAQS.map((f, i) => (
+          {faqs.map((f, i) => (
             <div key={f.q} className={styles.faqItem}>
               <button
                 type="button"
@@ -689,24 +481,263 @@ export default function VirtualInternshipPage() {
             </div>
           ))}
         </section>
-
-        <div className={styles.finalCta}>
-          <h2>Ready to stop applying and start building?</h2>
-          <p>4 months. 4 real projects. One certificate that actually means something.</p>
-          <div className={styles.finalCtaBtnRow}>
-            <button
-              type="button"
-              className={cn(styles.btn, styles.btnGhostOnGreen)}
-              onClick={exploreTrackFromCta}
-            >
-              Explore the track
-            </button>
-            <Link href={enrollHref.week} className={styles.btn}>
-              Join from ₹2,790
-            </Link>
-          </div>
-        </div>
       </div>
+      </>
+      )}
+
+      {openTrack && (
+        <>
+          <div className={styles.detailHero}>
+            <button type="button" className={styles.backBtn} onClick={showLanding}>
+              <ArrowLeft className="h-4 w-4" /> Back to tracks
+            </button>
+            <div className={styles.detailHeroTitle}>
+              <span className={styles.detailEyebrow}>
+                {openTrack === 'month' ? 'Online · 4 months' : 'Online · 4 weeks'}
+              </span>
+              <h2>{openTrack === 'month' ? '4-Month Track' : '4-Week Track'}</h2>
+            </div>
+          </div>
+
+          <div className={cn(styles.wrap, styles.detailBody)}>
+            {openTrack === 'month' ? (
+              <>
+                <p className={styles.featureGroupLabel}>What you build</p>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <ClipboardCheck className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>4 real projects, 4 months</h4>
+                    <p>
+                      One minor project every month for 4 months — your own idea, or one of the most in-demand
+                      projects currently used in the market if you don&apos;t have one. Built with a team, deployed
+                      on a live server, and reviewed and signed off before you move to the next — so you leave with
+                      a real portfolio, not just a certificate.
+                    </p>
+                  </div>
+                </div>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <LineChart className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Weekly progress updates</h4>
+                    <p>
+                      You report progress every week, so mentors can catch you drifting off track early — not after
+                      you&apos;ve already lost a month.
+                    </p>
+                  </div>
+                </div>
+
+                <p className={styles.featureGroupLabel}>Who supports you</p>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <Sparkles className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Designed by people who&apos;ve actually built this</h4>
+                    <p>The curriculum is built by:</p>
+                    <MentorAvatars people={MENTORS} />
+                  </div>
+                </div>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <MessageCircle className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Doubts solved on WhatsApp</h4>
+                    <p>
+                      Stuck on something? You&apos;re in direct touch with your doubt-support team, plus regular
+                      check-ins with industry experts:
+                    </p>
+                    <MentorAvatars people={SUPPORT_TEAM} />
+                  </div>
+                </div>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <Users className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Weekly live doubt-solving sessions</h4>
+                    <p>
+                      A live group session every week for the full 4 months — beyond the WhatsApp support, so
+                      nothing you&apos;re stuck on waits until next month.
+                    </p>
+                  </div>
+                </div>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <Users className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Monthly 1:1 mentor call</h4>
+                    <p>
+                      One-on-one with your mentor at the end of every month to review your project, your progress,
+                      and what to focus on next.
+                    </p>
+                  </div>
+                </div>
+
+                <p className={styles.featureGroupLabel}>What you get</p>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <FileText className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Resume &amp; LinkedIn review</h4>
+                    <p>
+                      Your mentors personally review and rework your resume and LinkedIn once you&apos;re through
+                      the track — built around the projects you actually shipped.
+                    </p>
+                  </div>
+                </div>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <Award className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Certificate + Letter of Recommendation</h4>
+                    <p>
+                      Finish all 4 projects and you get a verified internship certificate plus a signed LOR from
+                      your mentors — not just a PDF, something you can actually use.
+                    </p>
+                  </div>
+                </div>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <Share2 className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Referral program included</h4>
+                    <p>
+                      Finish the track and get access to our referral program — a real head start when
+                      you&apos;re applying for your next role.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.scheduleSection}>
+                  <h4>Track Schedule</h4>
+                  {monthSchedule.map((m) => (
+                    <ScheduleMonth
+                      key={m.num}
+                      month={m}
+                      open={openMonth === m.num}
+                      onToggle={() => setOpenMonth(openMonth === m.num ? null : m.num)}
+                    />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <p className={styles.featureGroupLabel}>What you build</p>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <ClipboardCheck className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>4 real projects, 4 weeks</h4>
+                    <p>
+                      You&apos;ll be assigned a real-world project we&apos;re already running — no idea-hunting, no
+                      scoping from scratch. Submit one minor project every week for 4 consecutive weeks, each one
+                      reviewed before you move to the next, so you build a real portfolio, not just a certificate.
+                      The fast-track version of the internship, for students who want the same outcome in a quarter
+                      of the time.
+                    </p>
+                  </div>
+                </div>
+
+                <p className={styles.featureGroupLabel}>Who supports you</p>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <Sparkles className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Track designed by IITians</h4>
+                    <p>The curriculum is built by:</p>
+                    <MentorAvatars people={MENTORS} />
+                  </div>
+                </div>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <MessageCircle className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Doubts solved on WhatsApp</h4>
+                    <p>
+                      Stuck on something? You&apos;re in direct touch with your doubt-support team, plus regular
+                      check-ins with industry experts:
+                    </p>
+                    <MentorAvatars people={SUPPORT_TEAM} />
+                  </div>
+                </div>
+
+                <p className={styles.featureGroupLabel}>What you get</p>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <Award className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Certificate + Letter of Recommendation</h4>
+                    <p>
+                      Finish all 4 projects and you get a verified internship certificate plus a signed LOR from
+                      your mentors — not just a PDF, something you can actually use.
+                    </p>
+                  </div>
+                </div>
+                <div className={styles.feature}>
+                  <span className={styles.featureIcon}>
+                    <Share2 className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h4>Referral program included</h4>
+                    <p>
+                      Finish the track and get access to our referral program — a real head start when
+                      you&apos;re applying for your next role.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.scheduleSection}>
+                  <h4>Track Schedule</h4>
+                  <div className={styles.flatWeekList}>
+                    {weekSchedule.map((w, i) => (
+                      <div key={w.title} className={styles.schItem}>
+                        <div className={styles.schItemTop}>
+                          <span className={styles.schNum} style={{ background: w.accent }}>
+                            {i + 1}
+                          </span>
+                          <h5>{w.title}</h5>
+                        </div>
+                        <div className={styles.schMetaRow}>
+                          <MetaChip icon={Clock} label="Duration" value={w.duration} />
+                          <MetaChip icon={Target} label="Effort" value={w.hours} />
+                        </div>
+                        <p className={styles.schDesc}>{w.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className={styles.detailCta}>
+              <div>
+                <div className={styles.priceBlock}>
+                  <span className="now">
+                    {activePricing ? `₹${activePricing.totalAmount.toLocaleString()}` : '···'}
+                  </span>
+                </div>
+                <span className={styles.discountTag}>✓ Includes {activePricing?.gstPercent ?? 18}% GST</span>
+              </div>
+              <Link href={activeEnrollHref} className={cn(styles.btn, styles.btnDark)}>
+                Join track
+              </Link>
+            </div>
+          </div>
+        </>
+      )}
 
       <footer className={styles.siteFooter}>
         <div>EduBridge Open Career Program</div>
