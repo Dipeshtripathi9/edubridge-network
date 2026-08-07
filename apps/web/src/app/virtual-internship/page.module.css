@@ -11,7 +11,9 @@
   --ink-soft: #51604f;
   --ink-faint: rgba(27, 42, 29, 0.55);
   --line: rgba(27, 42, 29, 0.14);
-  --line-on-green: rgba(247, 242, 230, 0.22);
+  --how-card: #ddd0b8;
+  --track-dark: #16281c;
+  --track-dark-border: #24402f;
 
   min-height: 100vh;
   background: var(--cream);
@@ -130,14 +132,6 @@
   border-color: var(--green);
   transform: translateY(-1px);
 }
-.btnGhostOnGreen {
-  background: transparent;
-  border-color: var(--line-on-green);
-  color: var(--cream);
-}
-.btnGhostOnGreen:hover {
-  background: rgba(247, 242, 230, 0.08);
-}
 .btnDark {
   background: var(--green);
   border-color: var(--green);
@@ -178,14 +172,19 @@
 .howSection {
   padding: 1.5rem 0 2.5rem;
 }
+.howSection h2 {
+  font-size: 1.55rem;
+  color: var(--green);
+  margin: 0 0 1.3rem;
+}
 .howScroller {
   position: relative;
 }
 .howGrid {
   display: flex;
-  gap: 1.1rem;
+  gap: 1.5rem;
   overflow-x: auto;
-  padding-bottom: 0.3rem;
+  padding: 0.4rem 0.3rem 0.6rem;
   scrollbar-width: none;
 }
 .howGrid::-webkit-scrollbar {
@@ -206,60 +205,39 @@
   }
 }
 .howStep {
-  flex: 0 0 auto;
-  width: min(210px, 68vw);
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 1.1rem;
-  position: relative;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  flex: 1 1 200px;
+  max-width: 250px;
+  background: var(--how-card);
+  border-radius: 28px;
+  padding: 1.6rem 1.1rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(54, 78, 51, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .howStep:hover {
-  border-color: var(--orange);
-  box-shadow: 0 10px 24px rgba(27, 42, 29, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(54, 78, 51, 0.14);
 }
-.howStepIcon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--mint);
-  color: var(--mint-deep);
-  margin-bottom: 0.8rem;
+.howStepImgWrap {
+  width: 170px;
+  height: 170px;
+  margin: 0 auto 1.3rem;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 6px var(--cream), 0 4px 10px rgba(54, 78, 51, 0.15);
 }
-.howStepIconOrange {
-  background: var(--orange-tint);
-  color: #a9761f;
+.howStepImgWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: sepia(0.4) saturate(1.15) brightness(0.98);
 }
 .howStep h4 {
   font-family: var(--font-fraunces), serif;
   font-weight: 700;
-  font-size: 0.92rem;
-  margin: 0 0 0.3rem;
-  color: var(--ink);
-}
-.howStep p {
-  font-size: 0.75rem;
-  color: var(--ink-soft);
-  line-height: 1.5;
+  font-size: 1.15rem;
   margin: 0;
-}
-.howArrow {
-  display: none;
-  position: absolute;
-  top: 50%;
-  right: -22px;
-  transform: translateY(-50%);
-  color: var(--orange);
-  z-index: 1;
-}
-@media (min-width: 560px) {
-  .howArrow {
-    display: block;
-  }
+  color: var(--green);
 }
 
 /* TRACK CARDS */
@@ -283,37 +261,33 @@
 }
 .trackCard {
   position: relative;
-  background: var(--card);
-  border: 1px solid var(--line);
+  background: var(--track-dark);
+  border: 1px solid var(--track-dark-border);
   border-radius: 18px;
   padding: 1.5rem 1.4rem 1.4rem;
-  overflow: hidden;
 }
-.ribbonOnline {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: var(--green);
-  color: var(--cream);
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.35rem 0.85rem 0.35rem 0.7rem;
-  clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
-}
-.trackCardHead {
-  margin-top: 1.1rem;
-  margin-bottom: 0.2rem;
+.trackTop {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+.onlineBadge {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green);
+  background: var(--mint);
+  padding: 0.3rem 0.7rem;
+  border-radius: 100px;
 }
 .trackCard h3 {
   font-size: 1.2rem;
-  margin: 0;
-  color: var(--ink);
+  margin: 0 0 0.3rem;
+  color: var(--cream);
 }
 .fastBadge {
   background: var(--orange-tint);
@@ -324,25 +298,30 @@
   border-radius: 100px;
   white-space: nowrap;
   flex-shrink: 0;
-  margin-top: 2px;
 }
 .tagline {
   font-size: 0.83rem;
-  color: var(--ink-soft);
+  color: rgba(247, 242, 230, 0.72);
   line-height: 1.55;
-  margin: 0.35rem 0 1rem;
+  margin: 0 0 1rem;
 }
-.metaRow {
+.featureList {
   display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.82rem;
-  color: var(--ink-soft);
-  margin-bottom: 0.4rem;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0 0 1.1rem;
 }
-.metaRow svg {
+.featureRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.82rem;
+  color: var(--cream);
+}
+.featureRow svg {
   flex-shrink: 0;
-  color: var(--mint-deep);
+  color: var(--cream);
+  margin-top: 2px;
 }
 .priceBlock {
   display: flex;
@@ -356,12 +335,8 @@
   font-size: 1.55rem;
   color: var(--green);
 }
-.priceBlock .was {
-  font-family: var(--font-fraunces), serif;
-  font-weight: 600;
-  font-size: 0.92rem;
-  color: var(--ink-faint);
-  text-decoration: line-through;
+.trackCard .priceBlock .now {
+  color: var(--cream);
 }
 .discountTag {
   display: inline-flex;
@@ -375,6 +350,10 @@
   border-radius: 100px;
   margin-bottom: 1rem;
 }
+.trackCard .discountTag {
+  color: #a9761f;
+  background: var(--orange-tint);
+}
 .trackCardBtns {
   display: flex;
   gap: 0.6rem;
@@ -385,29 +364,107 @@
   padding: 0.7rem 0.9rem;
   font-size: 0.83rem;
 }
-.exploreChev {
-  transition: transform 0.2s ease;
+.trackCard .btnGhost {
+  border-color: rgba(247, 242, 230, 0.3);
+  color: var(--cream);
 }
-.exploreOpen .exploreChev {
-  transform: rotate(180deg);
+.trackCard .btnGhost:hover {
+  background: rgba(247, 242, 230, 0.08);
+  border-color: rgba(247, 242, 230, 0.5);
+  color: var(--cream);
+}
+.trackCard .btnDark {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: var(--green-deep);
+}
+.trackCard .btnDark:hover {
+  background: #f5b562;
+  border-color: #f5b562;
+}
+/* DETAIL VIEW (shown instead of the landing content when a track is opened) */
+.detailHero {
+  background: var(--green-deep);
+  padding: 1.4rem 6vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--mint);
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0;
+}
+.backBtn:hover {
+  color: var(--cream);
+}
+.detailHeroTitle {
+  text-align: right;
+}
+.detailEyebrow {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--orange);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+.detailHeroTitle h2 {
+  font-size: 1.4rem;
+  color: var(--cream);
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .detailHero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .detailHeroTitle {
+    text-align: left;
+  }
+}
+.detailBody {
+  padding-top: 2.2rem;
+  padding-bottom: 3.5rem;
+}
+.detailBody > .featureGroupLabel:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+.detailCta {
+  margin-top: 1.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  background: var(--mint);
+  border-radius: 18px;
+  padding: 1.4rem 1.5rem;
+}
+.detailCta .priceBlock {
+  margin: 0 0 0.2rem;
+}
+.detailCta .discountTag {
+  margin-bottom: 0;
+}
+.detailCta .btn {
+  flex: none;
+  padding: 0.75rem 1.6rem;
 }
 
-/* TRACK DETAILS PANEL */
-.trackDetails {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease;
-}
-.trackDetailsOpen {
-  max-height: 10000px;
-}
-.trackDetailsInner {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 1.8rem 1.8rem;
-  margin-top: 0.9rem;
-}
 .featureGroupLabel {
   font-family: var(--font-ibm-plex-mono), monospace;
   font-size: 0.68rem;
@@ -418,10 +475,6 @@
   margin: 0 0 0.9rem;
   padding-top: 1.1rem;
   border-top: 1px solid var(--line);
-}
-.trackDetailsInner > .featureGroupLabel:first-child {
-  padding-top: 0;
-  border-top: none;
 }
 .feature {
   display: flex;
@@ -628,6 +681,91 @@
   margin-bottom: 0;
 }
 
+/* SCHEDULE META CHIPS (shared by month accordion + flat week cards) */
+.schMetaRow {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+.schMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.schMetaIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--mint);
+  color: var(--mint-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.schMetaTextWrap {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.metaKey {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.metaVal {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* FLAT SCHEDULE ITEM CARDS (4-week track) */
+.schItem {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.6rem;
+}
+.schItem:last-child {
+  margin-bottom: 0;
+}
+.schItemTop {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.15rem;
+}
+.schNum {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cream);
+  font-family: var(--font-fraunces), serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.schItemTop h5 {
+  font-family: var(--font-fraunces), serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ink);
+  margin: 0;
+}
+.schDesc {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin: 0.65rem 0 0;
+}
+
 /* GIGS */
 .gigsSection {
   padding: 1rem 0 2.5rem;
@@ -648,80 +786,9 @@
   line-height: 1.6;
 }
 
-/* CERTIFICATE SHOWCASE */
-.certSection {
-  padding: 2.5rem 0;
-  background: var(--mint);
-}
-.certHead {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-.certHead h2 {
-  font-size: 1.85rem;
-  color: var(--ink);
-  margin: 0 0 0.6rem;
-}
-.certHead h2 span {
-  color: var(--mint-deep);
-}
-.certHead p {
-  font-size: 0.9rem;
-  color: var(--ink-soft);
-  margin: 0 auto;
-  max-width: 30rem;
-}
-.certGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.6rem;
-}
-@media (max-width: 760px) {
-  .certGrid {
-    grid-template-columns: 1fr;
-  }
-}
-.certCard {
-  background: var(--card);
-  border-radius: 20px;
-  padding: 1.2rem;
-  box-shadow: 0 10px 30px rgba(27, 42, 29, 0.08);
-}
-.certCard img {
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-}
-.certCaption {
-  margin-top: 0.9rem;
-  text-align: center;
-}
-.certCaption p {
-  font-family: var(--font-fraunces), serif;
-  font-weight: 700;
-  font-size: 1rem;
-  margin: 0 0 0.3rem;
-  color: var(--ink);
-}
-.certCaption span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.76rem;
-  font-weight: 600;
-  color: var(--mint-deep);
-}
-.certVerifyLink {
-  display: flex;
-  width: max-content;
-  margin: 0 auto;
-  background: var(--card);
-}
-
 /* FAQ */
 .faqSection {
-  padding: 1rem 0 2.5rem;
+  padding: 1rem 0 3.5rem;
 }
 .faqSection h2 {
   font-size: 1.55rem;
@@ -779,33 +846,6 @@
   line-height: 1.65;
   margin: 0;
   padding: 0 1.15rem 1.05rem;
-}
-
-/* FINAL CTA */
-.finalCta {
-  margin: 1.5rem 0 3rem;
-  text-align: center;
-  background: var(--green);
-  border-radius: 22px;
-  padding: 3rem 2rem;
-}
-.finalCta h2 {
-  color: var(--cream);
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  margin: 0 0 0.6rem;
-}
-.finalCta p {
-  font-size: 0.9rem;
-  color: rgba(247, 242, 230, 0.82);
-  margin: 0 0 1.5rem;
-}
-.finalCtaBtnRow {
-  display: flex;
-  gap: 0.7rem;
-  justify-content: center;
-  max-width: 24rem;
-  margin: 0 auto;
-  flex-wrap: wrap;
 }
 
 .siteFooter {

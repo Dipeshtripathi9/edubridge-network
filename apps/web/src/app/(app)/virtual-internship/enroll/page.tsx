@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VirtualInternshipEnrollForm } from '@/components/internship/virtual-internship-enroll-form';
 import { VirtualInternshipPaymentBox } from '@/components/internship/virtual-internship-payment-box';
+import { VirtualInternshipTaskBoard } from '@/components/internship/virtual-internship-task-board';
 import { useMyVirtualInternshipEnrollment, type VirtualInternshipTrack } from '@/hooks/use-virtual-internship';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -62,7 +63,12 @@ function EnrollInner() {
       {isLoading ? (
         <Skeleton className="h-72 w-full" />
       ) : activeEnrollment ? (
-        <VirtualInternshipPaymentBox enrollment={activeEnrollment} />
+        <>
+          <VirtualInternshipPaymentBox enrollment={activeEnrollment} />
+          {(activeEnrollment.status === 'ACTIVE' || activeEnrollment.status === 'COMPLETED') && (
+            <VirtualInternshipTaskBoard enrollment={activeEnrollment} />
+          )}
+        </>
       ) : (
         <VirtualInternshipEnrollForm initialTrack={initialTrack} />
       )}

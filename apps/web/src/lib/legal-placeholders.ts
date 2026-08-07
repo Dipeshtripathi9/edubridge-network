@@ -17,3 +17,9 @@ export const LEGAL = {
   refundProcessingDays: '7',
   lastUpdated: '6 August 2026',
 } as const;
+
+/** Separate WhatsApp-only number (distinct from the call-support number above). */
+export const SUPPORT_WHATSAPP_PHONE = '+91 77839 79187';
+
+/** `https://wa.me/<digits>` deep link built from SUPPORT_WHATSAPP_PHONE. */
+export const SUPPORT_WHATSAPP_URL = `https://wa.me/${SUPPORT_WHATSAPP_PHONE.replace(/\D/g, '')}`;

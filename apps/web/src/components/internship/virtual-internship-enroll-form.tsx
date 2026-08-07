@@ -5,29 +5,32 @@ import { toast } from 'sonner';
 import { ArrowRight, Check, Rocket, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { useCreateVirtualInternshipEnrollment, type VirtualInternshipTrack } from '@/hooks/use-virtual-internship';
+import {
+  useCreateVirtualInternshipEnrollment,
+  useVirtualInternshipPricing,
+  type VirtualInternshipTrack,
+} from '@/hooks/use-virtual-internship';
 
-const TRACKS: { value: VirtualInternshipTrack; icon: typeof Zap; label: string; blurb: string; feeAmount: number }[] = [
-  {
-    value: 'FOUR_WEEK',
+const TRACK_META: Record<VirtualInternshipTrack, { icon: typeof Zap; label: string; blurb: string }> = {
+  FOUR_WEEK: {
     icon: Zap,
     label: '4-Week Track',
     blurb: 'The fast-track version — same outcome, same certificate, in a quarter of the time.',
-    feeAmount: 2_790,
   },
-  {
-    value: 'FOUR_MONTH',
+  FOUR_MONTH: {
     icon: Rocket,
     label: '4-Month Track',
     blurb: 'The full track — 4 real projects, deployed live, with mentors reviewing every month.',
-    feeAmount: 7_890,
   },
-];
+};
+const TRACK_ORDER: VirtualInternshipTrack[] = ['FOUR_WEEK', 'FOUR_MONTH'];
 
 export function VirtualInternshipEnrollForm({ initialTrack }: { initialTrack?: VirtualInternshipTrack }) {
   const [track, setTrack] = useState<VirtualInternshipTrack>(initialTrack ?? 'FOUR_WEEK');
   const enroll = useCreateVirtualInternshipEnrollment();
+  const { data: pricing, isLoading: pricingLoading } = useVirtualInternshipPricing();
 
   const onSubmit = () => {
     enroll.mutate(
@@ -39,7 +42,9 @@ export function VirtualInternshipEnrollForm({ initialTrack }: { initialTrack?: V
     );
   };
 
-  const selected = TRACKS.find((t) => t.value === track)!;
+  const selectedPricing = pricing?.find((p) => p.track === track);
+
+  if (pricingLoading) return <Skeleton className="h-64 w-full" />;
 
   return (
     <Card>
@@ -47,17 +52,19 @@ export function VirtualInternshipEnrollForm({ initialTrack }: { initialTrack?: V
         <div className="space-y-2">
           <p className="text-sm font-semibold">Choose your track</p>
           <div className="grid gap-3 sm:grid-cols-2">
-            {TRACKS.map((t) => {
-              const active = track === t.value;
+            {TRACK_ORDER.map((value) => {
+              const meta = TRACK_META[value];
+              const trackPricing = pricing?.find((p) => p.track === value);
+              const active = track === value;
               return (
                 <Card
-                  key={t.value}
+                  key={value}
                   role="button"
                   tabIndex={0}
                   aria-pressed={active}
-                  onClick={() => setTrack(t.value)}
+                  onClick={() => setTrack(value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') setTrack(t.value);
+                    if (e.key === 'Enter' || e.key === ' ') setTrack(value);
                   }}
                   className={cn(
                     'cursor-pointer border-2 transition-colors',
@@ -72,15 +79,18 @@ export function VirtualInternshipEnrollForm({ initialTrack }: { initialTrack?: V
                           active ? 'bg-primary text-primary-foreground' : 'bg-accent text-primary',
                         )}
                       >
-                        <t.icon className="h-[18px] w-[18px]" />
+                        <meta.icon className="h-[18px] w-[18px]" />
                       </span>
                       {active && <Check className="h-4 w-4 text-primary" />}
                     </div>
-                    <p className="font-display text-base font-bold">{t.label}</p>
-                    <p className="text-sm text-muted-foreground">{t.blurb}</p>
-                    <p className="font-display text-lg font-extrabold text-primary">
-                      ₹{t.feeAmount.toLocaleString()}
-                    </p>
+                    <p className="font-display text-base font-bold">{meta.label}</p>
+                    <p className="text-sm text-muted-foreground">{meta.blurb}</p>
+                    {trackPricing && (
+                      <p className="font-display text-lg font-extrabold text-primary">
+                        ₹{trackPricing.totalAmount.toLocaleString()}
+                        <span className="text-xs font-medium text-muted-foreground"> incl. GST</span>
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               );
@@ -88,8 +98,9 @@ export function VirtualInternshipEnrollForm({ initialTrack }: { initialTrack?: V
           </div>
         </div>
 
-        <Button disabled={enroll.isPending} onClick={onSubmit} className="w-full">
-          Enroll — ₹{selected.feeAmount.toLocaleString()} <ArrowRight className="h-4 w-4" />
+        <Button disabled={enroll.isPending || !selectedPricing} onClick={onSubmit} className="w-full">
+          Enroll{selectedPricing && ` — ₹${selectedPricing.totalAmount.toLocaleString()}`}{' '}
+          <ArrowRight className="h-4 w-4" />
         </Button>
       </CardContent>
     </Card>
