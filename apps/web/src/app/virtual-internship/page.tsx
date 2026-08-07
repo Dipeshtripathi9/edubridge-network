@@ -133,6 +133,19 @@ const WEEK_SCHEDULE = [
   { accent: 'var(--mint-deep)', title: 'Week 4 — Review, submit & certify', desc: 'Finalize the project, get mentor review, and receive your verified certificate + LOR.' },
 ];
 
+const CERTIFICATE_SAMPLES = [
+  {
+    src: '/virtual-internship-certificate-4week.png',
+    alt: 'Sample 4-Week Track completion certificate',
+    title: '4-Week Track Certificate',
+  },
+  {
+    src: '/virtual-internship-certificate-4month.png',
+    alt: 'Sample 4-Month Track completion certificate',
+    title: '4-Month Track Certificate',
+  },
+];
+
 const FAQS = [
   {
     q: 'Is this a paid course, or a real internship?',
@@ -629,6 +642,33 @@ export default function VirtualInternshipPage() {
       </div>
 
       <GigsSection />
+
+      <section className={styles.certSection}>
+        <div className={styles.wrap}>
+          <div className={styles.certHead}>
+            <h2>
+              Official <span>Internship Certificate</span>
+            </h2>
+            <p>Get your official certificate — issued once you complete the track, verifiable online anytime.</p>
+          </div>
+          <div className={styles.certGrid}>
+            {CERTIFICATE_SAMPLES.map((c) => (
+              <div key={c.title} className={styles.certCard}>
+                <img src={c.src} alt={c.alt} />
+                <div className={styles.certCaption}>
+                  <p>{c.title}</p>
+                  <span>
+                    <ShieldCheck className="h-3.5 w-3.5" /> Official certificate · Verifiable online
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Link href="/verify-certificate" className={cn(styles.btn, styles.btnGhost, styles.certVerifyLink)}>
+            Verify a certificate <ChevronRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      </section>
 
       <div className={styles.wrap}>
         <section className={styles.faqSection}>

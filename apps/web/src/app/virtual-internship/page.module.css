@@ -647,6 +647,78 @@
   max-width: 32rem;
   line-height: 1.6;
 }
+
+/* CERTIFICATE SHOWCASE */
+.certSection {
+  padding: 2.5rem 0;
+  background: var(--mint);
+}
+.certHead {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.certHead h2 {
+  font-size: 1.85rem;
+  color: var(--ink);
+  margin: 0 0 0.6rem;
+}
+.certHead h2 span {
+  color: var(--mint-deep);
+}
+.certHead p {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  margin: 0 auto;
+  max-width: 30rem;
+}
+.certGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.6rem;
+}
+@media (max-width: 760px) {
+  .certGrid {
+    grid-template-columns: 1fr;
+  }
+}
+.certCard {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 1.2rem;
+  box-shadow: 0 10px 30px rgba(27, 42, 29, 0.08);
+}
+.certCard img {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+.certCaption {
+  margin-top: 0.9rem;
+  text-align: center;
+}
+.certCaption p {
+  font-family: var(--font-fraunces), serif;
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 0 0.3rem;
+  color: var(--ink);
+}
+.certCaption span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--mint-deep);
+}
+.certVerifyLink {
+  display: flex;
+  width: max-content;
+  margin: 0 auto;
+  background: var(--card);
+}
+
 /* FAQ */
 .faqSection {
   padding: 1rem 0 2.5rem;

@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth.store';
 // ---- Enum literal unions, copied verbatim from the backend's Prisma enums ----
 export type VirtualInternshipTrack = 'FOUR_WEEK' | 'FOUR_MONTH';
 export type VirtualInternshipStatus = 'PENDING_PAYMENT' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+export type VirtualInternshipEvaluationStatus = 'PENDING' | 'PASSED' | 'FAILED';
 
 export interface VirtualInternshipEnrollment {
   id: string;
@@ -17,6 +18,10 @@ export interface VirtualInternshipEnrollment {
   paymentReferenceNote?: string | null;
   paidAt?: string | null;
   paymentConfirmedById?: string | null;
+  evaluationStatus: VirtualInternshipEvaluationStatus;
+  evaluatedAt?: string | null;
+  evaluatedById?: string | null;
+  evaluationNote?: string | null;
   createdAt: string;
   updatedAt: string;
   user?: { id: string; email: string | null; profile?: { fullName: string } | null };
@@ -74,5 +79,46 @@ export function useConfirmVirtualInternshipPayment() {
         { mentorNote },
       ),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['virtual-internship'] }),
+  });
+}
+
+export function useEvaluateVirtualInternshipEnrollment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, passed, note }: { id: string; passed: boolean; note?: string }) =>
+      api.post<{ id: string; evaluationStatus: VirtualInternshipEvaluationStatus }>(
+        `/virtual-internship/enrollments/${id}/evaluate`,
+        { passed, note },
+      ),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['virtual-internship'] }),
+  });
+}
+
+export function useCompleteVirtualInternshipEnrollment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      api.post<{ id: string; status: VirtualInternshipStatus; certificateId: string }>(
+        `/virtual-internship/enrollments/${id}/complete`,
+        {},
+      ),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['virtual-internship'] }),
+  });
+}
+
+export interface VirtualInternshipMetrics {
+  totalEnrollments: number;
+  byStatus: Partial<Record<VirtualInternshipStatus, number>>;
+  byTrack: Partial<Record<VirtualInternshipTrack, number>>;
+  byEvaluation: Partial<Record<VirtualInternshipEvaluationStatus, number>>;
+  certificatesIssued: number;
+  paymentConfirmedRate: number;
+  completionRate: number;
+}
+
+export function useVirtualInternshipMetrics() {
+  return useQuery({
+    queryKey: ['virtual-internship', 'metrics'],
+    queryFn: () => api.get<VirtualInternshipMetrics>('/virtual-internship/metrics'),
   });
 }

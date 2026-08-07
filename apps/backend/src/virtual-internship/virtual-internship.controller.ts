@@ -5,6 +5,7 @@ import { VirtualInternshipService } from './virtual-internship.service';
 import {
   ConfirmPaymentDto,
   EnrollVirtualInternshipDto,
+  EvaluateEnrollmentDto,
   SubmitPaymentReferenceDto,
   VirtualInternshipQueryDto,
 } from './dto/virtual-internship.dto';
@@ -51,6 +52,13 @@ export class VirtualInternshipController {
   }
 
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Get('metrics')
+  @ApiOperation({ summary: 'Aggregate enrollment/certificate counts (admin)' })
+  metrics() {
+    return this.virtualInternship.metrics();
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @Post('enrollments/:id/confirm-payment')
   @ApiOperation({ summary: 'Confirm the manually-verified payment (admin)' })
   confirmPayment(
@@ -59,5 +67,23 @@ export class VirtualInternshipController {
     @Body() dto: ConfirmPaymentDto,
   ) {
     return this.virtualInternship.confirmPayment(adminId, id, dto);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Post('enrollments/:id/evaluate')
+  @ApiOperation({ summary: 'Record the final-project evaluation result (admin)' })
+  evaluate(
+    @CurrentUser('sub') adminId: string,
+    @Param('id') id: string,
+    @Body() dto: EvaluateEnrollmentDto,
+  ) {
+    return this.virtualInternship.evaluate(adminId, id, dto);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Post('enrollments/:id/complete')
+  @ApiOperation({ summary: 'Mark an enrollment complete and issue its certificate (admin)' })
+  complete(@CurrentUser('sub') adminId: string, @Param('id') id: string) {
+    return this.virtualInternship.complete(adminId, id);
   }
 }

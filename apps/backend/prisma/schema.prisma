@@ -180,6 +180,12 @@ enum VirtualInternshipTrack {
   FOUR_MONTH
 }
 
+enum VirtualInternshipEvaluationStatus {
+  PENDING
+  PASSED
+  FAILED
+}
+
 enum EnrollmentStatus {
   PENDING_PAYMENT
   ACTIVE
@@ -210,6 +216,7 @@ enum TrackBAllocationType {
 enum CertificateSourceType {
   TRACK_A_ENROLLMENT
   TRACK_B_APPLICATION
+  VIRTUAL_INTERNSHIP
 }
 
 // ============================================================
@@ -1336,6 +1343,12 @@ model VirtualInternshipEnrollment {
   paymentReferenceNote String?
   paidAt               DateTime?
   paymentConfirmedById String?
+  completedAt          DateTime?
+  completedById        String?
+  evaluationStatus     VirtualInternshipEvaluationStatus @default(PENDING)
+  evaluatedAt          DateTime?
+  evaluatedById        String?
+  evaluationNote       String?
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
 
