@@ -1,7 +1,8 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { EnrollmentStatus } from '@prisma/client';
+import { CertificateSourceType, EnrollmentStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { CertificatesService } from '../internships/certificates/certificates.service';
 import { getVirtualInternshipFee } from './pricing.constants';
 import {
   ConfirmPaymentDto,
@@ -18,6 +19,7 @@ export class VirtualInternshipService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly certificates: CertificatesService,
   ) {}
 
   // ---------------- Student ----------------
@@ -109,5 +111,48 @@ export class VirtualInternshipService {
     });
 
     return { id, status: EnrollmentStatus.ACTIVE };
+  }
+
+  async complete(adminId: string, id: string) {
+    const enrollment = await this.prisma.virtualInternshipEnrollment.findUnique({
+      where: { id },
+      include: { user: { select: { profile: { select: { fullName: true } } } } },
+    });
+    if (!enrollment) throw new NotFoundException('Enrollment not found');
+    if (enrollment.status !== EnrollmentStatus.ACTIVE) {
+      throw new ForbiddenException('Enrollment must be active to complete');
+    }
+
+    const completedAt = new Date();
+
+    await this.prisma.$transaction([
+      this.prisma.virtualInternshipEnrollment.update({
+        where: { id },
+        data: {
+          status: EnrollmentStatus.COMPLETED,
+          completedAt,
+          completedById: adminId,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: adminId,
+          action: 'virtual_internship.complete',
+          entity: 'virtual_internship_enrollment',
+          entityId: id,
+          metadata: { userId: enrollment.userId },
+        },
+      }),
+    ]);
+
+    const cert = await this.certificates.issue({
+      sourceType: CertificateSourceType.VIRTUAL_INTERNSHIP,
+      sourceId: enrollment.id,
+      recipientId: enrollment.userId,
+      recipientName: enrollment.user.profile?.fullName ?? 'EduBridge Student',
+      track: enrollment.track,
+    });
+
+    return { id, status: EnrollmentStatus.COMPLETED, certificateId: cert.id };
   }
 }

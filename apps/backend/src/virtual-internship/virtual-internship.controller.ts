@@ -60,4 +60,11 @@ export class VirtualInternshipController {
   ) {
     return this.virtualInternship.confirmPayment(adminId, id, dto);
   }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Post('enrollments/:id/complete')
+  @ApiOperation({ summary: 'Mark an enrollment complete and issue its certificate (admin)' })
+  complete(@CurrentUser('sub') adminId: string, @Param('id') id: string) {
+    return this.virtualInternship.complete(adminId, id);
+  }
 }

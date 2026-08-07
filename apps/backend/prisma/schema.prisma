@@ -210,6 +210,7 @@ enum TrackBAllocationType {
 enum CertificateSourceType {
   TRACK_A_ENROLLMENT
   TRACK_B_APPLICATION
+  VIRTUAL_INTERNSHIP
 }
 
 // ============================================================
@@ -1336,6 +1337,8 @@ model VirtualInternshipEnrollment {
   paymentReferenceNote String?
   paidAt               DateTime?
   paymentConfirmedById String?
+  completedAt          DateTime?
+  completedById        String?
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
 
