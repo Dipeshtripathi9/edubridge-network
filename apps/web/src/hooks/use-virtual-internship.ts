@@ -18,6 +18,8 @@ export interface VirtualInternshipEnrollment {
   paymentReferenceNote?: string | null;
   paidAt?: string | null;
   paymentConfirmedById?: string | null;
+  completedAt?: string | null;
+  completedById?: string | null;
   evaluationStatus: VirtualInternshipEvaluationStatus;
   evaluatedAt?: string | null;
   evaluatedById?: string | null;
@@ -55,6 +57,33 @@ export function useSubmitVirtualInternshipPaymentReference() {
         paymentReferenceNote,
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['virtual-internship', 'me'] }),
+  });
+}
+
+export interface VirtualInternshipFeedback {
+  id: string;
+  enrollmentId: string;
+  userId: string;
+  rating: number;
+  comment?: string | null;
+  createdAt: string;
+}
+
+export function useVirtualInternshipFeedback(enrollmentId: string | undefined) {
+  const token = useAuthStore((s) => s.accessToken);
+  return useQuery({
+    queryKey: ['virtual-internship', 'feedback', enrollmentId],
+    queryFn: () => api.get<VirtualInternshipFeedback | null>(`/virtual-internship/enrollments/${enrollmentId}/feedback`),
+    enabled: !!token && !!enrollmentId,
+  });
+}
+
+export function useSubmitVirtualInternshipFeedback() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, rating, comment }: { id: string; rating: number; comment?: string }) =>
+      api.post<VirtualInternshipFeedback>(`/virtual-internship/enrollments/${id}/feedback`, { rating, comment }),
+    onSuccess: (_, { id }) => qc.invalidateQueries({ queryKey: ['virtual-internship', 'feedback', id] }),
   });
 }
 
@@ -114,6 +143,9 @@ export interface VirtualInternshipMetrics {
   certificatesIssued: number;
   paymentConfirmedRate: number;
   completionRate: number;
+  averageSatisfactionRating: number | null;
+  feedbackCount: number;
+  averageQuizScorePercent: number;
 }
 
 export function useVirtualInternshipMetrics() {

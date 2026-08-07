@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EnrollmentStatus, VirtualInternshipTrack } from '@prisma/client';
-import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class EnrollVirtualInternshipDto {
@@ -39,4 +40,18 @@ export class EvaluateEnrollmentDto {
   @IsOptional()
   @IsString()
   note?: string;
+}
+
+export class SubmitFeedbackDto {
+  @ApiProperty({ minimum: 1, maximum: 5, description: '1-5 satisfaction rating' })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  rating!: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  comment?: string;
 }

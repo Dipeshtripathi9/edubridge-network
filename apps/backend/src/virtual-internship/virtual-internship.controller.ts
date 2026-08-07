@@ -6,6 +6,7 @@ import {
   ConfirmPaymentDto,
   EnrollVirtualInternshipDto,
   EvaluateEnrollmentDto,
+  SubmitFeedbackDto,
   SubmitPaymentReferenceDto,
   VirtualInternshipQueryDto,
 } from './dto/virtual-internship.dto';
@@ -40,6 +41,18 @@ export class VirtualInternshipController {
     @Body() dto: SubmitPaymentReferenceDto,
   ) {
     return this.virtualInternship.submitPaymentReference(userId, id, dto);
+  }
+
+  @Post('enrollments/:id/feedback')
+  @ApiOperation({ summary: 'Leave satisfaction feedback for a completed enrollment' })
+  submitFeedback(@CurrentUser('sub') userId: string, @Param('id') id: string, @Body() dto: SubmitFeedbackDto) {
+    return this.virtualInternship.submitFeedback(userId, id, dto);
+  }
+
+  @Get('enrollments/:id/feedback')
+  @ApiOperation({ summary: 'My feedback for this enrollment, if any' })
+  myFeedback(@CurrentUser('sub') userId: string, @Param('id') id: string) {
+    return this.virtualInternship.myFeedback(userId, id);
   }
 
   // ---- Admin ----
