@@ -105,3 +105,20 @@ export function useCompleteVirtualInternshipEnrollment() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['virtual-internship'] }),
   });
 }
+
+export interface VirtualInternshipMetrics {
+  totalEnrollments: number;
+  byStatus: Partial<Record<VirtualInternshipStatus, number>>;
+  byTrack: Partial<Record<VirtualInternshipTrack, number>>;
+  byEvaluation: Partial<Record<VirtualInternshipEvaluationStatus, number>>;
+  certificatesIssued: number;
+  paymentConfirmedRate: number;
+  completionRate: number;
+}
+
+export function useVirtualInternshipMetrics() {
+  return useQuery({
+    queryKey: ['virtual-internship', 'metrics'],
+    queryFn: () => api.get<VirtualInternshipMetrics>('/virtual-internship/metrics'),
+  });
+}

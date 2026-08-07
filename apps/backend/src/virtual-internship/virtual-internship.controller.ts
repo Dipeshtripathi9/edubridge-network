@@ -52,6 +52,13 @@ export class VirtualInternshipController {
   }
 
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Get('metrics')
+  @ApiOperation({ summary: 'Aggregate enrollment/certificate counts (admin)' })
+  metrics() {
+    return this.virtualInternship.metrics();
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @Post('enrollments/:id/confirm-payment')
   @ApiOperation({ summary: 'Confirm the manually-verified payment (admin)' })
   confirmPayment(

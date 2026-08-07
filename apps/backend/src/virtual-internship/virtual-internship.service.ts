@@ -77,6 +77,36 @@ export class VirtualInternshipService {
     return buildPaginatedResult(items, query);
   }
 
+  async metrics() {
+    const [byStatus, byTrack, byEvaluation, certificatesIssued] = await Promise.all([
+      this.prisma.virtualInternshipEnrollment.groupBy({ by: ['status'], _count: true }),
+      this.prisma.virtualInternshipEnrollment.groupBy({ by: ['track'], _count: true }),
+      this.prisma.virtualInternshipEnrollment.groupBy({ by: ['evaluationStatus'], _count: true }),
+      this.prisma.certificate.count({ where: { sourceType: CertificateSourceType.VIRTUAL_INTERNSHIP } }),
+    ]);
+
+    const statusCounts = Object.fromEntries(byStatus.map((r) => [r.status, r._count])) as Record<
+      EnrollmentStatus,
+      number
+    >;
+    const trackCounts = Object.fromEntries(byTrack.map((r) => [r.track, r._count]));
+    const evaluationCounts = Object.fromEntries(byEvaluation.map((r) => [r.evaluationStatus, r._count]));
+
+    const total = byStatus.reduce((sum, r) => sum + r._count, 0);
+    const paid = (statusCounts.ACTIVE ?? 0) + (statusCounts.COMPLETED ?? 0);
+    const completed = statusCounts.COMPLETED ?? 0;
+
+    return {
+      totalEnrollments: total,
+      byStatus: statusCounts,
+      byTrack: trackCounts,
+      byEvaluation: evaluationCounts,
+      certificatesIssued,
+      paymentConfirmedRate: total === 0 ? 0 : Math.round((paid / total) * 1000) / 10,
+      completionRate: paid === 0 ? 0 : Math.round((completed / paid) * 1000) / 10,
+    };
+  }
+
   async confirmPayment(adminId: string, id: string, dto: ConfirmPaymentDto) {
     const enrollment = await this.prisma.virtualInternshipEnrollment.findUnique({ where: { id } });
     if (!enrollment) throw new NotFoundException('Enrollment not found');
