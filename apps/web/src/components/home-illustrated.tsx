@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Briefcase, Building2, CheckCircle2, GraduationCap, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CollegeQuiz } from '@/components/college-quiz';
+import { CollegeMatchQuiz } from '@/components/college-match-quiz';
 import { HomeCareerBridge } from '@/components/home-career-bridge';
 import { HomeCollegeRanking } from '@/components/home-college-ranking';
 import { HomeInternshipRecommendations } from '@/components/home-internship-recommendations';
@@ -138,15 +139,17 @@ export function HeroContent({ onQuiz }: { onQuiz: () => void }) {
 export function HomeIllustrated() {
   const [quizOpen, setQuizOpen] = useState(false);
   const openQuiz = () => setQuizOpen(true);
+  const [collegeMatchQuizOpen, setCollegeMatchQuizOpen] = useState(false);
   const loggedIn = useAuthStore((s) => !!s.accessToken);
 
   return (
     <>
       <CollegeQuiz open={quizOpen} onClose={() => setQuizOpen(false)} />
+      <CollegeMatchQuiz open={collegeMatchQuizOpen} onClose={() => setCollegeMatchQuizOpen(false)} />
       <div className="space-y-12 sm:space-y-16">
         {loggedIn ? (
           <>
-            <HomeWelcomePanel onQuiz={openQuiz} />
+            <HomeWelcomePanel onQuiz={openQuiz} onCollegeMatchQuiz={() => setCollegeMatchQuizOpen(true)} />
             <HomeCollegeRanking onQuiz={openQuiz} />
           </>
         ) : (
@@ -160,7 +163,7 @@ export function HomeIllustrated() {
         )}
 
         {/* TOOLS + SCHOLARSHIPS */}
-        <HomeTools onQuiz={openQuiz} loggedIn={loggedIn} />
+        <HomeTools onQuiz={openQuiz} onCollegeMatchQuiz={() => setCollegeMatchQuizOpen(true)} loggedIn={loggedIn} />
 
         {/* INTERNSHIP RECOMMENDATIONS */}
         <HomeInternshipRecommendations />

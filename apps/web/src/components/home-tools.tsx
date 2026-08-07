@@ -209,10 +209,11 @@ const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/
 </svg>`;
 
 // Each poster is a clickable card — "quiz" opens the lead-gen quiz modal,
-// "href" navigates. Expert Guide reuses the quiz modal too: it's the same
+// "collegeMatchQuiz" opens the standalone college-match quiz, "href"
+// navigates. Expert Guide reuses the lead-gen quiz modal too: it's the same
 // counselor-callback flow the hero's "College" button starts.
 const POSTERS = [
-  { svg: POSTER_QUIZ, action: { type: 'quiz' as const } },
+  { svg: POSTER_QUIZ, action: { type: 'collegeMatchQuiz' as const } },
   { svg: POSTER_COMPARE, action: { type: 'href' as const, href: '/reviews' } },
   { svg: POSTER_INTERNSHIP, action: { type: 'href' as const, href: '/internship' } },
   { svg: POSTER_SCHOLARSHIP, action: { type: 'href' as const, href: '/scholarships' } },
@@ -226,7 +227,7 @@ const POSTER_TITLES = ['College Quiz', 'Compare Colleges', 'Internship', 'Schola
 // flat scroll strip. Advance via the chevrons, the dots, arrow keys, or a
 // left/right swipe on the deck itself; the front card is still the real
 // link/button so clicking it behaves exactly like before.
-function PosterStack({ onQuiz }: { onQuiz: () => void }) {
+function PosterStack({ onQuiz, onCollegeMatchQuiz }: { onQuiz: () => void; onCollegeMatchQuiz: () => void }) {
   const total = POSTER_TRACK.length;
   const [index, setIndex] = useState(0);
   const dragStartX = useRef<number | null>(null);
@@ -275,11 +276,21 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
               );
             }
             const label = `Open ${POSTER_TITLES[i]}`;
-            return action.type === 'quiz' ? (
-              <button key={i} type="button" className="deck-card front" aria-label={label} onClick={onQuiz}>
-                {photo}
-              </button>
-            ) : (
+            if (action.type === 'quiz') {
+              return (
+                <button key={i} type="button" className="deck-card front" aria-label={label} onClick={onQuiz}>
+                  {photo}
+                </button>
+              );
+            }
+            if (action.type === 'collegeMatchQuiz') {
+              return (
+                <button key={i} type="button" className="deck-card front" aria-label={label} onClick={onCollegeMatchQuiz}>
+                  {photo}
+                </button>
+              );
+            }
+            return (
               <Link key={i} href={action.href} className="deck-card front" aria-label={label}>
                 {photo}
               </Link>
@@ -377,7 +388,7 @@ function PosterStack({ onQuiz }: { onQuiz: () => void }) {
 // (all 5 posters share the same circle at cx=240,cy=230,r=168 in their
 // 480x600 viewBox), cropped to a small circle via scale + negative offset
 // so the poster's own outer card/title never show through.
-function PosterRow({ onQuiz }: { onQuiz: () => void }) {
+function PosterRow({ onQuiz, onCollegeMatchQuiz }: { onQuiz: () => void; onCollegeMatchQuiz: () => void }) {
   const cardClass =
     'flex flex-col items-center gap-3.5 rounded-[20px] border border-border bg-card px-3 py-7 text-inherit no-underline transition-transform hover:-translate-y-1 hover:shadow-lg';
   return (
@@ -396,11 +407,21 @@ function PosterRow({ onQuiz }: { onQuiz: () => void }) {
             <span className="text-center font-display text-[15px] font-extrabold tracking-tight">{POSTER_TITLES[i]}</span>
           </>
         );
-        return action.type === 'quiz' ? (
-          <button key={i} type="button" onClick={onQuiz} className={cardClass}>
-            {inner}
-          </button>
-        ) : (
+        if (action.type === 'quiz') {
+          return (
+            <button key={i} type="button" onClick={onQuiz} className={cardClass}>
+              {inner}
+            </button>
+          );
+        }
+        if (action.type === 'collegeMatchQuiz') {
+          return (
+            <button key={i} type="button" onClick={onCollegeMatchQuiz} className={cardClass}>
+              {inner}
+            </button>
+          );
+        }
+        return (
           <Link key={i} href={action.href} className={cardClass}>
             {inner}
           </Link>
@@ -410,7 +431,15 @@ function PosterRow({ onQuiz }: { onQuiz: () => void }) {
   );
 }
 
-export function HomeTools({ onQuiz, loggedIn }: { onQuiz: () => void; loggedIn: boolean }) {
+export function HomeTools({
+  onQuiz,
+  onCollegeMatchQuiz,
+  loggedIn,
+}: {
+  onQuiz: () => void;
+  onCollegeMatchQuiz: () => void;
+  loggedIn: boolean;
+}) {
   return (
     <section aria-label="Tools & scholarships" className="!mt-0 mx-auto w-full max-w-[960px]">
       <div className="mb-8 border-t-2 border-border pt-7 text-center sm:pt-10 [@media(max-height:700px)]:mb-4 [@media(max-height:700px)]:pt-4">
@@ -423,10 +452,10 @@ export function HomeTools({ onQuiz, loggedIn }: { onQuiz: () => void; loggedIn: 
 
       {/* Mobile: swipeable fanned carousel. Laptop/tablet: static row of all 5. */}
       <div className="md:hidden">
-        <PosterStack onQuiz={onQuiz} />
+        <PosterStack onQuiz={onQuiz} onCollegeMatchQuiz={onCollegeMatchQuiz} />
       </div>
       <div className="hidden md:block">
-        <PosterRow onQuiz={onQuiz} />
+        <PosterRow onQuiz={onQuiz} onCollegeMatchQuiz={onCollegeMatchQuiz} />
       </div>
 
       {/* Direct Admission Desk */}

@@ -19,7 +19,13 @@ const QUICK_ACTIONS = [
 // 860px breakpoint that reveals the quick-actions row) via styled-jsx, so
 // the exact CSS/media queries survive intact rather than being
 // re-derived through Tailwind's breakpoint scale.
-export function HomeWelcomePanel({ onQuiz }: { onQuiz: () => void }) {
+export function HomeWelcomePanel({
+  onQuiz,
+  onCollegeMatchQuiz,
+}: {
+  onQuiz: () => void;
+  onCollegeMatchQuiz: () => void;
+}) {
   const { data: me } = useMe();
   const profilePct = useProfileProgress((s) => s.pct);
   const profile = me?.profile;
@@ -62,7 +68,12 @@ export function HomeWelcomePanel({ onQuiz }: { onQuiz: () => void }) {
               {content}
             </Link>
           ) : (
-            <button key={label} type="button" onClick={onQuiz} className="action-item">
+            <button
+              key={label}
+              type="button"
+              onClick={label === 'College Quiz' ? onCollegeMatchQuiz : onQuiz}
+              className="action-item"
+            >
               {content}
             </button>
           );

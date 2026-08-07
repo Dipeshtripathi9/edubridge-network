@@ -1,0 +1,246 @@
+.page {
+  --bg: #f5efe6;
+  --ink: #191233;
+  --muted: #6b6577;
+  --indigo: #5b4fe5;
+  --grad-start: #6c5ce7;
+  --grad-end: #d99a3a;
+  --track: #e9e4f5;
+  --opt-bg: #e7e1d1;
+  --opt-selected: #5b4fe5;
+  --line: #d9d4c6;
+  --white: #ffffff;
+
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.wrap {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+  min-height: 100vh;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.topbar h1 {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.pct {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--indigo);
+}
+
+.progressTrack {
+  height: 8px;
+  background: var(--track);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--grad-start), var(--grad-end));
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+.progressCaption {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 30px;
+}
+
+.qcard {
+  animation: fadein 0.25s ease;
+}
+@keyframes fadein {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stepLabel {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+.qtitle {
+  font-size: 29px;
+  font-weight: 800;
+  margin: 0 0 12px;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+.qsub {
+  font-size: 15px;
+  color: var(--muted);
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+/* category cards (step 1) */
+.catStack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.catCard {
+  background: var(--opt-bg);
+  border: none;
+  border-radius: 16px;
+  padding: 20px 22px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  user-select: none;
+  width: 100%;
+}
+.catCard:hover {
+  filter: brightness(0.97);
+}
+.catCard.selected {
+  background: var(--opt-selected);
+  color: #fff;
+}
+.catIcon {
+  font-size: 22px;
+  margin-bottom: 6px;
+  display: block;
+}
+.catName {
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+.catDesc {
+  font-size: 13.5px;
+  line-height: 1.5;
+  opacity: 0.85;
+}
+.catCard.selected .catDesc {
+  opacity: 0.92;
+}
+
+/* generic pills (steps 2-7) */
+.optStack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.opt {
+  background: var(--opt-bg);
+  border: none;
+  border-radius: 14px;
+  padding: 18px 22px;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+  user-select: none;
+  width: 100%;
+}
+.opt:hover {
+  filter: brightness(0.97);
+}
+.opt.selected {
+  background: var(--opt-selected);
+  color: #fff;
+}
+
+.navStack {
+  margin-top: 32px;
+}
+.backLink {
+  display: inline-block;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 6px;
+}
+.backLink:hover {
+  color: var(--ink);
+}
+.cta {
+  display: block;
+  width: 100%;
+  font-size: 16.5px;
+  font-weight: 800;
+  padding: 18px 24px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: var(--indigo);
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+}
+.cta:hover {
+  filter: brightness(1.05);
+}
+.cta:disabled {
+  background: #c9c4e0;
+  cursor: not-allowed;
+}
+
+/* result screen */
+.result {
+  animation: fadein 0.25s ease;
+}
+.resultGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.resultCard {
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 20px;
+}
+.rLabel {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--indigo);
+  margin-bottom: 5px;
+}
+.rValue {
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+.rSub {
+  font-size: 13px;
+  color: var(--muted);
+}

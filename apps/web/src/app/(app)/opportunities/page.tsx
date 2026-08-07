@@ -124,8 +124,16 @@ function AppliedTab() {
   );
 }
 
-function AllTab({ category, onCategoryChange }: { category?: string; onCategoryChange: (c?: string) => void }) {
-  const [q, setQ] = useState('');
+function AllTab({
+  category,
+  onCategoryChange,
+  initialQuery,
+}: {
+  category?: string;
+  onCategoryChange: (c?: string) => void;
+  initialQuery?: string;
+}) {
+  const [q, setQ] = useState(initialQuery ?? '');
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInternshipListings({ category, q: q || undefined });
   const listings: InternshipListing[] = data?.pages.flatMap((p) => p.data) ?? [];
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -261,6 +269,7 @@ function OpenCareerProgramInner() {
   const [category, setCategory] = useState<string | undefined>(
     initialCategory && CATEGORIES.some((c) => c.key === initialCategory) ? initialCategory : undefined,
   );
+  const initialSearch = params.get('search') ?? undefined;
   const { slugs: shortlistSlugs } = useInternshipListingShortlist();
   const { slugs: appliedSlugs } = useInternshipListingApplied();
 
@@ -319,7 +328,7 @@ function OpenCareerProgramInner() {
       </div>
 
       <div className="pb-10">
-        {tab === 'all' && <AllTab category={category} onCategoryChange={setCategory} />}
+        {tab === 'all' && <AllTab category={category} onCategoryChange={setCategory} initialQuery={initialSearch} />}
         {tab === 'shortlist' && <ShortlistTab />}
         {tab === 'applied' && <AppliedTab />}
       </div>
