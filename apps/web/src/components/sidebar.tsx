@@ -9,6 +9,7 @@ import {
   Code2,
   GraduationCap,
   Headset,
+  HelpCircle,
   Home,
   Info,
   Repeat,
@@ -22,6 +23,7 @@ import { useAuthStore } from '@/stores/auth.store';
 export const NAV = [
   { href: '/home', label: 'Home', icon: Home },
   { href: '/internship', label: 'Internship', icon: Rocket },
+  { href: '/quizzes', label: 'Quizzes', icon: HelpCircle },
   { href: '/transfer', label: 'Transfer Hub', icon: Repeat },
   { href: '/referral', label: 'Referral', icon: Briefcase },
   { href: '/about', label: 'About', icon: Info },
@@ -36,6 +38,7 @@ export const ADMIN_NAV = [
   { href: '/manage/ez-rentbuddy', label: 'EZ-Rentbuddy', icon: Home },
   { href: '/manage/internship', label: 'Internship', icon: Award },
   { href: '/manage/virtual-internship', label: 'Virtual Internship', icon: Sparkles },
+  { href: '/manage/quizzes', label: 'Quizzes', icon: HelpCircle },
 ];
 
 export function Sidebar() {

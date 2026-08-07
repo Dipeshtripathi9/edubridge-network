@@ -2,18 +2,59 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { CheckCircle2, IndianRupee } from 'lucide-react';
+import { Award, CheckCircle2, Download, IndianRupee } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { VirtualInternshipFeedbackForm } from './virtual-internship-feedback-form';
 import {
   useSubmitVirtualInternshipPaymentReference,
   type VirtualInternshipEnrollment,
 } from '@/hooks/use-virtual-internship';
+import { useMyCertificates } from '@/hooks/use-certificates';
+import { API_URL } from '@/lib/api';
 
 export function VirtualInternshipPaymentBox({ enrollment }: { enrollment: VirtualInternshipEnrollment }) {
   const [note, setNote] = useState(enrollment.paymentReferenceNote ?? '');
   const submitRef = useSubmitVirtualInternshipPaymentReference();
+  const { data: certificates, isLoading: certsLoading } = useMyCertificates();
+
+  if (enrollment.status === 'COMPLETED') {
+    const certificate = certificates?.find(
+      (c) => c.sourceType === 'VIRTUAL_INTERNSHIP' && c.sourceId === enrollment.id,
+    );
+
+    return (
+      <div className="space-y-4">
+        <Card className="border-green/40 bg-green-soft/40">
+          <CardContent className="flex items-start gap-3 p-5">
+            <span className="grid h-9 w-9 flex-none place-items-center rounded-full bg-green text-white">
+              <Award className="h-5 w-5" />
+            </span>
+            <div className="flex-1">
+              <p className="font-semibold">Track complete — certificate issued</p>
+              <p className="text-sm text-muted-foreground">
+                {enrollment.completedAt
+                  ? `Completed on ${new Date(enrollment.completedAt).toLocaleDateString()}.`
+                  : 'Nice work!'}
+              </p>
+              {certsLoading ? (
+                <Skeleton className="mt-3 h-9 w-40" />
+              ) : certificate ? (
+                <Button asChild size="sm" className="mt-3">
+                  <a href={`${API_URL}/internships/certificates/${certificate.id}/download`} target="_blank" rel="noreferrer">
+                    <Download className="h-4 w-4" /> Download certificate
+                  </a>
+                </Button>
+              ) : null}
+            </div>
+          </CardContent>
+        </Card>
+        <VirtualInternshipFeedbackForm enrollmentId={enrollment.id} />
+      </div>
+    );
+  }
 
   if (enrollment.status !== 'PENDING_PAYMENT') {
     return (

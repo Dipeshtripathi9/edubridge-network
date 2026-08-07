@@ -290,6 +290,8 @@ model User {
   trackBApplications           TrackBApplication[]
   certificates                 Certificate[]
   virtualInternshipEnrollments VirtualInternshipEnrollment[]
+  virtualInternshipFeedback    VirtualInternshipFeedback[]
+  quizAttempts                 QuizAttempt[]
 
   @@index([status])
   @@index([role])
@@ -1351,10 +1353,68 @@ model VirtualInternshipEnrollment {
   evaluationNote       String?
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
+  feedback             VirtualInternshipFeedback?
 
   @@index([userId, status])
   @@index([status, createdAt])
   @@map("virtual_internship_enrollments")
+}
+
+model VirtualInternshipFeedback {
+  id           String                       @id @default(cuid())
+  enrollmentId String                       @unique
+  enrollment   VirtualInternshipEnrollment  @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating       Int // 1-5
+  comment      String?
+  createdAt    DateTime                     @default(now())
+
+  @@index([userId])
+  @@map("virtual_internship_feedback")
+}
+
+model Quiz {
+  id          String         @id @default(cuid())
+  title       String
+  description String?
+  isPublished Boolean        @default(false)
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id            String   @id @default(cuid())
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  order         Int
+  prompt        String
+  options       String[]
+  correctOption Int // index into options
+  createdAt     DateTime @default(now())
+
+  @@index([quizId])
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id             String   @id @default(cuid())
+  quizId         String
+  quiz           Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers        Json // { [questionId]: selectedOptionIndex }
+  score          Int // number of correct answers
+  totalQuestions Int
+  submittedAt    DateTime @default(now())
+
+  @@index([quizId])
+  @@index([userId])
+  @@map("quiz_attempts")
 }
 
 model TrackBApplication {

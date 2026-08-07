@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowUpRight, Award, Clock, FileCheck2, Rocket, ShieldCheck, Wallet } from 'lucide-react';
+import { ArrowUpRight, Award, Clock, FileCheck2, GraduationCap, Rocket, ShieldCheck, Star, Wallet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -94,6 +94,12 @@ function MetricsRow() {
       <Stat icon={FileCheck2} label="Payment confirmed rate" value={`${data.paymentConfirmedRate}%`} />
       <Stat icon={FileCheck2} label="Completion rate" value={`${data.completionRate}%`} />
       <Stat icon={Award} label="Certificates issued" value={data.certificatesIssued} />
+      <Stat icon={GraduationCap} label="Average quiz score" value={`${data.averageQuizScorePercent}%`} />
+      <Stat
+        icon={Star}
+        label={`Satisfaction (${data.feedbackCount})`}
+        value={data.averageSatisfactionRating === null ? '—' : `${data.averageSatisfactionRating}/5`}
+      />
     </div>
   );
 }
