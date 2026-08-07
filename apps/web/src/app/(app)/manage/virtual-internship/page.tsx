@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowUpRight, Award, FileCheck2, Rocket, ShieldCheck, Wallet } from 'lucide-react';
+import { ArrowUpRight, Award, Clock, FileCheck2, Rocket, ShieldCheck, Wallet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,6 +16,7 @@ import {
   useVirtualInternshipMetrics,
   type VirtualInternshipEnrollment,
   type VirtualInternshipStatus,
+  type VirtualInternshipTrack,
 } from '@/hooks/use-virtual-internship';
 
 const STATUSES: { value: VirtualInternshipStatus | 'ALL'; label: string }[] = [
@@ -25,6 +26,34 @@ const STATUSES: { value: VirtualInternshipStatus | 'ALL'; label: string }[] = [
   { value: 'COMPLETED', label: 'Completed' },
   { value: 'CANCELLED', label: 'Cancelled' },
 ];
+
+// Submission deadline = track length from the day payment was confirmed (the
+// day the track actually started). No task-submission system exists yet, so
+// this is the one real, non-fabricated signal we have for "is this student on
+// schedule" — matches the durations already advertised on the landing page.
+const TRACK_DAYS: Record<VirtualInternshipTrack, number> = { FOUR_WEEK: 28, FOUR_MONTH: 121 };
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function getExpectedDeadline(enrollment: VirtualInternshipEnrollment): Date | null {
+  if (!enrollment.paidAt) return null;
+  return new Date(new Date(enrollment.paidAt).getTime() + TRACK_DAYS[enrollment.track] * DAY_MS);
+}
+
+function DeadlineBadge({ enrollment }: { enrollment: VirtualInternshipEnrollment }) {
+  if (enrollment.status !== 'ACTIVE') return null;
+  const deadline = getExpectedDeadline(enrollment);
+  if (!deadline) return null;
+
+  const daysLeft = Math.ceil((deadline.getTime() - Date.now()) / DAY_MS);
+  const overdue = daysLeft < 0;
+
+  return (
+    <Badge variant="outline" className={overdue ? 'border-destructive text-destructive' : 'border-border text-muted-foreground'}>
+      <Clock className="mr-1 h-3 w-3" />
+      {overdue ? `Overdue by ${Math.abs(daysLeft)}d` : `Due ${deadline.toLocaleDateString()}`}
+    </Badge>
+  );
+}
 
 function UserLine({ user }: { user: VirtualInternshipEnrollment['user'] }) {
   return (
@@ -121,6 +150,7 @@ export default function ManageVirtualInternshipPage() {
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <Badge variant="secondary">{enrollment.status.replaceAll('_', ' ')}</Badge>
+                      <DeadlineBadge enrollment={enrollment} />
                       {enrollment.evaluationStatus !== 'PENDING' && (
                         <Badge
                           variant="outline"
