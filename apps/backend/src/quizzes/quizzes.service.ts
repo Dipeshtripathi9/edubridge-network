@@ -42,6 +42,13 @@ export class QuizzesService {
     return { id: questionId };
   }
 
+  async deleteQuiz(id: string) {
+    const quiz = await this.prisma.quiz.findUnique({ where: { id } });
+    if (!quiz) throw new NotFoundException('Quiz not found');
+    await this.prisma.quiz.delete({ where: { id } });
+    return { id };
+  }
+
   /** Admin view — includes correctOption so it can be edited/reviewed. */
   async getQuizForAdmin(id: string) {
     const quiz = await this.prisma.quiz.findUnique({

@@ -123,6 +123,14 @@ export function useDeleteQuizQuestion() {
   });
 }
 
+export function useDeleteQuiz() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete<{ id: string }>(`/quizzes/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['quizzes', 'admin'] }),
+  });
+}
+
 // ---------------- Student ----------------
 
 export function usePublishedQuizzes() {

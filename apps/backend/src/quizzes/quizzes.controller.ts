@@ -57,6 +57,13 @@ export class QuizzesController {
     return this.quizzes.deleteQuestion(id, questionId);
   }
 
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a quiz and all its questions/attempts (admin)' })
+  deleteQuiz(@Param('id') id: string) {
+    return this.quizzes.deleteQuiz(id);
+  }
+
   // ---- Student ----
 
   @Public()
