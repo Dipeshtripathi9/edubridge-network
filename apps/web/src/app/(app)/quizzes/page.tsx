@@ -17,7 +17,7 @@ export default function QuizzesPage() {
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           <HelpCircle className="h-6 w-6 text-primary" /> Quizzes
         </h1>
-        <p className="text-muted-foreground">Test what you've learned — auto-graded instantly.</p>
+        <p className="text-muted-foreground">Test what you&apos;ve learned — auto-graded instantly.</p>
       </div>
 
       {isLoading ? (
