@@ -9,12 +9,14 @@ import {
   ChevronDown,
   ChevronRight,
   ClipboardCheck,
+  Code2,
   FileText,
   GraduationCap,
   LineChart,
   MessageCircle,
   Share2,
   Sparkles,
+  UserPlus,
   Users,
 } from 'lucide-react';
 import { AccountMenu } from '@/components/account-menu';
@@ -41,10 +43,30 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 const HOW_STEPS = [
-  { src: '/virtual-internship-step-enroll.png', alt: 'Enroll' },
-  { src: '/virtual-internship-step-build.png', alt: 'Build' },
-  { src: '/virtual-internship-step-certified.png', alt: 'Get certified' },
-  { src: '/virtual-internship-step-referral.png', alt: 'Referral support' },
+  {
+    icon: UserPlus,
+    tone: 'mint',
+    title: 'Enroll',
+    desc: 'Pick your track — 4-week or 4-month — and pay via UPI.',
+  },
+  {
+    icon: Code2,
+    tone: 'orange',
+    title: 'Build',
+    desc: 'Get matched to a team and start shipping real projects.',
+  },
+  {
+    icon: Award,
+    tone: 'mint',
+    title: 'Get certified',
+    desc: 'Finish all projects, get mentor sign-off, receive your certificate.',
+  },
+  {
+    icon: Share2,
+    tone: 'orange',
+    title: 'Referral support',
+    desc: 'Unlock referral access and paid remote gigs once you finish.',
+  },
 ];
 
 const MENTORS = [
@@ -287,10 +309,12 @@ export default function VirtualInternshipPage() {
         <section className={styles.howSection}>
           <div className={styles.howGrid}>
             {HOW_STEPS.map((step) => (
-              <div key={step.src} className={styles.howStep}>
-                <div className={styles.howStepIcon}>
-                  <img src={step.src} alt={step.alt} />
-                </div>
+              <div key={step.title} className={styles.howStep}>
+                <span className={cn(styles.howStepIcon, step.tone === 'orange' && styles.howStepIconOrange)}>
+                  <step.icon className="h-5 w-5" />
+                </span>
+                <h4>{step.title}</h4>
+                <p>{step.desc}</p>
                 <ChevronRight className={styles.howArrow} width={20} height={20} />
               </div>
             ))}
