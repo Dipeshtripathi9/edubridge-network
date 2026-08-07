@@ -1,5 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CertificateSourceType, EnrollmentStatus } from '@prisma/client';
+import { CertificateSourceType, EnrollmentStatus, VirtualInternshipEvaluationStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CertificatesService } from '../internships/certificates/certificates.service';
@@ -7,6 +7,7 @@ import { getVirtualInternshipFee } from './pricing.constants';
 import {
   ConfirmPaymentDto,
   EnrollVirtualInternshipDto,
+  EvaluateEnrollmentDto,
   SubmitPaymentReferenceDto,
   VirtualInternshipQueryDto,
 } from './dto/virtual-internship.dto';
@@ -113,6 +114,50 @@ export class VirtualInternshipService {
     return { id, status: EnrollmentStatus.ACTIVE };
   }
 
+  async evaluate(adminId: string, id: string, dto: EvaluateEnrollmentDto) {
+    const enrollment = await this.prisma.virtualInternshipEnrollment.findUnique({ where: { id } });
+    if (!enrollment) throw new NotFoundException('Enrollment not found');
+    if (enrollment.status !== EnrollmentStatus.ACTIVE) {
+      throw new ForbiddenException('Enrollment must be active before it can be evaluated');
+    }
+
+    const evaluationStatus = dto.passed
+      ? VirtualInternshipEvaluationStatus.PASSED
+      : VirtualInternshipEvaluationStatus.FAILED;
+
+    await this.prisma.$transaction([
+      this.prisma.virtualInternshipEnrollment.update({
+        where: { id },
+        data: {
+          evaluationStatus,
+          evaluatedAt: new Date(),
+          evaluatedById: adminId,
+          evaluationNote: dto.note,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: adminId,
+          action: 'virtual_internship.evaluate',
+          entity: 'virtual_internship_enrollment',
+          entityId: id,
+          metadata: { userId: enrollment.userId, passed: dto.passed, note: dto.note },
+        },
+      }),
+    ]);
+
+    await this.notifications.create({
+      recipientId: enrollment.userId,
+      type: 'INTERNSHIP_TASK_REVIEWED',
+      title: dto.passed ? 'Your final project passed review 🎉' : 'Your final project needs revision',
+      body: dto.passed
+        ? 'Nice work — your certificate will be issued shortly.'
+        : dto.note ?? 'Your mentor left feedback — check with them on next steps.',
+    });
+
+    return { id, evaluationStatus };
+  }
+
   async complete(adminId: string, id: string) {
     const enrollment = await this.prisma.virtualInternshipEnrollment.findUnique({
       where: { id },
@@ -121,6 +166,9 @@ export class VirtualInternshipService {
     if (!enrollment) throw new NotFoundException('Enrollment not found');
     if (enrollment.status !== EnrollmentStatus.ACTIVE) {
       throw new ForbiddenException('Enrollment must be active to complete');
+    }
+    if (enrollment.evaluationStatus !== VirtualInternshipEvaluationStatus.PASSED) {
+      throw new BadRequestException('Final project must pass evaluation before completing this enrollment');
     }
 
     const completedAt = new Date();

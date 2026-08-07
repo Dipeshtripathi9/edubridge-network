@@ -180,6 +180,12 @@ enum VirtualInternshipTrack {
   FOUR_MONTH
 }
 
+enum VirtualInternshipEvaluationStatus {
+  PENDING
+  PASSED
+  FAILED
+}
+
 enum EnrollmentStatus {
   PENDING_PAYMENT
   ACTIVE
@@ -1339,6 +1345,10 @@ model VirtualInternshipEnrollment {
   paymentConfirmedById String?
   completedAt          DateTime?
   completedById        String?
+  evaluationStatus     VirtualInternshipEvaluationStatus @default(PENDING)
+  evaluatedAt          DateTime?
+  evaluatedById        String?
+  evaluationNote       String?
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
 
