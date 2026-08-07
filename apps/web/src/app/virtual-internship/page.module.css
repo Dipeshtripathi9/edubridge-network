@@ -32,7 +32,7 @@
   font-family: var(--font-ibm-plex-mono), monospace;
 }
 
-.page a {
+.page a:not(.btn) {
   color: inherit;
 }
 .page img {
