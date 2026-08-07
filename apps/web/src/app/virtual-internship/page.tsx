@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import {
@@ -15,6 +15,7 @@ import {
   LineChart,
   MessageCircle,
   Share2,
+  ShieldCheck,
   Sparkles,
   UserPlus,
   Users,
@@ -250,6 +251,12 @@ export default function VirtualInternshipPage() {
   const [openMonth, setOpenMonth] = useState<number | null>(1);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showSticky, setShowSticky] = useState(false);
+  const trackSectionRef = useRef<HTMLDivElement>(null);
+
+  const exploreTrackFromCta = () => {
+    setOpenTrack('month');
+    trackSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   useEffect(() => {
     const onScroll = () => setShowSticky(window.scrollY > 480);
@@ -307,21 +314,24 @@ export default function VirtualInternshipPage() {
         </section>
 
         <section className={styles.howSection}>
-          <div className={styles.howGrid}>
-            {HOW_STEPS.map((step) => (
-              <div key={step.title} className={styles.howStep}>
-                <span className={cn(styles.howStepIcon, step.tone === 'orange' && styles.howStepIconOrange)}>
-                  <step.icon className="h-5 w-5" />
-                </span>
-                <h4>{step.title}</h4>
-                <p>{step.desc}</p>
-                <ChevronRight className={styles.howArrow} width={20} height={20} />
-              </div>
-            ))}
+          <div className={styles.howScroller}>
+            <div className={styles.howGrid}>
+              {HOW_STEPS.map((step) => (
+                <div key={step.title} className={styles.howStep}>
+                  <span className={cn(styles.howStepIcon, step.tone === 'orange' && styles.howStepIconOrange)}>
+                    <step.icon className="h-5 w-5" />
+                  </span>
+                  <h4>{step.title}</h4>
+                  <p>{step.desc}</p>
+                  <ChevronRight className={styles.howArrow} width={20} height={20} />
+                </div>
+              ))}
+            </div>
+            <div className={styles.howFade} aria-hidden />
           </div>
         </section>
 
-        <section className={styles.trackSection}>
+        <section className={styles.trackSection} ref={trackSectionRef}>
           <h2>Choose your track</h2>
           <div className={styles.trackCards}>
             {/* 4-Month */}
@@ -335,7 +345,7 @@ export default function VirtualInternshipPage() {
                 The full track — 4 real projects, deployed live, with mentors reviewing every month.
               </p>
               <div className={styles.metaRow}>
-                <Users className="h-3.5 w-3.5" /> Verified students only
+                <ShieldCheck className="h-3.5 w-3.5" /> Verified students only
               </div>
               <div className={styles.metaRow}>
                 <Calendar className="h-3.5 w-3.5" /> 4-month guided track · mentor-reviewed
@@ -371,7 +381,7 @@ export default function VirtualInternshipPage() {
                 The fast-track version — same outcome, same certificate, in a quarter of the time.
               </p>
               <div className={styles.metaRow}>
-                <Users className="h-3.5 w-3.5" /> Verified students only
+                <ShieldCheck className="h-3.5 w-3.5" /> Verified students only
               </div>
               <div className={styles.metaRow}>
                 <Calendar className="h-3.5 w-3.5" /> 4-week guided track · mentor-reviewed
@@ -647,7 +657,7 @@ export default function VirtualInternshipPage() {
             <button
               type="button"
               className={cn(styles.btn, styles.btnGhostOnGreen)}
-              onClick={() => setOpenTrack('month')}
+              onClick={exploreTrackFromCta}
             >
               Explore the track
             </button>
