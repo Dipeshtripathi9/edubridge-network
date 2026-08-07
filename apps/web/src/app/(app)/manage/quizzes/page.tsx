@@ -16,14 +16,46 @@ import {
   useAdminQuiz,
   useAdminQuizzes,
   useCreateQuiz,
+  useDeleteQuiz,
   useUpdateQuiz,
   type QuizAdmin,
 } from '@/hooks/use-quizzes';
+
+// Inline confirm instead of window.confirm — native confirm() dialogs are
+// blocking and inconsistent with the rest of the UI.
+function ConfirmDeleteButton({ onConfirm }: { onConfirm: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  if (confirming) {
+    return (
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="destructive"
+          onClick={() => {
+            setConfirming(false);
+            onConfirm();
+          }}
+        >
+          Confirm delete
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => setConfirming(false)}>
+          Cancel
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <Button size="sm" variant="outline" onClick={() => setConfirming(true)}>
+      Delete
+    </Button>
+  );
+}
 
 function QuizCard({ summary }: { summary: QuizAdmin }) {
   const [open, setOpen] = useState(false);
   const { data: quiz, isLoading } = useAdminQuiz(open ? summary.id : undefined);
   const updateQuiz = useUpdateQuiz();
+  const deleteQuiz = useDeleteQuiz();
 
   return (
     <Card>
@@ -64,6 +96,14 @@ function QuizCard({ summary }: { summary: QuizAdmin }) {
           >
             {summary.isPublished ? 'Unpublish' : 'Publish'}
           </Button>
+          <ConfirmDeleteButton
+            onConfirm={() =>
+              deleteQuiz.mutate(summary.id, {
+                onSuccess: () => toast.success('Quiz deleted'),
+                onError: (e) => toast.error((e as Error).message),
+              })
+            }
+          />
         </div>
 
         {open && (
