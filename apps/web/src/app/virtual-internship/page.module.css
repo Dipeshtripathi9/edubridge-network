@@ -133,9 +133,28 @@
 .stickyBar button {
   flex-shrink: 0;
 }
+.stickyJoinBtn {
+  flex-shrink: 0;
+  background: var(--amber);
+  color: #1c1300;
+  border: none;
+  border-radius: 999px;
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: auto;
+}
+.stickyJoinBtn:hover {
+  background: #f0b562;
+}
 @media (max-width: 640px) {
   .stickyBar {
     padding: 14px 20px;
+  }
+  .stickyJoinBtn {
+    padding: 8px 16px;
+    font-size: 12px;
   }
 }
 
@@ -151,47 +170,53 @@
   margin-bottom: 26px;
 }
 .howGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 28px;
+  overflow-x: auto;
+  padding: 4px 4px 10px;
 }
 @media (max-width: 860px) {
-  .howGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
   .howSection {
     padding: 16px 20px 10px;
   }
+  .howGrid {
+    justify-content: flex-start;
+  }
 }
 .howCard {
-  background: var(--cream-pill);
-  border-radius: 20px;
-  padding: 20px;
+  flex: 0 0 210px;
+  background: #f0e9dc;
+  border: 1px solid #e4dcc9;
+  border-radius: 28px;
+  padding: 26px 18px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  box-shadow: 0 6px 16px rgba(54, 78, 51, 0.1);
 }
 .howImgWrap {
-  width: 92px;
-  height: 92px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   overflow: hidden;
-  background: #fff;
-  box-shadow: inset 0 0 0 5px var(--parchment), 0 4px 10px rgba(28, 71, 54, 0.15);
-  margin-bottom: 14px;
+  background: #364e33;
+  box-shadow: inset 0 0 0 6px #f0e9dc, 0 4px 10px rgba(54, 78, 51, 0.18);
+  margin-bottom: 22px;
 }
 .howImgWrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: sepia(0.9) saturate(0.55) brightness(1.04) hue-rotate(-6deg);
 }
 .howCard h3 {
-  font-size: 15px;
+  font-size: 22px;
   font-weight: 700;
-  color: var(--forest-deep);
+  color: #364e33;
+  letter-spacing: 0.2px;
 }
 
 /* TRACK SECTION */

@@ -153,10 +153,10 @@ const TRACKS: Record<TrackKey, TrackData> = {
 };
 
 const HOW_STEPS = [
-  { img: '/virtual-internship-step-enroll.png', title: 'Enroll' },
-  { img: '/virtual-internship-step-build.png', title: 'Build' },
-  { img: '/virtual-internship-step-certified.png', title: 'Get Certified' },
-  { img: '/virtual-internship-step-referral.png', title: 'Job Referral' },
+  { img: '/virtual-internship-step-enroll.jpg', title: 'Enroll' },
+  { img: '/virtual-internship-step-build.jpg', title: 'Build' },
+  { img: '/virtual-internship-step-certified.jpg', title: 'Get Certified' },
+  { img: '/virtual-internship-step-referral.jpg', title: 'Job Referral' },
 ];
 
 const MENTORS = [
@@ -425,7 +425,7 @@ export default function VirtualInternshipPage() {
             4-week {money(TRACKS.week.priceNow)} · 4-month {money(TRACKS.month.priceNow)}
           </p>
         </div>
-        <button type="button" className={cn(styles.btnTrack, styles.join)} onClick={() => showDetail('month')}>
+        <button type="button" className={styles.stickyJoinBtn} onClick={() => showDetail('month')}>
           Join track
         </button>
       </div>
