@@ -185,6 +185,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  filter: sepia(0.9) saturate(0.55) brightness(1.04) hue-rotate(-6deg);
 }
 .howCard h3 {
   font-size: 15px;
@@ -304,16 +305,6 @@
   font-size: 13px;
   color: var(--amber);
   font-weight: 600;
-  margin-bottom: 4px;
-}
-.gstPill {
-  display: inline-block;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--forest-deep);
-  background: var(--cream-pill);
-  padding: 5px 12px;
-  border-radius: 20px;
   margin-bottom: 18px;
 }
 .trackActions {
@@ -1138,16 +1129,22 @@
     padding: 30px 20px 10px;
   }
 }
-.gigsSection h2 {
+.gigsSectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.gigsSectionHead h2 {
   font-size: 26px;
   color: var(--forest-deep);
-  margin-bottom: 8px;
+  margin: 0;
 }
-.gigsSection p {
-  font-size: 14.5px;
+.gigsMatchCount {
+  font-size: 13px;
   color: var(--ink-soft);
-  max-width: 560px;
-  margin: 0 0 26px;
+  flex-shrink: 0;
 }
 .gigsList {
   display: flex;
