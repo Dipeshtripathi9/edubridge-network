@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { UpdateProfileDto } from './dto/profile.dto';
+import { CompleteJobsOnboardingDto, VerifyGoogleDto } from './dto/jobs-onboarding.dto';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -27,6 +28,18 @@ export class UsersController {
   @ApiOperation({ summary: 'Complete onboarding (profile + interests)' })
   onboarding(@CurrentUser('sub') userId: string, @Body() dto: UpdateProfileDto) {
     return this.users.completeOnboarding(userId, dto);
+  }
+
+  @Put('me/jobs-onboarding')
+  @ApiOperation({ summary: 'Complete the Internships & Jobs onboarding (name, mobile, college, course, state + Google verify)' })
+  jobsOnboarding(@CurrentUser('sub') userId: string, @Body() dto: CompleteJobsOnboardingDto) {
+    return this.users.completeJobsOnboarding(userId, dto);
+  }
+
+  @Post('me/verify-google')
+  @ApiOperation({ summary: 'Verify identity with Google (no domain check) — used to gate the college profile submit' })
+  verifyGoogle(@CurrentUser('sub') userId: string, @Body() dto: VerifyGoogleDto) {
+    return this.users.verifyWithGoogle(userId, dto);
   }
 
   @Get('me/sessions')

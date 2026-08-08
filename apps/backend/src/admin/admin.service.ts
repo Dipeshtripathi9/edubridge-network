@@ -73,6 +73,7 @@ export class AdminService {
     const where: Prisma.UserWhereInput = {
       ...(query.status ? { status: query.status } : {}),
       ...(query.role ? { role: query.role } : {}),
+      ...(query.signupIntent ? { profile: { signupIntent: query.signupIntent } } : {}),
       ...(query.q
         ? {
             OR: [
@@ -102,6 +103,9 @@ export class AdminService {
             avatarUrl: true,
             collegeVerification: true,
             college: { select: { name: true } },
+            collegeNameText: true,
+            course: true,
+            state: true,
           },
         },
       },
