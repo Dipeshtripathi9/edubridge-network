@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import QRCode from 'qrcode';
 import {
   ArrowUpRight,
   Award,
@@ -25,6 +26,34 @@ import {
 import { useMyCertificates } from '@/hooks/use-certificates';
 import { API_URL } from '@/lib/api';
 import { LEGAL, SUPPORT_WHATSAPP_URL } from '@/lib/legal-placeholders';
+
+function PaymentQrCode({ link }: { link: string }) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    QRCode.toDataURL(link, { width: 176, margin: 1, color: { dark: '#1b2a1d', light: '#ffffff' } })
+      .then((url) => {
+        if (!cancelled) setDataUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) setDataUrl(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [link]);
+
+  if (!dataUrl) return null;
+
+  return (
+    <div className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-background p-3">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={dataUrl} alt="Scan to open the payment link" width={176} height={176} className="rounded-lg" />
+      <p className="text-center text-xs text-muted-foreground">Scan to open the payment link on your phone</p>
+    </div>
+  );
+}
 
 function HelpButtons() {
   return (
@@ -107,13 +136,13 @@ export function VirtualInternshipPaymentBox({ enrollment }: { enrollment: Virtua
 
   const onSubmit = () => {
     if (!note.trim()) {
-      toast.error('Enter your UTR number');
+      toast.error('Enter your UTR / transaction ID');
       return;
     }
     submitRef.mutate(
       { id: enrollment.id, paymentReferenceNote: note.trim() },
       {
-        onSuccess: () => toast.success('UTR submitted — we’ll confirm your payment within 60 minutes'),
+        onSuccess: () => toast.success('Submitted — we’ll confirm your payment within 60 minutes'),
         onError: (e) => toast.error((e as Error).message),
       },
     );
@@ -154,6 +183,11 @@ export function VirtualInternshipPaymentBox({ enrollment }: { enrollment: Virtua
             </span>
           )}
         </div>
+        {enrollment.paymentLink && (
+          <div className="mt-4 flex justify-center sm:justify-start">
+            <PaymentQrCode link={enrollment.paymentLink} />
+          </div>
+        )}
       </div>
 
       <CardContent className="space-y-5 p-5">
@@ -175,25 +209,25 @@ export function VirtualInternshipPaymentBox({ enrollment }: { enrollment: Virtua
           </div>
         </div>
 
-        {/* UTR submission */}
+        {/* UTR / transaction ID submission */}
         <div>
           <label htmlFor="vi-utr" className="text-sm font-semibold">
-            UTR number
+            UTR / Transaction ID
           </label>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Pay using the button above, then paste your UTR number here — we&apos;ll confirm your payment within
-            60 minutes.
+            Pay using the button or QR code above, then paste the UTR (or transaction ID) from your UPI app&apos;s
+            confirmation screen here — we&apos;ll confirm your payment within 60 minutes.
           </p>
           <div className="mt-2.5 flex flex-wrap gap-2">
             <Input
               id="vi-utr"
-              placeholder="Enter UTR number"
+              placeholder="e.g. 302481234567"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="flex-1"
             />
             <Button disabled={submitRef.isPending || !note.trim()} onClick={onSubmit}>
-              {enrollment.paymentReferenceNote ? 'Update UTR number' : 'Submit UTR number'}
+              {enrollment.paymentReferenceNote ? 'Update UTR / transaction ID' : 'Submit UTR / transaction ID'}
             </Button>
           </div>
         </div>
@@ -207,7 +241,7 @@ export function VirtualInternshipPaymentBox({ enrollment }: { enrollment: Virtua
               <div>
                 <p className="font-semibold">UTR received — under review</p>
                 <p className="text-sm text-muted-foreground">
-                  Your track will be active within 1 hour of submitting your UTR number.
+                  Your track will be active within 1 hour of submitting your UTR / transaction ID.
                 </p>
               </div>
             </div>
