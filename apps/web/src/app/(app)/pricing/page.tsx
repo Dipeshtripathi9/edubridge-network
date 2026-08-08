@@ -91,33 +91,6 @@ export default function PricingPage() {
       </section>
 
       <section>
-        <h2 className="mb-5 font-display text-xl font-bold tracking-tight">Virtual Internship</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <PriceCard
-            icon={Zap}
-            tone="bg-accent text-primary"
-            title="4-Week Track"
-            blurb="Same outcome, same certificate, in a quarter of the time."
-            price="₹2,790"
-            features={['4 real projects, 4 weeks', 'Weekly mentor review', 'Verified certificate + LOR']}
-            href="/virtual-internship"
-            cta="View 4-Week Track"
-          />
-          <PriceCard
-            icon={Rocket}
-            tone="bg-marigold-soft text-amber-600"
-            title="4-Month Track"
-            blurb="The full track — 4 real projects, deployed live, mentor-reviewed monthly."
-            price="₹7,890"
-            features={['4 real projects, 4 months', 'Monthly 1:1 mentor call', 'Certificate + LOR + referral program']}
-            href="/virtual-internship"
-            cta="View 4-Month Track"
-            highlight
-          />
-        </div>
-      </section>
-
-      <section>
         <h2 className="mb-5 font-display text-xl font-bold tracking-tight">Internship Program</h2>
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2">

@@ -13,7 +13,6 @@ import { usePublicCertificate } from '@/hooks/use-certificates';
 const SOURCE_LABEL: Record<string, string> = {
   TRACK_A_ENROLLMENT: 'Track A — Learn & Build',
   TRACK_B_APPLICATION: 'Track B — Apply & Get Selected',
-  VIRTUAL_INTERNSHIP: 'Virtual Internship',
 };
 
 export default function VerifyCertificatePage({ params }: { params: Promise<{ code: string }> }) {

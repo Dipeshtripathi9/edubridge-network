@@ -15,7 +15,6 @@ import {
   Repeat,
   Rocket,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -37,7 +36,6 @@ export const ADMIN_NAV = [
   { href: '/manage/99x', label: '99x Developers', icon: Code2 },
   { href: '/manage/ez-rentbuddy', label: 'EZ-Rentbuddy', icon: Home },
   { href: '/manage/internship', label: 'Internship', icon: Award },
-  { href: '/manage/virtual-internship', label: 'Virtual Internship', icon: Sparkles },
   { href: '/manage/quizzes', label: 'Quizzes', icon: HelpCircle },
 ];
 

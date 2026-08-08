@@ -18,7 +18,6 @@
     "db:seed": "ts-node prisma/seed.ts",
     "db:seed:scholarships": "ts-node prisma/seed-scholarships.ts",
     "db:seed:blog": "ts-node prisma/seed-blog.ts",
-    "db:seed:vi-tasks": "ts-node prisma/seed-virtual-internship-tasks.ts",
     "db:studio": "prisma studio"
   },
   "prisma": {
