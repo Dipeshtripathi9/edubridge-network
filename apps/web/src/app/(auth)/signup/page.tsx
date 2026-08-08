@@ -76,7 +76,7 @@ export default function SignupPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Get Started on EduBridge</CardTitle>
+        <CardTitle>Get Started on EduBridge Network</CardTitle>
         <p className="text-sm text-muted-foreground">
           Sign up to boost your career with resources, opportunities, and expert guidance.
         </p>
@@ -90,30 +90,38 @@ export default function SignupPage() {
               initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.2 }}
-              className="space-y-4 py-2"
+              className="space-y-5 py-2"
             >
-              <p className="text-center text-sm font-medium">What brings you to EduBridge today?</p>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <p className="text-center text-lg font-bold">What brings you to EduBridge Network today?</p>
+              <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
                   onClick={() => setIntent('college')}
-                  className="flex flex-col items-center gap-2 rounded-lg border border-border p-4 text-center transition-colors hover:border-primary hover:bg-primary/5"
+                  className="flex flex-col items-center gap-3.5 rounded-2xl border-[1.5px] border-border bg-card p-7 text-center transition-all hover:border-primary/60 hover:bg-primary/5"
                 >
-                  <GraduationCap className="h-6 w-6 text-primary" />
-                  <span className="font-medium">🏫 College Admissions</span>
+                  <GraduationCap className="h-8 w-8 text-primary" />
+                  <span className="text-[17px] font-bold leading-tight">
+                    College
+                    <br />
+                    Admissions
+                  </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setIntent('jobs')}
-                  className="flex flex-col items-center gap-2 rounded-lg border border-border p-4 text-center transition-colors hover:border-primary hover:bg-primary/5"
+                  className="flex flex-col items-center gap-3.5 rounded-2xl border-[1.5px] border-border bg-card p-7 text-center transition-all hover:border-primary/60 hover:bg-primary/5"
                 >
-                  <Briefcase className="h-6 w-6 text-primary" />
-                  <span className="font-medium">💼 Internships &amp; Jobs</span>
+                  <Briefcase className="h-7 w-7 text-primary" />
+                  <span className="text-[17px] font-bold leading-tight">
+                    Internships &amp;
+                    <br />
+                    Jobs
+                  </span>
                 </button>
               </div>
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="text-center text-base text-muted-foreground">
                 Already have an account?{' '}
-                <Link href="/login" className="text-primary hover:underline">
+                <Link href="/login" className="font-bold text-primary hover:underline">
                   Log in
                 </Link>
               </p>

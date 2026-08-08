@@ -1,8 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useProfileProgress } from '@/stores/profile-progress.store';
 import { useMyProfileLead, useUpsertProfileStep } from '@/hooks/use-profile-leads';
+import { useVerifyGoogle } from '@/hooks/use-profile';
+import { GoogleVerifyButton } from '@/components/social-auth';
 import { COURSE_TAXONOMY } from '@/lib/course-taxonomy';
 
 // The 4-step EduBridge Profile form, embedded in an isolated iframe (its own
@@ -428,8 +432,10 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     for(var i=1;i<=customCount;i++){var k='cx'+i;var enEl=document.getElementById('en_'+k);if(!enEl)continue;var en=enEl.value.trim();var sc2=document.getElementById('sc_'+k).value.trim();if(en||sc2||files[k])P.exams.push({name:en||'Other exam',score:sc2||null,file:files[k]?files[k].name:null});}
     P.submittedAt=new Date().toISOString();
     document.getElementById('sentTxt').textContent='Welcome aboard, '+P.firstName+'! Your EduBridge Profile is ready. A counselor will review it and call '+P.phone.replace(/(\d{2})\d{6}(\d{2})/,'$1******$2')+' with your matches — then everything lands on WhatsApp & email. Free, always.';
-    postStep(4,100,{board:board,stream:stream,passYear:py,p12:p12,p10:p10,marksheet:P.marksheet,exams:P.exams},{eduName:((P.firstName||'')+' '+(P.lastName||'')).trim(),eduPhone:P.phone,eduEmail:P.email});go(5);
+    postStep(4,90,{board:board,stream:stream,passYear:py,p12:p12,p10:p10,marksheet:P.marksheet,exams:P.exams},{eduName:((P.firstName||'')+' '+(P.lastName||'')).trim(),eduPhone:P.phone,eduEmail:P.email});
+    try{parent.postMessage({eduAwaitingVerification:true},'*');}catch(e){}
   });
+  window.addEventListener('message',function(e){if(e.data&&e.data.eduProceed)go(e.data.eduProceed);});
   var NS={};
   function postNext(){postStep(5,100,NS,{});}
   function nsShow(id){document.getElementById('nsMenu').style.display='none';document.getElementById(id).style.display='';postH();}
@@ -464,8 +470,10 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
 export function ProfileForm() {
   const ref = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(620);
+  const [awaitingVerification, setAwaitingVerification] = useState(false);
   const setPct = useProfileProgress((s) => s.setPct);
   const upsert = useUpsertProfileStep();
+  const verifyGoogle = useVerifyGoogle();
   const { data: myLead } = useMyProfileLead();
 
   // Server is the source of truth for progress — sync the store from it (e.g.
@@ -479,6 +487,7 @@ export function ProfileForm() {
       if (e.source !== ref.current?.contentWindow) return;
       if (typeof e.data?.eduHeight === 'number') setHeight(Math.max(300, e.data.eduHeight));
       if (typeof e.data?.eduPct === 'number') setPct(e.data.eduPct);
+      if (e.data?.eduAwaitingVerification) setAwaitingVerification(true);
       if (typeof e.data?.eduStep === 'number' && e.data.eduData) {
         upsert.mutate({
           step: e.data.eduStep,
@@ -494,14 +503,44 @@ export function ProfileForm() {
     return () => window.removeEventListener('message', onMsg);
   }, [setPct, upsert]);
 
+  const onGoogleVerified = (credential: string) => {
+    verifyGoogle.mutate(credential, {
+      onSuccess: () => {
+        setPct(100);
+        setAwaitingVerification(false);
+        ref.current?.contentWindow?.postMessage({ eduProceed: 5 }, '*');
+      },
+      onError: (e) => toast.error((e as Error).message),
+    });
+  };
+
   return (
-    <iframe
-      ref={ref}
-      title="Complete your EduBridge Profile"
-      srcDoc={SRC}
-      scrolling="no"
-      className="block w-full border-0 bg-transparent"
-      style={{ height }}
-    />
+    <div className="relative">
+      <iframe
+        ref={ref}
+        title="Complete your EduBridge Profile"
+        srcDoc={SRC}
+        scrolling="no"
+        className="block w-full border-0 bg-transparent"
+        style={{ height }}
+      />
+      {awaitingVerification && (
+        <div className="absolute inset-0 flex items-start justify-center bg-background/95 pt-10 backdrop-blur-sm">
+          <div className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-6 text-center shadow-lg">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-lg font-bold">One last step</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Verify with Google to finish creating your EduBridge Profile.
+              </p>
+            </div>
+            <GoogleVerifyButton onVerified={onGoogleVerified} />
+            {verifyGoogle.isPending && <p className="text-xs text-muted-foreground">Verifying…</p>}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

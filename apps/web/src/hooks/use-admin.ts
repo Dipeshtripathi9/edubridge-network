@@ -24,6 +24,7 @@ export interface Analytics {
 export interface AdminUser {
   id: string;
   email: string | null;
+  phone?: string | null;
   role: string;
   status: string;
   reputationPoints: number;
@@ -34,6 +35,9 @@ export interface AdminUser {
     avatarUrl?: string | null;
     collegeVerification: string;
     college?: { name: string } | null;
+    collegeNameText?: string | null;
+    course?: string | null;
+    state?: string | null;
   } | null;
 }
 
@@ -53,7 +57,9 @@ export function useAnalytics() {
   return useQuery({ queryKey: ['admin', 'analytics'], queryFn: () => api.get<Analytics>('/admin/analytics') });
 }
 
-export function useAdminUsers(filters: { q?: string; status?: string; role?: string } = {}) {
+export function useAdminUsers(
+  filters: { q?: string; status?: string; role?: string; signupIntent?: string } = {},
+) {
   return useQuery({
     queryKey: ['admin', 'users', filters],
     queryFn: () => {
@@ -61,6 +67,7 @@ export function useAdminUsers(filters: { q?: string; status?: string; role?: str
       if (filters.q) params.set('q', filters.q);
       if (filters.status) params.set('status', filters.status);
       if (filters.role) params.set('role', filters.role);
+      if (filters.signupIntent) params.set('signupIntent', filters.signupIntent);
       return api.paginated<AdminUser>(`/admin/users?${params.toString()}`);
     },
   });
