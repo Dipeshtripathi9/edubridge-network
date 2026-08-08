@@ -11,9 +11,9 @@
   --ink-soft: #51604f;
   --ink-faint: rgba(27, 42, 29, 0.55);
   --line: rgba(27, 42, 29, 0.14);
-  --how-card: #ddd0b8;
-  --track-dark: #16281c;
-  --track-dark-border: #24402f;
+  --how-card: #e8dac2;
+  --track-dark: #2e4f30;
+  --track-dark-border: rgba(247, 242, 230, 0.16);
 
   min-height: 100vh;
   background: var(--cream);
@@ -230,7 +230,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: sepia(0.4) saturate(1.15) brightness(0.98);
+  filter: sepia(0.9) saturate(0.55) brightness(1.04) hue-rotate(-6deg);
 }
 .howStep h4 {
   font-family: var(--font-fraunces), serif;
