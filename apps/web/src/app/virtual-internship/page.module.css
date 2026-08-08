@@ -52,8 +52,8 @@
 
 /* HERO */
 .hero {
-  max-width: 680px;
-  margin: 0;
+  max-width: 1180px;
+  margin: 0 auto;
   padding: 48px 56px 20px;
 }
 .badgePill {
@@ -78,6 +78,7 @@
   background: var(--forest);
 }
 .hero h1 {
+  max-width: 620px;
   font-size: 46px;
   font-weight: 700;
   color: var(--forest-deep);
