@@ -6,9 +6,7 @@ import { ChevronDown, GraduationCap } from 'lucide-react';
 import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import { AccountMenu } from '@/components/account-menu';
 import { InternshipBrowseByField } from '@/components/internship-browse-by-field';
-import { InternshipLaunchCarousel } from '@/components/internship-launch-carousel';
 import { InternshipBlogTeaser } from '@/components/internship-blog-teaser';
-import { InternshipCareerPrograms } from '@/components/internship-career-programs';
 import { OpportunityShortlistDemo } from '@/components/opportunity-shortlist-demo';
 import styles from './page.module.css';
 
@@ -149,10 +147,6 @@ export default function InternshipLandingPage() {
       <InternshipBrowseByField />
 
       <InternshipBlogTeaser />
-
-      <InternshipCareerPrograms />
-
-      <InternshipLaunchCarousel />
 
       <section className={`${styles.faqSection} ${styles.reveal}`}>
         <h2>Common questions</h2>
