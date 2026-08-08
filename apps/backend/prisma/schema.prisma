@@ -189,6 +189,11 @@ enum EnrollmentTaskStatus {
   REJECTED
 }
 
+enum VirtualInternshipTrack {
+  WEEK
+  MONTH
+}
+
 enum TrackBApplicationStatus {
   PENDING
   ALLOCATED
@@ -278,6 +283,7 @@ model User {
   trackBApplications           TrackBApplication[]
   certificates                 Certificate[]
   quizAttempts                 QuizAttempt[]
+  virtualInternshipEnrollments VirtualInternshipEnrollment[]
 
   @@index([status])
   @@index([role])
@@ -1304,6 +1310,25 @@ model TrackAEnrollment {
   @@index([userId, status])
   @@index([status, createdAt])
   @@map("track_a_enrollments")
+}
+
+model VirtualInternshipEnrollment {
+  id                String                 @id @default(cuid())
+  userId            String
+  user              User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track             VirtualInternshipTrack
+  referralApplied   Boolean                @default(false) // free entitlement flag; doesn't affect feeAmount
+  donateApplied     Boolean                @default(false) // adds the flat scholarship-donation amount to feeAmount
+  feeAmount         Int // INR, snapshot at enroll time (track price + GST + optional donation)
+  status            EnrollmentStatus       @default(PENDING_PAYMENT)
+  razorpayOrderId   String?                @unique
+  razorpayPaymentId String?                @unique
+  paidAt            DateTime?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  @@index([userId, status])
+  @@map("virtual_internship_enrollments")
 }
 
 model EnrollmentTask {

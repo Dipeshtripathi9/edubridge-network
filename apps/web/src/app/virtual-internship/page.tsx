@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google';
 import {
   Award,
@@ -13,6 +15,7 @@ import {
   ClipboardCheck,
   FileText,
   GraduationCap,
+  Loader2,
   MessageCircle,
   Share2,
   Target,
@@ -21,8 +24,18 @@ import {
 import { AccountMenu } from '@/components/account-menu';
 import { OpportunityRecommendationCard } from '@/components/opportunity-recommendation-card';
 import { useInternshipListings } from '@/hooks/use-internship-listings';
+import { api, ApiError } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth.store';
+import { loadRazorpayScript, type RazorpayFailureResponse } from '@/lib/razorpay';
 import { cn } from '@/lib/utils';
 import styles from './page.module.css';
+
+interface VirtualInternshipEnrollment {
+  id: string;
+  status: 'PENDING_PAYMENT' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+  track: 'WEEK' | 'MONTH';
+  feeAmount: number;
+}
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -240,6 +253,7 @@ function GigsSection() {
 }
 
 export default function VirtualInternshipPage() {
+  const router = useRouter();
   const [view, setView] = useState<'landing' | 'detail' | 'checkout'>('landing');
   const [currentTrackKey, setCurrentTrackKey] = useState<TrackKey>('month');
   const cameFromDetailRef = useRef(false);
@@ -249,11 +263,7 @@ export default function VirtualInternshipPage() {
   const [donateChecked, setDonateChecked] = useState(false);
 
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const [pmStep, setPmStep] = useState<'qr' | 'txn' | 'confirm'>('qr');
-  const [pmSecondsLeft, setPmSecondsLeft] = useState(60);
-  const [pmExpired, setPmExpired] = useState(false);
-  const [txnId, setTxnId] = useState('');
-  const [txnError, setTxnError] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [confirmDates, setConfirmDates] = useState<{ start: string; end: string } | null>(null);
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -269,23 +279,6 @@ export default function VirtualInternshipPage() {
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, [view]);
-
-  useEffect(() => {
-    if (!paymentOpen || pmStep !== 'qr') return;
-    setPmSecondsLeft(60);
-    setPmExpired(false);
-    const id = setInterval(() => {
-      setPmSecondsLeft((s) => {
-        if (s <= 1) {
-          clearInterval(id);
-          setPmExpired(true);
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, [paymentOpen, pmStep]);
 
   const bill = useMemo(() => {
     const platformFeeOld = 49;
@@ -328,26 +321,12 @@ export default function VirtualInternshipPage() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const openPaymentModal = () => {
-    setPmStep('qr');
-    setTxnId('');
-    setTxnError(false);
-    setPaymentOpen(true);
-  };
-
   const closePaymentModal = () => {
     setPaymentOpen(false);
-    setPmStep('qr');
-    setTxnId('');
-    setTxnError(false);
+    setConfirmDates(null);
   };
 
-  const submitTransactionId = () => {
-    if (txnId.trim().length < 6) {
-      setTxnError(true);
-      return;
-    }
-    setTxnError(false);
+  const showConfirmation = () => {
     const start = new Date();
     const end = new Date(start);
     if (currentTrackKey === 'month') {
@@ -356,7 +335,74 @@ export default function VirtualInternshipPage() {
       end.setDate(end.getDate() + 28);
     }
     setConfirmDates({ start: formatInternshipDate(start), end: formatInternshipDate(end) });
-    setPmStep('confirm');
+    setPaymentOpen(true);
+  };
+
+  const startPayment = async () => {
+    if (!useAuthStore.getState().accessToken) {
+      toast.error('Sign in to enroll');
+      router.push('/login');
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    try {
+      let enrollment: VirtualInternshipEnrollment;
+      try {
+        enrollment = await api.post<VirtualInternshipEnrollment>('/internships/virtual/enroll', {
+          track: currentTrackKey.toUpperCase(),
+          referralApplied,
+          donateApplied: donateChecked,
+        });
+      } catch (e) {
+        // Already has a PENDING_PAYMENT enrollment (e.g. a previous attempt) — reuse it.
+        if (e instanceof ApiError && e.status === 400) {
+          enrollment = await api.get<VirtualInternshipEnrollment>('/internships/virtual/enrollments/me');
+        } else {
+          throw e;
+        }
+      }
+
+      const [order, scriptReady] = await Promise.all([
+        api.post<{ orderId: string; amount: number; currency: string; keyId: string }>(
+          `/internships/virtual/enrollments/${enrollment.id}/checkout`,
+        ),
+        loadRazorpayScript(),
+      ]);
+      if (!scriptReady || !window.Razorpay) {
+        toast.error('Could not load Razorpay checkout — check your connection and try again');
+        return;
+      }
+
+      const user = useAuthStore.getState().user;
+      const rzp = new window.Razorpay({
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.orderId,
+        name: 'EduBridge Network',
+        description: `${track.name} — Virtual Internship`,
+        prefill: { name: user?.profile?.fullName, email: user?.email ?? undefined },
+        theme: { color: '#F2A31B' },
+        handler: (response) => {
+          api
+            .post(`/internships/virtual/enrollments/${enrollment.id}/verify-payment`, response)
+            .then(() => showConfirmation())
+            .catch((e) => toast.error((e as Error).message));
+        },
+        modal: {
+          ondismiss: () => toast('Payment cancelled — you can try again anytime'),
+        },
+      });
+      rzp.on('payment.failed', (response: RazorpayFailureResponse) => {
+        toast.error(response.error.description || 'Payment failed — please try again');
+      });
+      rzp.open();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const trackCard = (key: TrackKey, alt: boolean) => {
@@ -806,8 +852,15 @@ export default function VirtualInternshipPage() {
               <div className={styles.coTopayK}>To Pay</div>
               <div className={styles.coTopayV}>{money(bill.toPay)}</div>
             </div>
-            <button type="button" className={styles.btnPay} onClick={openPaymentModal}>
-              Proceed to Payment
+            <button type="button" className={styles.btnPay} onClick={startPayment} disabled={isProcessingPayment}>
+              {isProcessingPayment ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" style={{ marginRight: 8 }} />
+                  Opening checkout…
+                </>
+              ) : (
+                'Proceed to Payment'
+              )}
             </button>
           </div>
         </div>
@@ -819,84 +872,7 @@ export default function VirtualInternshipPage() {
             <X className="h-4 w-4" />
           </button>
 
-          {pmStep === 'qr' && (
-            <div>
-              <div className={styles.pmEyebrow}>Scan &amp; pay</div>
-              <div className={styles.pmAmount}>{money(bill.toPay)}</div>
-              <div className={styles.qrBox}>
-                <svg width="150" height="150" viewBox="0 0 150 150">
-                  <rect x="0" y="0" width="150" height="150" fill="#fff" />
-                  <rect x="8" y="8" width="34" height="34" fill="none" stroke="#14162B" strokeWidth="6" />
-                  <rect x="18" y="18" width="14" height="14" fill="#14162B" />
-                  <rect x="108" y="8" width="34" height="34" fill="none" stroke="#14162B" strokeWidth="6" />
-                  <rect x="118" y="18" width="14" height="14" fill="#14162B" />
-                  <rect x="8" y="108" width="34" height="34" fill="none" stroke="#14162B" strokeWidth="6" />
-                  <rect x="18" y="118" width="14" height="14" fill="#14162B" />
-                  <rect x="54" y="8" width="8" height="8" fill="#14162B" />
-                  <rect x="70" y="8" width="8" height="8" fill="#14162B" />
-                  <rect x="54" y="24" width="8" height="8" fill="#14162B" />
-                  <rect x="86" y="24" width="8" height="8" fill="#14162B" />
-                  <rect x="54" y="40" width="8" height="8" fill="#14162B" />
-                  <rect x="70" y="40" width="8" height="8" fill="#14162B" />
-                  <rect x="86" y="56" width="8" height="8" fill="#14162B" />
-                  <rect x="102" y="56" width="8" height="8" fill="#14162B" />
-                  <rect x="54" y="56" width="8" height="8" fill="#14162B" />
-                  <rect x="118" y="56" width="8" height="8" fill="#14162B" />
-                  <rect x="54" y="72" width="8" height="8" fill="#14162B" />
-                  <rect x="70" y="72" width="8" height="8" fill="#14162B" />
-                  <rect x="102" y="72" width="8" height="8" fill="#14162B" />
-                  <rect x="54" y="88" width="8" height="8" fill="#14162B" />
-                  <rect x="86" y="88" width="8" height="8" fill="#14162B" />
-                  <rect x="118" y="88" width="8" height="8" fill="#14162B" />
-                  <rect x="54" y="104" width="8" height="8" fill="#14162B" />
-                  <rect x="70" y="104" width="8" height="8" fill="#14162B" />
-                  <rect x="102" y="104" width="8" height="8" fill="#14162B" />
-                  <rect x="54" y="120" width="8" height="8" fill="#14162B" />
-                  <rect x="86" y="120" width="8" height="8" fill="#14162B" />
-                  <rect x="118" y="120" width="8" height="8" fill="#14162B" />
-                  <rect x="70" y="136" width="8" height="8" fill="#14162B" />
-                  <rect x="102" y="136" width="8" height="8" fill="#14162B" />
-                </svg>
-              </div>
-              <div className={styles.pmHint}>Scan with any UPI app to pay the amount above</div>
-              {!pmExpired ? (
-                <div className={styles.pmTimer}>
-                  QR expires in {String(Math.floor(pmSecondsLeft / 60)).padStart(2, '0')}:
-                  {String(pmSecondsLeft % 60).padStart(2, '0')}
-                </div>
-              ) : (
-                <button type="button" className={styles.btnPmRetry} onClick={() => setPmStep('qr')}>
-                  Retry
-                </button>
-              )}
-              <button type="button" className={styles.btnPmDone} onClick={() => setPmStep('txn')}>
-                Payment done, proceed
-              </button>
-            </div>
-          )}
-
-          {pmStep === 'txn' && (
-            <div>
-              <div className={styles.pmEyebrow}>Confirm payment</div>
-              <h3 className={styles.pmTitle}>Enter your transaction ID</h3>
-              <p className={styles.pmHint} style={{ marginBottom: 18 }}>
-                You&apos;ll find this in your UPI app&apos;s payment confirmation screen
-              </p>
-              <input
-                type="text"
-                className={styles.pmInput}
-                placeholder="e.g. T2608081234567890"
-                value={txnId}
-                onChange={(e) => setTxnId(e.target.value)}
-              />
-              {txnError && <div className={styles.pmError}>Please enter a valid transaction ID</div>}
-              <button type="button" className={styles.btnPmDone} onClick={submitTransactionId}>
-                Submit
-              </button>
-            </div>
-          )}
-
-          {pmStep === 'confirm' && confirmDates && (
+          {confirmDates && (
             <div>
               <div className={styles.pmConfirmIcon}>
                 <Check className="h-[26px] w-[26px] text-white" strokeWidth={2.6} />
