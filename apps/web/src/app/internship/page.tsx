@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { GraduationCap } from 'lucide-react';
+import { ChevronDown, GraduationCap } from 'lucide-react';
 import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import { AccountMenu } from '@/components/account-menu';
 import { InternshipBrowseByField } from '@/components/internship-browse-by-field';
@@ -28,7 +28,28 @@ const ibmPlexMono = IBM_Plex_Mono({
   variable: '--font-ibm-plex-mono',
 });
 
+const FAQS = [
+  {
+    q: 'Do I need to be a verified student to use this?',
+    a: 'Yes — the Open Career Program is open only to verified students. Sign up and complete verification once, and you get access to every opportunity, track, and gig on the platform.',
+  },
+  {
+    q: 'Is EduBridge Network free to use?',
+    a: 'Signing up, building your profile, and browsing every opportunity is completely free. Only the optional Virtual Internship tracks and a few paid gigs have their own listed pricing.',
+  },
+  {
+    q: "What's the difference between Opportunities and the Virtual Internship?",
+    a: 'Opportunities are real internships, gigs, and projects from companies and startups that you apply to directly. The Virtual Internship is our own guided, mentor-reviewed track where you’re matched to a project and build it end-to-end.',
+  },
+  {
+    q: 'How does the Career Path Test help me?',
+    a: 'It’s a short quiz that maps your interests and skills to the career paths and opportunity categories most likely to be a fit, so your first search on the platform is already narrowed down.',
+  },
+];
+
 export default function InternshipLandingPage() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -56,7 +77,8 @@ export default function InternshipLandingPage() {
         </Link>
         <div className={styles.links}>
           <a href="#opportunities">Opportunities</a>
-          <Link href="/upskill-courses">Upskill Courses</Link>
+          <Link href="/virtual-internship">Virtual Internship</Link>
+          <Link href="/blog/write">Write Blog</Link>
         </div>
         <div className={styles.navActions}>
           <AccountMenu />
@@ -88,8 +110,8 @@ export default function InternshipLandingPage() {
               </Link>
             </div>
             <p className={styles.ctaNote} style={{ marginTop: '1.2rem' }}>
-              <Link href="/upskill-courses" style={{ color: 'var(--orange)' }}>
-                No experience? No problem — Join Upskill Courses and master in-demand skills →
+              <Link href="/virtual-internship" style={{ color: 'var(--orange)' }}>
+                No experience? No problem — Join Virtual Internship and master in-demand skills →
               </Link>
             </p>
           </div>
@@ -116,7 +138,7 @@ export default function InternshipLandingPage() {
                 shortlist and rank the most relevant opportunities based on your interests, career goals, and
                 skills, helping you build your future faster.
               </p>
-              <a className={styles.exploreLink} href="#opportunities">
+              <a className={styles.exploreLink} href="/opportunities?tab=all&category=Technology">
                 &gt; Explore Opportunities
               </a>
             </div>
@@ -131,6 +153,29 @@ export default function InternshipLandingPage() {
       <InternshipCareerPrograms />
 
       <InternshipLaunchCarousel />
+
+      <section className={`${styles.faqSection} ${styles.reveal}`}>
+        <h2>Common questions</h2>
+        {FAQS.map((f, i) => (
+          <div key={f.q} className={styles.faqItem}>
+            <button
+              type="button"
+              className={styles.faqQ}
+              onClick={() => setOpenFaq(openFaq === i ? null : i)}
+            >
+              {f.q}
+              <ChevronDown
+                className={`${styles.faqChev} ${openFaq === i ? styles.faqChevOpen : ''}`}
+                width={16}
+                height={16}
+              />
+            </button>
+            <div className={`${styles.faqA} ${openFaq === i ? styles.faqAOpen : ''}`}>
+              <p>{f.a}</p>
+            </div>
+          </div>
+        ))}
+      </section>
 
       <footer className={styles.siteFooter}>
         <div>EduBridge Open Career Program</div>
