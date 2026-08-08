@@ -703,48 +703,129 @@
   transition: max-height 0.35s ease;
 }
 .weeksPanelOpen {
-  max-height: 900px;
+  max-height: 4000px;
 }
 .weeksInner {
   padding: 0 1.1rem 1.1rem;
 }
-.weekRow {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  border-left: 4px solid var(--accent, var(--orange));
-  border-top: 1px solid var(--line);
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+
+/* PER-WEEK TASK ACCORDION (nested inside a month, or flat for the 4-week track) */
+.taskAcc {
+  border: 1px solid var(--line);
+  border-radius: 12px;
   background: var(--card);
-  border-radius: 10px;
-  padding: 0.85rem 0.95rem;
   margin-bottom: 0.55rem;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
 }
-.weekRow:last-child {
+.taskAcc:last-child {
   margin-bottom: 0;
 }
-.weekMain {
+.taskAccOpen {
+  border-color: var(--orange);
+}
+.taskAccHead {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.75rem 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+.taskAccOpen .taskAccHead {
+  background: var(--orange-tint);
+}
+.taskAccNum {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-fraunces), serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+.taskAccHeadTxt {
   flex: 1;
   min-width: 0;
 }
-.weekMain h5 {
-  font-size: 0.83rem;
+.taskAccHeadTxt h5 {
+  font-family: var(--font-fraunces), serif;
   font-weight: 700;
-  margin: 0 0 0.15rem;
+  font-size: 0.85rem;
+  margin: 0;
   color: var(--ink);
 }
-.weekMain p {
-  font-size: 0.75rem;
+.taskAccHeadTxt span {
+  font-size: 0.7rem;
   color: var(--ink-soft);
-  margin: 0;
-  line-height: 1.5;
 }
-.flatWeekList .weekRow {
-  margin-bottom: 0.6rem;
+.taskAccChev {
+  flex-shrink: 0;
+  color: var(--ink-faint);
+  transition: transform 0.2s ease;
 }
-.flatWeekList .weekRow:last-child {
+.taskAccChevOpen {
+  transform: rotate(180deg);
+}
+.taskAccBody {
+  padding: 0 1rem 1rem;
+}
+.taskSec {
+  margin-bottom: 0.85rem;
+}
+.taskSec:last-of-type {
   margin-bottom: 0;
+}
+.taskSec h6 {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  margin: 0 0 0.3rem;
+}
+.taskSec p {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 0;
+}
+.taskSec ul {
+  margin: 0;
+  padding-left: 1.05rem;
+}
+.taskSec ul li {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-bottom: 0.25rem;
+}
+.taskHours {
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+  margin: 0.6rem 0 0;
+}
+.taskJoinBtn {
+  display: inline-flex;
+  margin-top: 0.85rem;
+  background: var(--green);
+  color: var(--cream);
+  border-radius: 9px;
+  padding: 0.6rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.taskJoinBtn:hover {
+  background: var(--green-deep);
 }
 
 /* SCHEDULE META CHIPS (shared by month accordion + flat week cards) */
@@ -786,50 +867,6 @@
   font-size: 0.74rem;
   font-weight: 700;
   color: var(--ink);
-}
-
-/* FLAT SCHEDULE ITEM CARDS (4-week track) */
-.schItem {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 1rem 1.1rem;
-  margin-bottom: 0.6rem;
-}
-.schItem:last-child {
-  margin-bottom: 0;
-}
-.schItemTop {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  margin-bottom: 0.15rem;
-}
-.schNum {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--cream);
-  font-family: var(--font-fraunces), serif;
-  font-weight: 700;
-  font-size: 0.8rem;
-}
-.schItemTop h5 {
-  font-family: var(--font-fraunces), serif;
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--ink);
-  margin: 0;
-}
-.schDesc {
-  font-size: 0.78rem;
-  color: var(--ink-soft);
-  line-height: 1.55;
-  margin: 0.65rem 0 0;
 }
 
 /* GIGS */
