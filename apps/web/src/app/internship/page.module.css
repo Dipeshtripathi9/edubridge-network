@@ -65,12 +65,7 @@
 }
 .page :global(#blog-teaser) {
   padding-top: 1.5rem;
-}
-.page :global(#career-programs) {
   padding-bottom: 2rem;
-}
-.page :global(#launch-carousel) {
-  padding-top: 1.5rem;
 }
 
 .wrap {
