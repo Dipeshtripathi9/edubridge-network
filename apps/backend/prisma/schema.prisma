@@ -300,6 +300,9 @@ model Profile {
   college      College?    @relation(fields: [collegeId], references: [id])
   universityId String?
   university   University? @relation(fields: [universityId], references: [id])
+  // Free-text college name from the simplified Internships & Jobs onboarding
+  // flow — not tied to the College catalog like collegeId/college above.
+  collegeNameText String?
 
   course String?
   branch String?
