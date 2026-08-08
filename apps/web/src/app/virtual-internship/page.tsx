@@ -416,9 +416,9 @@ export default function VirtualInternshipPage() {
                 <button type="button" className={cn(styles.btn, styles.btnGhost)} onClick={() => showDetail('month')}>
                   Explore
                 </button>
-                <Link href={enrollHref.month} className={cn(styles.btn, styles.btnDark)}>
+                <button type="button" className={cn(styles.btn, styles.btnDark)} onClick={() => showDetail('month')}>
                   Join track
-                </Link>
+                </button>
               </div>
             </div>
 
@@ -450,9 +450,9 @@ export default function VirtualInternshipPage() {
                 <button type="button" className={cn(styles.btn, styles.btnGhost)} onClick={() => showDetail('week')}>
                   Explore
                 </button>
-                <Link href={enrollHref.week} className={cn(styles.btn, styles.btnDark)}>
+                <button type="button" className={cn(styles.btn, styles.btnDark)} onClick={() => showDetail('week')}>
                   Join track
-                </Link>
+                </button>
               </div>
             </div>
           </div>
