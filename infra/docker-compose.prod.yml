@@ -50,6 +50,9 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS}
       APP_URL: ${APP_URL}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
       # No SMTP in this $0 bundle → activate email/password signups immediately
       # so signup→login works. Set to false once you wire a real email provider.
       AUTO_VERIFY_EMAIL: ${AUTO_VERIFY_EMAIL:-true}
@@ -70,6 +73,7 @@ services:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL}
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+        NEXT_PUBLIC_RAZORPAY_KEY_ID: ${NEXT_PUBLIC_RAZORPAY_KEY_ID}
     restart: unless-stopped
     depends_on: [backend]
     expose: ['3000']

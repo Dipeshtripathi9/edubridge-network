@@ -2,15 +2,18 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { CheckCircle2, IndianRupee } from 'lucide-react';
+import { CheckCircle2, IndianRupee, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useSubmitPaymentReference, type TrackAEnrollment } from '@/hooks/use-internships';
+import { useAuthStore } from '@/stores/auth.store';
+import { loadRazorpayScript, type RazorpayFailureResponse } from '@/lib/razorpay';
+import { useCreateCheckoutOrder, useVerifyPayment, type TrackAEnrollment } from '@/hooks/use-internships';
 
 export function PaymentBox({ enrollment }: { enrollment: TrackAEnrollment }) {
-  const [note, setNote] = useState(enrollment.paymentReferenceNote ?? '');
-  const submitRef = useSubmitPaymentReference();
+  const user = useAuthStore((s) => s.user);
+  const [isOpening, setIsOpening] = useState(false);
+  const createOrder = useCreateCheckoutOrder();
+  const verifyPayment = useVerifyPayment();
 
   if (enrollment.status !== 'PENDING_PAYMENT') {
     return (
@@ -32,18 +35,49 @@ export function PaymentBox({ enrollment }: { enrollment: TrackAEnrollment }) {
     );
   }
 
-  const onSubmit = () => {
-    if (!note.trim()) {
-      toast.error('Add a payment reference (UPI ref / transaction ID)');
-      return;
+  const onPay = async () => {
+    setIsOpening(true);
+    try {
+      const [order, scriptReady] = await Promise.all([
+        createOrder.mutateAsync(enrollment.id),
+        loadRazorpayScript(),
+      ]);
+      if (!scriptReady || !window.Razorpay) {
+        toast.error('Could not load Razorpay checkout — check your connection and try again');
+        return;
+      }
+
+      const rzp = new window.Razorpay({
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.orderId,
+        name: 'EduBridge Network',
+        description: 'Track A internship enrollment fee',
+        prefill: { name: user?.profile?.fullName, email: user?.email ?? undefined },
+        theme: { color: '#F2A31B' },
+        handler: (response) => {
+          verifyPayment.mutate(
+            { id: enrollment.id, ...response },
+            {
+              onSuccess: () => toast.success('Payment verified — your internship is active!'),
+              onError: (e) => toast.error((e as Error).message),
+            },
+          );
+        },
+        modal: {
+          ondismiss: () => toast('Payment cancelled — you can try again anytime'),
+        },
+      });
+      rzp.on('payment.failed', (response: RazorpayFailureResponse) => {
+        toast.error(response.error.description || 'Payment failed — please try again');
+      });
+      rzp.open();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setIsOpening(false);
     }
-    submitRef.mutate(
-      { id: enrollment.id, paymentReferenceNote: note.trim() },
-      {
-        onSuccess: () => toast.success('Reference submitted — we’ll confirm your payment shortly'),
-        onError: (e) => toast.error((e as Error).message),
-      },
-    );
   };
 
   return (
@@ -58,21 +92,15 @@ export function PaymentBox({ enrollment }: { enrollment: TrackAEnrollment }) {
             <p className="text-sm text-muted-foreground">₹{enrollment.feeAmount.toLocaleString()} due</p>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Pay via UPI to <strong className="text-foreground">edubridge@upi</strong>, then submit the
-          transaction reference below. An admin will manually confirm it and activate your internship.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <Input
-            placeholder="UPI ref / transaction ID"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="flex-1"
-          />
-          <Button disabled={submitRef.isPending || !note.trim()} onClick={onSubmit}>
-            {enrollment.paymentReferenceNote ? 'Update reference' : 'Submit reference'}
-          </Button>
-        </div>
+        <Button disabled={isOpening} onClick={onPay} className="w-full sm:w-auto">
+          {isOpening ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Opening checkout…
+            </>
+          ) : (
+            `Pay ₹${enrollment.feeAmount.toLocaleString()} with Razorpay`
+          )}
+        </Button>
       </CardContent>
     </Card>
   );

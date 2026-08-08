@@ -16,6 +16,8 @@ function assertProductionConfig() {
   if (!refresh || refresh === DEV_REFRESH_SECRET) problems.push('JWT_REFRESH_SECRET');
   if (access && refresh && access === refresh) problems.push('JWT secrets must differ');
   if (!process.env.DATABASE_URL) problems.push('DATABASE_URL');
+  if (!process.env.RAZORPAY_KEY_ID) problems.push('RAZORPAY_KEY_ID');
+  if (!process.env.RAZORPAY_KEY_SECRET) problems.push('RAZORPAY_KEY_SECRET');
   if (problems.length) {
     throw new Error(
       `Refusing to start in production with insecure/missing config: ${problems.join(', ')}. ` +
@@ -60,6 +62,14 @@ export default () => {
     clientId: process.env.GOOGLE_CLIENT_ID ?? '',
     clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
     callbackUrl: process.env.GOOGLE_CALLBACK_URL ?? '',
+  },
+
+  razorpay: {
+    keyId: process.env.RAZORPAY_KEY_ID ?? '',
+    keySecret: process.env.RAZORPAY_KEY_SECRET ?? '',
+    // Separate secret you set when creating the webhook in the Razorpay dashboard —
+    // not the API key secret. Optional: unset until a webhook is actually configured.
+    webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET ?? '',
   },
 
   twilio: {
