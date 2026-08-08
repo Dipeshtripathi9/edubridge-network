@@ -1,12 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Bookmark, BookmarkCheck, Briefcase, ChevronRight, Clock, Laptop, PenLine, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { isSafeHttpUrl, cn } from '@/lib/utils';
 import { OPPORTUNITY_TYPE_LABEL, type InternshipListing, type OpportunityType } from '@/hooks/use-internship-listings';
 import { useInternshipListingShortlist } from '@/hooks/use-internship-listing-shortlist';
 import { useInternshipListingApplied } from '@/hooks/use-internship-listing-applied';
+
+const VIRTUAL_INTERNSHIP_GIGS_CATEGORY = 'Virtual Internship Gigs';
 
 const TYPE_ICON: Record<OpportunityType, typeof Briefcase> = {
   INTERNSHIP: Briefcase,
@@ -55,11 +59,13 @@ function DetailsLink({ slug, className }: { slug: string; className?: string }) 
 }
 
 export function OpportunityRecommendationCard({ listing }: { listing: InternshipListing }) {
+  const router = useRouter();
   const { isShortlisted, toggle } = useInternshipListingShortlist();
   const shortlisted = isShortlisted(listing.slug);
   const { isApplied, markApplied } = useInternshipListingApplied();
   const applied = isApplied(listing.slug);
   const canApply = isSafeHttpUrl(listing.applyUrl);
+  const isVirtualInternshipGig = listing.category === VIRTUAL_INTERNSHIP_GIGS_CATEGORY;
 
   return (
     <article className="grid grid-cols-[72px_1fr] gap-x-4 gap-y-3 rounded-[20px] border border-border bg-card p-[18px_18px_16px] shadow-[0_1px_2px_rgba(24,35,51,0.04),0_8px_24px_rgba(24,35,51,0.06)] min-[900px]:grid-cols-[84px_220px_1fr_1fr_140px] min-[900px]:items-center min-[900px]:gap-x-5 min-[900px]:p-[22px_26px]">
@@ -138,7 +144,20 @@ export function OpportunityRecommendationCard({ listing }: { listing: Internship
             href={listing.applyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => !applied && markApplied(listing.slug)}
+            onClick={(e) => {
+              if (applied) return;
+              if (isVirtualInternshipGig) {
+                e.preventDefault();
+                toast('Complete the Virtual Internship from EduBridge Network to apply for this gig.', {
+                  action: {
+                    label: 'Choose your track',
+                    onClick: () => router.push('/virtual-internship#tracks'),
+                  },
+                });
+                return;
+              }
+              markApplied(listing.slug);
+            }}
             className={cn('flex items-center gap-1 font-sans text-[16px] font-bold', applied ? 'text-[#1C4736]' : 'text-foreground')}
           >
             {applied ? (
