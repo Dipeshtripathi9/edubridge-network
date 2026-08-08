@@ -57,3 +57,28 @@ export function useCompleteOnboarding() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['me'] }),
   });
 }
+
+/** Simplified Internships & Jobs onboarding — name/mobile/college/course/state + Google verify. */
+export function useCompleteJobsOnboarding() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      fullName: string;
+      phone?: string;
+      collegeName: string;
+      course: string;
+      state: string;
+      idToken: string;
+    }) => api.put<Me>('/users/me/jobs-onboarding', input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['me'] }),
+  });
+}
+
+/** Bare Google identity gate — used before the "find my college" profile form's final submit. */
+export function useVerifyGoogle() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (idToken: string) => api.post<Me>('/users/me/verify-google', { idToken }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['me'] }),
+  });
+}

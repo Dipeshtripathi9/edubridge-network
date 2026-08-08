@@ -296,6 +296,57 @@ function UsersTab() {
   );
 }
 
+// Read-only summary of every student who signed up via the Internships &
+// Jobs path — name, mobile, college/course/state they entered, whether
+// Google-verified, and their most recent login.
+function InternshipSignupsTab() {
+  const { data, isLoading } = useAdminUsers({ signupIntent: 'INTERNSHIPS_JOBS' });
+  const users = data?.data ?? [];
+
+  return (
+    <div className="space-y-4">
+      {isLoading ? (
+        <Skeleton className="h-64 w-full" />
+      ) : users.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center text-sm text-muted-foreground">
+            No Internships &amp; Jobs signups yet.
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="divide-y divide-border p-0">
+            {users.map((u) => (
+              <div key={u.id} className="flex flex-wrap items-center gap-3 p-4">
+                <Avatar src={u.profile?.avatarUrl} name={u.profile?.fullName} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">{u.profile?.fullName ?? 'Student'}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {u.phone ?? '—'} · {u.profile?.collegeNameText ?? 'No college'} ·{' '}
+                    {u.profile?.course ?? '—'} · {u.profile?.state ?? '—'}
+                  </p>
+                </div>
+                {u.profile?.collegeVerification === 'VERIFIED' ? (
+                  <span className="flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300">
+                    <BadgeCheck className="h-3.5 w-3.5" /> Verified
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    Unverified
+                  </span>
+                )}
+                <span className="text-xs text-muted-foreground">
+                  Last login: {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString() : 'Never'}
+                </span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 function ReportsTab() {
   const { data, isLoading } = useReports('OPEN');
   const resolve = useResolveReport();
@@ -569,6 +620,7 @@ export default function AdminPage() {
           <TabsTrigger value="users">
             <UsersIcon className="mr-1 h-4 w-4" /> Users
           </TabsTrigger>
+          <TabsTrigger value="internship-signups">Internship Signups</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="verification">Verification</TabsTrigger>
           <TabsTrigger value="complaints">Complaints</TabsTrigger>
@@ -579,6 +631,9 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="users">
           <UsersTab />
+        </TabsContent>
+        <TabsContent value="internship-signups">
+          <InternshipSignupsTab />
         </TabsContent>
         <TabsContent value="reports">
           <ReportsTab />
