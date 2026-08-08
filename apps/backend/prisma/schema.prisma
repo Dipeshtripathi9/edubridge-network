@@ -1319,7 +1319,7 @@ model VirtualInternshipEnrollment {
   track             VirtualInternshipTrack
   referralApplied   Boolean                @default(false) // free entitlement flag; doesn't affect feeAmount
   donateApplied     Boolean                @default(false) // adds the flat scholarship-donation amount to feeAmount
-  feeAmount         Int // INR, snapshot at enroll time (track price + GST + optional donation)
+  feeAmount         Decimal                @db.Decimal(10, 2) // INR, snapshot at enroll time (track price + exact GST + optional donation) — decimal so GST isn't rounded to a whole rupee
   status            EnrollmentStatus       @default(PENDING_PAYMENT)
   razorpayOrderId   String?                @unique
   razorpayPaymentId String?                @unique

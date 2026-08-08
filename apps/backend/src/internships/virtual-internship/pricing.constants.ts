@@ -12,20 +12,31 @@ export const VIRTUAL_INTERNSHIP_PRICES: Record<VirtualInternshipTrack, { priceNo
 const GST_RATE = 0.18;
 export const DONATION_AMOUNT = 19;
 
-/** Server-side fee computation — never trust a client-supplied amount. */
+/** Rounds to the nearest paisa (2 decimal places) — guards against float drift, not a rupee-level rounding compromise. */
+function roundToPaisa(amount: number): number {
+  return Math.round(amount * 100) / 100;
+}
+
+function computeGst(base: number): number {
+  return roundToPaisa(base * GST_RATE);
+}
+
+/**
+ * Server-side fee computation — never trust a client-supplied amount.
+ * Returns the exact amount in rupees (up to 2 decimal places, e.g. 3184.82).
+ * Deliberately NOT rounded to a whole rupee, so the Razorpay charge matches
+ * the displayed GST breakdown exactly instead of silently rounding up.
+ */
 export function computeVirtualInternshipFee(track: VirtualInternshipTrack, donateApplied: boolean): number {
   const base = VIRTUAL_INTERNSHIP_PRICES[track].priceNow;
-  const gst = Math.round(base * GST_RATE);
-  return base + gst + (donateApplied ? DONATION_AMOUNT : 0);
+  const gst = computeGst(base);
+  return roundToPaisa(base + gst + (donateApplied ? DONATION_AMOUNT : 0));
 }
 
 export function getVirtualInternshipPricingInfo() {
   return {
-    week: { ...VIRTUAL_INTERNSHIP_PRICES.WEEK, gst: Math.round(VIRTUAL_INTERNSHIP_PRICES.WEEK.priceNow * GST_RATE) },
-    month: {
-      ...VIRTUAL_INTERNSHIP_PRICES.MONTH,
-      gst: Math.round(VIRTUAL_INTERNSHIP_PRICES.MONTH.priceNow * GST_RATE),
-    },
+    week: { ...VIRTUAL_INTERNSHIP_PRICES.WEEK, gst: computeGst(VIRTUAL_INTERNSHIP_PRICES.WEEK.priceNow) },
+    month: { ...VIRTUAL_INTERNSHIP_PRICES.MONTH, gst: computeGst(VIRTUAL_INTERNSHIP_PRICES.MONTH.priceNow) },
     donationAmount: DONATION_AMOUNT,
   };
 }

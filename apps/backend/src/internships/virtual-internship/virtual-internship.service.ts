@@ -1,5 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { EnrollmentStatus } from '@prisma/client';
+import { EnrollmentStatus, VirtualInternshipEnrollment } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { PaymentsService } from '../../payments/payments.service';
@@ -28,7 +28,7 @@ export class VirtualInternshipService {
       throw new BadRequestException('You already have an in-progress virtual internship enrollment');
     }
     const donateApplied = dto.donateApplied ?? false;
-    return this.prisma.virtualInternshipEnrollment.create({
+    const enrollment = await this.prisma.virtualInternshipEnrollment.create({
       data: {
         userId,
         track: dto.track,
@@ -38,13 +38,20 @@ export class VirtualInternshipService {
         status: EnrollmentStatus.PENDING_PAYMENT,
       },
     });
+    return this.serialize(enrollment);
   }
 
   async myEnrollment(userId: string) {
-    return this.prisma.virtualInternshipEnrollment.findFirst({
+    const enrollment = await this.prisma.virtualInternshipEnrollment.findFirst({
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
+    return enrollment ? this.serialize(enrollment) : null;
+  }
+
+  /** Prisma serializes Decimal fields as strings over JSON — normalize back to a plain number for the API contract. */
+  private serialize(enrollment: VirtualInternshipEnrollment) {
+    return { ...enrollment, feeAmount: Number(enrollment.feeAmount) };
   }
 
   async checkout(userId: string, id: string) {
@@ -55,11 +62,11 @@ export class VirtualInternshipService {
       throw new BadRequestException('This enrollment is not awaiting payment');
     }
 
-    const order = await this.payments.createOrder(
-      enrollment.feeAmount * 100,
-      'INR',
-      `virtual-internship-${enrollment.id}`,
-    );
+    // Math.round guards against float noise from the Decimal->Number->paise
+    // conversion (e.g. 3184.82 -> 318481.99999999994) — not a rupee rounding
+    // compromise, since feeAmount already carries exact paisa precision.
+    const amountInPaise = Math.round(Number(enrollment.feeAmount) * 100);
+    const order = await this.payments.createOrder(amountInPaise, 'INR', `virtual-internship-${enrollment.id}`);
 
     await this.prisma.virtualInternshipEnrollment.update({
       where: { id },

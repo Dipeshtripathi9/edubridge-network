@@ -204,6 +204,11 @@ function money(n: number) {
   return `₹${n.toLocaleString('en-IN')}`;
 }
 
+/** Same as money(), but always shows paisa precision (e.g. ₹485.82) instead of rounding to a whole rupee. */
+function moneyPrecise(n: number) {
+  return `₹${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 function formatInternshipDate(d: Date) {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
@@ -281,11 +286,14 @@ export default function VirtualInternshipPage() {
   }, [view]);
 
   const bill = useMemo(() => {
+    // Paisa-precise GST — matches the backend's computeVirtualInternshipFee exactly,
+    // rather than each rounding to a whole rupee independently and drifting apart.
+    const roundToPaisa = (n: number) => Math.round(n * 100) / 100;
     const platformFeeOld = 49;
-    const gst = Math.round(track.priceNow * 0.18);
+    const gst = roundToPaisa(track.priceNow * 0.18);
     const referralValue = 1999;
     const donateAmt = donateChecked ? 19 : 0;
-    const toPay = track.priceNow + gst + donateAmt;
+    const toPay = roundToPaisa(track.priceNow + gst + donateAmt);
     const mrpSavings = track.priceOld - track.priceNow;
     const referralSavings = referralApplied ? referralValue : 0;
     const totalSavings = mrpSavings + platformFeeOld + referralSavings;
@@ -759,7 +767,7 @@ export default function VirtualInternshipPage() {
                 Bill Summary
               </div>
               <div className={styles.billRow}>
-                <span>Item Total</span>
+                <span>Base Price</span>
                 <span>
                   <span className={styles.vOld}>{money(track.priceOld)}</span>
                   <span>{money(track.priceNow)}</span>
@@ -783,7 +791,7 @@ export default function VirtualInternshipPage() {
               )}
               <div className={styles.billRow}>
                 <span>GST (18%)</span>
-                <span>+ {money(bill.gst)}</span>
+                <span>+ {moneyPrecise(bill.gst)}</span>
               </div>
               {donateChecked && (
                 <div className={styles.billRow}>
@@ -792,8 +800,8 @@ export default function VirtualInternshipPage() {
                 </div>
               )}
               <div className={cn(styles.billRow, styles.billTotal)}>
-                <span>To Pay</span>
-                <span>{money(bill.toPay)}</span>
+                <span>Total Payable</span>
+                <span>{moneyPrecise(bill.toPay)}</span>
               </div>
             </div>
 
@@ -850,7 +858,7 @@ export default function VirtualInternshipPage() {
           <div className={styles.coBottombar}>
             <div>
               <div className={styles.coTopayK}>To Pay</div>
-              <div className={styles.coTopayV}>{money(bill.toPay)}</div>
+              <div className={styles.coTopayV}>{moneyPrecise(bill.toPay)}</div>
             </div>
             <button type="button" className={styles.btnPay} onClick={startPayment} disabled={isProcessingPayment}>
               {isProcessingPayment ? (
