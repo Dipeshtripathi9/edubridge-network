@@ -12,6 +12,6 @@ import { GoogleService } from './services/google.service';
   imports: [PassportModule, JwtModule.register({})],
   controllers: [AuthController],
   providers: [AuthService, TokenService, OtpService, GoogleService, JwtStrategy],
-  exports: [TokenService],
+  exports: [TokenService, GoogleService],
 })
 export class AuthModule {}

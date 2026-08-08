@@ -3,6 +3,7 @@ import {
   CollegeVerificationStatus,
   ReportStatus,
   ReportTargetType,
+  SignupIntent,
   UserRole,
   UserStatus,
 } from '@prisma/client';
@@ -54,6 +55,11 @@ export class AdminUserQueryDto extends PaginationDto {
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
+
+  @ApiPropertyOptional({ enum: SignupIntent, description: 'Filter by why they signed up (college vs internships/jobs)' })
+  @IsOptional()
+  @IsEnum(SignupIntent)
+  signupIntent?: SignupIntent;
 }
 
 export class SetUserStatusDto {
