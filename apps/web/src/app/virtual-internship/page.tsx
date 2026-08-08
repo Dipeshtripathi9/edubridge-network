@@ -68,17 +68,18 @@ const TRACKS: Record<TrackKey, TrackData> = {
   month: {
     online: 'ONLINE',
     badge: 'New',
-    name: 'Web Development + DevOps (4 month)',
-    tagline: 'The full track — 3 minor projects and 1 major project, every month.',
+    name: 'Web Development + DevOps (4 Months)',
+    tagline: 'The complete career track — 3 minor projects and 1 major project every month.',
     features: [
       'Verified students only',
       '4-month guided track · mentor-reviewed',
       '1:1 mentorship throughout the track',
       'Letter of recommendation',
+      'Work presentation (PPT)',
       'Virtual internship certificate',
-      'Job referral, if a suitable match is found',
+      '1:1 resume review',
     ],
-    priceNow: 9310,
+    priceNow: 7634,
     priceOld: 12999,
     hasReferral: true,
     detailEyebrow: 'Online · 4 months',
@@ -111,15 +112,16 @@ const TRACKS: Record<TrackKey, TrackData> = {
     online: 'ONLINE',
     badge: 'Fast track',
     name: 'Web Development (4 week)',
-    tagline: 'The fast-track version — same outcome, same certificate, a quarter of the time.',
+    tagline: 'The complete beginner-to-industry track — complete 4 real-world, industry-specific projects.',
     features: [
       'Verified students only',
       '4-week guided track · mentor-reviewed',
-      '1:1 mentorship throughout the track',
+      'Mentorship throughout the track',
       'Letter of recommendation',
+      'Work presentation (PPT)',
       'Virtual internship certificate',
     ],
-    priceNow: 3292,
+    priceNow: 2699,
     priceOld: 4999,
     hasReferral: false,
     detailEyebrow: 'Online · 4 weeks',
@@ -217,11 +219,10 @@ function GigsSection() {
 
   return (
     <section className={styles.gigsSection}>
-      <h2>Paid remote gigs</h2>
-      <p>
-        Exclusive to students who enroll early in the Virtual Internship — a way to keep earning and building
-        experience once your track is complete.
-      </p>
+      <div className={styles.gigsSectionHead}>
+        <h2>All opportunities</h2>
+        <span className={styles.gigsMatchCount}>{listings.length} matches</span>
+      </div>
       <div className={styles.gigsList}>
         {listings.slice(0, 4).map((listing) => (
           <OpportunityRecommendationCard key={listing.id} listing={listing} />
@@ -386,7 +387,6 @@ export default function VirtualInternshipPage() {
           <p className={styles.priceSave}>
             Save {money(t.priceOld - t.priceNow)} · one-time payment
           </p>
-          <span className={styles.gstPill}>✓ Includes 18% GST</span>
           <div className={styles.trackActions}>
             <button type="button" className={cn(styles.btnTrack, styles.explore)} onClick={() => showDetail(key)}>
               Explore
@@ -465,8 +465,8 @@ export default function VirtualInternshipPage() {
           <section className={styles.section} id="tracks">
             <h2 className={styles.sectionTitle}>Choose your track</h2>
             <div className={styles.tracksGrid}>
-              {trackCard('month', false)}
-              {trackCard('week', true)}
+              {trackCard('week', false)}
+              {trackCard('month', true)}
             </div>
           </section>
 
