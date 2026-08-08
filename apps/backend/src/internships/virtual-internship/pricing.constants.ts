@@ -4,8 +4,9 @@ import { VirtualInternshipTrack } from '@prisma/client';
  * Hardcoded track prices (INR, pre-GST). Must match apps/web's TRACKS constant —
  * there is no shared source of truth between the two yet.
  */
+// TEMPORARY: WEEK price dropped to ₹1 for a live-payment smoke test — revert before merging anything else.
 export const VIRTUAL_INTERNSHIP_PRICES: Record<VirtualInternshipTrack, { priceNow: number; priceOld: number }> = {
-  [VirtualInternshipTrack.WEEK]: { priceNow: 2699, priceOld: 4999 },
+  [VirtualInternshipTrack.WEEK]: { priceNow: 1, priceOld: 4999 },
   [VirtualInternshipTrack.MONTH]: { priceNow: 7634, priceOld: 12999 },
 };
 
