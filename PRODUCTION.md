@@ -54,6 +54,9 @@ Defined in `render.yaml`; secrets are set in the dashboard (`sync: false`).
 | `CORS_ORIGINS` | `https://edubridgenetwork.in,https://www.edubridgenetwork.in` |
 | `APP_URL` | `https://edubridgenetwork.in` |
 | `GOOGLE_CLIENT_ID` | Google OAuth Web client id |
+| `RAZORPAY_KEY_ID` | **Live** Key ID (`rzp_live_...`) — never the test key in production |
+| `RAZORPAY_KEY_SECRET` | **Live** Key Secret — server-side only, used for order creation + signature verification. Never sent to the frontend. |
+| `RAZORPAY_WEBHOOK_SECRET` | From Razorpay Dashboard → Settings → Webhooks. A separate secret you choose, not the API key secret. |
 
 ### Frontend — Vercel (Project → Settings → Environment Variables)
 These are **build-time** (baked into the browser bundle) — changing one requires a redeploy.
@@ -63,9 +66,36 @@ These are **build-time** (baked into the browser bundle) — changing one requir
 | `NEXT_PUBLIC_API_URL` | `https://api.edubridgenetwork.in/api/v1` |
 | `NEXT_PUBLIC_WS_URL` | `https://api.edubridgenetwork.in` |
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth Web client id |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | **Live** Key ID — same value as the backend's `RAZORPAY_KEY_ID`. Only the Key ID, never the secret. |
 
 > **Never commit real secret values.** Store the actual `DATABASE_URL`, `REDIS_URL`,
 > and JWT secrets in the Render dashboard only.
+
+### Razorpay: test vs. live
+
+Test/live mode is determined **entirely by which key you set** — `rzp_test_...` vs
+`rzp_live_...` — the integration code (`apps/backend/src/payments/`,
+`apps/backend/src/internships/track-a/`) has no test/live branching, so switching
+requires no code or redeploy-of-logic, only updating the four values above (Render's
+`RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET`, Vercel's `NEXT_PUBLIC_RAZORPAY_KEY_ID`) and
+redeploying the frontend so the new public key gets baked into the bundle. Local dev
+(`.env`) intentionally keeps its own `rzp_test_...` keys — never overwrite those with
+live ones.
+
+**`payment.captured` webhook:** `POST /internships/webhooks/razorpay` reconciles
+payments whose checkout `handler` never reached the browser (tab closed, network drop
+mid-redirect) — it activates the enrollment the same way `verify-payment` does, and
+the two paths share an idempotent `PENDING_PAYMENT` guard so it's safe for either one
+to arrive first, or for Razorpay to redeliver the same event. To enable it:
+
+1. Razorpay Dashboard → **Settings → Webhooks → Add New Webhook**.
+2. URL: `https://api.edubridgenetwork.in/api/v1/internships/webhooks/razorpay`.
+3. Active events: **`payment.captured`** only.
+4. Set a secret (any strong random string) → save it as `RAZORPAY_WEBHOOK_SECRET` in
+   Render (this is a value *you* choose here, distinct from the API `KEY_SECRET`).
+
+Without this configured, payments still work end-to-end via the checkout callback —
+the webhook is a reconciliation safety net, not required for normal payments.
 
 ---
 

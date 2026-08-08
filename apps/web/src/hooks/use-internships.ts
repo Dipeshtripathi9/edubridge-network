@@ -33,6 +33,8 @@ export interface TrackAEnrollment {
   feeAmount: number;
   status: EnrollmentStatus;
   paymentReferenceNote?: string | null;
+  razorpayOrderId?: string | null;
+  razorpayPaymentId?: string | null;
   paidAt?: string | null;
   paymentConfirmedById?: string | null;
   mentorNote?: string | null;
@@ -86,6 +88,42 @@ export function useCreateTrackAEnrollment() {
   return useMutation({
     mutationFn: (input: { subtype: EnrollmentSubtype; projectDescription: string }) =>
       api.post<TrackAEnrollment>('/internships/enroll', input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['internships', 'track-a', 'me'] }),
+  });
+}
+
+export interface CheckoutOrder {
+  orderId: string;
+  amount: number;
+  currency: string;
+  keyId: string;
+}
+
+export function useCreateCheckoutOrder() {
+  return useMutation({
+    mutationFn: (id: string) => api.post<CheckoutOrder>(`/internships/enrollments/${id}/checkout`),
+  });
+}
+
+export function useVerifyPayment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+    }: {
+      id: string;
+      razorpay_order_id: string;
+      razorpay_payment_id: string;
+      razorpay_signature: string;
+    }) =>
+      api.post<{ id: string; status: EnrollmentStatus }>(`/internships/enrollments/${id}/verify-payment`, {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['internships', 'track-a', 'me'] }),
   });
 }

@@ -1,6 +1,8 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Headers, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import type { RawBodyRequest } from '@nestjs/common';
+import { ApiBearerAuth, ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
+import type { Request } from 'express';
 import { TrackAService } from './track-a.service';
 import {
   AssignTaskDto,
@@ -10,6 +12,7 @@ import {
   SubmitPaymentReferenceDto,
   SubmitTaskWorkDto,
   TrackAQueryDto,
+  VerifyPaymentDto,
 } from './dto/track-a.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -48,8 +51,27 @@ export class TrackAController {
     return this.trackA.getEnrollment(user.sub, user.role, id);
   }
 
+  @Post('enrollments/:id/checkout')
+  @ApiOperation({ summary: 'Create a Razorpay order to pay the enrollment fee' })
+  checkout(@CurrentUser('sub') userId: string, @Param('id') id: string) {
+    return this.trackA.checkout(userId, id);
+  }
+
+  @Post('enrollments/:id/verify-payment')
+  @ApiOperation({ summary: 'Verify a completed Razorpay checkout payment' })
+  verifyPayment(@CurrentUser('sub') userId: string, @Param('id') id: string, @Body() dto: VerifyPaymentDto) {
+    return this.trackA.verifyPayment(userId, id, dto);
+  }
+
+  @Public()
+  @ApiExcludeEndpoint()
+  @Post('webhooks/razorpay')
+  razorpayWebhook(@Req() req: RawBodyRequest<Request>, @Headers('x-razorpay-signature') signature?: string) {
+    return this.trackA.handleRazorpayWebhook(req.rawBody, signature);
+  }
+
   @Patch('enrollments/:id/payment-reference')
-  @ApiOperation({ summary: 'Submit / update the manual-payment reference note' })
+  @ApiOperation({ summary: 'Submit / update the manual-payment reference note (admin fallback)' })
   submitPaymentReference(
     @CurrentUser('sub') userId: string,
     @Param('id') id: string,

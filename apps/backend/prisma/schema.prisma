@@ -1287,7 +1287,9 @@ model TrackAEnrollment {
   projectDescription   String
   feeAmount            Int // snapshot at enroll time; never re-read pricing config later
   status               EnrollmentStatus  @default(PENDING_PAYMENT)
-  paymentReferenceNote String?
+  paymentReferenceNote String? // fallback: manual UPI ref, used only if admin overrides Razorpay
+  razorpayOrderId      String?           @unique
+  razorpayPaymentId    String?           @unique
   paidAt               DateTime?
   paymentConfirmedById String?
   mentorNote           String?

@@ -16,6 +16,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { BlogModule } from './blog/blog.module';
 import { ResourcesModule } from './resources/resources.module';
 import { StorageModule } from './storage/storage.module';
+import { PaymentsModule } from './payments/payments.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { ReferralsModule } from './referrals/referrals.module';
@@ -73,6 +74,7 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     }),
     PrismaModule,
     RedisModule,
+    PaymentsModule,
     AuthModule,
     UsersModule,
     TransferModule,

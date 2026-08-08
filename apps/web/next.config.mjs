@@ -23,15 +23,18 @@ try {
 //   fonts.gstatic.com need to be allow-listed too, or the fonts silently fail
 //   to load in production (dev doesn't send this header, so the gap is easy
 //   to miss locally).
+// - Razorpay Standard Checkout loads checkout.razorpay.com as a script, which
+//   opens the actual payment form in an iframe served from api.razorpay.com —
+//   both need allow-listing, plus connect-src for its status-polling requests.
 // - Dev needs 'unsafe-eval' (React Refresh / HMR); prod does not.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ''} https://accounts.google.com https://apis.google.com`,
+  `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ''} https://accounts.google.com https://apis.google.com https://checkout.razorpay.com https://cdn.razorpay.com`,
   "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
-  `connect-src 'self' https://accounts.google.com ${apiOrigin} ${apiWsOrigin}`.trim(),
-  "frame-src 'self' https://accounts.google.com",
+  `connect-src 'self' https://accounts.google.com https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com ${apiOrigin} ${apiWsOrigin}`.trim(),
+  "frame-src 'self' https://accounts.google.com https://api.razorpay.com https://checkout.razorpay.com",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
   "object-src 'none'",

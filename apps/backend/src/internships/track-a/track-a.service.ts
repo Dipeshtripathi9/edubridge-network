@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException 
 import { CertificateSourceType, EnrollmentStatus, EnrollmentSubtype, EnrollmentTaskStatus, UserRole } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/notifications.service';
+import { PaymentsService } from '../../payments/payments.service';
 import { CertificatesService } from '../certificates/certificates.service';
 import { getPricingInfo, getTrackAFee } from '../pricing.constants';
 import {
@@ -12,6 +13,7 @@ import {
   SubmitPaymentReferenceDto,
   SubmitTaskWorkDto,
   TrackAQueryDto,
+  VerifyPaymentDto,
 } from './dto/track-a.dto';
 import { buildPaginatedResult } from '../../common/dto/pagination.dto';
 
@@ -24,6 +26,7 @@ export class TrackAService {
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
     private readonly certificates: CertificatesService,
+    private readonly payments: PaymentsService,
   ) {}
 
   pricing() {
@@ -84,6 +87,122 @@ export class TrackAService {
       where: { id },
       data: { paymentReferenceNote: dto.paymentReferenceNote },
     });
+  }
+
+  async checkout(userId: string, id: string) {
+    const enrollment = await this.prisma.trackAEnrollment.findUnique({ where: { id } });
+    if (!enrollment) throw new NotFoundException('Enrollment not found');
+    if (enrollment.userId !== userId) throw new ForbiddenException('Not your enrollment');
+    if (enrollment.status !== EnrollmentStatus.PENDING_PAYMENT) {
+      throw new BadRequestException('This enrollment is not awaiting payment');
+    }
+
+    const order = await this.payments.createOrder(enrollment.feeAmount * 100, 'INR', `track-a-${enrollment.id}`);
+
+    await this.prisma.trackAEnrollment.update({
+      where: { id },
+      data: { razorpayOrderId: order.orderId },
+    });
+
+    return order;
+  }
+
+  async verifyPayment(userId: string, id: string, dto: VerifyPaymentDto) {
+    const enrollment = await this.prisma.trackAEnrollment.findUnique({ where: { id } });
+    if (!enrollment) throw new NotFoundException('Enrollment not found');
+    if (enrollment.userId !== userId) throw new ForbiddenException('Not your enrollment');
+    if (enrollment.status !== EnrollmentStatus.PENDING_PAYMENT) {
+      throw new ForbiddenException('Payment already confirmed for this enrollment');
+    }
+    if (enrollment.razorpayOrderId !== dto.razorpay_order_id) {
+      throw new BadRequestException('This order does not belong to the enrollment');
+    }
+
+    const verified = this.payments.verifySignature(
+      dto.razorpay_order_id,
+      dto.razorpay_payment_id,
+      dto.razorpay_signature,
+    );
+    if (!verified) {
+      throw new BadRequestException('Payment signature verification failed');
+    }
+
+    return this.activatePaidEnrollment(enrollment, dto.razorpay_payment_id, userId, 'checkout');
+  }
+
+  /**
+   * Razorpay server-to-server webhook. Reconciles payments whose checkout
+   * `handler` never reached the browser (tab closed, network drop mid-redirect) —
+   * `verifyPayment` above and this method both funnel through `activatePaidEnrollment`,
+   * whose PENDING_PAYMENT guard makes it safe for either one to arrive first or
+   * for Razorpay to redeliver the same event.
+   */
+  async handleRazorpayWebhook(rawBody: Buffer | undefined, signature: string | undefined) {
+    if (!rawBody || !signature || !this.payments.verifyWebhookSignature(rawBody, signature)) {
+      throw new BadRequestException('Invalid webhook signature');
+    }
+
+    let event: { event?: string; payload?: { payment?: { entity?: { id?: string; order_id?: string } } } };
+    try {
+      event = JSON.parse(rawBody.toString('utf8'));
+    } catch {
+      throw new BadRequestException('Malformed webhook payload');
+    }
+
+    if (event.event !== 'payment.captured') {
+      return { received: true };
+    }
+
+    const payment = event.payload?.payment?.entity;
+    const orderId = payment?.order_id;
+    const paymentId = payment?.id;
+    if (!orderId || !paymentId) {
+      return { received: true };
+    }
+
+    const enrollment = await this.prisma.trackAEnrollment.findUnique({ where: { razorpayOrderId: orderId } });
+    if (!enrollment || enrollment.status !== EnrollmentStatus.PENDING_PAYMENT) {
+      return { received: true };
+    }
+
+    await this.activatePaidEnrollment(enrollment, paymentId, null, 'webhook');
+    return { received: true };
+  }
+
+  private async activatePaidEnrollment(
+    enrollment: { id: string; userId: string },
+    paymentId: string,
+    actorId: string | null,
+    source: 'checkout' | 'webhook',
+  ) {
+    await this.prisma.$transaction([
+      this.prisma.trackAEnrollment.update({
+        where: { id: enrollment.id },
+        data: {
+          status: EnrollmentStatus.ACTIVE,
+          paidAt: new Date(),
+          razorpayPaymentId: paymentId,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId,
+          action: 'internship.track_a.razorpay_payment_verified',
+          entity: 'track_a_enrollment',
+          entityId: enrollment.id,
+          metadata: { razorpayPaymentId: paymentId, source },
+        },
+      }),
+    ]);
+
+    await this.notifications.create({
+      recipientId: enrollment.userId,
+      type: 'INTERNSHIP_PAYMENT_CONFIRMED',
+      title: 'Payment confirmed — your internship is active! 🎉',
+      body: 'Your mentor will assign your first task shortly.',
+    });
+
+    return { id: enrollment.id, status: EnrollmentStatus.ACTIVE };
   }
 
   async submitTaskWork(userId: string, taskId: string, dto: SubmitTaskWorkDto) {

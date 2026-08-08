@@ -35,3 +35,9 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
+      - key: RAZORPAY_KEY_ID # Live Key ID (rzp_live_...) — never the test key in production
+        sync: false
+      - key: RAZORPAY_KEY_SECRET # Live Key Secret — server-side only, never sent to the frontend
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET # from Razorpay Dashboard > Settings > Webhooks (payment.captured)
+        sync: false

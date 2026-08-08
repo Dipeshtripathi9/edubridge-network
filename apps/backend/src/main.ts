@@ -11,7 +11,10 @@ import { RedisIoAdapter } from './common/adapters/redis-io.adapter';
 import { RedisService } from './redis/redis.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  // rawBody: exposes req.rawBody (exact bytes) alongside the normal parsed body —
+  // needed to verify the Razorpay webhook's HMAC signature, which is computed over
+  // the raw payload and would mismatch against a re-serialized JSON body.
+  const app = await NestFactory.create(AppModule, { bufferLogs: true, rawBody: true });
 
   app.useLogger(app.get(Logger));
   app.use(helmet());
