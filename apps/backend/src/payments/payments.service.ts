@@ -15,7 +15,7 @@ const MIN_AMOUNT_PAISE = 100;
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
-  private readonly client: Razorpay;
+  private readonly client: Razorpay | null;
   private readonly keyId: string;
   private readonly keySecret: string;
   private readonly webhookSecret: string;
@@ -24,13 +24,24 @@ export class PaymentsService {
     this.keyId = this.config.get<string>('razorpay.keyId') ?? '';
     this.keySecret = this.config.get<string>('razorpay.keySecret') ?? '';
     this.webhookSecret = this.config.get<string>('razorpay.webhookSecret') ?? '';
-    this.client = new Razorpay({ key_id: this.keyId, key_secret: this.keySecret });
+    if (this.keyId && this.keySecret) {
+      this.client = new Razorpay({ key_id: this.keyId, key_secret: this.keySecret });
+    } else {
+      // Matches StorageService's pattern for an optional external dependency —
+      // the app (and every other module, since PaymentsModule is global) must
+      // still boot without Razorpay configured; payment endpoints just 500 until it is.
+      this.client = null;
+      this.logger.warn('Razorpay not configured — payment endpoints will fail until RAZORPAY_KEY_ID/SECRET are set.');
+    }
   }
 
   /** Creates a Razorpay order. `amountInPaise` must be >= 100 (Razorpay's ₹1 minimum). */
   async createOrder(amountInPaise: number, currency: string, receipt: string): Promise<CreatedOrder> {
     if (amountInPaise < MIN_AMOUNT_PAISE) {
       throw new BadRequestException(`Amount must be at least ${MIN_AMOUNT_PAISE} paise`);
+    }
+    if (!this.client) {
+      throw new InternalServerErrorException('Razorpay is not configured');
     }
     try {
       const order = await this.client.orders.create({ amount: amountInPaise, currency, receipt });
@@ -48,6 +59,7 @@ export class PaymentsService {
    * compared with a timing-safe equality check to avoid leaking the expected value via timing.
    */
   verifySignature(orderId: string, paymentId: string, signature: string): boolean {
+    if (!this.keySecret) return false;
     const expectedHex = createHmac('sha256', this.keySecret).update(`${orderId}|${paymentId}`).digest('hex');
     const expected = Buffer.from(expectedHex, 'hex');
     const actual = Buffer.from(signature, 'hex');
