@@ -61,10 +61,14 @@ const SUPPORT_TEAM = [
   { initials: 'V', name: 'Vikram', info: 'B.Tech CSE · IIIT Guna' },
 ];
 
-// Decorative week-accent rotation only — actual schedule content (title,
-// objective, deliverable, steps, hours) is admin-editable, sourced live from
-// the backend via useVirtualInternshipTasks() below.
-const WEEK_ACCENTS = ['var(--mint-deep)', 'var(--green)', 'var(--orange)', 'var(--mint-deep)'];
+interface ScheduleTaskData {
+  weekKey: string;
+  title: string;
+  hours: string;
+  objective: string;
+  deliverable: string;
+  steps: string[];
+}
 
 interface ScheduleMonthData {
   num: number;
@@ -72,15 +76,7 @@ interface ScheduleMonthData {
   sub: string;
   duration: string;
   focus: string;
-  weeks: { accent: string; title: string; desc: string }[];
-}
-
-interface ScheduleWeekData {
-  accent: string;
-  duration: string;
-  hours: string;
-  title: string;
-  desc: string;
+  weeks: ScheduleTaskData[];
 }
 
 // Static "compare-at" anchor prices for the savings note on each track's
@@ -168,14 +164,71 @@ function MetaChip({
   );
 }
 
+function WeekTaskAccordion({
+  task,
+  numberLabel,
+  open,
+  onToggle,
+  enrollHref,
+}: {
+  task: ScheduleTaskData;
+  numberLabel: string | number;
+  open: boolean;
+  onToggle: () => void;
+  enrollHref: string;
+}) {
+  return (
+    <div className={cn(styles.taskAcc, open && styles.taskAccOpen)}>
+      <button type="button" className={styles.taskAccHead} onClick={onToggle}>
+        <span className={styles.taskAccNum}>{numberLabel}</span>
+        <span className={styles.taskAccHeadTxt}>
+          <h5>{task.title}</h5>
+          <span>{task.hours}</span>
+        </span>
+        <ChevronDown className={cn(styles.taskAccChev, open && styles.taskAccChevOpen)} width={16} height={16} />
+      </button>
+      {open && (
+        <div className={styles.taskAccBody}>
+          <div className={styles.taskSec}>
+            <h6>Task Objective</h6>
+            <p>{task.objective}</p>
+          </div>
+          <div className={styles.taskSec}>
+            <h6>Expected Deliverable</h6>
+            <p>{task.deliverable}</p>
+          </div>
+          <div className={styles.taskSec}>
+            <h6>Key Steps</h6>
+            <ul>
+              {task.steps.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ul>
+          </div>
+          <p className={styles.taskHours}>Estimated effort: {task.hours}</p>
+          <Link href={enrollHref} className={styles.taskJoinBtn}>
+            Join track to submit your work
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ScheduleMonth({
   month,
   open,
   onToggle,
+  openWeekKey,
+  onToggleWeek,
+  enrollHref,
 }: {
   month: ScheduleMonthData;
   open: boolean;
   onToggle: () => void;
+  openWeekKey: string | null;
+  onToggleWeek: (key: string) => void;
+  enrollHref: string;
 }) {
   return (
     <div className={styles.monthBlock}>
@@ -197,13 +250,15 @@ function ScheduleMonth({
       </button>
       <div className={cn(styles.weeksPanel, open && styles.weeksPanelOpen)}>
         <div className={styles.weeksInner}>
-          {month.weeks.map((w) => (
-            <div key={w.title} className={styles.weekRow} style={{ '--accent': w.accent } as React.CSSProperties}>
-              <div className={styles.weekMain}>
-                <h5>{w.title}</h5>
-                <p>{w.desc}</p>
-              </div>
-            </div>
+          {month.weeks.map((w, i) => (
+            <WeekTaskAccordion
+              key={w.weekKey}
+              task={w}
+              numberLabel={i + 1}
+              open={openWeekKey === w.weekKey}
+              onToggle={() => onToggleWeek(w.weekKey)}
+              enrollHref={enrollHref}
+            />
           ))}
         </div>
       </div>
@@ -272,6 +327,7 @@ function GigsSection() {
 export default function VirtualInternshipPage() {
   const [openTrack, setOpenTrack] = useState<'month' | 'week' | null>(null);
   const [openMonth, setOpenMonth] = useState<number | null>(1);
+  const [openWeekKey, setOpenWeekKey] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showSticky, setShowSticky] = useState(false);
   const { data: pricing } = useVirtualInternshipPricing();
@@ -290,26 +346,30 @@ export default function VirtualInternshipPage() {
           sub: tasks[0].monthDesc ?? '',
           duration: '1 month',
           focus: tasks[0].monthTitle ?? '',
-          weeks: tasks.map((t, i) => ({
-            accent: WEEK_ACCENTS[i % WEEK_ACCENTS.length],
+          weeks: tasks.map((t) => ({
+            weekKey: `m${num}-w${t.weekNum}`,
             title: `Week ${t.weekNum} — ${t.title}`,
-            desc: t.objective,
+            hours: t.hours,
+            objective: t.objective,
+            deliverable: t.deliverable,
+            steps: t.steps,
           })),
         };
       })
       .filter((m): m is ScheduleMonthData => m !== null);
   }, [monthTaskList]);
 
-  const weekSchedule = useMemo<ScheduleWeekData[]>(() => {
+  const weekSchedule = useMemo<ScheduleTaskData[]>(() => {
     if (!weekTaskList) return [];
     return [...weekTaskList]
       .sort((a, b) => a.weekNum - b.weekNum)
-      .map((t, i) => ({
-        accent: WEEK_ACCENTS[i % WEEK_ACCENTS.length],
-        duration: '1 week',
-        hours: t.hours,
+      .map((t) => ({
+        weekKey: `w${t.weekNum}`,
         title: `Week ${t.weekNum} — ${t.title}`,
-        desc: t.objective,
+        hours: t.hours,
+        objective: t.objective,
+        deliverable: t.deliverable,
+        steps: t.steps,
       }));
   }, [weekTaskList]);
 
@@ -581,6 +641,9 @@ export default function VirtualInternshipPage() {
                       month={m}
                       open={openMonth === m.num}
                       onToggle={() => setOpenMonth(openMonth === m.num ? null : m.num)}
+                      openWeekKey={openWeekKey}
+                      onToggleWeek={(key) => setOpenWeekKey(openWeekKey === key ? null : key)}
+                      enrollHref={enrollHref.month}
                     />
                   ))}
                 </div>
@@ -694,23 +757,16 @@ export default function VirtualInternshipPage() {
 
                 <div className={styles.scheduleSection}>
                   <h4>Track Schedule</h4>
-                  <div className={styles.flatWeekList}>
-                    {weekSchedule.map((w, i) => (
-                      <div key={w.title} className={styles.schItem}>
-                        <div className={styles.schItemTop}>
-                          <span className={styles.schNum} style={{ background: w.accent }}>
-                            {i + 1}
-                          </span>
-                          <h5>{w.title}</h5>
-                        </div>
-                        <div className={styles.schMetaRow}>
-                          <MetaChip icon={Clock} label="Duration" value={w.duration} />
-                          <MetaChip icon={Target} label="Effort" value={w.hours} />
-                        </div>
-                        <p className={styles.schDesc}>{w.desc}</p>
-                      </div>
-                    ))}
-                  </div>
+                  {weekSchedule.map((w, i) => (
+                    <WeekTaskAccordion
+                      key={w.weekKey}
+                      task={w}
+                      numberLabel={i + 1}
+                      open={openWeekKey === w.weekKey}
+                      onToggle={() => setOpenWeekKey(openWeekKey === w.weekKey ? null : w.weekKey)}
+                      enrollHref={enrollHref.week}
+                    />
+                  ))}
                 </div>
 
                 <p className={styles.featureGroupLabel}>Unlocked when you finish</p>
