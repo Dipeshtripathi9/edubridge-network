@@ -7,6 +7,7 @@ import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import { AccountMenu } from '@/components/account-menu';
 import { InternshipBrowseByField } from '@/components/internship-browse-by-field';
 import { InternshipBlogTeaser } from '@/components/internship-blog-teaser';
+import { InternshipCareerPrograms } from '@/components/internship-career-programs';
 import { OpportunityShortlistDemo } from '@/components/opportunity-shortlist-demo';
 import styles from './page.module.css';
 
@@ -120,6 +121,8 @@ export default function InternshipLandingPage() {
         </div>
         <div className={styles.heroStrip} />
       </section>
+
+      <InternshipCareerPrograms />
 
       <section className={styles.exploreSection}>
         <div className={styles.wrap}>

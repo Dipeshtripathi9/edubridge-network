@@ -67,6 +67,10 @@
   padding-top: 1.5rem;
   padding-bottom: 2rem;
 }
+.page :global(#career-programs) {
+  padding-top: 3rem;
+  padding-bottom: 2rem;
+}
 
 .wrap {
   max-width: 1180px;
