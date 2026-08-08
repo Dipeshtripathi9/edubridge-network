@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Award, GraduationCap, Rocket, Search, Share2, Sparkles } from 'lucide-react';
+import { Award, GraduationCap, Rocket, Search, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -42,14 +42,6 @@ const SERVICES = [
     body: 'A structured, mentor-guided internship — pick Guided Learning, build your Own Project, or apply free to Track B.',
     href: '/internship',
     cta: 'View the program',
-  },
-  {
-    icon: Sparkles,
-    tone: 'bg-marigold-soft text-amber-600',
-    title: 'Virtual Internship',
-    body: 'A fast-track or 4-month guided track — ship real projects with a team, mentor review every step, and a verified certificate.',
-    href: '/virtual-internship',
-    cta: 'View tracks & pricing',
   },
   {
     icon: Share2,

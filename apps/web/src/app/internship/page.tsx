@@ -7,7 +7,6 @@ import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import { AccountMenu } from '@/components/account-menu';
 import { InternshipBrowseByField } from '@/components/internship-browse-by-field';
 import { InternshipBlogTeaser } from '@/components/internship-blog-teaser';
-import { InternshipCareerPrograms } from '@/components/internship-career-programs';
 import { OpportunityShortlistDemo } from '@/components/opportunity-shortlist-demo';
 import styles from './page.module.css';
 
@@ -34,11 +33,11 @@ const FAQS = [
   },
   {
     q: 'Is EduBridge Network free to use?',
-    a: 'Signing up, building your profile, and browsing every opportunity is completely free. Only the optional Virtual Internship tracks and a few paid gigs have their own listed pricing.',
+    a: 'Signing up, building your profile, and browsing every opportunity is completely free. Only a few paid gigs and the mentor-guided internship program have their own listed pricing.',
   },
   {
-    q: "What's the difference between Opportunities and the Virtual Internship?",
-    a: 'Opportunities are real internships, gigs, and projects from companies and startups that you apply to directly. The Virtual Internship is our own guided, mentor-reviewed track where you’re matched to a project and build it end-to-end.',
+    q: "What's the difference between Opportunities and the Internship Program?",
+    a: 'Opportunities are real internships, gigs, and projects from companies and startups that you apply to directly. The Internship Program is our own guided, mentor-reviewed track where you build a project end-to-end.',
   },
   {
     q: 'How does the Career Path Test help me?',
@@ -76,7 +75,6 @@ export default function InternshipLandingPage() {
         </Link>
         <div className={styles.links}>
           <a href="#opportunities">Opportunities</a>
-          <Link href="/virtual-internship">Virtual Internship</Link>
           <Link href="/blog/write">Write Blog</Link>
         </div>
         <div className={styles.navActions}>
@@ -108,11 +106,6 @@ export default function InternshipLandingPage() {
                 Take the Career Path Test
               </Link>
             </div>
-            <p className={styles.ctaNote} style={{ marginTop: '1.2rem' }}>
-              <Link href="/virtual-internship" style={{ color: 'var(--orange)' }}>
-                No experience? No problem — Join Virtual Internship and master in-demand skills →
-              </Link>
-            </p>
           </div>
 
           <div className={`${styles.demoFrameWrap} ${styles.reveal}`}>
@@ -121,8 +114,6 @@ export default function InternshipLandingPage() {
         </div>
         <div className={styles.heroStrip} />
       </section>
-
-      <InternshipCareerPrograms />
 
       <section className={styles.exploreSection}>
         <div className={styles.wrap}>

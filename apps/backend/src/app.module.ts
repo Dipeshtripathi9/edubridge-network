@@ -29,7 +29,6 @@ import { AdminModule } from './admin/admin.module';
 import { VerificationModule } from './verification/verification.module';
 import { InternshipsModule } from './internships/internships.module';
 import { InternshipListingsModule } from './internship-listings/internship-listings.module';
-import { VirtualInternshipModule } from './virtual-internship/virtual-internship.module';
 import { QuizzesModule } from './quizzes/quizzes.module';
 import { SearchModule } from './search/search.module';
 import { HealthModule } from './health/health.module';
@@ -96,7 +95,6 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     VerificationModule,
     InternshipsModule,
     InternshipListingsModule,
-    VirtualInternshipModule,
     QuizzesModule,
     SearchModule,
     HealthModule,

@@ -106,8 +106,6 @@ enum NotificationType {
   INTERNSHIP_APPLICATION_REVIEWED
   INTERNSHIP_PAYOUT_SENT
   CERTIFICATE_ISSUED
-  VIRTUAL_INTERNSHIP_PAYMENT_CLICKED
-  VIRTUAL_INTERNSHIP_PAYMENT_REJECTED
 }
 
 enum ReputationAction {
@@ -177,17 +175,6 @@ enum EnrollmentSubtype {
   OWN_PROJECT
 }
 
-enum VirtualInternshipTrack {
-  FOUR_WEEK
-  FOUR_MONTH
-}
-
-enum VirtualInternshipEvaluationStatus {
-  PENDING
-  PASSED
-  FAILED
-}
-
 enum EnrollmentStatus {
   PENDING_PAYMENT
   ACTIVE
@@ -218,7 +205,6 @@ enum TrackBAllocationType {
 enum CertificateSourceType {
   TRACK_A_ENROLLMENT
   TRACK_B_APPLICATION
-  VIRTUAL_INTERNSHIP
 }
 
 // ============================================================
@@ -291,9 +277,6 @@ model User {
   trackAEnrollments            TrackAEnrollment[]
   trackBApplications           TrackBApplication[]
   certificates                 Certificate[]
-  virtualInternshipEnrollments VirtualInternshipEnrollment[]
-  virtualInternshipFeedback    VirtualInternshipFeedback[]
-  virtualInternshipSubmissions VirtualInternshipTaskSubmission[]
   quizAttempts                 QuizAttempt[]
 
   @@index([status])
@@ -1336,117 +1319,6 @@ model EnrollmentTask {
 
   @@index([enrollmentId, order])
   @@map("enrollment_tasks")
-}
-
-model VirtualInternshipEnrollment {
-  id                   String                 @id @default(cuid())
-  userId               String
-  user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  track                VirtualInternshipTrack
-  feeAmount            Int // snapshot at enroll time; never re-read pricing config later
-  status               EnrollmentStatus       @default(PENDING_PAYMENT)
-  paymentReferenceNote String?
-  paymentLinkClickedAt DateTime?
-  paidAt               DateTime?
-  paymentConfirmedById String?
-  completedAt          DateTime?
-  completedById        String?
-  evaluationStatus     VirtualInternshipEvaluationStatus @default(PENDING)
-  evaluatedAt          DateTime?
-  evaluatedById        String?
-  evaluationNote       String?
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  feedback             VirtualInternshipFeedback?
-  taskSubmissions      VirtualInternshipTaskSubmission[]
-
-  @@index([userId, status])
-  @@index([status, createdAt])
-  @@map("virtual_internship_enrollments")
-}
-
-model VirtualInternshipFeedback {
-  id           String                       @id @default(cuid())
-  enrollmentId String                       @unique
-  enrollment   VirtualInternshipEnrollment  @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  userId       String
-  user         User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  rating       Int // 1-5
-  comment      String?
-  createdAt    DateTime                     @default(now())
-
-  @@index([userId])
-  @@map("virtual_internship_feedback")
-}
-
-// Per-track admin-configurable settings: the price (base fee, before GST) and
-// the external payment link (e.g. a UPI/Razorpay payment link) shown to
-// students as the "Pay ₹X" action until a real payment gateway is integrated.
-// `baseFeeAmount: null` means "fall back to the hardcoded VIRTUAL_INTERNSHIP_FEES
-// default" — never affects enrollments already snapshotted with an older fee.
-model VirtualInternshipPaymentLink {
-  id            String                 @id @default(cuid())
-  track         VirtualInternshipTrack @unique
-  url           String?
-  baseFeeAmount Int?
-  updatedById   String?
-  createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @updatedAt
-
-  @@map("virtual_internship_payment_links")
-}
-
-enum TaskSubmissionStatus {
-  SUBMITTED
-  APPROVED
-  REJECTED
-}
-
-// Admin-editable curriculum content per track. `monthNum` is null for the
-// FOUR_WEEK track (flat 4-week list) and 1-4 for FOUR_MONTH (nested under
-// each month). `weekNum` is always 1-4 within its scope.
-model VirtualInternshipTask {
-  id          String                 @id @default(cuid())
-  track       VirtualInternshipTrack
-  monthNum    Int?
-  weekNum     Int
-  monthTitle  String? // e.g. "Onboarding & Project 1" — only meaningful when monthNum is set
-  monthDesc   String? // short blurb shown above the month's weeks
-  title       String
-  objective   String
-  deliverable String
-  steps       String[]
-  hours       String
-  updatedById String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  submissions VirtualInternshipTaskSubmission[]
-
-  @@unique([track, monthNum, weekNum])
-  @@map("virtual_internship_tasks")
-}
-
-// A student's GitHub submission for one task, reviewed by an admin/mentor.
-model VirtualInternshipTaskSubmission {
-  id           String                       @id @default(cuid())
-  taskId       String
-  task         VirtualInternshipTask       @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  enrollmentId String
-  enrollment   VirtualInternshipEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  userId       String
-  user         User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  githubUrl    String
-  status       TaskSubmissionStatus         @default(SUBMITTED)
-  reviewNote   String?
-  reviewedById String?
-  reviewedAt   DateTime?
-  createdAt    DateTime                     @default(now())
-  updatedAt    DateTime                     @updatedAt
-
-  @@unique([taskId, enrollmentId])
-  @@index([enrollmentId])
-  @@index([status])
-  @@map("virtual_internship_task_submissions")
 }
 
 model Quiz {
