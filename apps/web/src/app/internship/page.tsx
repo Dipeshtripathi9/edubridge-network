@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ChevronDown, GraduationCap } from 'lucide-react';
+import { Check, ChevronDown, GraduationCap } from 'lucide-react';
 import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import { AccountMenu } from '@/components/account-menu';
 import { InternshipBrowseByField } from '@/components/internship-browse-by-field';
@@ -25,6 +25,42 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: ['400', '500', '600'],
   variable: '--font-ibm-plex-mono',
 });
+
+const VI_TRACKS = [
+  {
+    key: 'week',
+    badge: 'Fast track',
+    name: 'Web Development (4 Weeks)',
+    tagline: 'The fast-track version — same outcome, same certificate, a quarter of the time.',
+    features: [
+      'Verified students only',
+      '4-week guided track · mentor-reviewed',
+      '1:1 mentorship throughout the track',
+      'Letter of recommendation',
+      'Virtual internship certificate',
+    ],
+    priceNow: '₹2,699',
+    priceOld: '₹4,999',
+    priceNote: 'Save ₹2,300 · one-time payment',
+  },
+  {
+    key: 'month',
+    badge: 'New',
+    name: 'Web Development + DevOps (4 Months)',
+    tagline: 'The full track — 3 minor projects and 1 major project, every month.',
+    features: [
+      'Verified students only',
+      '4-month guided track · mentor-reviewed',
+      '1:1 mentorship throughout the track',
+      'Letter of recommendation',
+      'Virtual internship certificate',
+      'Job referral, if a suitable match is found',
+    ],
+    priceNow: '₹7,634',
+    priceOld: '₹12,999',
+    priceNote: 'Save ₹5,365 · one-time payment',
+  },
+];
 
 const FAQS = [
   {
@@ -113,6 +149,59 @@ export default function InternshipLandingPage() {
           </div>
         </div>
         <div className={styles.heroStrip} />
+      </section>
+
+      <section className={`${styles.viSection} ${styles.reveal}`}>
+        <div className={styles.wrap}>
+          <div className={styles.viHeader}>
+            <div className={`${styles.eyebrow} ${styles.onCream}`}>Virtual Internship</div>
+            <h2>Don&apos;t just apply. Earn the internship instead.</h2>
+            <p>
+              Skip the idea-hunting. Get matched to a real, running project, ship it with mentor review, and walk
+              away with a certificate and a signed letter of recommendation.
+            </p>
+          </div>
+
+          <div className={styles.viGrid}>
+            {VI_TRACKS.map((t, i) => (
+              <div key={t.key} className={`${styles.viCard} ${i === 1 ? styles.viCardAlt : ''}`}>
+                <div className={styles.viTop}>
+                  <span className={styles.viPill}>Online</span>
+                  <span className={styles.viPillAlt}>{t.badge}</span>
+                </div>
+                <h3 className={styles.viName}>{t.name}</h3>
+                <p className={styles.viTagline}>{t.tagline}</p>
+                <div className={styles.viFeatures}>
+                  {t.features.map((f) => (
+                    <div key={f} className={styles.viFeature}>
+                      <Check width={15} height={15} />
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className={styles.viPriceRow}>
+                  <span className={styles.viPriceNow}>{t.priceNow}</span>
+                  <span className={styles.viPriceOld}>{t.priceOld}</span>
+                </div>
+                <div className={styles.viPriceSave}>{t.priceNote}</div>
+                <div className={styles.viActions}>
+                  <Link href="/virtual-internship#tracks" className={`${styles.viBtn} ${styles.viBtnGhost}`}>
+                    Explore
+                  </Link>
+                  <Link href="/virtual-internship#tracks" className={`${styles.viBtn} ${styles.viBtnSolid}`}>
+                    Join track
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.viCtaRow}>
+            <Link className={styles.btn} href="/virtual-internship">
+              Explore Virtual Internships
+            </Link>
+          </div>
+        </div>
       </section>
 
       <section className={styles.exploreSection}>

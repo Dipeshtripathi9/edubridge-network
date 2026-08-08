@@ -240,6 +240,165 @@
   background: var(--orange);
 }
 
+/* VIRTUAL INTERNSHIP TEASER */
+.viSection {
+  padding-bottom: 3.5rem;
+}
+@media (max-width: 720px) {
+  .viSection {
+    padding-bottom: 2.25rem;
+  }
+}
+.viHeader {
+  max-width: 640px;
+  margin: 0 auto 2.6rem;
+  text-align: center;
+}
+.viHeader h2 {
+  font-size: clamp(1.9rem, 3.4vw, 2.5rem);
+  color: var(--green);
+  margin: 1rem 0 1rem;
+}
+.viHeader p {
+  color: var(--ink-soft);
+}
+.viGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.75rem;
+  margin-bottom: 2.4rem;
+}
+@media (max-width: 860px) {
+  .viGrid {
+    grid-template-columns: 1fr;
+  }
+}
+.viCard {
+  background: var(--green-deep);
+  border-radius: 22px;
+  padding: 2rem 1.9rem;
+  color: var(--cream);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 36px rgba(30, 58, 34, 0.22);
+}
+.viCardAlt {
+  background: var(--green);
+}
+.viTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.1rem;
+}
+.viPill {
+  background: var(--mint);
+  color: var(--green-deep);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+}
+.viPillAlt {
+  background: var(--cream);
+  color: var(--green-deep);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+}
+.viName {
+  font-size: 1.3rem;
+  margin-bottom: 0.6rem;
+}
+.viTagline {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 0.92rem;
+  font-weight: 400;
+  color: rgba(247, 242, 230, 0.75);
+  margin-bottom: 1.3rem;
+  line-height: 1.55;
+}
+.viFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.3rem;
+}
+.viFeature {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 0.88rem;
+  color: #e8ede9;
+}
+.viFeature svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #fff;
+}
+.viPriceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.2rem;
+}
+.viPriceNow {
+  font-family: var(--font-fraunces), serif;
+  font-weight: 700;
+  font-size: 1.7rem;
+}
+.viPriceOld {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 0.9rem;
+  color: #87977f;
+  text-decoration: line-through;
+}
+.viPriceSave {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 0.76rem;
+  color: var(--orange);
+  font-weight: 600;
+  margin-bottom: 1.1rem;
+}
+.viActions {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: auto;
+}
+.viBtn {
+  flex: 1;
+  text-align: center;
+  border-radius: 999px;
+  padding: 0.68rem 0.6rem;
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.viBtnGhost {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+}
+.viBtnGhost:hover {
+  border-color: #fff;
+}
+.viBtnSolid {
+  background: var(--orange);
+  color: #1c1300;
+  border: none;
+}
+.viBtnSolid:hover {
+  background: #f0b562;
+}
+.viCtaRow {
+  display: flex;
+  justify-content: center;
+}
+
 /* MATCH STAT (screenshot-2 replacement block) */
 .matchStat {
   display: grid;
