@@ -338,6 +338,26 @@
 .trackCard .priceBlock .now {
   color: var(--cream);
 }
+.priceBlock .old {
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+  text-decoration: line-through;
+}
+.trackCard .priceBlock .old {
+  color: rgba(247, 242, 230, 0.4);
+}
+.priceNote {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #a9761f;
+  margin: 0 0 0.6rem;
+}
+.trackCard .priceNote {
+  color: var(--orange);
+}
+.detailCta .priceNote {
+  margin-bottom: 0;
+}
 .discountTag {
   display: inline-flex;
   align-items: center;
@@ -546,6 +566,52 @@
   font-weight: 700;
   display: block;
   font-size: 0.72rem;
+}
+
+/* LOCKED REWARDS */
+.lockedRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.lockedItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(27, 42, 29, 0.035);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.9rem 1.1rem;
+  color: var(--ink-faint);
+}
+.lockedIcon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+.lockedTxt {
+  flex: 1;
+  min-width: 0;
+}
+.lockedTxt b {
+  display: block;
+  font-size: 0.87rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.lockedTxt span {
+  font-size: 0.76rem;
+}
+.lockedAction {
+  flex-shrink: 0;
+  font-size: 0.76rem;
+  font-weight: 700;
 }
 
 /* SCHEDULE */

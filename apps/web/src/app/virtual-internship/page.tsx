@@ -14,6 +14,7 @@ import {
   FileText,
   GraduationCap,
   LineChart,
+  Lock,
   MessageCircle,
   Share2,
   Sparkles,
@@ -81,6 +82,17 @@ interface ScheduleWeekData {
   title: string;
   desc: string;
 }
+
+// Static "compare-at" anchor prices for the savings note on each track's
+// price row — a marketing decision (not derived from any backend field),
+// unrelated to the real, GST-inclusive total shown as the current price.
+const OLD_PRICE = { FOUR_WEEK: 4999, FOUR_MONTH: 12999 };
+
+const LOCKED_REWARDS = [
+  { title: 'Certificate', sub: 'Verified internship certificate' },
+  { title: 'Letter of Recommendation', sub: 'Signed by your mentors' },
+  { title: 'Referral community', sub: 'Access to job referrals' },
+];
 
 const FOUR_MONTH_FEATURES = [
   'Verified students only',
@@ -195,6 +207,25 @@ function ScheduleMonth({
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function LockedRewards() {
+  return (
+    <div className={styles.lockedRow}>
+      {LOCKED_REWARDS.map((item) => (
+        <div key={item.title} className={styles.lockedItem}>
+          <span className={styles.lockedIcon}>
+            <Lock className="h-4 w-4" />
+          </span>
+          <span className={styles.lockedTxt}>
+            <b>{item.title}</b>
+            <span>{item.sub}</span>
+          </span>
+          <span className={styles.lockedAction}>Unlocks on completion</span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -396,7 +427,7 @@ export default function VirtualInternshipPage() {
               </div>
               <h3>4-Month Track</h3>
               <p className={styles.tagline}>
-                The full track — 4 real projects, deployed live, with mentors reviewing every month.
+                The full track — 3 minor projects and 1 major project, every month.
               </p>
               <div className={styles.featureList}>
                 {FOUR_MONTH_FEATURES.map((f) => (
@@ -408,7 +439,13 @@ export default function VirtualInternshipPage() {
               </div>
               <div className={styles.priceBlock}>
                 <span className={styles.now}>{monthPricing ? `₹${monthPricing.totalAmount.toLocaleString()}` : '···'}</span>
+                <span className={styles.old}>₹{OLD_PRICE.FOUR_MONTH.toLocaleString()}</span>
               </div>
+              {monthPricing && (
+                <div className={styles.priceNote}>
+                  Save ₹{(OLD_PRICE.FOUR_MONTH - monthPricing.totalAmount).toLocaleString()} · one-time payment
+                </div>
+              )}
               <span className={styles.discountTag}>
                 ✓ Includes {monthPricing?.gstPercent ?? 18}% GST
               </span>
@@ -430,7 +467,7 @@ export default function VirtualInternshipPage() {
               </div>
               <h3>4-Week Track</h3>
               <p className={styles.tagline}>
-                The fast-track version — same outcome, same certificate, in a quarter of the time.
+                The fast-track version — same outcome, same certificate, a quarter of the time.
               </p>
               <div className={styles.featureList}>
                 {FOUR_WEEK_FEATURES.map((f) => (
@@ -442,7 +479,13 @@ export default function VirtualInternshipPage() {
               </div>
               <div className={styles.priceBlock}>
                 <span className={styles.now}>{weekPricing ? `₹${weekPricing.totalAmount.toLocaleString()}` : '···'}</span>
+                <span className={styles.old}>₹{OLD_PRICE.FOUR_WEEK.toLocaleString()}</span>
               </div>
+              {weekPricing && (
+                <div className={styles.priceNote}>
+                  Save ₹{(OLD_PRICE.FOUR_WEEK - weekPricing.totalAmount).toLocaleString()} · one-time payment
+                </div>
+              )}
               <span className={styles.discountTag}>
                 ✓ Includes {weekPricing?.gstPercent ?? 18}% GST
               </span>
@@ -508,12 +551,12 @@ export default function VirtualInternshipPage() {
                     <ClipboardCheck className="h-4 w-4" />
                   </span>
                   <div>
-                    <h4>4 real projects, 4 months</h4>
+                    <h4>3 real minor projects and 1 major project, every month</h4>
                     <p>
-                      One minor project every month for 4 months — your own idea, or one of the most in-demand
-                      projects currently used in the market if you don&apos;t have one. Built with a team, deployed
-                      on a live server, and reviewed and signed off before you move to the next — so you leave with
-                      a real portfolio, not just a certificate.
+                      Each month, you&apos;re assigned real-world projects we&apos;re already running — 3 minor
+                      projects plus 1 major project, no idea-hunting required. Submit them across 4 weeks, each one
+                      reviewed before you move to the next, so every month adds real, deployed work to your
+                      portfolio — not just a certificate.
                     </p>
                   </div>
                 </div>
@@ -529,6 +572,21 @@ export default function VirtualInternshipPage() {
                     </p>
                   </div>
                 </div>
+
+                <div className={styles.scheduleSection}>
+                  <h4>Track Schedule</h4>
+                  {monthSchedule.map((m) => (
+                    <ScheduleMonth
+                      key={m.num}
+                      month={m}
+                      open={openMonth === m.num}
+                      onToggle={() => setOpenMonth(openMonth === m.num ? null : m.num)}
+                    />
+                  ))}
+                </div>
+
+                <p className={styles.featureGroupLabel}>Unlocked when you finish</p>
+                <LockedRewards />
 
                 <p className={styles.featureGroupLabel}>Who supports you</p>
                 <div className={styles.feature}>
@@ -616,18 +674,6 @@ export default function VirtualInternshipPage() {
                     </p>
                   </div>
                 </div>
-
-                <div className={styles.scheduleSection}>
-                  <h4>Track Schedule</h4>
-                  {monthSchedule.map((m) => (
-                    <ScheduleMonth
-                      key={m.num}
-                      month={m}
-                      open={openMonth === m.num}
-                      onToggle={() => setOpenMonth(openMonth === m.num ? null : m.num)}
-                    />
-                  ))}
-                </div>
               </>
             ) : (
               <>
@@ -637,16 +683,38 @@ export default function VirtualInternshipPage() {
                     <ClipboardCheck className="h-4 w-4" />
                   </span>
                   <div>
-                    <h4>4 real projects, 4 weeks</h4>
+                    <h4>4 real major projects, 4 weeks</h4>
                     <p>
                       You&apos;ll be assigned a real-world project we&apos;re already running — no idea-hunting, no
                       scoping from scratch. Submit one minor project every week for 4 consecutive weeks, each one
                       reviewed before you move to the next, so you build a real portfolio, not just a certificate.
-                      The fast-track version of the internship, for students who want the same outcome in a quarter
-                      of the time.
                     </p>
                   </div>
                 </div>
+
+                <div className={styles.scheduleSection}>
+                  <h4>Track Schedule</h4>
+                  <div className={styles.flatWeekList}>
+                    {weekSchedule.map((w, i) => (
+                      <div key={w.title} className={styles.schItem}>
+                        <div className={styles.schItemTop}>
+                          <span className={styles.schNum} style={{ background: w.accent }}>
+                            {i + 1}
+                          </span>
+                          <h5>{w.title}</h5>
+                        </div>
+                        <div className={styles.schMetaRow}>
+                          <MetaChip icon={Clock} label="Duration" value={w.duration} />
+                          <MetaChip icon={Target} label="Effort" value={w.hours} />
+                        </div>
+                        <p className={styles.schDesc}>{w.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <p className={styles.featureGroupLabel}>Unlocked when you finish</p>
+                <LockedRewards />
 
                 <p className={styles.featureGroupLabel}>Who supports you</p>
                 <div className={styles.feature}>
@@ -698,27 +766,6 @@ export default function VirtualInternshipPage() {
                     </p>
                   </div>
                 </div>
-
-                <div className={styles.scheduleSection}>
-                  <h4>Track Schedule</h4>
-                  <div className={styles.flatWeekList}>
-                    {weekSchedule.map((w, i) => (
-                      <div key={w.title} className={styles.schItem}>
-                        <div className={styles.schItemTop}>
-                          <span className={styles.schNum} style={{ background: w.accent }}>
-                            {i + 1}
-                          </span>
-                          <h5>{w.title}</h5>
-                        </div>
-                        <div className={styles.schMetaRow}>
-                          <MetaChip icon={Clock} label="Duration" value={w.duration} />
-                          <MetaChip icon={Target} label="Effort" value={w.hours} />
-                        </div>
-                        <p className={styles.schDesc}>{w.desc}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </>
             )}
 
@@ -728,7 +775,19 @@ export default function VirtualInternshipPage() {
                   <span className={styles.now}>
                     {activePricing ? `₹${activePricing.totalAmount.toLocaleString()}` : '···'}
                   </span>
+                  <span className={styles.old}>
+                    ₹{(openTrack === 'month' ? OLD_PRICE.FOUR_MONTH : OLD_PRICE.FOUR_WEEK).toLocaleString()}
+                  </span>
                 </div>
+                {activePricing && (
+                  <div className={styles.priceNote}>
+                    Save ₹
+                    {(
+                      (openTrack === 'month' ? OLD_PRICE.FOUR_MONTH : OLD_PRICE.FOUR_WEEK) - activePricing.totalAmount
+                    ).toLocaleString()}{' '}
+                    · one-time payment
+                  </div>
+                )}
                 <span className={styles.discountTag}>✓ Includes {activePricing?.gstPercent ?? 18}% GST</span>
               </div>
               <Link href={activeEnrollHref} className={cn(styles.btn, styles.btnDark)}>
