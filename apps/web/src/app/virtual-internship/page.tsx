@@ -407,7 +407,7 @@ export default function VirtualInternshipPage() {
                 ))}
               </div>
               <div className={styles.priceBlock}>
-                <span className="now">{monthPricing ? `₹${monthPricing.totalAmount.toLocaleString()}` : '···'}</span>
+                <span className={styles.now}>{monthPricing ? `₹${monthPricing.totalAmount.toLocaleString()}` : '···'}</span>
               </div>
               <span className={styles.discountTag}>
                 ✓ Includes {monthPricing?.gstPercent ?? 18}% GST
@@ -416,9 +416,9 @@ export default function VirtualInternshipPage() {
                 <button type="button" className={cn(styles.btn, styles.btnGhost)} onClick={() => showDetail('month')}>
                   Explore
                 </button>
-                <Link href={enrollHref.month} className={cn(styles.btn, styles.btnDark)}>
+                <button type="button" className={cn(styles.btn, styles.btnDark)} onClick={() => showDetail('month')}>
                   Join track
-                </Link>
+                </button>
               </div>
             </div>
 
@@ -441,7 +441,7 @@ export default function VirtualInternshipPage() {
                 ))}
               </div>
               <div className={styles.priceBlock}>
-                <span className="now">{weekPricing ? `₹${weekPricing.totalAmount.toLocaleString()}` : '···'}</span>
+                <span className={styles.now}>{weekPricing ? `₹${weekPricing.totalAmount.toLocaleString()}` : '···'}</span>
               </div>
               <span className={styles.discountTag}>
                 ✓ Includes {weekPricing?.gstPercent ?? 18}% GST
@@ -450,9 +450,9 @@ export default function VirtualInternshipPage() {
                 <button type="button" className={cn(styles.btn, styles.btnGhost)} onClick={() => showDetail('week')}>
                   Explore
                 </button>
-                <Link href={enrollHref.week} className={cn(styles.btn, styles.btnDark)}>
+                <button type="button" className={cn(styles.btn, styles.btnDark)} onClick={() => showDetail('week')}>
                   Join track
-                </Link>
+                </button>
               </div>
             </div>
           </div>
@@ -725,7 +725,7 @@ export default function VirtualInternshipPage() {
             <div className={styles.detailCta}>
               <div>
                 <div className={styles.priceBlock}>
-                  <span className="now">
+                  <span className={styles.now}>
                     {activePricing ? `₹${activePricing.totalAmount.toLocaleString()}` : '···'}
                   </span>
                 </div>
