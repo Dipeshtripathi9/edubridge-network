@@ -4,17 +4,19 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { ArrowUpRight, Check, ClipboardList, GraduationCap, Inbox, X } from 'lucide-react';
+import { ArrowUpRight, Check, ChevronDown, ChevronUp, ClipboardList, GraduationCap, Inbox, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useAuthStore } from '@/stores/auth.store';
 import {
+  useAdminAssignVirtualInternshipTask,
   useAdminReviewVirtualInternshipTask,
   useAdminVirtualInternshipEnrollments,
   useAdminVirtualInternshipStats,
@@ -56,6 +58,51 @@ function StatsRow() {
       <Stat label="Pending payment" value={data.pendingPayment} />
       <Stat label="4-week / 4-month" value={`${data.byTrack.WEEK} / ${data.byTrack.MONTH}`} />
       <Stat label="Awaiting review" value={data.submissionsPendingReview} />
+    </div>
+  );
+}
+
+function AssignTaskPanel({ enrollmentId }: { enrollmentId: string }) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const assign = useAdminAssignVirtualInternshipTask();
+
+  return (
+    <div className="pt-1">
+      <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
+        Assign task {open ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+      </Button>
+      {open && (
+        <div className="mt-2 space-y-2 rounded-xl border border-border bg-accent/20 p-3">
+          <Input placeholder="Task title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <Textarea
+            placeholder="Description (optional)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <Button
+            size="sm"
+            disabled={assign.isPending || !title.trim()}
+            onClick={() =>
+              assign.mutate(
+                { enrollmentId, title: title.trim(), description: description.trim() || undefined },
+                {
+                  onSuccess: () => {
+                    toast.success('Task assigned');
+                    setTitle('');
+                    setDescription('');
+                    setOpen(false);
+                  },
+                  onError: (e) => toast.error((e as Error).message),
+                },
+              )
+            }
+          >
+            Assign
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -105,6 +152,7 @@ function EnrollmentsPanel() {
                       )}
                     </div>
                   </div>
+                  {enrollment.status === 'ACTIVE' && <AssignTaskPanel enrollmentId={enrollment.id} />}
                 </CardContent>
               </Card>
             );
