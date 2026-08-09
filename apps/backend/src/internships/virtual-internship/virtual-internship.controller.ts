@@ -53,6 +53,12 @@ export class VirtualInternshipController {
     return this.virtualInternship.myEnrollment(userId);
   }
 
+  @Get('enrollments/me/active')
+  @ApiOperation({ summary: 'Every ACTIVE Virtual Internship enrollment I hold (at most one per track)' })
+  myActiveEnrollments(@CurrentUser('sub') userId: string) {
+    return this.virtualInternship.myActiveEnrollments(userId);
+  }
+
   @Post('enrollments/:id/checkout')
   @ApiOperation({ summary: 'Create a Razorpay order to pay the enrollment fee' })
   checkout(@CurrentUser('sub') userId: string, @Param('id') id: string) {
@@ -78,28 +84,29 @@ export class VirtualInternshipController {
 
   // ---------------- Tasks (student) ----------------
 
-  @Get('enrollments/me/tasks')
-  @ApiOperation({ summary: 'My virtual internship task list, merged with submission/review state' })
-  myTasks(@CurrentUser('sub') userId: string) {
-    return this.virtualInternship.myTasks(userId);
+  @Get('enrollments/:id/tasks')
+  @ApiOperation({ summary: "This enrollment's task list, merged with submission/review state" })
+  myTasks(@CurrentUser('sub') userId: string, @Param('id') id: string) {
+    return this.virtualInternship.myTasks(userId, id);
   }
 
-  @Post('enrollments/me/tasks/:taskIndex/submit')
-  @ApiOperation({ summary: 'Submit work for my current unlocked task' })
+  @Post('enrollments/:id/tasks/:taskIndex/submit')
+  @ApiOperation({ summary: "Submit work for this enrollment's current unlocked task" })
   submitTask(
     @CurrentUser('sub') userId: string,
+    @Param('id') id: string,
     @Param('taskIndex', ParseIntPipe) taskIndex: number,
     @Body() dto: SubmitVirtualInternshipTaskDto,
   ) {
-    return this.virtualInternship.submitTask(userId, taskIndex, dto);
+    return this.virtualInternship.submitTask(userId, id, taskIndex, dto);
   }
 
   // ---------------- Documents (student) ----------------
 
-  @Get('enrollments/me/invoice')
-  @ApiOperation({ summary: 'Download my payment invoice as a PDF (attachment)' })
-  async invoice(@CurrentUser('sub') userId: string, @Res() res: Response) {
-    const enrollment = await this.virtualInternship.getForInvoice(userId);
+  @Get('enrollments/:id/invoice')
+  @ApiOperation({ summary: 'Download this enrollment\'s payment invoice as a PDF (attachment)' })
+  async invoice(@CurrentUser('sub') userId: string, @Param('id') id: string, @Res() res: Response) {
+    const enrollment = await this.virtualInternship.getForInvoice(userId, id);
     const doc = buildInvoicePdf(enrollment);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="invoice-${enrollment.id}.pdf"`);
@@ -107,14 +114,15 @@ export class VirtualInternshipController {
     doc.end();
   }
 
-  @Get('enrollments/me/documents/:type/download')
-  @ApiOperation({ summary: 'Download my recommendation letter or report card as a PDF (unlocks at 100% progress)' })
+  @Get('enrollments/:id/documents/:type/download')
+  @ApiOperation({ summary: "This enrollment's recommendation letter or report card as a PDF (unlocks at 100% progress)" })
   async rewardDocument(
     @CurrentUser('sub') userId: string,
+    @Param('id') id: string,
     @Param('type') type: 'letter' | 'report',
     @Res() res: Response,
   ) {
-    const { enrollment, tasks } = await this.virtualInternship.getForRewardDocument(userId);
+    const { enrollment, tasks } = await this.virtualInternship.getForRewardDocument(userId, id);
     const doc = buildRewardDocumentPdf(type, enrollment, tasks);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${type}-${enrollment.id}.pdf"`);

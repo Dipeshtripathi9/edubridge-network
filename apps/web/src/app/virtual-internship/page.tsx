@@ -24,12 +24,17 @@ import {
 import { AccountMenu } from '@/components/account-menu';
 import { OpportunityRecommendationCard } from '@/components/opportunity-recommendation-card';
 import { EnrolledDashboard } from '@/components/internship/virtual-internship-dashboard';
+import { MyCourses } from '@/components/internship/my-courses';
 import { useInternshipListings } from '@/hooks/use-internship-listings';
-import { useMyVirtualInternshipEnrollment } from '@/hooks/use-virtual-internship';
+import {
+  useMyVirtualInternshipEnrollments,
+  type VirtualInternshipEnrollment as ActiveVirtualInternshipEnrollment,
+} from '@/hooks/use-virtual-internship';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
 import { loadRazorpayScript, type RazorpayFailureResponse } from '@/lib/razorpay';
 import { cn } from '@/lib/utils';
+import { TRACKS, money, moneyPrecise, formatInternshipDate, type TrackKey } from '@/lib/virtual-internship-tracks';
 import styles from './page.module.css';
 
 interface VirtualInternshipEnrollment {
@@ -54,118 +59,6 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ['600'],
   variable: '--font-jetbrains',
 });
-
-type TrackKey = 'month' | 'week';
-
-interface TrackScheduleStep {
-  t: string;
-  d: string;
-}
-
-interface TrackData {
-  online: string;
-  badge: string;
-  name: string;
-  tagline: string;
-  features: string[];
-  priceNow: number;
-  priceOld: number;
-  hasReferral: boolean;
-  detailEyebrow: string;
-  buildTitle: string;
-  buildCopy: string;
-  certCopy: string;
-  scheduleLabel: string;
-  schedule: TrackScheduleStep[];
-}
-
-const TRACKS: Record<TrackKey, TrackData> = {
-  month: {
-    online: 'ONLINE',
-    badge: 'New',
-    name: 'Web Development + DevOps (4 Months)',
-    tagline: 'The complete career track — 3 minor projects and 1 major project every month.',
-    features: [
-      'Verified students only',
-      '4-month guided track · mentor-reviewed',
-      '1:1 mentorship throughout the track',
-      'Letter of recommendation',
-      'Work presentation (PPT)',
-      'Virtual internship certificate',
-      '1:1 resume review',
-    ],
-    priceNow: 7634,
-    priceOld: 12999,
-    hasReferral: true,
-    detailEyebrow: 'Online · 4 months',
-    buildTitle: '3 minor projects + 1 major project, 4 months',
-    buildCopy:
-      "Every month you ship a minor project reviewed by your mentor, and once a month that work builds toward one major, portfolio-grade project taken all the way to production. It's the depth version — more time to get the engineering right, not just the outcome.",
-    certCopy:
-      "Finish the track and you get a verified internship certificate plus a signed LOR from your mentors — not just a PDF, something you can actually use.",
-    scheduleLabel: 'Track schedule',
-    schedule: [
-      {
-        t: 'Month 1 — Onboarding & first minor project',
-        d: 'Get matched with your team and project. Set up your repo and tools, then ship your first minor project.',
-      },
-      {
-        t: 'Month 2 — Second minor project',
-        d: 'Scope, build, and ship your second minor project, with mentor check-ins along the way.',
-      },
-      {
-        t: 'Month 3 — Third minor project',
-        d: "Build the third minor project, sharpening the skills you'll need for the major build in month four.",
-      },
-      {
-        t: 'Month 4 — Major project, review & certify',
-        d: "Take everything you've built into one major project, get full mentor review, and receive your certificate + LOR.",
-      },
-    ],
-  },
-  week: {
-    online: 'ONLINE',
-    badge: 'Fast track',
-    name: 'Web Development (4 week)',
-    tagline: 'The complete beginner-to-industry track — complete 4 real-world, industry-specific projects.',
-    features: [
-      'Verified students only',
-      '4-week guided track · mentor-reviewed',
-      'Mentorship throughout the track',
-      'Letter of recommendation',
-      'Work presentation (PPT)',
-      'Virtual internship certificate',
-    ],
-    priceNow: 2699,
-    priceOld: 4999,
-    hasReferral: false,
-    detailEyebrow: 'Online · 4 weeks',
-    buildTitle: '4 real projects, 4 weeks',
-    buildCopy:
-      "You'll be assigned a real-world project we're already running — no idea-hunting, no scoping from scratch. Submit one minor project every week for 4 consecutive weeks, each one reviewed before you move to the next, so you build a real portfolio, not just a certificate.",
-    certCopy:
-      "Finish all 4 projects and you get a verified internship certificate plus a signed LOR from your mentors — not just a PDF, something you can actually use.",
-    scheduleLabel: 'Track schedule',
-    schedule: [
-      {
-        t: 'Week 1 — Onboarding & team matching',
-        d: 'Get matched with your team and your project (your idea, or one we assign). Set up your repo and tools.',
-      },
-      {
-        t: 'Week 2 — Planning & architecture',
-        d: 'Scope the build, define milestones, and lock the architecture for your project.',
-      },
-      {
-        t: 'Week 3 — Core build',
-        d: 'Build the core features of your project, with mentor check-ins along the way.',
-      },
-      {
-        t: 'Week 4 — Review, submit & certify',
-        d: 'Finalize the project, get mentor review, and receive your verified certificate + LOR.',
-      },
-    ],
-  },
-};
 
 const HOW_STEPS = [
   { img: '/virtual-internship-step-enroll.jpg', title: 'Enroll' },
@@ -201,19 +94,6 @@ const FAQS = [
     a: "They're open exclusively to early enrollees who complete the track — not guaranteed to every graduate, but you get the same shot at them everyone else in your cohort does.",
   },
 ];
-
-function money(n: number) {
-  return `₹${n.toLocaleString('en-IN')}`;
-}
-
-/** Same as money(), but always shows paisa precision (e.g. ₹485.82) instead of rounding to a whole rupee. */
-function moneyPrecise(n: number) {
-  return `₹${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function formatInternshipDate(d: Date) {
-  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-}
 
 function PersonRow({ people }: { people: { initials: string; name: string; info: string }[] }) {
   return (
@@ -262,8 +142,9 @@ function GigsSection() {
 export default function VirtualInternshipPage() {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: myEnrollment } = useMyVirtualInternshipEnrollment();
-  const [view, setView] = useState<'landing' | 'detail' | 'checkout'>('landing');
+  const { data: activeEnrollments } = useMyVirtualInternshipEnrollments();
+  const [view, setView] = useState<'landing' | 'detail' | 'checkout' | 'dashboard'>('landing');
+  const [dashboardEnrollment, setDashboardEnrollment] = useState<ActiveVirtualInternshipEnrollment | null>(null);
   const [currentTrackKey, setCurrentTrackKey] = useState<TrackKey>('month');
   const cameFromDetailRef = useRef(false);
   const [stickyVisible, setStickyVisible] = useState(false);
@@ -313,6 +194,12 @@ export default function VirtualInternshipPage() {
 
   const showLanding = () => {
     setView('landing');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const showDashboard = (enrollment: ActiveVirtualInternshipEnrollment) => {
+    setDashboardEnrollment(enrollment);
+    setView('dashboard');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -468,10 +355,6 @@ export default function VirtualInternshipPage() {
         <AccountMenu />
       </nav>
 
-      {myEnrollment?.status === 'ACTIVE' ? (
-        <EnrolledDashboard enrollment={myEnrollment} />
-      ) : (
-        <>
       <div
         className={cn(styles.stickyBar, stickyVisible && styles.stickyBarVisible)}
         aria-hidden={!stickyVisible}
@@ -489,20 +372,24 @@ export default function VirtualInternshipPage() {
 
       {view === 'landing' && (
         <>
-          <div className={styles.hero}>
-            <div className={styles.badgePill}>
-              <span className={styles.dot} /> Virtual Internship
+          {activeEnrollments && activeEnrollments.length > 0 ? (
+            <MyCourses enrollments={activeEnrollments} onContinue={showDashboard} />
+          ) : (
+            <div className={styles.hero}>
+              <div className={styles.badgePill}>
+                <span className={styles.dot} /> Virtual Internship
+              </div>
+              <h1>
+                Don&apos;t just apply.
+                <br />
+                Earn the internship instead.
+              </h1>
+              <p>
+                Skip the idea-hunting. Get matched to a real, running project, ship it with mentor review, and walk
+                away with a certificate and a signed letter of recommendation.
+              </p>
             </div>
-            <h1>
-              Don&apos;t just apply.
-              <br />
-              Earn the internship instead.
-            </h1>
-            <p>
-              Skip the idea-hunting. Get matched to a real, running project, ship it with mentor review, and walk
-              away with a certificate and a signed letter of recommendation.
-            </p>
-          </div>
+          )}
 
           <section className={styles.howSection}>
             <h2>How it works</h2>
@@ -887,7 +774,14 @@ export default function VirtualInternshipPage() {
           )}
         </div>
       </div>
-        </>
+
+      {view === 'dashboard' && dashboardEnrollment && (
+        <div>
+          <button type="button" className={styles.backBtn} style={{ margin: '20px 56px 0' }} onClick={showLanding}>
+            <ChevronLeft className="h-4 w-4" /> Back to my courses
+          </button>
+          <EnrolledDashboard enrollment={dashboardEnrollment} />
+        </div>
       )}
     </div>
   );

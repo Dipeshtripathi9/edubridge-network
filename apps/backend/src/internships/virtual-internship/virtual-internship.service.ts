@@ -83,6 +83,32 @@ export class VirtualInternshipService {
     return enrollment ? this.serialize(enrollment) : null;
   }
 
+  /** Every ACTIVE enrollment the caller holds — at most one per track. */
+  async myActiveEnrollments(userId: string) {
+    const enrollments = await this.prisma.virtualInternshipEnrollment.findMany({
+      where: { userId, status: EnrollmentStatus.ACTIVE },
+      orderBy: { createdAt: 'desc' },
+    });
+    return enrollments.map((e) => this.serialize(e));
+  }
+
+  /** Load a specific enrollment and verify the caller owns it. */
+  private async ownedEnrollment(userId: string, enrollmentId: string) {
+    const enrollment = await this.prisma.virtualInternshipEnrollment.findUnique({ where: { id: enrollmentId } });
+    if (!enrollment) throw new NotFoundException('Enrollment not found');
+    if (enrollment.userId !== userId) throw new ForbiddenException('Not your enrollment');
+    return enrollment;
+  }
+
+  /** Same as `ownedEnrollment`, additionally requiring it to be ACTIVE (paid). */
+  private async ownedActiveEnrollment(userId: string, enrollmentId: string) {
+    const enrollment = await this.ownedEnrollment(userId, enrollmentId);
+    if (enrollment.status !== EnrollmentStatus.ACTIVE) {
+      throw new ForbiddenException('This enrollment is not active');
+    }
+    return enrollment;
+  }
+
   /** Prisma serializes Decimal fields as strings over JSON — normalize back to a plain number for the API contract. */
   private serialize(enrollment: VirtualInternshipEnrollment) {
     return { ...enrollment, feeAmount: Number(enrollment.feeAmount) };
@@ -242,17 +268,8 @@ export class VirtualInternshipService {
     };
   }
 
-  private async myActiveEnrollment(userId: string) {
-    const enrollment = await this.prisma.virtualInternshipEnrollment.findFirst({
-      where: { userId, status: EnrollmentStatus.ACTIVE },
-      orderBy: { createdAt: 'desc' },
-    });
-    if (!enrollment) throw new NotFoundException('No active virtual internship enrollment');
-    return enrollment;
-  }
-
-  async myTasks(userId: string) {
-    const enrollment = await this.myActiveEnrollment(userId);
+  async myTasks(userId: string, enrollmentId: string) {
+    const enrollment = await this.ownedActiveEnrollment(userId, enrollmentId);
     const tasks = await this.prisma.virtualInternshipTask.findMany({
       where: { enrollmentId: enrollment.id },
       orderBy: { taskIndex: 'asc' },
@@ -275,8 +292,8 @@ export class VirtualInternshipService {
     };
   }
 
-  async submitTask(userId: string, taskIndex: number, dto: SubmitVirtualInternshipTaskDto) {
-    const enrollment = await this.myActiveEnrollment(userId);
+  async submitTask(userId: string, enrollmentId: string, taskIndex: number, dto: SubmitVirtualInternshipTaskDto) {
+    const enrollment = await this.ownedActiveEnrollment(userId, enrollmentId);
     const tasks = await this.prisma.virtualInternshipTask.findMany({
       where: { enrollmentId: enrollment.id },
       orderBy: { taskIndex: 'asc' },
@@ -305,24 +322,22 @@ export class VirtualInternshipService {
   // ---------------- Documents (student) ----------------
 
   /** Gated on ACTIVE (paid) — used by the invoice PDF route. */
-  async getForInvoice(userId: string) {
-    const enrollment = await this.prisma.virtualInternshipEnrollment.findFirst({
-      where: { userId, status: EnrollmentStatus.ACTIVE },
-      orderBy: { createdAt: 'desc' },
+  async getForInvoice(userId: string, enrollmentId: string) {
+    await this.ownedActiveEnrollment(userId, enrollmentId);
+    const enrollment = await this.prisma.virtualInternshipEnrollment.findUniqueOrThrow({
+      where: { id: enrollmentId },
       include: { user: { select: { email: true, profile: { select: { fullName: true } } } } },
     });
-    if (!enrollment) throw new NotFoundException('No paid virtual internship enrollment found');
     return enrollment;
   }
 
   /** Gated on 100% task approval — used by the recommendation-letter / report-card PDF routes. */
-  async getForRewardDocument(userId: string) {
-    const enrollment = await this.prisma.virtualInternshipEnrollment.findFirst({
-      where: { userId, status: EnrollmentStatus.ACTIVE },
-      orderBy: { createdAt: 'desc' },
+  async getForRewardDocument(userId: string, enrollmentId: string) {
+    await this.ownedActiveEnrollment(userId, enrollmentId);
+    const enrollment = await this.prisma.virtualInternshipEnrollment.findUniqueOrThrow({
+      where: { id: enrollmentId },
       include: { user: { select: { email: true, profile: { select: { fullName: true } } } } },
     });
-    if (!enrollment) throw new NotFoundException('No active virtual internship enrollment');
 
     const tasks = await this.prisma.virtualInternshipTask.findMany({
       where: { enrollmentId: enrollment.id },
