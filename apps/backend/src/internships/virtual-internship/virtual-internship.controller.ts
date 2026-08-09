@@ -17,6 +17,7 @@ import { UserRole } from '@prisma/client';
 import { VirtualInternshipService } from './virtual-internship.service';
 import { buildInvoicePdf, buildRewardDocumentPdf } from './virtual-internship.pdf';
 import {
+  AssignVirtualInternshipTaskDto,
   EnrollVirtualInternshipDto,
   ReviewVirtualInternshipTaskDto,
   SubmitVirtualInternshipTaskDto,
@@ -128,6 +129,17 @@ export class VirtualInternshipController {
   @ApiOperation({ summary: 'List virtual internship enrollments (admin)' })
   adminListEnrollments(@Query() query: VirtualInternshipAdminQueryDto) {
     return this.virtualInternship.adminListEnrollments(query);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Post('admin/enrollments/:id/tasks')
+  @ApiOperation({ summary: 'Assign a custom task to a student, beyond the fixed curriculum (admin)' })
+  adminAssignTask(
+    @CurrentUser('sub') adminId: string,
+    @Param('id') id: string,
+    @Body() dto: AssignVirtualInternshipTaskDto,
+  ) {
+    return this.virtualInternship.adminAssignTask(adminId, id, dto);
   }
 
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)

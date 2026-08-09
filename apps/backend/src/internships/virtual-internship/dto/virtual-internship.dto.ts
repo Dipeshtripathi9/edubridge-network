@@ -58,6 +58,18 @@ export class ReviewVirtualInternshipTaskDto {
   reviewNote?: string;
 }
 
+export class AssignVirtualInternshipTaskDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  title!: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  description?: string;
+}
+
 export class VirtualInternshipAdminQueryDto extends PaginationDto {
   @ApiPropertyOptional({ enum: VirtualInternshipTrack })
   @IsOptional()

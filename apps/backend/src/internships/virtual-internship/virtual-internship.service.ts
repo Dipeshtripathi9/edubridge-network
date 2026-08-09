@@ -14,6 +14,7 @@ import { buildPaginatedResult } from '../../common/dto/pagination.dto';
 import { computeVirtualInternshipFee, getVirtualInternshipPricingInfo } from './pricing.constants';
 import { getVirtualInternshipTaskTemplate } from './tasks.constants';
 import {
+  AssignVirtualInternshipTaskDto,
   EnrollVirtualInternshipDto,
   ReviewVirtualInternshipTaskDto,
   SubmitVirtualInternshipTaskDto,
@@ -191,6 +192,49 @@ export class VirtualInternshipService {
 
   // ---------------- Tasks (student) ----------------
 
+  /**
+   * Shared by myTasks (student) and adminListSubmissions (admin) so a task's
+   * displayed content is always sourced consistently: the static template
+   * for curriculum tasks (taskIndex 1-4), or the row's own title/description
+   * for an admin-assigned custom task (taskIndex 5+, template undefined).
+   */
+  private mergeTask(
+    task: {
+      id: string;
+      taskIndex: number;
+      title: string | null;
+      description: string | null;
+      status: EnrollmentTaskStatus;
+      submissionUrl: string | null;
+      submissionNote: string | null;
+      submittedAt: Date | null;
+      reviewNote: string | null;
+      reviewedAt: Date | null;
+    },
+    track: VirtualInternshipTrack,
+    unlocked?: boolean,
+  ) {
+    const template = getVirtualInternshipTaskTemplate(track, task.taskIndex);
+    return {
+      id: task.id,
+      taskIndex: task.taskIndex,
+      title: template?.title ?? task.title ?? `Task ${task.taskIndex}`,
+      objective: template?.objective,
+      deliverables: template?.deliverables,
+      steps: template?.steps,
+      evaluationCriteria: template?.evaluationCriteria,
+      estimatedHours: template?.estimatedHours,
+      description: task.description ?? undefined,
+      status: task.status,
+      submissionUrl: task.submissionUrl,
+      submissionNote: task.submissionNote,
+      submittedAt: task.submittedAt,
+      reviewNote: task.reviewNote,
+      reviewedAt: task.reviewedAt,
+      ...(unlocked !== undefined ? { unlocked } : {}),
+    };
+  }
+
   private async myActiveEnrollment(userId: string) {
     const enrollment = await this.prisma.virtualInternshipEnrollment.findFirst({
       where: { userId, status: EnrollmentStatus.ACTIVE },
@@ -208,18 +252,13 @@ export class VirtualInternshipService {
     });
 
     const approvedCount = tasks.filter((t) => t.status === EnrollmentTaskStatus.APPROVED).length;
-    const merged = tasks.map((task, i) => ({
-      ...getVirtualInternshipTaskTemplate(enrollment.track, task.taskIndex),
-      id: task.id,
-      taskIndex: task.taskIndex,
-      status: task.status,
-      submissionUrl: task.submissionUrl,
-      submissionNote: task.submissionNote,
-      submittedAt: task.submittedAt,
-      reviewNote: task.reviewNote,
-      reviewedAt: task.reviewedAt,
-      unlocked: task.taskIndex === 1 || tasks[i - 1]?.status === EnrollmentTaskStatus.APPROVED,
-    }));
+    const merged = tasks.map((task, i) =>
+      this.mergeTask(
+        task,
+        enrollment.track,
+        task.taskIndex === 1 || tasks[i - 1]?.status === EnrollmentTaskStatus.APPROVED,
+      ),
+    );
 
     return {
       enrollment: { id: enrollment.id, track: enrollment.track, status: enrollment.status },
@@ -282,7 +321,7 @@ export class VirtualInternshipService {
       orderBy: { taskIndex: 'asc' },
     });
     const approvedCount = tasks.filter((t) => t.status === EnrollmentTaskStatus.APPROVED).length;
-    if (tasks.length < TOTAL_TASKS || approvedCount < tasks.length) {
+    if (tasks.length === 0 || approvedCount < tasks.length) {
       throw new ForbiddenException('Finish and get all tasks approved before downloading this document');
     }
 
@@ -357,8 +396,9 @@ export class VirtualInternshipService {
       },
     });
     return tasks.map((task) => ({
-      ...getVirtualInternshipTaskTemplate(task.enrollment.track, task.taskIndex),
-      ...task,
+      ...this.mergeTask(task, task.enrollment.track),
+      enrollmentId: task.enrollmentId,
+      enrollment: task.enrollment,
     }));
   }
 
@@ -390,24 +430,69 @@ export class VirtualInternshipService {
     ]);
 
     const template = getVirtualInternshipTaskTemplate(task.enrollment.track, task.taskIndex);
+    const taskTitle = template?.title ?? task.title ?? 'Task';
     await this.notifications.create({
       recipientId: task.enrollment.userId,
       type: 'INTERNSHIP_TASK_REVIEWED',
-      title: dto.approve ? `Task approved: ${template?.title ?? 'Task'}` : `Task needs changes: ${template?.title ?? 'Task'}`,
+      title: dto.approve ? `Task approved: ${taskTitle}` : `Task needs changes: ${taskTitle}`,
       body: dto.reviewNote,
       data: { enrollmentId: task.enrollmentId, taskId },
     });
 
-    if (dto.approve && task.taskIndex === TOTAL_TASKS) {
-      await this.certificates.issue({
-        sourceType: CertificateSourceType.VIRTUAL_INTERNSHIP,
-        sourceId: task.enrollmentId,
-        recipientId: task.enrollment.userId,
-        recipientName: task.enrollment.user.profile?.fullName ?? 'EduBridge Student',
-        track: task.enrollment.track,
+    // Certificate fires when EVERY task for this enrollment is approved — not
+    // just taskIndex 4 — since an admin can append custom tasks beyond the
+    // fixed curriculum (adminAssignTask), extending what "100% done" means.
+    if (dto.approve) {
+      const allTasks = await this.prisma.virtualInternshipTask.findMany({
+        where: { enrollmentId: task.enrollmentId },
       });
+      const allApproved = allTasks.every((t) => t.status === EnrollmentTaskStatus.APPROVED);
+      if (allApproved) {
+        await this.certificates.issue({
+          sourceType: CertificateSourceType.VIRTUAL_INTERNSHIP,
+          sourceId: task.enrollmentId,
+          recipientId: task.enrollment.userId,
+          recipientName: task.enrollment.user.profile?.fullName ?? 'EduBridge Student',
+          track: task.enrollment.track,
+        });
+      }
     }
 
     return updated;
+  }
+
+  /** Mirrors TrackAService.assignTask — admin appends a custom task beyond the fixed curriculum. */
+  async adminAssignTask(adminId: string, enrollmentId: string, dto: AssignVirtualInternshipTaskDto) {
+    const enrollment = await this.prisma.virtualInternshipEnrollment.findUnique({ where: { id: enrollmentId } });
+    if (!enrollment) throw new NotFoundException('Enrollment not found');
+    if (enrollment.status !== EnrollmentStatus.ACTIVE) {
+      throw new ForbiddenException('Enrollment must be active to assign a task');
+    }
+
+    const existingCount = await this.prisma.virtualInternshipTask.count({ where: { enrollmentId } });
+    const [task] = await this.prisma.$transaction([
+      this.prisma.virtualInternshipTask.create({
+        data: { enrollmentId, taskIndex: existingCount + 1, title: dto.title, description: dto.description },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: adminId,
+          action: 'internship.virtual.assign_task',
+          entity: 'virtual_internship_task',
+          entityId: enrollmentId,
+          metadata: { title: dto.title },
+        },
+      }),
+    ]);
+
+    await this.notifications.create({
+      recipientId: enrollment.userId,
+      type: 'INTERNSHIP_TASK_ASSIGNED',
+      title: 'New task assigned',
+      body: dto.title,
+      data: { enrollmentId, taskId: task.id },
+    });
+
+    return this.mergeTask(task, enrollment.track);
   }
 }

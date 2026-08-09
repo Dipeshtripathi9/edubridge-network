@@ -664,4 +664,134 @@ describe('Internship Program (e2e)', () => {
       expect(stats.body.data.active).toBeGreaterThanOrEqual(1);
     });
   });
+
+  describe('Virtual Internship — admin-assigned custom task', () => {
+    let student: TestUser;
+    let enrollmentId: string;
+    let taskIds: string[] = [];
+    let task5Id: string;
+
+    beforeAll(async () => {
+      student = await registerVerifiedUser(app, { fullName: 'VI Custom Task Student' });
+      const enroll = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(student.token))
+        .send({ track: 'MONTH' })
+        .expect(201);
+      enrollmentId = enroll.body.data.id;
+
+      await prisma.virtualInternshipEnrollment.update({
+        where: { id: enrollmentId },
+        data: { status: 'ACTIVE', paidAt: new Date(), razorpayPaymentId: `test_pay_${enrollmentId}` },
+      });
+      await prisma.virtualInternshipTask.createMany({
+        data: [1, 2, 3, 4].map((taskIndex) => ({ enrollmentId, taskIndex })),
+      });
+
+      const tasksRes = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .set(auth(student.token))
+        .expect(200);
+      taskIds = tasksRes.body.data.tasks.map((t: { id: string }) => t.id);
+    });
+
+    it('403s a non-admin assigning a task', async () => {
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/enrollments/${enrollmentId}/tasks`)
+        .set(auth(student.token))
+        .send({ title: 'Extra polish pass' })
+        .expect(403);
+    });
+
+    it('rejects assigning a task to a PENDING_PAYMENT enrollment', async () => {
+      const other = await registerVerifiedUser(app, { fullName: 'VI Unpaid Student' });
+      const pending = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(other.token))
+        .send({ track: 'WEEK' })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/enrollments/${pending.body.data.id}/tasks`)
+        .set(auth(admin.token))
+        .send({ title: 'Too early' })
+        .expect(403);
+    });
+
+    it('admin assigns a 5th task, appearing as taskIndex 5 with its own title/description', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/enrollments/${enrollmentId}/tasks`)
+        .set(auth(admin.token))
+        .send({ title: 'Extra polish pass', description: 'Add dark mode support to the dashboard.' })
+        .expect(201);
+      expect(res.body.data.taskIndex).toBe(5);
+      expect(res.body.data.title).toBe('Extra polish pass');
+      expect(res.body.data.description).toBe('Add dark mode support to the dashboard.');
+      task5Id = res.body.data.id;
+    });
+
+    it('approving all 4 curriculum tasks does NOT yet issue a certificate — task 5 is still pending', async () => {
+      for (let i = 0; i < taskIds.length; i += 1) {
+        await request(app.getHttpServer())
+          .post(`${API}/internships/virtual/enrollments/me/tasks/${i + 1}/submit`)
+          .set(auth(student.token))
+          .send({ submissionUrl: `https://example.com/month${i + 1}` })
+          .expect(201);
+        await request(app.getHttpServer())
+          .post(`${API}/internships/virtual/admin/submissions/${taskIds[i]}/review`)
+          .set(auth(admin.token))
+          .send({ approve: true })
+          .expect(201);
+      }
+
+      const certs = await request(app.getHttpServer())
+        .get(`${API}/internships/certificates/me`)
+        .set(auth(student.token))
+        .expect(200);
+      const cert = certs.body.data.find((c: { sourceId: string }) => c.sourceId === enrollmentId);
+      expect(cert).toBeFalsy();
+
+      // Reward documents must also still be forbidden — 4/5 tasks approved, not all.
+      await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/documents/letter/download`)
+        .set(auth(student.token))
+        .expect(403);
+    });
+
+    it('task 5 is now unlocked; approving it issues the certificate and unlocks reward documents', async () => {
+      const tasksRes = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .set(auth(student.token))
+        .expect(200);
+      const task5 = tasksRes.body.data.tasks.find((t: { taskIndex: number }) => t.taskIndex === 5);
+      expect(task5.unlocked).toBe(true);
+      expect(task5.description).toBe('Add dark mode support to the dashboard.');
+
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enrollments/me/tasks/5/submit`)
+        .set(auth(student.token))
+        .send({ submissionUrl: 'https://example.com/dark-mode' })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/submissions/${task5Id}/review`)
+        .set(auth(admin.token))
+        .send({ approve: true })
+        .expect(201);
+
+      const certs = await request(app.getHttpServer())
+        .get(`${API}/internships/certificates/me`)
+        .set(auth(student.token))
+        .expect(200);
+      const cert = certs.body.data.find((c: { sourceId: string }) => c.sourceId === enrollmentId);
+      expect(cert).toBeTruthy();
+
+      const invoice = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/documents/report/download`)
+        .set(auth(student.token))
+        .buffer(true)
+        .parse(binaryParser)
+        .expect(200);
+      expect(invoice.body.slice(0, 4).toString('utf8')).toBe('%PDF');
+    });
+  });
 });

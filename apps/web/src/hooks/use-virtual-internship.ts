@@ -35,11 +35,14 @@ export interface VirtualInternshipTaskView {
   reviewedAt?: string | null;
   unlocked: boolean;
   title: string;
-  objective: string;
-  deliverables: string;
-  steps: string[];
-  evaluationCriteria: string;
-  estimatedHours: string;
+  // Curriculum tasks (1-4) have the full static breakdown below; an
+  // admin-assigned custom task (taskIndex 5+) has only `description` instead.
+  objective?: string;
+  deliverables?: string;
+  steps?: string[];
+  evaluationCriteria?: string;
+  estimatedHours?: string;
+  description?: string;
 }
 
 export interface VirtualInternshipTasksResponse {
@@ -174,6 +177,22 @@ export function useAdminReviewVirtualInternshipTask() {
   return useMutation({
     mutationFn: ({ taskId, approve, reviewNote }: { taskId: string; approve: boolean; reviewNote?: string }) =>
       api.post(`/internships/virtual/admin/submissions/${taskId}/review`, { approve, reviewNote }),
+    onSuccess: () => invalidateAdminVirtualInternship(qc),
+  });
+}
+
+export function useAdminAssignVirtualInternshipTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      enrollmentId,
+      title,
+      description,
+    }: {
+      enrollmentId: string;
+      title: string;
+      description?: string;
+    }) => api.post(`/internships/virtual/admin/enrollments/${enrollmentId}/tasks`, { title, description }),
     onSuccess: () => invalidateAdminVirtualInternship(qc),
   });
 }

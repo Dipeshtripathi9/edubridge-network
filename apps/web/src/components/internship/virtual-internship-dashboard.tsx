@@ -72,19 +72,26 @@ function TaskItem({
       </button>
       <div className={cn(styles.taskBody, isOpen && styles.taskBodyOpen)}>
         <div className={styles.taskBodyInner}>
-          <h5>Task objective</h5>
-          <p>{task.objective}</p>
-          <h5>Expected deliverables</h5>
-          <p>{task.deliverables}</p>
-          <h5>Key steps to complete the task</h5>
-          <ol>
-            {task.steps.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
-          <h5>Evaluation criteria</h5>
-          <p>{task.evaluationCriteria}</p>
-          <p className={styles.taskLockedNote}>{task.estimatedHours}</p>
+          {task.description ? (
+            // Admin-assigned custom task — no static breakdown, just the note the admin wrote.
+            <p>{task.description}</p>
+          ) : (
+            <>
+              <h5>Task objective</h5>
+              <p>{task.objective}</p>
+              <h5>Expected deliverables</h5>
+              <p>{task.deliverables}</p>
+              <h5>Key steps to complete the task</h5>
+              <ol>
+                {task.steps?.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+              <h5>Evaluation criteria</h5>
+              <p>{task.evaluationCriteria}</p>
+              <p className={styles.taskLockedNote}>{task.estimatedHours}</p>
+            </>
+          )}
 
           {task.reviewNote && (done || task.status === 'REJECTED') && (
             <p className={styles.taskReviewNote}>Mentor note: {task.reviewNote}</p>
