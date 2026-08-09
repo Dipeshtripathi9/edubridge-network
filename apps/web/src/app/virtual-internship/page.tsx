@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google';
 import {
@@ -36,13 +37,6 @@ import { loadRazorpayScript, type RazorpayFailureResponse } from '@/lib/razorpay
 import { cn } from '@/lib/utils';
 import { TRACKS, money, moneyPrecise, formatInternshipDate, type TrackKey } from '@/lib/virtual-internship-tracks';
 import styles from './page.module.css';
-
-interface VirtualInternshipEnrollment {
-  id: string;
-  status: 'PENDING_PAYMENT' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
-  track: 'WEEK' | 'MONTH';
-  feeAmount: number;
-}
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -142,6 +136,7 @@ function GigsSection() {
 export default function VirtualInternshipPage() {
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const { data: activeEnrollments } = useMyVirtualInternshipEnrollments();
   const [view, setView] = useState<'landing' | 'detail' | 'checkout' | 'dashboard'>('landing');
   const [dashboardEnrollment, setDashboardEnrollment] = useState<ActiveVirtualInternshipEnrollment | null>(null);
@@ -155,6 +150,7 @@ export default function VirtualInternshipPage() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [confirmDates, setConfirmDates] = useState<{ start: string; end: string } | null>(null);
+  const [justJoinedEnrollment, setJustJoinedEnrollment] = useState<ActiveVirtualInternshipEnrollment | null>(null);
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -223,6 +219,13 @@ export default function VirtualInternshipPage() {
   const closePaymentModal = () => {
     setPaymentOpen(false);
     setConfirmDates(null);
+    // Right after joining, drop the student straight into their new track's
+    // dashboard instead of leaving them on the checkout screen or the "My
+    // courses" list — they just paid, they shouldn't need another click.
+    if (justJoinedEnrollment) {
+      showDashboard(justJoinedEnrollment);
+      setJustJoinedEnrollment(null);
+    }
   };
 
   const showConfirmation = () => {
@@ -246,7 +249,7 @@ export default function VirtualInternshipPage() {
 
     setIsProcessingPayment(true);
     try {
-      const enrollment = await api.post<VirtualInternshipEnrollment>('/internships/virtual/enroll', {
+      const enrollment = await api.post<ActiveVirtualInternshipEnrollment>('/internships/virtual/enroll', {
         track: currentTrackKey.toUpperCase(),
         referralApplied,
         donateApplied: donateChecked,
@@ -281,7 +284,11 @@ export default function VirtualInternshipPage() {
         handler: (response) => {
           api
             .post(`/internships/virtual/enrollments/${enrollment.id}/verify-payment`, response)
-            .then(() => showConfirmation())
+            .then(() => {
+              queryClient.invalidateQueries({ queryKey: ['virtual-internship', 'me'] });
+              setJustJoinedEnrollment(enrollment);
+              showConfirmation();
+            })
             .catch((e) => toast.error((e as Error).message));
         },
         modal: {
