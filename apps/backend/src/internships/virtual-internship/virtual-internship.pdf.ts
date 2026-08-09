@@ -12,8 +12,11 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+// PDFKit's standard (non-embedded) fonts have no glyph for ₹ (U+20B9) — it
+// renders as a mangled fallback character. Use the ASCII "Rs." prefix instead
+// of pulling in a custom embedded font just for one symbol.
 function money(amount: number): string {
-  return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `Rs. ${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 /** Purely generative — no image/font file dependencies (same rationale as certificates.pdf.ts). */

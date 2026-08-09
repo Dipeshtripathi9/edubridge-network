@@ -93,7 +93,9 @@ export function buildCertificatePdf(cert: Certificate): PDFKit.PDFDocument {
       .font('Helvetica')
       .fontSize(11)
       .fillColor('#6b7280')
-      .text(`Paid client work — payout ₹${payoutAmount.toLocaleString('en-IN')}.`, { align: 'center' });
+      // PDFKit's standard fonts have no glyph for ₹ (U+20B9) — it renders as a
+      // mangled fallback character. "Rs." avoids needing a custom embedded font.
+      .text(`Paid client work — payout Rs. ${payoutAmount.toLocaleString('en-IN')}.`, { align: 'center' });
   }
 
   doc.moveDown(3);
