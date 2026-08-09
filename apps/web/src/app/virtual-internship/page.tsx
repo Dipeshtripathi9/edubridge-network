@@ -357,18 +357,20 @@ export default function VirtualInternshipPage() {
     try {
       let enrollment: VirtualInternshipEnrollment;
       try {
+        // Idempotent server-side: reuses an existing same-track pending
+        // enrollment as-is, or 409s if the pending one is for the OTHER
+        // track — never silently substitutes the wrong course/amount here.
         enrollment = await api.post<VirtualInternshipEnrollment>('/internships/virtual/enroll', {
           track: currentTrackKey.toUpperCase(),
           referralApplied,
           donateApplied: donateChecked,
         });
       } catch (e) {
-        // Already has a PENDING_PAYMENT enrollment (e.g. a previous attempt) — reuse it.
-        if (e instanceof ApiError && e.status === 400) {
-          enrollment = await api.get<VirtualInternshipEnrollment>('/internships/virtual/enrollments/me');
-        } else {
-          throw e;
+        if (e instanceof ApiError && e.status === 409) {
+          toast.error(e.message);
+          return;
         }
+        throw e;
       }
 
       const [order, scriptReady] = await Promise.all([
