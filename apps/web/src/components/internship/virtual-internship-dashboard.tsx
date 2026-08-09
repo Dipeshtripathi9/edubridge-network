@@ -23,17 +23,19 @@ const TRACK_LABEL: Record<'WEEK' | 'MONTH', string> = {
 };
 
 function TaskItem({
+  enrollmentId,
   task,
   isOpen,
   onToggle,
 }: {
+  enrollmentId: string;
   task: VirtualInternshipTaskView;
   isOpen: boolean;
   onToggle: () => void;
 }) {
   const [url, setUrl] = useState(task.submissionUrl ?? '');
   const [note, setNote] = useState('');
-  const submit = useSubmitVirtualInternshipTask();
+  const submit = useSubmitVirtualInternshipTask(enrollmentId);
 
   const done = task.status === 'APPROVED';
   const underReview = task.status === 'SUBMITTED';
@@ -217,7 +219,7 @@ function RewardButton({
 export function EnrolledDashboard({ enrollment }: { enrollment: VirtualInternshipEnrollment }) {
   const token = useAuthStore((s) => s.accessToken);
   const user = useAuthStore((s) => s.user);
-  const { data, isLoading } = useMyVirtualInternshipTasks();
+  const { data, isLoading } = useMyVirtualInternshipTasks(enrollment.id);
   const { data: certificates } = useMyCertificates();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -300,6 +302,7 @@ export function EnrolledDashboard({ enrollment }: { enrollment: VirtualInternshi
               {group.tasks.map((task) => (
                 <TaskItem
                   key={task.id}
+                  enrollmentId={enrollment.id}
                   task={task}
                   isOpen={openIndex === task.taskIndex || (openIndex === null && task.taskIndex === currentTaskIndex)}
                   onToggle={() => setOpenIndex(openIndex === task.taskIndex ? null : task.taskIndex)}

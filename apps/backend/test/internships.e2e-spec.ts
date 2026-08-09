@@ -444,6 +444,61 @@ describe('Internship Program (e2e)', () => {
       expect(mine.body.data.status).toBe('ACTIVE');
     });
 
+    it('enrollments/me/active returns both tracks when a student holds two concurrent ACTIVE enrollments', async () => {
+      const student = await registerVerifiedUser(app, { fullName: 'VI Both Tracks Student' });
+
+      const week = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(student.token))
+        .send({ track: 'WEEK' })
+        .expect(201);
+      const month = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(student.token))
+        .send({ track: 'MONTH' })
+        .expect(201);
+      await prisma.virtualInternshipEnrollment.update({
+        where: { id: week.body.data.id },
+        data: { status: 'ACTIVE', paidAt: new Date(), razorpayPaymentId: `test_pay_${week.body.data.id}` },
+      });
+      await prisma.virtualInternshipEnrollment.update({
+        where: { id: month.body.data.id },
+        data: { status: 'ACTIVE', paidAt: new Date(), razorpayPaymentId: `test_pay_${month.body.data.id}` },
+      });
+
+      const active = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/active`)
+        .set(auth(student.token))
+        .expect(200);
+      const ids = active.body.data.map((e: { id: string }) => e.id);
+      expect(ids).toContain(week.body.data.id);
+      expect(ids).toContain(month.body.data.id);
+      expect(active.body.data.every((e: { status: string }) => e.status === 'ACTIVE')).toBe(true);
+    });
+
+    it("403s a student fetching another student's enrollment tasks", async () => {
+      const owner = await registerVerifiedUser(app, { fullName: 'VI Owner Student' });
+      const intruder = await registerVerifiedUser(app, { fullName: 'VI Intruder Student' });
+      const enroll = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(owner.token))
+        .send({ track: 'WEEK' })
+        .expect(201);
+      await prisma.virtualInternshipEnrollment.update({
+        where: { id: enroll.body.data.id },
+        data: { status: 'ACTIVE', paidAt: new Date(), razorpayPaymentId: `test_pay_${enroll.body.data.id}` },
+      });
+
+      await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/${enroll.body.data.id}/tasks`)
+        .set(auth(intruder.token))
+        .expect(403);
+      await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/${enroll.body.data.id}/invoice`)
+        .set(auth(intruder.token))
+        .expect(403);
+    });
+
     it('admin backfill creates tasks for an ACTIVE enrollment with none, and is idempotent', async () => {
       const student = await registerVerifiedUser(app, { fullName: 'VI Backfill Student' });
       const enroll = await request(app.getHttpServer())
@@ -459,8 +514,9 @@ describe('Internship Program (e2e)', () => {
         data: { status: 'ACTIVE', paidAt: new Date() },
       });
 
+      const enrollmentId = enroll.body.data.id;
       const before = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks`)
         .set(auth(student.token))
         .expect(200);
       expect(before.body.data.tasks).toHaveLength(0);
@@ -470,10 +526,10 @@ describe('Internship Program (e2e)', () => {
         .set(auth(admin.token))
         .send({})
         .expect(201);
-      expect(backfill.body.data.backfilledEnrollmentIds).toContain(enroll.body.data.id);
+      expect(backfill.body.data.backfilledEnrollmentIds).toContain(enrollmentId);
 
       const after = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks`)
         .set(auth(student.token))
         .expect(200);
       expect(after.body.data.tasks).toHaveLength(4);
@@ -484,10 +540,10 @@ describe('Internship Program (e2e)', () => {
         .set(auth(admin.token))
         .send({})
         .expect(201);
-      expect(again.body.data.backfilledEnrollmentIds).not.toContain(enroll.body.data.id);
+      expect(again.body.data.backfilledEnrollmentIds).not.toContain(enrollmentId);
 
       const stillFour = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks`)
         .set(auth(student.token))
         .expect(200);
       expect(stillFour.body.data.tasks).toHaveLength(4);
@@ -531,7 +587,7 @@ describe('Internship Program (e2e)', () => {
 
     it('lists 4 tasks, only the first unlocked', async () => {
       const res = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks`)
         .set(auth(student.token))
         .expect(200);
       expect(res.body.data.progress).toBe(0);
@@ -543,7 +599,7 @@ describe('Internship Program (e2e)', () => {
 
     it('rejects submitting a still-locked task', async () => {
       await request(app.getHttpServer())
-        .post(`${API}/internships/virtual/enrollments/me/tasks/2/submit`)
+        .post(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks/2/submit`)
         .set(auth(student.token))
         .send({ submissionUrl: 'https://example.com/too-early' })
         .expect(403);
@@ -558,7 +614,7 @@ describe('Internship Program (e2e)', () => {
 
     it('student submits task 1, it appears in the admin review queue, admin approves it', async () => {
       await request(app.getHttpServer())
-        .post(`${API}/internships/virtual/enrollments/me/tasks/1/submit`)
+        .post(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks/1/submit`)
         .set(auth(student.token))
         .send({ submissionUrl: 'https://example.com/week1' })
         .expect(201);
@@ -581,7 +637,7 @@ describe('Internship Program (e2e)', () => {
 
     it('task 2 unlocks after task 1 is approved; progress reflects one of four', async () => {
       const res = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks`)
         .set(auth(student.token))
         .expect(200);
       expect(res.body.data.progress).toBe(0.25);
@@ -590,7 +646,7 @@ describe('Internship Program (e2e)', () => {
 
     it('reward documents are forbidden before all tasks are approved', async () => {
       await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/documents/letter/download`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/documents/letter/download`)
         .set(auth(student.token))
         .expect(403);
     });
@@ -598,7 +654,7 @@ describe('Internship Program (e2e)', () => {
     it('submits and approves tasks 2-4, issuing a certificate on the 4th approval', async () => {
       for (let i = 1; i < taskIds.length; i += 1) {
         await request(app.getHttpServer())
-          .post(`${API}/internships/virtual/enrollments/me/tasks/${i + 1}/submit`)
+          .post(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks/${i + 1}/submit`)
           .set(auth(student.token))
           .send({ submissionUrl: `https://example.com/week${i + 1}` })
           .expect(201);
@@ -619,13 +675,13 @@ describe('Internship Program (e2e)', () => {
 
     it('progress is 100% and the invoice + reward documents download as real PDFs', async () => {
       const tasksRes = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks`)
         .set(auth(student.token))
         .expect(200);
       expect(tasksRes.body.data.progress).toBe(1);
 
       const invoice = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/invoice`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/invoice`)
         .set(auth(student.token))
         .buffer(true)
         .parse(binaryParser)
@@ -634,7 +690,7 @@ describe('Internship Program (e2e)', () => {
       expect(invoice.body.slice(0, 4).toString('utf8')).toBe('%PDF');
 
       const letter = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/documents/letter/download`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/documents/letter/download`)
         .set(auth(student.token))
         .buffer(true)
         .parse(binaryParser)
@@ -642,7 +698,7 @@ describe('Internship Program (e2e)', () => {
       expect(letter.body.slice(0, 4).toString('utf8')).toBe('%PDF');
 
       const report = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/documents/report/download`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/documents/report/download`)
         .set(auth(student.token))
         .buffer(true)
         .parse(binaryParser)
@@ -685,7 +741,7 @@ describe('Internship Program (e2e)', () => {
         .expect(201);
 
       const tasksRes = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .get(`${API}/internships/virtual/enrollments/${enroll.body.data.id}/tasks`)
         .set(auth(student.token))
         .expect(200);
       expect(tasksRes.body.data.tasks).toHaveLength(4);
@@ -712,7 +768,7 @@ describe('Internship Program (e2e)', () => {
         .expect(201);
 
       const tasksRes = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .get(`${API}/internships/virtual/enrollments/${enroll.body.data.id}/tasks`)
         .set(auth(student.token))
         .expect(200);
       expect(tasksRes.body.data.tasks).toHaveLength(16);
@@ -753,7 +809,7 @@ describe('Internship Program (e2e)', () => {
       });
 
       const tasksRes = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks`)
         .set(auth(student.token))
         .expect(200);
       taskIds = tasksRes.body.data.tasks.map((t: { id: string }) => t.id);
@@ -797,7 +853,7 @@ describe('Internship Program (e2e)', () => {
     it('approving all 4 curriculum tasks does NOT yet issue a certificate — task 5 is still pending', async () => {
       for (let i = 0; i < taskIds.length; i += 1) {
         await request(app.getHttpServer())
-          .post(`${API}/internships/virtual/enrollments/me/tasks/${i + 1}/submit`)
+          .post(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks/${i + 1}/submit`)
           .set(auth(student.token))
           .send({ submissionUrl: `https://example.com/month${i + 1}` })
           .expect(201);
@@ -817,14 +873,14 @@ describe('Internship Program (e2e)', () => {
 
       // Reward documents must also still be forbidden — 4/5 tasks approved, not all.
       await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/documents/letter/download`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/documents/letter/download`)
         .set(auth(student.token))
         .expect(403);
     });
 
     it('task 5 is now unlocked; approving it issues the certificate and unlocks reward documents', async () => {
       const tasksRes = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks`)
         .set(auth(student.token))
         .expect(200);
       const task5 = tasksRes.body.data.tasks.find((t: { taskIndex: number }) => t.taskIndex === 5);
@@ -832,7 +888,7 @@ describe('Internship Program (e2e)', () => {
       expect(task5.description).toBe('Add dark mode support to the dashboard.');
 
       await request(app.getHttpServer())
-        .post(`${API}/internships/virtual/enrollments/me/tasks/5/submit`)
+        .post(`${API}/internships/virtual/enrollments/${enrollmentId}/tasks/5/submit`)
         .set(auth(student.token))
         .send({ submissionUrl: 'https://example.com/dark-mode' })
         .expect(201);
@@ -850,7 +906,7 @@ describe('Internship Program (e2e)', () => {
       expect(cert).toBeTruthy();
 
       const invoice = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me/documents/report/download`)
+        .get(`${API}/internships/virtual/enrollments/${enrollmentId}/documents/report/download`)
         .set(auth(student.token))
         .buffer(true)
         .parse(binaryParser)

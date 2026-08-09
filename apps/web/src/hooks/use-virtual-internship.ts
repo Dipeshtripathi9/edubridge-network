@@ -76,22 +76,32 @@ export function useMyVirtualInternshipEnrollment() {
   });
 }
 
-/** My task list merged with submission/review state — only meaningful once ACTIVE. */
-export function useMyVirtualInternshipTasks() {
+/** Every ACTIVE enrollment I hold — at most one per track — `GET /internships/virtual/enrollments/me/active`. */
+export function useMyVirtualInternshipEnrollments() {
   const token = useAuthStore((s) => s.accessToken);
   return useQuery({
-    queryKey: ['virtual-internship', 'me', 'tasks'],
-    queryFn: () => api.get<VirtualInternshipTasksResponse>('/internships/virtual/enrollments/me/tasks'),
+    queryKey: ['virtual-internship', 'me', 'active'],
+    queryFn: () => api.get<VirtualInternshipEnrollment[]>('/internships/virtual/enrollments/me/active'),
     enabled: !!token,
   });
 }
 
-export function useSubmitVirtualInternshipTask() {
+/** This enrollment's task list merged with submission/review state — only meaningful once ACTIVE. */
+export function useMyVirtualInternshipTasks(enrollmentId: string) {
+  const token = useAuthStore((s) => s.accessToken);
+  return useQuery({
+    queryKey: ['virtual-internship', enrollmentId, 'tasks'],
+    queryFn: () => api.get<VirtualInternshipTasksResponse>(`/internships/virtual/enrollments/${enrollmentId}/tasks`),
+    enabled: !!token && !!enrollmentId,
+  });
+}
+
+export function useSubmitVirtualInternshipTask(enrollmentId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ taskIndex, submissionUrl, note }: { taskIndex: number; submissionUrl: string; note?: string }) =>
-      api.post(`/internships/virtual/enrollments/me/tasks/${taskIndex}/submit`, { submissionUrl, note }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['virtual-internship', 'me', 'tasks'] }),
+      api.post(`/internships/virtual/enrollments/${enrollmentId}/tasks/${taskIndex}/submit`, { submissionUrl, note }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['virtual-internship', enrollmentId, 'tasks'] }),
   });
 }
 
@@ -116,7 +126,7 @@ async function downloadBlob(path: string, filename: string, token: string | null
 }
 
 export function downloadVirtualInvoice(enrollmentId: string, token: string | null) {
-  return downloadBlob('/internships/virtual/enrollments/me/invoice', `invoice-${enrollmentId}.pdf`, token);
+  return downloadBlob(`/internships/virtual/enrollments/${enrollmentId}/invoice`, `invoice-${enrollmentId}.pdf`, token);
 }
 
 export function downloadVirtualRewardDocument(
@@ -125,7 +135,7 @@ export function downloadVirtualRewardDocument(
   token: string | null,
 ) {
   return downloadBlob(
-    `/internships/virtual/enrollments/me/documents/${type}/download`,
+    `/internships/virtual/enrollments/${enrollmentId}/documents/${type}/download`,
     `${type}-${enrollmentId}.pdf`,
     token,
   );

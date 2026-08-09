@@ -101,6 +101,213 @@
   }
 }
 
+/* MY COURSES — replaces the hero once the student owns at least one track */
+.myCourses {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 48px 56px 20px;
+}
+.myCoursesHead {
+  margin-bottom: 22px;
+}
+.myCoursesHead h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--forest-deep);
+  margin-bottom: 6px;
+}
+.myCoursesHead p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.courseGrid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+}
+.courseCard {
+  background: var(--forest-card);
+  border-radius: 24px;
+  padding: 26px 26px 24px;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  box-shadow: var(--shadow-lg);
+}
+.badgeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 6px 13px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badgeLive {
+  background: var(--forest-card-2);
+  color: var(--mint);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.badgeLive::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mint);
+}
+.badgeGhost {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.74);
+  letter-spacing: 0.03em;
+  text-transform: none;
+  font-size: 11.5px;
+  padding: 5px 12px;
+}
+.courseCard h2 {
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+.courseDesc {
+  margin: 0 0 18px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.74);
+}
+.courseIncludes {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.courseIncludes li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.74);
+}
+.courseIncludes svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--mint);
+}
+.progBlock {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 18px;
+  margin-top: auto;
+}
+.progTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+.progTop span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
+}
+.progTop b {
+  font-family: var(--font-fraunces), serif;
+  font-size: 19px;
+  font-weight: 700;
+}
+.progBar {
+  height: 8px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+.progFill {
+  height: 100%;
+  border-radius: 100px;
+  background: var(--mint);
+}
+.progStep {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.74);
+}
+.courseMeta {
+  margin: 16px 0 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.52);
+}
+.btnRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+.btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 14px 18px;
+  border-radius: 100px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: background 0.13s ease, border-color 0.13s ease, transform 0.13s ease;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 3px;
+}
+.btnPrimary {
+  background: var(--amber);
+  color: #1b3a2c;
+}
+.btnPrimary:hover {
+  background: #f0b562;
+}
+.btnGhost {
+  flex: 0 0 auto;
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #fff;
+  padding: 14px 20px;
+}
+.btnGhost:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+@media (max-width: 520px) {
+  .myCourses {
+    padding: 28px 20px 10px;
+  }
+  .courseCard {
+    padding: 22px 20px;
+  }
+  .btnRow {
+    flex-direction: column;
+  }
+  .btnGhost {
+    flex: 1 1 auto;
+  }
+}
+
 /* STICKY BAR */
 .stickyBar {
   position: fixed;
