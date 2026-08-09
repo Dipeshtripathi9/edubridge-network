@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth.store';
 import { useMe } from '@/hooks/use-profile';
 import { useCreateBlogPost, type BlogCategory } from '@/hooks/use-blog';
+import { useAuthLinks } from '@/hooks/use-auth-links';
 import { CATEGORY_META } from '../category-meta';
 import styles from '../blog.module.css';
 
@@ -19,6 +20,7 @@ export default function WriteBlogPage() {
   const [category, setCategory] = useState<BlogCategory>('CAREER');
   const [submitted, setSubmitted] = useState(false);
   const create = useCreateBlogPost();
+  const { loginHref, signupHref } = useAuthLinks();
 
   const words = useMemo(() => body.trim().split(/\s+/).filter(Boolean).length, [body]);
   const minutes = Math.max(1, Math.ceil(words / 200));
@@ -30,10 +32,10 @@ export default function WriteBlogPage() {
           <b>Sign in to write a blog</b>
           <p>Only ID-verified students can publish on the EduBridge blog.</p>
           <div className={styles.gateActions}>
-            <Link href="/login" className={styles.btnGhost}>
+            <Link href={loginHref} className={styles.btnGhost}>
               Sign in
             </Link>
-            <Link href="/signup" className={styles.btn}>
+            <Link href={signupHref} className={styles.btn}>
               Sign up
             </Link>
           </div>

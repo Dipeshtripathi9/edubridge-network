@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { disconnectSocket } from '@/lib/socket';
+import { sanitizeRedirect } from '@/lib/safe-redirect';
 import { useAuthStore, type AuthUser } from '@/stores/auth.store';
 
 interface AuthResult {
@@ -15,11 +16,13 @@ export function useLogin() {
   const setSession = useAuthStore((s) => s.setSession);
   const router = useRouter();
   return useMutation({
-    mutationFn: (input: { email: string; password: string; rememberMe?: boolean }) =>
+    // `redirectTo` never reaches the backend — LoginDto doesn't (and shouldn't)
+    // know about it; it's only consumed client-side in onSuccess below.
+    mutationFn: ({ redirectTo, ...input }: { email: string; password: string; rememberMe?: boolean; redirectTo?: string }) =>
       api.post<AuthResult>('/auth/login', input, { auth: false }),
-    onSuccess: (res) => {
+    onSuccess: (res, variables) => {
       setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
-      router.push('/home');
+      router.push(sanitizeRedirect(variables.redirectTo, '/home'));
     },
   });
 }
@@ -33,6 +36,7 @@ export function useSignup() {
       gender?: string;
       googleIdToken?: string;
       intent?: 'COLLEGE_ADMISSIONS' | 'INTERNSHIPS_JOBS';
+      redirect?: string;
     }) =>
       api.post<{
         user: AuthUser;
@@ -55,7 +59,7 @@ export function useVerifyEmail() {
     // straight into the app, never back to a manual login screen.
     onSuccess: (res, variables) => {
       setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
-      router.push(variables.redirectTo ?? '/home');
+      router.push(sanitizeRedirect(variables.redirectTo, '/home'));
     },
   });
 }
@@ -71,11 +75,11 @@ export function useGoogleAuth() {
   const setSession = useAuthStore((s) => s.setSession);
   const router = useRouter();
   return useMutation({
-    mutationFn: (idToken: string) =>
+    mutationFn: ({ idToken }: { idToken: string; redirectTo?: string }) =>
       api.post<AuthResult>('/auth/google', { idToken }, { auth: false }),
-    onSuccess: (res) => {
+    onSuccess: (res, variables) => {
       setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
-      router.push('/home');
+      router.push(sanitizeRedirect(variables.redirectTo, '/home'));
     },
   });
 }

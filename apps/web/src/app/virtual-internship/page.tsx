@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google';
 import {
@@ -261,6 +261,7 @@ function GigsSection() {
 
 export default function VirtualInternshipPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: myEnrollment } = useMyVirtualInternshipEnrollment();
   const [view, setView] = useState<'landing' | 'detail' | 'checkout'>('landing');
   const [currentTrackKey, setCurrentTrackKey] = useState<TrackKey>('month');
@@ -352,7 +353,7 @@ export default function VirtualInternshipPage() {
   const startPayment = async () => {
     if (!useAuthStore.getState().accessToken) {
       toast.error('Sign in to enroll');
-      router.push('/login');
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
 

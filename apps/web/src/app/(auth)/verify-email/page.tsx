@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useResendVerification, useVerifyEmail } from '@/hooks/use-auth';
+import { sanitizeRedirect } from '@/lib/safe-redirect';
 
 function VerifyByToken({ token, redirectTo }: { token: string; redirectTo?: string }) {
   const verify = useVerifyEmail();
@@ -109,7 +110,11 @@ function VerifyEmailInner() {
   const token = params.get('token');
   const email = params.get('email') ?? '';
   const intent = params.get('intent');
-  const redirectTo = intent === 'college' ? '/profile' : intent === 'jobs' ? '/onboarding/jobs' : undefined;
+  const redirect = params.get('redirect');
+  const redirectTo = sanitizeRedirect(
+    redirect,
+    intent === 'college' ? '/profile' : intent === 'jobs' ? '/onboarding/jobs' : '/home',
+  );
   return token ? <VerifyByToken token={token} redirectTo={redirectTo} /> : <CheckInbox email={email} />;
 }
 

@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useAuthStore } from '@/stores/auth.store';
 import { useSubmitComplaint } from '@/hooks/use-complaints';
+import { useAuthLinks } from '@/hooks/use-auth-links';
 
 export default function AskPage() {
   const loggedIn = useAuthStore((s) => !!s.accessToken);
@@ -17,6 +18,7 @@ export default function AskPage() {
   const [question, setQuestion] = useState('');
   const [sent, setSent] = useState(false);
   const submit = useSubmitComplaint();
+  const { loginHref, signupHref } = useAuthLinks();
 
   if (!loggedIn) {
     return (
@@ -25,8 +27,8 @@ export default function AskPage() {
           <b className="block font-display text-lg">Sign in to ask a verified student</b>
           <p className="mt-1 text-muted-foreground">Your question goes straight to our team — no brochures, no spam.</p>
           <div className="mt-5 flex justify-center gap-3">
-            <Button asChild variant="outline"><Link href="/login">Sign in</Link></Button>
-            <Button asChild><Link href="/signup">Sign up</Link></Button>
+            <Button asChild variant="outline"><Link href={loginHref}>Sign in</Link></Button>
+            <Button asChild><Link href={signupHref}>Sign up</Link></Button>
           </div>
         </div>
       </div>

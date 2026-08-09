@@ -11,11 +11,13 @@ import { TaskList, deriveTrackAStages } from '@/components/internship/task-list'
 import { StageTracker } from '@/components/internship/stage-tracker';
 import { useMyTrackAEnrollment } from '@/hooks/use-internships';
 import { useAuthStore } from '@/stores/auth.store';
+import { useAuthLinks } from '@/hooks/use-auth-links';
 
 export default function EnrollTrackAPage() {
   const router = useRouter();
   const loggedIn = useAuthStore((s) => !!s.accessToken);
   const { data: enrollment, isLoading } = useMyTrackAEnrollment();
+  const { loginHref, signupHref } = useAuthLinks();
 
   if (!loggedIn) {
     return (
@@ -25,10 +27,10 @@ export default function EnrollTrackAPage() {
           <p className="mt-1 text-muted-foreground">Learn with a mentor, or have your idea built — sign in first.</p>
           <div className="mt-5 flex justify-center gap-3">
             <Button asChild variant="outline">
-              <Link href="/login">Sign in</Link>
+              <Link href={loginHref}>Sign in</Link>
             </Button>
             <Button asChild>
-              <Link href="/signup">Sign up</Link>
+              <Link href={signupHref}>Sign up</Link>
             </Button>
           </div>
         </div>

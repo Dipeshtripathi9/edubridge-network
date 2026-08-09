@@ -107,7 +107,7 @@ export class AuthService {
       user: this.sanitize(user),
       autoVerified: false,
       message: 'Verification email sent',
-      ...this.devVerifyLink(token),
+      ...this.devVerifyLink(token, dto.intent, this.sanitizeRedirectPath(dto.redirect)),
     };
   }
 
@@ -121,11 +121,23 @@ export class AuthService {
     return { message: 'If that account needs verification, a link has been sent.' };
   }
 
+  // Query-param values are attacker-influenceable — only ever embed an
+  // internal relative path in a generated link, never an absolute URL.
+  private sanitizeRedirectPath(raw?: string): string | undefined {
+    if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw.startsWith('/\\') || raw.includes('://')) {
+      return undefined;
+    }
+    return raw;
+  }
+
   // In non-production (no SMTP) return the link so the flow stays testable.
-  private devVerifyLink(token: string): { devLink?: string } {
+  private devVerifyLink(token: string, intent?: string, redirect?: string): { devLink?: string } {
     if (process.env.NODE_ENV === 'production') return {};
     const webUrl = this.config.get<string>('appUrl') ?? 'http://localhost:3000';
-    return { devLink: `${webUrl}/verify-email?token=${token}` };
+    let link = `${webUrl}/verify-email?token=${token}`;
+    if (intent) link += `&intent=${encodeURIComponent(intent)}`;
+    if (redirect) link += `&redirect=${encodeURIComponent(redirect)}`;
+    return { devLink: link };
   }
 
   private async issueEmailVerification(userId: string): Promise<string> {
