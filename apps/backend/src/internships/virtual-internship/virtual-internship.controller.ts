@@ -145,6 +145,13 @@ export class VirtualInternshipController {
   }
 
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Post('admin/backfill-missing-tasks')
+  @ApiOperation({ summary: 'Create task rows for any ACTIVE enrollment that has none (admin, idempotent)' })
+  adminBackfillMissingTasks() {
+    return this.virtualInternship.adminBackfillMissingTasks();
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @Post('admin/submissions/:taskId/review')
   @ApiOperation({ summary: 'Approve or request changes on a task submission (admin)' })
   adminReviewTask(

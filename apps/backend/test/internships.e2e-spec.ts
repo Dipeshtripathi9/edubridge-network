@@ -443,6 +443,64 @@ describe('Internship Program (e2e)', () => {
       expect(mine.body.data.track).toBe('WEEK');
       expect(mine.body.data.status).toBe('ACTIVE');
     });
+
+    it('admin backfill creates tasks for an ACTIVE enrollment with none, and is idempotent', async () => {
+      const student = await registerVerifiedUser(app, { fullName: 'VI Backfill Student' });
+      const enroll = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(student.token))
+        .send({ track: 'WEEK' })
+        .expect(201);
+
+      // Simulate an enrollment that was activated before task auto-creation
+      // existed: ACTIVE, but zero task rows.
+      await prisma.virtualInternshipEnrollment.update({
+        where: { id: enroll.body.data.id },
+        data: { status: 'ACTIVE', paidAt: new Date() },
+      });
+
+      const before = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .set(auth(student.token))
+        .expect(200);
+      expect(before.body.data.tasks).toHaveLength(0);
+
+      const backfill = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/backfill-missing-tasks`)
+        .set(auth(admin.token))
+        .send({})
+        .expect(201);
+      expect(backfill.body.data.backfilledEnrollmentIds).toContain(enroll.body.data.id);
+
+      const after = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .set(auth(student.token))
+        .expect(200);
+      expect(after.body.data.tasks).toHaveLength(4);
+
+      // Re-running must not duplicate tasks or error.
+      const again = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/backfill-missing-tasks`)
+        .set(auth(admin.token))
+        .send({})
+        .expect(201);
+      expect(again.body.data.backfilledEnrollmentIds).not.toContain(enroll.body.data.id);
+
+      const stillFour = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .set(auth(student.token))
+        .expect(200);
+      expect(stillFour.body.data.tasks).toHaveLength(4);
+    });
+
+    it('403s a non-admin hitting the backfill endpoint', async () => {
+      const student = await registerVerifiedUser(app, { fullName: 'VI Backfill RBAC Student' });
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/backfill-missing-tasks`)
+        .set(auth(student.token))
+        .send({})
+        .expect(403);
+    });
   });
 
   describe('Virtual Internship — tasks, review, certificate, invoice (admin RBAC)', () => {

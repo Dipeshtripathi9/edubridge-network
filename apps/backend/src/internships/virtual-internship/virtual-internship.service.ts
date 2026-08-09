@@ -326,6 +326,26 @@ export class VirtualInternshipService {
     return { active, pendingPayment, byTrack: { WEEK: week, MONTH: month }, submissionsPendingReview };
   }
 
+  /**
+   * Idempotent, safe to re-run: creates the 4 task rows for any ACTIVE
+   * enrollment that has none. Covers enrollments activated before task
+   * auto-creation existed (activatePaidEnrollment only creates tasks at the
+   * moment of activation — it can't retroactively backfill enrollments that
+   * were already ACTIVE when that code shipped).
+   */
+  async adminBackfillMissingTasks() {
+    const enrollments = await this.prisma.virtualInternshipEnrollment.findMany({
+      where: { status: EnrollmentStatus.ACTIVE, tasks: { none: {} } },
+    });
+    for (const enrollment of enrollments) {
+      await this.prisma.virtualInternshipTask.createMany({
+        data: Array.from({ length: TOTAL_TASKS }, (_, i) => ({ enrollmentId: enrollment.id, taskIndex: i + 1 })),
+        skipDuplicates: true,
+      });
+    }
+    return { backfilledEnrollmentIds: enrollments.map((e) => e.id) };
+  }
+
   async adminListSubmissions(status?: EnrollmentTaskStatus) {
     const tasks = await this.prisma.virtualInternshipTask.findMany({
       where: { status: status ?? EnrollmentTaskStatus.SUBMITTED },
