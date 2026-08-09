@@ -24,7 +24,7 @@ import {
 import { AccountMenu } from '@/components/account-menu';
 import { OpportunityRecommendationCard } from '@/components/opportunity-recommendation-card';
 import { useInternshipListings } from '@/hooks/use-internship-listings';
-import { api, ApiError } from '@/lib/api';
+import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
 import { loadRazorpayScript, type RazorpayFailureResponse } from '@/lib/razorpay';
 import { cn } from '@/lib/utils';
@@ -355,23 +355,11 @@ export default function VirtualInternshipPage() {
 
     setIsProcessingPayment(true);
     try {
-      let enrollment: VirtualInternshipEnrollment;
-      try {
-        // Idempotent server-side: reuses an existing same-track pending
-        // enrollment as-is, or 409s if the pending one is for the OTHER
-        // track — never silently substitutes the wrong course/amount here.
-        enrollment = await api.post<VirtualInternshipEnrollment>('/internships/virtual/enroll', {
-          track: currentTrackKey.toUpperCase(),
-          referralApplied,
-          donateApplied: donateChecked,
-        });
-      } catch (e) {
-        if (e instanceof ApiError && e.status === 409) {
-          toast.error(e.message);
-          return;
-        }
-        throw e;
-      }
+      const enrollment = await api.post<VirtualInternshipEnrollment>('/internships/virtual/enroll', {
+        track: currentTrackKey.toUpperCase(),
+        referralApplied,
+        donateApplied: donateChecked,
+      });
 
       const [order, scriptReady] = await Promise.all([
         api.post<{ orderId: string; amount: number; currency: string; keyId: string }>(

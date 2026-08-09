@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { EnrollmentStatus, VirtualInternshipEnrollment } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/notifications.service';
@@ -28,19 +22,10 @@ export class VirtualInternshipService {
 
   async enroll(userId: string, dto: EnrollVirtualInternshipDto) {
     const existing = await this.prisma.virtualInternshipEnrollment.findFirst({
-      where: { userId, status: { in: ACTIVE_STATUSES } },
+      where: { userId, track: dto.track, status: { in: ACTIVE_STATUSES } },
     });
     if (existing) {
-      // Same track already in progress — reuse it as-is. Never recompute a
-      // locked fee, and never let a different track's enrollment (wrong
-      // course, wrong amount) get reused for this checkout.
-      if (existing.track === dto.track) {
-        return this.serialize(existing);
-      }
-      const trackLabel = existing.track === 'WEEK' ? '4-week' : '4-month';
-      throw new ConflictException(
-        `You already have a pending enrollment for the ${trackLabel} track. Complete or cancel it before starting a new one.`,
-      );
+      return this.serialize(existing);
     }
     const donateApplied = dto.donateApplied ?? false;
     const enrollment = await this.prisma.virtualInternshipEnrollment.create({
