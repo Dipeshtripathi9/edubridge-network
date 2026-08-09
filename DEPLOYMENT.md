@@ -1,5 +1,10 @@
 # EduBridge Network — Deployment Guide (Railway + Vercel)
 
+> ⚠️ **This is NOT how production currently runs.** The live site uses **Render**
+> for the backend (not Railway), plus **Neon** (Postgres) and **Upstash** (Redis) —
+> see **[`PRODUCTION.md`](./PRODUCTION.md)** for the real, current setup and how to
+> deploy a change. This file is a Railway-based walkthrough that was superseded.
+
 Follow this top-to-bottom to go live. **Backend + Postgres + Redis → Railway**
 (one project), **frontend → Vercel**, **media → Cloudflare R2**, **email → Amazon SES**.
 

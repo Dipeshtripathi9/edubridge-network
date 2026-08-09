@@ -1,5 +1,13 @@
 # Deploy EduBridge Network on Oracle Cloud (Always Free) + GoDaddy domain
 
+> ⚠️ **This is NOT how production currently runs.** `edubridgenetwork.in` is live on
+> **Vercel** (frontend) + **Render** (backend) + **Neon** (Postgres) + **Upstash**
+> (Redis) — see **[`PRODUCTION.md`](../PRODUCTION.md)** at the repo root for the real,
+> current setup, DNS records, and how to deploy a change (`git push` to `main` —
+> both services auto-deploy). This file documents an *alternative*, self-hosted
+> single-VPS path that was never put into production. Don't SSH into any Oracle
+> Cloud server expecting to find the live site here — there isn't one wired up.
+
 One small server runs everything with Docker: Postgres, Redis, the NestJS API
 (with WebSockets), the Next.js frontend, and Caddy (automatic HTTPS). Cost: **$0**
 on Oracle's Always-Free tier.

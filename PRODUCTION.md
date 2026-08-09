@@ -3,8 +3,10 @@
 Live, card-free, **$0/month** deployment. This documents exactly how production is
 wired, how to operate it, and how to recover it.
 
-> Companion docs: `DEPLOYMENT.md` (managed-services walkthrough), `infra/DEPLOY.md`
-> (alternative single-VPS/Docker path), `ARCHITECTURE.md`.
+> Companion docs: `ARCHITECTURE.md`. **`DEPLOYMENT.md` (Railway walkthrough) and
+> `infra/DEPLOY.md` (Oracle Cloud/Docker walkthrough) are superseded/unused — they
+> describe hosting paths that were never put into production. This file (PRODUCTION.md)
+> is the only accurate description of the live setup.**
 
 ---
 
