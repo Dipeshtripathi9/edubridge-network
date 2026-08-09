@@ -389,7 +389,12 @@ export default function VirtualInternshipPage() {
         currency: order.currency,
         order_id: order.orderId,
         name: 'EduBridge Network',
-        description: `${track.name} — Virtual Internship`,
+        // Razorpay's Standard Checkout modal has no structured price-breakdown
+        // UI — this description line is the only place inside their hosted
+        // panel we can surface the GST split to the customer during payment.
+        description: donateChecked
+          ? `Base ${money(track.priceNow)} + GST ${moneyPrecise(bill.gst)} + Donation ${money(bill.donateAmt)} = ${moneyPrecise(bill.toPay)}`
+          : `Base ${money(track.priceNow)} + GST ${moneyPrecise(bill.gst)} = ${moneyPrecise(bill.toPay)}`,
         prefill: { name: user?.profile?.fullName, email: user?.email ?? undefined },
         theme: { color: '#F2A31B' },
         handler: (response) => {
@@ -764,13 +769,13 @@ export default function VirtualInternshipPage() {
                 <span className={styles.ic}>
                   <FileText className="h-[15px] w-[15px]" strokeWidth={1.8} />
                 </span>
-                Bill Summary
+                Price Summary
               </div>
               <div className={styles.billRow}>
-                <span>Base Price</span>
+                <span>Course Price</span>
                 <span>
                   <span className={styles.vOld}>{money(track.priceOld)}</span>
-                  <span>{money(track.priceNow)}</span>
+                  <span>{moneyPrecise(track.priceNow)}</span>
                 </span>
               </div>
               <div className={styles.billRow}>
