@@ -127,6 +127,44 @@ function TaskItem({
   );
 }
 
+interface TaskGroup {
+  monthNumber?: number;
+  monthTitle?: string;
+  monthDescription?: string;
+  status: 'now' | 'soon' | 'done';
+  tasks: VirtualInternshipTaskView[];
+}
+
+/**
+ * Groups consecutive tasks sharing a `monthNumber` (the MONTH track's 16
+ * weekly tasks, 4 per month) into headed sections; tasks without a
+ * `monthNumber` (the WEEK track's flat 4, or any admin-assigned custom task
+ * appended after the curriculum) render with no header, same as before.
+ */
+function groupTasksByMonth(tasks: VirtualInternshipTaskView[]): TaskGroup[] {
+  const groups: TaskGroup[] = [];
+  for (const task of tasks) {
+    const last = groups[groups.length - 1];
+    if (last && last.monthNumber === task.monthNumber) {
+      last.tasks.push(task);
+    } else {
+      groups.push({
+        monthNumber: task.monthNumber,
+        monthTitle: task.monthTitle,
+        monthDescription: task.monthDescription,
+        status: 'soon',
+        tasks: [task],
+      });
+    }
+  }
+  for (const group of groups) {
+    const allDone = group.tasks.every((t) => t.status === 'APPROVED');
+    const anyCurrent = group.tasks.some((t) => t.unlocked && t.status !== 'APPROVED');
+    group.status = allDone ? 'done' : anyCurrent ? 'now' : 'soon';
+  }
+  return groups;
+}
+
 function RewardButton({
   icon,
   title,
@@ -232,13 +270,30 @@ export function EnrolledDashboard({ enrollment }: { enrollment: VirtualInternshi
         <h3 className={styles.dashSectionTitle}>
           <ClipboardCheck className="mr-2 inline h-5 w-5" style={{ color: 'var(--forest-deep)' }} /> Tasks and duties
         </h3>
-        {tasks.map((task) => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            isOpen={openIndex === task.taskIndex || (openIndex === null && task.taskIndex === currentTaskIndex)}
-            onToggle={() => setOpenIndex(openIndex === task.taskIndex ? null : task.taskIndex)}
-          />
+        {data?.trackNote && <p className={styles.dashTrackNote}>{data.trackNote}</p>}
+        {groupTasksByMonth(tasks).map((group, i) => (
+          <div key={group.monthNumber ?? `ungrouped-${i}`} className={group.monthNumber ? styles.dashMonthGroup : undefined}>
+            {group.monthNumber && (
+              <div className={styles.dashMonthHead}>
+                <span className={styles.dashMonthChip}>Month {group.monthNumber}</span>
+                <div>
+                  <h4>{group.monthTitle}</h4>
+                  <p>{group.monthDescription}</p>
+                </div>
+                <span className={cn(styles.dashMonthTag, group.status === 'done' && styles.dashMonthTagDone, group.status === 'now' && styles.dashMonthTagNow)}>
+                  {group.status === 'done' ? 'Done' : group.status === 'now' ? 'In progress' : 'Locked'}
+                </span>
+              </div>
+            )}
+            {group.tasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                isOpen={openIndex === task.taskIndex || (openIndex === null && task.taskIndex === currentTaskIndex)}
+                onToggle={() => setOpenIndex(openIndex === task.taskIndex ? null : task.taskIndex)}
+              />
+            ))}
+          </div>
         ))}
       </div>
 

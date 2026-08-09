@@ -665,6 +665,66 @@ describe('Internship Program (e2e)', () => {
     });
   });
 
+  describe('Virtual Internship — per-track curriculum size', () => {
+    it('backfill creates 4 tasks for an ACTIVE WEEK enrollment with none', async () => {
+      const student = await registerVerifiedUser(app, { fullName: 'VI Week Curriculum Size Student' });
+      const enroll = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(student.token))
+        .send({ track: 'WEEK' })
+        .expect(201);
+      await prisma.virtualInternshipEnrollment.update({
+        where: { id: enroll.body.data.id },
+        data: { status: 'ACTIVE', paidAt: new Date() },
+      });
+
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/backfill-missing-tasks`)
+        .set(auth(admin.token))
+        .send({})
+        .expect(201);
+
+      const tasksRes = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .set(auth(student.token))
+        .expect(200);
+      expect(tasksRes.body.data.tasks).toHaveLength(4);
+      expect(tasksRes.body.data.tasks[0].title).toBe('Week 1 — Setup, page shell and Home');
+      expect(tasksRes.body.data.trackNote).toContain('Personal portfolio website');
+    });
+
+    it('backfill creates 16 tasks (4 months of 4) for an ACTIVE MONTH enrollment with none', async () => {
+      const student = await registerVerifiedUser(app, { fullName: 'VI Month Curriculum Size Student' });
+      const enroll = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(student.token))
+        .send({ track: 'MONTH' })
+        .expect(201);
+      await prisma.virtualInternshipEnrollment.update({
+        where: { id: enroll.body.data.id },
+        data: { status: 'ACTIVE', paidAt: new Date() },
+      });
+
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/backfill-missing-tasks`)
+        .set(auth(admin.token))
+        .send({})
+        .expect(201);
+
+      const tasksRes = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .set(auth(student.token))
+        .expect(200);
+      expect(tasksRes.body.data.tasks).toHaveLength(16);
+      expect(tasksRes.body.data.tasks[0].title).toBe('Week 1 — Project setup and layout shell');
+      expect(tasksRes.body.data.tasks[0].monthNumber).toBe(1);
+      expect(tasksRes.body.data.tasks[0].monthTitle).toBe('Frontend foundation');
+      expect(tasksRes.body.data.tasks[15].title).toBe('Week 16 — Audit, walkthrough and certify');
+      expect(tasksRes.body.data.tasks[15].monthNumber).toBe(4);
+      expect(tasksRes.body.data.trackNote).toContain('Simple blog website');
+    });
+  });
+
   describe('Virtual Internship — admin-assigned custom task', () => {
     let student: TestUser;
     let enrollmentId: string;
@@ -672,11 +732,15 @@ describe('Internship Program (e2e)', () => {
     let task5Id: string;
 
     beforeAll(async () => {
+      // WEEK track: still exactly 4 curriculum tasks, so taskIndex 5 is
+      // unambiguously "beyond the curriculum" = a custom task. (MONTH now has
+      // 16 real curriculum tasks, so index 5 there is a legitimate Week 5 task,
+      // not an available custom slot — see "per-track curriculum size" above.)
       student = await registerVerifiedUser(app, { fullName: 'VI Custom Task Student' });
       const enroll = await request(app.getHttpServer())
         .post(`${API}/internships/virtual/enroll`)
         .set(auth(student.token))
-        .send({ track: 'MONTH' })
+        .send({ track: 'WEEK' })
         .expect(201);
       enrollmentId = enroll.body.data.id;
 
