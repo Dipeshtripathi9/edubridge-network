@@ -58,11 +58,24 @@ export class VirtualInternshipService {
     return this.serialize(enrollment);
   }
 
+  /**
+   * A student can hold two concurrent enrollments (one per track — see the
+   * cross-track fix). Prefer an ACTIVE one over "most recently created": a
+   * student who has already paid for WEEK and is just browsing the MONTH
+   * checkout (creating a fresh PENDING_PAYMENT row) must still see their
+   * paid enrollment, not have it hidden behind the newer pending one.
+   */
   async myEnrollment(userId: string) {
-    const enrollment = await this.prisma.virtualInternshipEnrollment.findFirst({
-      where: { userId },
+    const active = await this.prisma.virtualInternshipEnrollment.findFirst({
+      where: { userId, status: EnrollmentStatus.ACTIVE },
       orderBy: { createdAt: 'desc' },
     });
+    const enrollment =
+      active ??
+      (await this.prisma.virtualInternshipEnrollment.findFirst({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+      }));
     return enrollment ? this.serialize(enrollment) : null;
   }
 
