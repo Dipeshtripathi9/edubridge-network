@@ -6,6 +6,7 @@ import {
   Prisma,
   TrackBAllocationType,
   UserRole,
+  VirtualInternshipTrack,
 } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/notifications.service';
@@ -20,6 +21,7 @@ export interface IssueCertificateInput {
   recipientName: string;
   subtype?: EnrollmentSubtype;
   allocationType?: TrackBAllocationType;
+  track?: VirtualInternshipTrack;
   metadata?: Prisma.InputJsonValue;
 }
 
@@ -31,11 +33,18 @@ export class CertificatesService {
   ) {}
 
   /** Server-generated title — never admin-free-typed, so it can't drift from the real facts. */
-  private buildTitle(input: Pick<IssueCertificateInput, 'sourceType' | 'subtype' | 'allocationType'>): string {
+  private buildTitle(
+    input: Pick<IssueCertificateInput, 'sourceType' | 'subtype' | 'allocationType' | 'track'>,
+  ): string {
     if (input.sourceType === CertificateSourceType.TRACK_A_ENROLLMENT) {
       return input.subtype === EnrollmentSubtype.OWN_PROJECT
         ? 'EduBridge Internship — Own Project Track'
         : 'EduBridge Internship — Guided Learning Track';
+    }
+    if (input.sourceType === CertificateSourceType.VIRTUAL_INTERNSHIP) {
+      return input.track === VirtualInternshipTrack.MONTH
+        ? 'EduBridge Virtual Internship — Web Development + DevOps (4 Months)'
+        : 'EduBridge Virtual Internship — Web Development (4 Weeks)';
     }
     return input.allocationType === TrackBAllocationType.PAID_CLIENT_WORK
       ? 'EduBridge Internship — Paid Client Work'

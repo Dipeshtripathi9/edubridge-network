@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import request, { Response as SupertestResponse } from 'supertest';
+import { PrismaService } from '../src/prisma/prisma.service';
 import { API, auth, createTestApp, registerVerifiedUser, TestUser } from './helpers';
 
 /** Buffers a raw (non-JSON) response body — needed to assert on PDF bytes. */
@@ -12,10 +13,12 @@ function binaryParser(res: SupertestResponse, callback: (err: Error | null, body
 
 describe('Internship Program (e2e)', () => {
   let app: INestApplication;
+  let prisma: PrismaService;
   let admin: TestUser;
 
   beforeAll(async () => {
     app = await createTestApp();
+    prisma = app.get(PrismaService);
     admin = await registerVerifiedUser(app, { role: 'ADMIN', fullName: 'Internship Admin' });
   });
 
@@ -407,6 +410,168 @@ describe('Internship Program (e2e)', () => {
 
       expect(second.body.data.id).toBe(first.body.data.id);
       expect(second.body.data.feeAmount).toBe(3184.82);
+    });
+  });
+
+  describe('Virtual Internship — tasks, review, certificate, invoice (admin RBAC)', () => {
+    let student: TestUser;
+    let enrollmentId: string;
+    let taskIds: string[] = [];
+
+    beforeAll(async () => {
+      student = await registerVerifiedUser(app, { fullName: 'VI Task Flow Student' });
+      const enroll = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(student.token))
+        .send({ track: 'WEEK' })
+        .expect(201);
+      enrollmentId = enroll.body.data.id;
+
+      // Bypass the real Razorpay checkout/verify flow — not exercised anywhere in this
+      // suite (it would require a live network call to Razorpay's order API) — by
+      // reproducing exactly what VirtualInternshipService.activatePaidEnrollment does.
+      await prisma.virtualInternshipEnrollment.update({
+        where: { id: enrollmentId },
+        data: { status: 'ACTIVE', paidAt: new Date(), razorpayPaymentId: `test_pay_${enrollmentId}` },
+      });
+      await prisma.virtualInternshipTask.createMany({
+        data: [1, 2, 3, 4].map((taskIndex) => ({ enrollmentId, taskIndex })),
+      });
+    });
+
+    it('lists 4 tasks, only the first unlocked', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .set(auth(student.token))
+        .expect(200);
+      expect(res.body.data.progress).toBe(0);
+      expect(res.body.data.tasks).toHaveLength(4);
+      expect(res.body.data.tasks[0].unlocked).toBe(true);
+      expect(res.body.data.tasks[1].unlocked).toBe(false);
+      taskIds = res.body.data.tasks.map((t: { id: string }) => t.id);
+    });
+
+    it('rejects submitting a still-locked task', async () => {
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enrollments/me/tasks/2/submit`)
+        .set(auth(student.token))
+        .send({ submissionUrl: 'https://example.com/too-early' })
+        .expect(403);
+    });
+
+    it('403s a non-admin hitting the admin submission queue', async () => {
+      await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/admin/submissions`)
+        .set(auth(student.token))
+        .expect(403);
+    });
+
+    it('student submits task 1, it appears in the admin review queue, admin approves it', async () => {
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enrollments/me/tasks/1/submit`)
+        .set(auth(student.token))
+        .send({ submissionUrl: 'https://example.com/week1' })
+        .expect(201);
+
+      const queue = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/admin/submissions`)
+        .set(auth(admin.token))
+        .expect(200);
+      const submitted = queue.body.data.find((t: { id: string }) => t.id === taskIds[0]);
+      expect(submitted).toBeTruthy();
+      expect(submitted.enrollment.userId).toBe(student.userId);
+
+      const reviewed = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/submissions/${taskIds[0]}/review`)
+        .set(auth(admin.token))
+        .send({ approve: true, reviewNote: 'Nice work' })
+        .expect(201);
+      expect(reviewed.body.data.status).toBe('APPROVED');
+    });
+
+    it('task 2 unlocks after task 1 is approved; progress reflects one of four', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .set(auth(student.token))
+        .expect(200);
+      expect(res.body.data.progress).toBe(0.25);
+      expect(res.body.data.tasks[1].unlocked).toBe(true);
+    });
+
+    it('reward documents are forbidden before all tasks are approved', async () => {
+      await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/documents/letter/download`)
+        .set(auth(student.token))
+        .expect(403);
+    });
+
+    it('submits and approves tasks 2-4, issuing a certificate on the 4th approval', async () => {
+      for (let i = 1; i < taskIds.length; i += 1) {
+        await request(app.getHttpServer())
+          .post(`${API}/internships/virtual/enrollments/me/tasks/${i + 1}/submit`)
+          .set(auth(student.token))
+          .send({ submissionUrl: `https://example.com/week${i + 1}` })
+          .expect(201);
+        await request(app.getHttpServer())
+          .post(`${API}/internships/virtual/admin/submissions/${taskIds[i]}/review`)
+          .set(auth(admin.token))
+          .send({ approve: true })
+          .expect(201);
+      }
+
+      const certs = await request(app.getHttpServer())
+        .get(`${API}/internships/certificates/me`)
+        .set(auth(student.token))
+        .expect(200);
+      const cert = certs.body.data.find((c: { title: string }) => c.title.includes('Virtual Internship'));
+      expect(cert).toBeTruthy();
+    });
+
+    it('progress is 100% and the invoice + reward documents download as real PDFs', async () => {
+      const tasksRes = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/tasks`)
+        .set(auth(student.token))
+        .expect(200);
+      expect(tasksRes.body.data.progress).toBe(1);
+
+      const invoice = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/invoice`)
+        .set(auth(student.token))
+        .buffer(true)
+        .parse(binaryParser)
+        .expect(200);
+      expect(invoice.headers['content-type']).toContain('application/pdf');
+      expect(invoice.body.slice(0, 4).toString('utf8')).toBe('%PDF');
+
+      const letter = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/documents/letter/download`)
+        .set(auth(student.token))
+        .buffer(true)
+        .parse(binaryParser)
+        .expect(200);
+      expect(letter.body.slice(0, 4).toString('utf8')).toBe('%PDF');
+
+      const report = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me/documents/report/download`)
+        .set(auth(student.token))
+        .buffer(true)
+        .parse(binaryParser)
+        .expect(200);
+      expect(report.body.slice(0, 4).toString('utf8')).toBe('%PDF');
+    });
+
+    it('admin enrollment list + stats reflect this student', async () => {
+      const list = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/admin/enrollments?track=WEEK`)
+        .set(auth(admin.token))
+        .expect(200);
+      expect(list.body.data.some((e: { id: string }) => e.id === enrollmentId)).toBe(true);
+
+      const stats = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/admin/stats`)
+        .set(auth(admin.token))
+        .expect(200);
+      expect(stats.body.data.active).toBeGreaterThanOrEqual(1);
     });
   });
 });

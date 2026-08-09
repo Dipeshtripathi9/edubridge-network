@@ -6,6 +6,7 @@ import {
   Award,
   BarChart3,
   Briefcase,
+  ClipboardList,
   Code2,
   GraduationCap,
   Headset,
@@ -36,6 +37,7 @@ export const ADMIN_NAV = [
   { href: '/manage/99x', label: '99x Developers', icon: Code2 },
   { href: '/manage/ez-rentbuddy', label: 'EZ-Rentbuddy', icon: Home },
   { href: '/manage/internship', label: 'Internship', icon: Award },
+  { href: '/manage/virtual-internship', label: 'Virtual Internship', icon: ClipboardList },
   { href: '/manage/quizzes', label: 'Quizzes', icon: HelpCircle },
 ];
 

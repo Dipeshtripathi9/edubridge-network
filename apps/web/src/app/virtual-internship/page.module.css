@@ -1281,3 +1281,385 @@
     padding: 20px 20px;
   }
 }
+
+/* ============ POST-PAYMENT DASHBOARD ============ */
+.dashWrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px 56px 60px;
+}
+@media (max-width: 760px) {
+  .dashWrap {
+    padding: 26px 20px 44px;
+  }
+}
+
+.dashCard {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 28px 30px;
+}
+.dashCard + .dashCard {
+  margin-top: 24px;
+}
+
+.dashWelcome {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.dashAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--forest-deep);
+  font-family: var(--font-fraunces), serif;
+  font-weight: 700;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dashWelcome h2 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.dashTrackLabel {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--forest);
+  margin-bottom: 8px;
+}
+.dashProgressRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.dashProgressBar {
+  width: 180px;
+  max-width: 100%;
+  height: 8px;
+  border-radius: 100px;
+  background: var(--line);
+  overflow: hidden;
+}
+.dashProgressFill {
+  height: 100%;
+  background: var(--forest-deep);
+  border-radius: 100px;
+  transition: width 0.3s ease;
+}
+.dashProgressTxt {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.dashProgressTxt b {
+  color: var(--ink);
+}
+
+.dashSectionTitle {
+  font-size: 19px;
+  margin-bottom: 16px;
+}
+
+/* Task accordion — same visual language as .faqItem/.faqQ/.faqA */
+.taskItem {
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+.taskItem + .taskItem {
+  margin-top: 10px;
+}
+.taskItemOpen {
+  border-color: var(--forest);
+}
+.taskQ {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  font-family: var(--font-inter), sans-serif;
+}
+.taskQ:hover {
+  background: var(--parchment);
+}
+.taskItemOpen .taskQ {
+  background: var(--mint);
+  border-radius: 12px 12px 0 0;
+}
+.taskNum {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--forest-deep);
+  font-family: var(--font-fraunces), serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.taskNumDone {
+  background: var(--forest-deep);
+  color: #fff;
+}
+.taskNumCurrent {
+  background: var(--amber-deep);
+  color: #fff;
+}
+.taskTitle {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-fraunces), serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.taskItemOpen .taskTitle {
+  color: var(--forest-deep);
+}
+.taskChev {
+  flex-shrink: 0;
+  color: var(--ink-faint);
+  transition: transform 0.15s ease;
+}
+.taskChevOpen {
+  transform: rotate(180deg);
+}
+.taskTag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.taskTagCurrent {
+  background: var(--amber-deep);
+  color: #fff;
+}
+.taskTagDone {
+  background: var(--forest-deep);
+  color: #fff;
+}
+.taskTagReview {
+  background: var(--ink-faint);
+  color: #fff;
+}
+.taskBody {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.taskBodyOpen {
+  max-height: 900px;
+}
+.taskBodyInner {
+  padding: 16px 18px 18px;
+  border-top: 1px solid var(--line);
+}
+.taskBodyInner h5 {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  margin: 16px 0 6px;
+  color: var(--ink);
+}
+.taskBodyInner h5:first-child {
+  margin-top: 0;
+}
+.taskBodyInner p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  margin: 0;
+}
+.taskBodyInner ol {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+.taskBodyInner ol li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 28px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.taskBodyInner ol li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--forest-deep);
+  font-family: var(--font-fraunces), serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.taskSubmitRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--line);
+}
+.taskSubmitRow input {
+  flex: 1;
+  min-width: 180px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.taskSubmitRow input:focus {
+  outline: none;
+  border-color: var(--forest);
+}
+.taskSubmitBtn {
+  background: var(--forest-deep);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.taskSubmitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.taskLockedNote {
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+.taskReviewNote {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--mint);
+  color: var(--forest-deep);
+  font-size: 12.5px;
+}
+
+/* Rewards row */
+.rewardsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.rewardItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 220px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 16px;
+  background: var(--card);
+  cursor: pointer;
+  transition: border-color 0.12s ease;
+  font-family: var(--font-inter), sans-serif;
+  text-align: left;
+}
+.rewardItem:hover:not(:disabled) {
+  border-color: var(--forest);
+}
+.rewardItem:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.rewardIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--forest-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.rewardIconLocked {
+  background: var(--lock-grey);
+  color: var(--ink-faint);
+}
+.rewardTitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.rewardSub {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+
+.dashFooter {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  margin-top: 22px;
+}
+.btnInvoice {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--forest-deep);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 100px;
+  padding: 8px 15px;
+  cursor: pointer;
+}
+.btnInvoice:hover {
+  border-color: var(--forest-deep);
+  background: var(--mint);
+}
+.btnInvoice:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

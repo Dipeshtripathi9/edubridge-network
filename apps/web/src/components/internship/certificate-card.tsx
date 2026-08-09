@@ -17,7 +17,7 @@ import type { Certificate } from '@/hooks/use-certificates';
  * throwaway anchor — this still hits the real backend `pdfkit` PDF directly,
  * it just carries the auth header a navigation can't.
  */
-async function downloadCertificate(id: string, code: string, token: string | null) {
+export async function downloadCertificate(id: string, code: string, token: string | null) {
   const res = await fetch(`${API_URL}/internships/certificates/${id}/download`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
