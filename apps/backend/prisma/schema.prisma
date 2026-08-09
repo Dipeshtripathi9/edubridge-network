@@ -210,6 +210,7 @@ enum TrackBAllocationType {
 enum CertificateSourceType {
   TRACK_A_ENROLLMENT
   TRACK_B_APPLICATION
+  VIRTUAL_INTERNSHIP
 }
 
 // ============================================================
@@ -1327,8 +1328,29 @@ model VirtualInternshipEnrollment {
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
 
+  tasks VirtualInternshipTask[]
+
   @@index([userId, status])
   @@map("virtual_internship_enrollments")
+}
+
+model VirtualInternshipTask {
+  id             String                      @id @default(cuid())
+  enrollmentId   String
+  enrollment     VirtualInternshipEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  taskIndex      Int // 1-4, matches the static template index in tasks.constants.ts for the enrollment's track
+  status         EnrollmentTaskStatus        @default(ASSIGNED)
+  submissionUrl  String?
+  submissionNote String?
+  submittedAt    DateTime?
+  reviewNote     String?
+  reviewedById   String?
+  reviewedAt     DateTime?
+  createdAt      DateTime                    @default(now())
+  updatedAt      DateTime                    @updatedAt
+
+  @@unique([enrollmentId, taskIndex])
+  @@map("virtual_internship_tasks")
 }
 
 model EnrollmentTask {

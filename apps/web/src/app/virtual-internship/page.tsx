@@ -23,7 +23,9 @@ import {
 } from 'lucide-react';
 import { AccountMenu } from '@/components/account-menu';
 import { OpportunityRecommendationCard } from '@/components/opportunity-recommendation-card';
+import { EnrolledDashboard } from '@/components/internship/virtual-internship-dashboard';
 import { useInternshipListings } from '@/hooks/use-internship-listings';
+import { useMyVirtualInternshipEnrollment } from '@/hooks/use-virtual-internship';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
 import { loadRazorpayScript, type RazorpayFailureResponse } from '@/lib/razorpay';
@@ -259,6 +261,7 @@ function GigsSection() {
 
 export default function VirtualInternshipPage() {
   const router = useRouter();
+  const { data: myEnrollment } = useMyVirtualInternshipEnrollment();
   const [view, setView] = useState<'landing' | 'detail' | 'checkout'>('landing');
   const [currentTrackKey, setCurrentTrackKey] = useState<TrackKey>('month');
   const cameFromDetailRef = useRef(false);
@@ -464,6 +467,10 @@ export default function VirtualInternshipPage() {
         <AccountMenu />
       </nav>
 
+      {myEnrollment?.status === 'ACTIVE' ? (
+        <EnrolledDashboard enrollment={myEnrollment} />
+      ) : (
+        <>
       <div
         className={cn(styles.stickyBar, stickyVisible && styles.stickyBarVisible)}
         aria-hidden={!stickyVisible}
@@ -900,6 +907,8 @@ export default function VirtualInternshipPage() {
           )}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

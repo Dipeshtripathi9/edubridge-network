@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
 
-export type CertificateSourceType = 'TRACK_A_ENROLLMENT' | 'TRACK_B_APPLICATION';
+export type CertificateSourceType = 'TRACK_A_ENROLLMENT' | 'TRACK_B_APPLICATION' | 'VIRTUAL_INTERNSHIP';
 
 export interface Certificate {
   id: string;

@@ -1,12 +1,28 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { EnrollmentStatus, VirtualInternshipEnrollment } from '@prisma/client';
+import {
+  CertificateSourceType,
+  EnrollmentStatus,
+  EnrollmentTaskStatus,
+  VirtualInternshipEnrollment,
+  VirtualInternshipTrack,
+} from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { PaymentsService } from '../../payments/payments.service';
+import { CertificatesService } from '../certificates/certificates.service';
+import { buildPaginatedResult } from '../../common/dto/pagination.dto';
 import { computeVirtualInternshipFee, getVirtualInternshipPricingInfo } from './pricing.constants';
-import { EnrollVirtualInternshipDto, VerifyVirtualInternshipPaymentDto } from './dto/virtual-internship.dto';
+import { getVirtualInternshipTaskTemplate } from './tasks.constants';
+import {
+  EnrollVirtualInternshipDto,
+  ReviewVirtualInternshipTaskDto,
+  SubmitVirtualInternshipTaskDto,
+  VerifyVirtualInternshipPaymentDto,
+  VirtualInternshipAdminQueryDto,
+} from './dto/virtual-internship.dto';
 
 const ACTIVE_STATUSES: EnrollmentStatus[] = [EnrollmentStatus.PENDING_PAYMENT, EnrollmentStatus.ACTIVE];
+const TOTAL_TASKS = 4;
 
 @Injectable()
 export class VirtualInternshipService {
@@ -14,6 +30,7 @@ export class VirtualInternshipService {
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
     private readonly payments: PaymentsService,
+    private readonly certificates: CertificatesService,
   ) {}
 
   pricing() {
@@ -144,6 +161,11 @@ export class VirtualInternshipService {
       },
     });
 
+    await this.prisma.virtualInternshipTask.createMany({
+      data: Array.from({ length: TOTAL_TASKS }, (_, i) => ({ enrollmentId: enrollment.id, taskIndex: i + 1 })),
+      skipDuplicates: true,
+    });
+
     await this.notifications.create({
       recipientId: enrollment.userId,
       type: 'INTERNSHIP_PAYMENT_CONFIRMED',
@@ -152,5 +174,207 @@ export class VirtualInternshipService {
     });
 
     return { id: updated.id, status: updated.status, track: updated.track, paidAt: updated.paidAt };
+  }
+
+  // ---------------- Tasks (student) ----------------
+
+  private async myActiveEnrollment(userId: string) {
+    const enrollment = await this.prisma.virtualInternshipEnrollment.findFirst({
+      where: { userId, status: EnrollmentStatus.ACTIVE },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!enrollment) throw new NotFoundException('No active virtual internship enrollment');
+    return enrollment;
+  }
+
+  async myTasks(userId: string) {
+    const enrollment = await this.myActiveEnrollment(userId);
+    const tasks = await this.prisma.virtualInternshipTask.findMany({
+      where: { enrollmentId: enrollment.id },
+      orderBy: { taskIndex: 'asc' },
+    });
+
+    const approvedCount = tasks.filter((t) => t.status === EnrollmentTaskStatus.APPROVED).length;
+    const merged = tasks.map((task, i) => ({
+      ...getVirtualInternshipTaskTemplate(enrollment.track, task.taskIndex),
+      id: task.id,
+      taskIndex: task.taskIndex,
+      status: task.status,
+      submissionUrl: task.submissionUrl,
+      submissionNote: task.submissionNote,
+      submittedAt: task.submittedAt,
+      reviewNote: task.reviewNote,
+      reviewedAt: task.reviewedAt,
+      unlocked: task.taskIndex === 1 || tasks[i - 1]?.status === EnrollmentTaskStatus.APPROVED,
+    }));
+
+    return {
+      enrollment: { id: enrollment.id, track: enrollment.track, status: enrollment.status },
+      progress: tasks.length ? approvedCount / tasks.length : 0,
+      tasks: merged,
+    };
+  }
+
+  async submitTask(userId: string, taskIndex: number, dto: SubmitVirtualInternshipTaskDto) {
+    const enrollment = await this.myActiveEnrollment(userId);
+    const tasks = await this.prisma.virtualInternshipTask.findMany({
+      where: { enrollmentId: enrollment.id },
+      orderBy: { taskIndex: 'asc' },
+    });
+
+    const task = tasks.find((t) => t.taskIndex === taskIndex);
+    if (!task) throw new NotFoundException('Task not found');
+    const previous = tasks.find((t) => t.taskIndex === taskIndex - 1);
+    const unlocked = taskIndex === 1 || previous?.status === EnrollmentTaskStatus.APPROVED;
+    if (!unlocked) throw new ForbiddenException('Complete the previous task first');
+    if (task.status === EnrollmentTaskStatus.APPROVED) {
+      throw new BadRequestException('This task is already approved');
+    }
+
+    return this.prisma.virtualInternshipTask.update({
+      where: { id: task.id },
+      data: {
+        status: EnrollmentTaskStatus.SUBMITTED,
+        submissionUrl: dto.submissionUrl,
+        submissionNote: dto.note,
+        submittedAt: new Date(),
+      },
+    });
+  }
+
+  // ---------------- Documents (student) ----------------
+
+  /** Gated on ACTIVE (paid) — used by the invoice PDF route. */
+  async getForInvoice(userId: string) {
+    const enrollment = await this.prisma.virtualInternshipEnrollment.findFirst({
+      where: { userId, status: EnrollmentStatus.ACTIVE },
+      orderBy: { createdAt: 'desc' },
+      include: { user: { select: { email: true, profile: { select: { fullName: true } } } } },
+    });
+    if (!enrollment) throw new NotFoundException('No paid virtual internship enrollment found');
+    return enrollment;
+  }
+
+  /** Gated on 100% task approval — used by the recommendation-letter / report-card PDF routes. */
+  async getForRewardDocument(userId: string) {
+    const enrollment = await this.prisma.virtualInternshipEnrollment.findFirst({
+      where: { userId, status: EnrollmentStatus.ACTIVE },
+      orderBy: { createdAt: 'desc' },
+      include: { user: { select: { email: true, profile: { select: { fullName: true } } } } },
+    });
+    if (!enrollment) throw new NotFoundException('No active virtual internship enrollment');
+
+    const tasks = await this.prisma.virtualInternshipTask.findMany({
+      where: { enrollmentId: enrollment.id },
+      orderBy: { taskIndex: 'asc' },
+    });
+    const approvedCount = tasks.filter((t) => t.status === EnrollmentTaskStatus.APPROVED).length;
+    if (tasks.length < TOTAL_TASKS || approvedCount < tasks.length) {
+      throw new ForbiddenException('Finish and get all tasks approved before downloading this document');
+    }
+
+    return { enrollment, tasks };
+  }
+
+  // ---------------- Admin ----------------
+
+  async adminListEnrollments(query: VirtualInternshipAdminQueryDto) {
+    const items = await this.prisma.virtualInternshipEnrollment.findMany({
+      where: {
+        ...(query.track ? { track: query.track } : {}),
+        ...(query.status ? { status: query.status } : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: query.skip,
+      take: query.limit,
+      include: {
+        tasks: { orderBy: { taskIndex: 'asc' } },
+        user: { select: { id: true, email: true, profile: { select: { fullName: true } } } },
+      },
+    });
+    return buildPaginatedResult(
+      items.map((e) => this.serialize(e)),
+      query,
+    );
+  }
+
+  async adminStats() {
+    const [active, pendingPayment, week, month, submissionsPendingReview] = await Promise.all([
+      this.prisma.virtualInternshipEnrollment.count({ where: { status: EnrollmentStatus.ACTIVE } }),
+      this.prisma.virtualInternshipEnrollment.count({ where: { status: EnrollmentStatus.PENDING_PAYMENT } }),
+      this.prisma.virtualInternshipEnrollment.count({
+        where: { status: EnrollmentStatus.ACTIVE, track: VirtualInternshipTrack.WEEK },
+      }),
+      this.prisma.virtualInternshipEnrollment.count({
+        where: { status: EnrollmentStatus.ACTIVE, track: VirtualInternshipTrack.MONTH },
+      }),
+      this.prisma.virtualInternshipTask.count({ where: { status: EnrollmentTaskStatus.SUBMITTED } }),
+    ]);
+    return { active, pendingPayment, byTrack: { WEEK: week, MONTH: month }, submissionsPendingReview };
+  }
+
+  async adminListSubmissions(status?: EnrollmentTaskStatus) {
+    const tasks = await this.prisma.virtualInternshipTask.findMany({
+      where: { status: status ?? EnrollmentTaskStatus.SUBMITTED },
+      orderBy: { submittedAt: 'asc' },
+      include: {
+        enrollment: {
+          include: { user: { select: { id: true, email: true, profile: { select: { fullName: true } } } } },
+        },
+      },
+    });
+    return tasks.map((task) => ({
+      ...getVirtualInternshipTaskTemplate(task.enrollment.track, task.taskIndex),
+      ...task,
+    }));
+  }
+
+  async adminReviewTask(adminId: string, taskId: string, dto: ReviewVirtualInternshipTaskDto) {
+    const task = await this.prisma.virtualInternshipTask.findUnique({
+      where: { id: taskId },
+      include: { enrollment: { include: { user: { select: { profile: { select: { fullName: true } } } } } } },
+    });
+    if (!task) throw new NotFoundException('Task not found');
+    if (task.status !== EnrollmentTaskStatus.SUBMITTED) {
+      throw new BadRequestException('Task is not awaiting review');
+    }
+
+    const status = dto.approve ? EnrollmentTaskStatus.APPROVED : EnrollmentTaskStatus.REJECTED;
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.virtualInternshipTask.update({
+        where: { id: taskId },
+        data: { status, reviewNote: dto.reviewNote, reviewedById: adminId, reviewedAt: new Date() },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: adminId,
+          action: dto.approve ? 'internship.virtual.approve_task' : 'internship.virtual.reject_task',
+          entity: 'virtual_internship_task',
+          entityId: taskId,
+          metadata: { note: dto.reviewNote },
+        },
+      }),
+    ]);
+
+    const template = getVirtualInternshipTaskTemplate(task.enrollment.track, task.taskIndex);
+    await this.notifications.create({
+      recipientId: task.enrollment.userId,
+      type: 'INTERNSHIP_TASK_REVIEWED',
+      title: dto.approve ? `Task approved: ${template?.title ?? 'Task'}` : `Task needs changes: ${template?.title ?? 'Task'}`,
+      body: dto.reviewNote,
+      data: { enrollmentId: task.enrollmentId, taskId },
+    });
+
+    if (dto.approve && task.taskIndex === TOTAL_TASKS) {
+      await this.certificates.issue({
+        sourceType: CertificateSourceType.VIRTUAL_INTERNSHIP,
+        sourceId: task.enrollmentId,
+        recipientId: task.enrollment.userId,
+        recipientName: task.enrollment.user.profile?.fullName ?? 'EduBridge Student',
+        track: task.enrollment.track,
+      });
+    }
+
+    return updated;
   }
 }
