@@ -393,7 +393,10 @@
   background: var(--forest-deep);
   padding: 36px 56px;
   display: flex;
-  align-items: center;
+  /* flex-start, not center — centering against a two-line title (eyebrow +
+     heading) pulls "Back" down into the middle of it on narrow screens,
+     where the title wraps to two lines before this hits its own breakpoint. */
+  align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
   flex-wrap: wrap;
@@ -604,8 +607,14 @@
 /* CHECKOUT VIEW */
 .coHeader {
   display: flex;
-  align-items: center;
+  /* flex-start, not center — the right block is two lines (CHECKOUT eyebrow
+     + track title). Centering "Back" against that whole block drops it into
+     the middle, right on top of the title, once the title wraps on a narrow
+     phone. */
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
   padding: 26px 56px;
   background: var(--forest-deep);
   position: relative;
@@ -936,26 +945,45 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 14px;
   padding: 18px 56px;
+  /* Clear the iOS home-indicator gesture bar so the button never sits under it. */
+  padding-bottom: max(18px, env(safe-area-inset-bottom));
   box-shadow: 0 -10px 28px rgba(20, 22, 43, 0.1);
   z-index: 30;
 }
 @media (max-width: 640px) {
   .coBottombar {
-    padding: 14px 20px;
+    padding: 14px 16px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    gap: 10px;
+  }
+}
+@media (max-width: 380px) {
+  .coBottombar {
+    padding: 12px 14px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
   }
 }
 .coTopayK {
   font-size: 11.5px;
   color: var(--ink-faint);
+  white-space: nowrap;
 }
 .coTopayV {
   font-family: var(--font-fraunces), serif;
   font-size: 22px;
   font-weight: 700;
   color: var(--ink);
+  white-space: nowrap;
+}
+@media (max-width: 380px) {
+  .coTopayV {
+    font-size: 18px;
+  }
 }
 .btnPay {
+  flex-shrink: 0;
   background: var(--amber);
   color: #1c1300;
   font-size: 15px;
@@ -966,6 +994,13 @@
   box-shadow: 0 10px 24px -8px rgba(199, 127, 28, 0.5);
   transition: all 0.15s ease;
   cursor: pointer;
+  white-space: nowrap;
+}
+@media (max-width: 380px) {
+  .btnPay {
+    padding: 12px 18px;
+    font-size: 13px;
+  }
 }
 .btnPay:hover {
   background: #f0b562;
@@ -1300,15 +1335,44 @@
   border-radius: 22px;
   box-shadow: var(--shadow);
   padding: 28px 30px;
+  display: grid;
+  gap: 26px 24px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'welcome'
+    'schedule'
+    'rewards'
+    'footer';
 }
-.dashCard + .dashCard {
-  margin-top: 24px;
+@media (min-width: 761px) {
+  .dashCard {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'welcome  rewards'
+      'schedule schedule'
+      'footer   footer';
+    align-items: start;
+  }
+}
+@media (max-width: 640px) {
+  .dashCard {
+    padding: 20px 16px;
+  }
 }
 
 .dashWelcome {
+  grid-area: welcome;
   display: flex;
   gap: 16px;
   align-items: flex-start;
+  min-width: 0;
+}
+.dashSched {
+  grid-area: schedule;
+  min-width: 0;
+}
+.dashRewards {
+  grid-area: rewards;
 }
 .dashAvatar {
   width: 52px;
@@ -1648,11 +1712,18 @@
   font-size: 12.5px;
 }
 
-/* Rewards row */
+/* Rewards row — a horizontal card list on mobile, a compact right-aligned
+   column of circular icons (matching the mockup) from 761px up. */
 .rewardsList {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
+}
+@media (min-width: 761px) {
+  .rewardsList {
+    justify-content: flex-end;
+    gap: 18px;
+  }
 }
 .rewardItem {
   display: flex;
@@ -1676,19 +1747,62 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+@media (min-width: 761px) {
+  .rewardItem {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 0 0 auto;
+    width: 84px;
+    min-width: 0;
+    border: none;
+    padding: 0;
+    gap: 8px;
+    background: none;
+  }
+  .rewardItem:hover:not(:disabled) {
+    border-color: transparent;
+  }
+  .rewardItem:hover:not(:disabled) .rewardIcon {
+    transform: translateY(-2px);
+    border-color: var(--forest);
+  }
+}
 .rewardIcon {
+  position: relative;
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--mint);
-  color: var(--forest-deep);
+  flex-shrink: 0;
+  border: 1.5px solid var(--line);
+  background-color: var(--parchment);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+@media (min-width: 761px) {
+  .rewardIcon {
+    width: 56px;
+    height: 56px;
+  }
+}
+.rewardIconLocked {
+  filter: grayscale(0.55);
+  opacity: 0.65;
+}
+.rewardLockBadge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-}
-.rewardIconLocked {
-  background: var(--lock-grey);
   color: var(--ink-faint);
 }
 .rewardTitle {
@@ -1696,6 +1810,15 @@
   font-weight: 700;
   color: var(--ink);
   line-height: 1.3;
+}
+@media (min-width: 761px) {
+  .rewardTitle {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+}
+.rewardTitleLocked {
+  color: var(--ink-faint);
 }
 .rewardSub {
   display: flex;
@@ -1705,13 +1828,19 @@
   color: var(--ink-faint);
   margin-top: 2px;
 }
+@media (min-width: 761px) {
+  .rewardSub {
+    display: none;
+  }
+}
 
 .dashFooter {
+  grid-area: footer;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   border-top: 1px solid var(--line);
   padding-top: 18px;
-  margin-top: 22px;
 }
 .btnInvoice {
   display: inline-flex;

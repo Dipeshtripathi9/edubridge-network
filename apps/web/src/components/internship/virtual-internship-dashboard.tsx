@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { ReactNode } from 'react';
 import { toast } from 'sonner';
-import { Award, CheckCircle2, ChevronDown, ClipboardCheck, Download, FileText, Lock, MessageCircle } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ClipboardCheck, Download, Lock } from 'lucide-react';
 import { cn, isSafeHttpUrl } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 import {
@@ -165,6 +164,13 @@ function groupTasksByMonth(tasks: VirtualInternshipTaskView[]): TaskGroup[] {
   return groups;
 }
 
+const REWARD_ICON: Record<'certificate' | 'letter' | 'report' | 'community', string> = {
+  certificate: '/rewards/certificate.png',
+  letter: '/rewards/recommendation-letter.png',
+  report: '/rewards/report-card.png',
+  community: '/rewards/community.png',
+};
+
 function RewardButton({
   icon,
   title,
@@ -173,7 +179,7 @@ function RewardButton({
   disabled,
   onClick,
 }: {
-  icon: ReactNode;
+  icon: keyof typeof REWARD_ICON;
   title: string;
   sub: string;
   locked: boolean;
@@ -182,11 +188,18 @@ function RewardButton({
 }) {
   return (
     <button type="button" className={styles.rewardItem} disabled={locked || disabled} onClick={onClick}>
-      <span className={cn(styles.rewardIcon, locked && styles.rewardIconLocked)}>
-        {locked ? <Lock className="h-4 w-4" /> : icon}
+      <span
+        className={cn(styles.rewardIcon, locked && styles.rewardIconLocked)}
+        style={{ backgroundImage: `url(${REWARD_ICON[icon]})` }}
+      >
+        {locked && (
+          <span className={styles.rewardLockBadge}>
+            <Lock className="h-2.5 w-2.5" />
+          </span>
+        )}
       </span>
       <span>
-        <span className={styles.rewardTitle}>{title}</span>
+        <span className={cn(styles.rewardTitle, locked && styles.rewardTitleLocked)}>{title}</span>
         <span className={styles.rewardSub}>
           {locked ? (
             <>
@@ -264,93 +277,91 @@ export function EnrolledDashboard({ enrollment }: { enrollment: VirtualInternshi
             </div>
           </div>
         </div>
-      </div>
 
-      <div className={styles.dashCard}>
-        <h3 className={styles.dashSectionTitle}>
-          <ClipboardCheck className="mr-2 inline h-5 w-5" style={{ color: 'var(--forest-deep)' }} /> Tasks and duties
-        </h3>
-        {data?.trackNote && <p className={styles.dashTrackNote}>{data.trackNote}</p>}
-        {groupTasksByMonth(tasks).map((group, i) => (
-          <div key={group.monthNumber ?? `ungrouped-${i}`} className={group.monthNumber ? styles.dashMonthGroup : undefined}>
-            {group.monthNumber && (
-              <div className={styles.dashMonthHead}>
-                <span className={styles.dashMonthChip}>Month {group.monthNumber}</span>
-                <div>
-                  <h4>{group.monthTitle}</h4>
-                  <p>{group.monthDescription}</p>
+        <section className={styles.dashSched}>
+          <h3 className={styles.dashSectionTitle}>
+            <ClipboardCheck className="mr-2 inline h-5 w-5" style={{ color: 'var(--forest-deep)' }} /> Tasks and duties
+          </h3>
+          {data?.trackNote && <p className={styles.dashTrackNote}>{data.trackNote}</p>}
+          {groupTasksByMonth(tasks).map((group, i) => (
+            <div key={group.monthNumber ?? `ungrouped-${i}`} className={group.monthNumber ? styles.dashMonthGroup : undefined}>
+              {group.monthNumber && (
+                <div className={styles.dashMonthHead}>
+                  <span className={styles.dashMonthChip}>Month {group.monthNumber}</span>
+                  <div>
+                    <h4>{group.monthTitle}</h4>
+                    <p>{group.monthDescription}</p>
+                  </div>
+                  <span className={cn(styles.dashMonthTag, group.status === 'done' && styles.dashMonthTagDone, group.status === 'now' && styles.dashMonthTagNow)}>
+                    {group.status === 'done' ? 'Done' : group.status === 'now' ? 'In progress' : 'Locked'}
+                  </span>
                 </div>
-                <span className={cn(styles.dashMonthTag, group.status === 'done' && styles.dashMonthTagDone, group.status === 'now' && styles.dashMonthTagNow)}>
-                  {group.status === 'done' ? 'Done' : group.status === 'now' ? 'In progress' : 'Locked'}
-                </span>
-              </div>
-            )}
-            {group.tasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                isOpen={openIndex === task.taskIndex || (openIndex === null && task.taskIndex === currentTaskIndex)}
-                onToggle={() => setOpenIndex(openIndex === task.taskIndex ? null : task.taskIndex)}
-              />
-            ))}
+              )}
+              {group.tasks.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  isOpen={openIndex === task.taskIndex || (openIndex === null && task.taskIndex === currentTaskIndex)}
+                  onToggle={() => setOpenIndex(openIndex === task.taskIndex ? null : task.taskIndex)}
+                />
+              ))}
+            </div>
+          ))}
+        </section>
+
+        <section className={styles.dashRewards}>
+          <h3 className={styles.dashSectionTitle}>Your rewards</h3>
+          <div className={styles.rewardsList}>
+            <a href="https://chat.whatsapp.com/" target="_blank" rel="noreferrer" className={styles.rewardItem}>
+              <span className={styles.rewardIcon} style={{ backgroundImage: `url(${REWARD_ICON.community})` }} />
+              <span>
+                <span className={styles.rewardTitle}>Join community</span>
+                <span className={styles.rewardSub}>Connect with mentors and peers</span>
+              </span>
+            </a>
+
+            <RewardButton
+              icon="certificate"
+              title="Virtual internship certificate"
+              sub="Download your certificate"
+              locked={!unlocked || !certificate}
+              disabled={downloading === 'certificate'}
+              onClick={() =>
+                certificate &&
+                withDownloading('certificate', () => downloadCertificate(certificate.id, certificate.code, token))
+              }
+            />
+
+            <RewardButton
+              icon="letter"
+              title="Recommendation letter"
+              sub="Download your letter"
+              locked={!unlocked}
+              disabled={downloading === 'letter'}
+              onClick={() => withDownloading('letter', () => downloadVirtualRewardDocument('letter', enrollment.id, token))}
+            />
+
+            <RewardButton
+              icon="report"
+              title="Report card"
+              sub="Download your report card"
+              locked={!unlocked}
+              disabled={downloading === 'report'}
+              onClick={() => withDownloading('report', () => downloadVirtualRewardDocument('report', enrollment.id, token))}
+            />
           </div>
-        ))}
-      </div>
+        </section>
 
-      <div className={styles.dashCard}>
-        <h3 className={styles.dashSectionTitle}>Your rewards</h3>
-        <div className={styles.rewardsList}>
-          <a href="https://chat.whatsapp.com/" target="_blank" rel="noreferrer" className={styles.rewardItem}>
-            <span className={styles.rewardIcon}>
-              <MessageCircle className="h-5 w-5" />
-            </span>
-            <span>
-              <span className={styles.rewardTitle}>Join community</span>
-              <span className={styles.rewardSub}>Connect with mentors and peers</span>
-            </span>
-          </a>
-
-          <RewardButton
-            icon={<Award className="h-5 w-5" />}
-            title="Virtual internship certificate"
-            sub="Download your certificate"
-            locked={!unlocked || !certificate}
-            disabled={downloading === 'certificate'}
-            onClick={() =>
-              certificate &&
-              withDownloading('certificate', () => downloadCertificate(certificate.id, certificate.code, token))
-            }
-          />
-
-          <RewardButton
-            icon={<FileText className="h-5 w-5" />}
-            title="Recommendation letter"
-            sub="Download your letter"
-            locked={!unlocked}
-            disabled={downloading === 'letter'}
-            onClick={() => withDownloading('letter', () => downloadVirtualRewardDocument('letter', enrollment.id, token))}
-          />
-
-          <RewardButton
-            icon={<FileText className="h-5 w-5" />}
-            title="Report card"
-            sub="Download your report card"
-            locked={!unlocked}
-            disabled={downloading === 'report'}
-            onClick={() => withDownloading('report', () => downloadVirtualRewardDocument('report', enrollment.id, token))}
-          />
+        <div className={styles.dashFooter}>
+          <button
+            type="button"
+            className={styles.btnInvoice}
+            disabled={downloading === 'invoice'}
+            onClick={() => withDownloading('invoice', () => downloadVirtualInvoice(enrollment.id, token))}
+          >
+            <Download className="h-3.5 w-3.5" /> Invoice
+          </button>
         </div>
-      </div>
-
-      <div className={styles.dashFooter}>
-        <button
-          type="button"
-          className={styles.btnInvoice}
-          disabled={downloading === 'invoice'}
-          onClick={() => withDownloading('invoice', () => downloadVirtualInvoice(enrollment.id, token))}
-        >
-          <Download className="h-3.5 w-3.5" /> Invoice
-        </button>
       </div>
     </div>
   );
