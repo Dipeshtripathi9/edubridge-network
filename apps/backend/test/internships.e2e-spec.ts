@@ -411,6 +411,38 @@ describe('Internship Program (e2e)', () => {
       expect(second.body.data.id).toBe(first.body.data.id);
       expect(second.body.data.feeAmount).toBe(3184.82);
     });
+
+    it('enrollments/me prefers an ACTIVE enrollment over a newer PENDING_PAYMENT one for a different track', async () => {
+      const student = await registerVerifiedUser(app, { fullName: 'VI Active Over Pending Student' });
+
+      const week = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(student.token))
+        .send({ track: 'WEEK' })
+        .expect(201);
+
+      // Simulate a completed payment for WEEK, exactly like activatePaidEnrollment does.
+      await prisma.virtualInternshipEnrollment.update({
+        where: { id: week.body.data.id },
+        data: { status: 'ACTIVE', paidAt: new Date(), razorpayPaymentId: `test_pay_${week.body.data.id}` },
+      });
+
+      // Student then starts (but doesn't pay for) the other track — a newer,
+      // still-pending row now exists with a later createdAt than the paid one.
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(student.token))
+        .send({ track: 'MONTH' })
+        .expect(201);
+
+      const mine = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/me`)
+        .set(auth(student.token))
+        .expect(200);
+      expect(mine.body.data.id).toBe(week.body.data.id);
+      expect(mine.body.data.track).toBe('WEEK');
+      expect(mine.body.data.status).toBe('ACTIVE');
+    });
   });
 
   describe('Virtual Internship — tasks, review, certificate, invoice (admin RBAC)', () => {
