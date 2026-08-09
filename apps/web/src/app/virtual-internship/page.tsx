@@ -834,27 +834,6 @@ export default function VirtualInternshipPage() {
                 <span className={styles.amt}>{money(bill.referralSavings)}</span>
               </div>
             </div>
-
-            <div className={styles.donateRow}>
-              <div className={styles.donateLeft}>
-                <div
-                  role="checkbox"
-                  aria-checked={donateChecked}
-                  tabIndex={0}
-                  className={cn(styles.donateCheck, donateChecked && styles.donateCheckChecked)}
-                  onClick={() => setDonateChecked((v) => !v)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') setDonateChecked((v) => !v);
-                  }}
-                >
-                  {donateChecked && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
-                </div>
-                <div className={styles.donateText}>
-                  <b>Add ₹19 to fund a scholarship seat</b>
-                  <span>100% of this goes toward another student&apos;s internship fee</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div className={styles.coBottombar}>

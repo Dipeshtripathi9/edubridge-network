@@ -43,11 +43,17 @@ export interface VirtualInternshipTaskView {
   evaluationCriteria?: string;
   estimatedHours?: string;
   description?: string;
+  // Set only for MONTH-track curriculum tasks — groups the 16 weekly tasks
+  // into 4 month sections on the dashboard.
+  monthNumber?: number;
+  monthTitle?: string;
+  monthDescription?: string;
 }
 
 export interface VirtualInternshipTasksResponse {
   enrollment: { id: string; track: VirtualInternshipTrack; status: VirtualInternshipEnrollmentStatus };
   progress: number;
+  trackNote: string;
   tasks: VirtualInternshipTaskView[];
 }
 

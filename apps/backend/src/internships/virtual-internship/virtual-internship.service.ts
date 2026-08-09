@@ -12,7 +12,11 @@ import { PaymentsService } from '../../payments/payments.service';
 import { CertificatesService } from '../certificates/certificates.service';
 import { buildPaginatedResult } from '../../common/dto/pagination.dto';
 import { computeVirtualInternshipFee, getVirtualInternshipPricingInfo } from './pricing.constants';
-import { getVirtualInternshipTaskTemplate } from './tasks.constants';
+import {
+  getVirtualInternshipTaskTemplate,
+  VIRTUAL_INTERNSHIP_TASKS,
+  VIRTUAL_INTERNSHIP_TRACK_NOTE,
+} from './tasks.constants';
 import {
   AssignVirtualInternshipTaskDto,
   EnrollVirtualInternshipDto,
@@ -23,7 +27,6 @@ import {
 } from './dto/virtual-internship.dto';
 
 const ACTIVE_STATUSES: EnrollmentStatus[] = [EnrollmentStatus.PENDING_PAYMENT, EnrollmentStatus.ACTIVE];
-const TOTAL_TASKS = 4;
 
 @Injectable()
 export class VirtualInternshipService {
@@ -175,8 +178,9 @@ export class VirtualInternshipService {
       },
     });
 
+    const curriculumSize = VIRTUAL_INTERNSHIP_TASKS[updated.track].length;
     await this.prisma.virtualInternshipTask.createMany({
-      data: Array.from({ length: TOTAL_TASKS }, (_, i) => ({ enrollmentId: enrollment.id, taskIndex: i + 1 })),
+      data: Array.from({ length: curriculumSize }, (_, i) => ({ enrollmentId: enrollment.id, taskIndex: i + 1 })),
       skipDuplicates: true,
     });
 
@@ -224,6 +228,9 @@ export class VirtualInternshipService {
       steps: template?.steps,
       evaluationCriteria: template?.evaluationCriteria,
       estimatedHours: template?.estimatedHours,
+      monthNumber: template?.monthNumber,
+      monthTitle: template?.monthTitle,
+      monthDescription: template?.monthDescription,
       description: task.description ?? undefined,
       status: task.status,
       submissionUrl: task.submissionUrl,
@@ -263,6 +270,7 @@ export class VirtualInternshipService {
     return {
       enrollment: { id: enrollment.id, track: enrollment.track, status: enrollment.status },
       progress: tasks.length ? approvedCount / tasks.length : 0,
+      trackNote: VIRTUAL_INTERNSHIP_TRACK_NOTE[enrollment.track],
       tasks: merged,
     };
   }
@@ -366,19 +374,20 @@ export class VirtualInternshipService {
   }
 
   /**
-   * Idempotent, safe to re-run: creates the 4 task rows for any ACTIVE
-   * enrollment that has none. Covers enrollments activated before task
-   * auto-creation existed (activatePaidEnrollment only creates tasks at the
-   * moment of activation — it can't retroactively backfill enrollments that
-   * were already ACTIVE when that code shipped).
+   * Idempotent, safe to re-run: creates the curriculum task rows (per-track
+   * count) for any ACTIVE enrollment that has none. Covers enrollments
+   * activated before task auto-creation existed (activatePaidEnrollment only
+   * creates tasks at the moment of activation — it can't retroactively
+   * backfill enrollments that were already ACTIVE when that code shipped).
    */
   async adminBackfillMissingTasks() {
     const enrollments = await this.prisma.virtualInternshipEnrollment.findMany({
       where: { status: EnrollmentStatus.ACTIVE, tasks: { none: {} } },
     });
     for (const enrollment of enrollments) {
+      const curriculumSize = VIRTUAL_INTERNSHIP_TASKS[enrollment.track].length;
       await this.prisma.virtualInternshipTask.createMany({
-        data: Array.from({ length: TOTAL_TASKS }, (_, i) => ({ enrollmentId: enrollment.id, taskIndex: i + 1 })),
+        data: Array.from({ length: curriculumSize }, (_, i) => ({ enrollmentId: enrollment.id, taskIndex: i + 1 })),
         skipDuplicates: true,
       });
     }
