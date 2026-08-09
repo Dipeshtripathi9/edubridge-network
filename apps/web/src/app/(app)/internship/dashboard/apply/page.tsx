@@ -10,11 +10,13 @@ import { AllocationCard, deriveTrackBStages } from '@/components/internship/allo
 import { StageTracker } from '@/components/internship/stage-tracker';
 import { useMyTrackBApplication } from '@/hooks/use-internship-applications';
 import { useAuthStore } from '@/stores/auth.store';
+import { useAuthLinks } from '@/hooks/use-auth-links';
 
 export default function ApplyTrackBPage() {
   const router = useRouter();
   const loggedIn = useAuthStore((s) => !!s.accessToken);
   const { data: application, isLoading } = useMyTrackBApplication();
+  const { loginHref, signupHref } = useAuthLinks();
 
   if (!loggedIn) {
     return (
@@ -24,10 +26,10 @@ export default function ApplyTrackBPage() {
           <p className="mt-1 text-muted-foreground">Free, merit-based — sign in to submit your application.</p>
           <div className="mt-5 flex justify-center gap-3">
             <Button asChild variant="outline">
-              <Link href="/login">Sign in</Link>
+              <Link href={loginHref}>Sign in</Link>
             </Button>
             <Button asChild>
-              <Link href="/signup">Sign up</Link>
+              <Link href={signupHref}>Sign up</Link>
             </Button>
           </div>
         </div>

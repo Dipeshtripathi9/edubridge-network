@@ -10,12 +10,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useAuthStore } from '@/stores/auth.store';
 import { useQuizForTaking, useSubmitQuizAttempt, type QuizAttempt } from '@/hooks/use-quizzes';
+import { useAuthLinks } from '@/hooks/use-auth-links';
 
 export default function TakeQuizPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const loggedIn = useAuthStore((s) => !!s.accessToken);
   const { data: quiz, isLoading } = useQuizForTaking(id);
   const submit = useSubmitQuizAttempt();
+  const { loginHref } = useAuthLinks();
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<QuizAttempt | null>(null);
@@ -76,7 +78,7 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
           {!loggedIn && (
             <Card className="border-dashed">
               <CardContent className="p-4 text-sm text-muted-foreground">
-                <Link href="/login" className="font-semibold text-primary hover:underline">
+                <Link href={loginHref} className="font-semibold text-primary hover:underline">
                   Sign in
                 </Link>{' '}
                 to submit your answers and see your score.

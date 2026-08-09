@@ -60,6 +60,27 @@ describe('Auth (e2e)', () => {
     expect(login.body.data.tokens.refreshToken).toBeDefined();
   });
 
+  it('embeds a safe redirect path in the verification link', async () => {
+    const signup = await request(app.getHttpServer())
+      .post(`${API}/auth/signup`)
+      .send({ email: uniqueEmail(), password: 'Str0ngPass', fullName: 'Redirect User', redirect: '/some/page' })
+      .expect(201);
+    expect(signup.body.data.devLink).toContain(`redirect=${encodeURIComponent('/some/page')}`);
+  });
+
+  it('omits an unsafe (absolute) redirect from the verification link', async () => {
+    const signup = await request(app.getHttpServer())
+      .post(`${API}/auth/signup`)
+      .send({
+        email: uniqueEmail(),
+        password: 'Str0ngPass',
+        fullName: 'Unsafe Redirect User',
+        redirect: 'https://evil.example.com',
+      })
+      .expect(201);
+    expect(signup.body.data.devLink).not.toContain('redirect=');
+  });
+
   it('rejects bad credentials (401)', async () => {
     const user = await registerVerifiedUser(app);
     await request(app.getHttpServer())

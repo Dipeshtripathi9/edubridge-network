@@ -137,14 +137,14 @@ export function AccountMenu() {
             <div className="my-3 border-t border-border" />
             <div className="flex flex-col gap-3 px-3">
               <Link
-                href="/login"
+                href={`/login?redirect=${encodeURIComponent(pathname)}`}
                 onClick={() => setOpen(false)}
                 className="rounded-full bg-accent px-5 py-3 text-center text-[15px] font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
               >
                 Sign in
               </Link>
               <Link
-                href="/signup"
+                href={`/signup?redirect=${encodeURIComponent(pathname)}`}
                 onClick={() => setOpen(false)}
                 className="rounded-full bg-accent px-5 py-3 text-center text-[15px] font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
               >

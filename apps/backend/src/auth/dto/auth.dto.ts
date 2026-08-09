@@ -62,6 +62,14 @@ export class SignupDto {
   @IsOptional()
   @IsIn(['COLLEGE_ADMISSIONS', 'INTERNSHIPS_JOBS'])
   intent?: SignupIntent;
+
+  @ApiPropertyOptional({
+    description: 'Page the user was on before signing up — sent back here instead of onboarding once verified.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  redirect?: string;
 }
 
 export class LoginDto {

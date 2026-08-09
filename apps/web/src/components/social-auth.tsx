@@ -51,7 +51,7 @@ export function GoogleVerifyButton({
 }
 
 /** Standalone "Continue with Google" button (shown only when a client id is set). */
-export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {
+export function GoogleAuthButton({ mode, redirectTo }: { mode: 'login' | 'signup'; redirectTo?: string }) {
   const google = useGoogleAuth();
   if (!GOOGLE_CLIENT_ID) return null;
   return (
@@ -59,7 +59,9 @@ export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {
       <div className="flex justify-center">
         <GoogleLogin
           onSuccess={(cred) =>
-            cred.credential ? google.mutate(cred.credential) : toast.error('Google sign-in failed')
+            cred.credential
+              ? google.mutate({ idToken: cred.credential, redirectTo })
+              : toast.error('Google sign-in failed')
           }
           onError={() => toast.error('Google sign-in failed')}
           text={mode === 'signup' ? 'signup_with' : 'signin_with'}
@@ -71,7 +73,15 @@ export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {
   );
 }
 
-export function SocialAuth({ mode, showDivider = true }: { mode: 'login' | 'signup'; showDivider?: boolean }) {
+export function SocialAuth({
+  mode,
+  showDivider = true,
+  redirectTo,
+}: {
+  mode: 'login' | 'signup';
+  showDivider?: boolean;
+  redirectTo?: string;
+}) {
   const google = useGoogleAuth();
   const magic = useRequestMagicLink();
   const [email, setEmail] = useState('');
@@ -107,7 +117,9 @@ export function SocialAuth({ mode, showDivider = true }: { mode: 'login' | 'sign
           <div className="flex justify-center">
             <GoogleLogin
               onSuccess={(cred) =>
-                cred.credential ? google.mutate(cred.credential) : toast.error('Google sign-in failed')
+                cred.credential
+                  ? google.mutate({ idToken: cred.credential, redirectTo })
+                  : toast.error('Google sign-in failed')
               }
               onError={() => toast.error('Google sign-in failed')}
               text={mode === 'signup' ? 'signup_with' : 'signin_with'}

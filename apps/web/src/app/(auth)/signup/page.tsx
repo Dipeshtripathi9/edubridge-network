@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { BadgeCheck, Briefcase, GraduationCap, Lock } from 'lucide-react';
 import { MotionProvider, m } from '@/components/motion';
@@ -12,10 +12,13 @@ import { Button } from '@/components/ui/button';
 import { GoogleVerifyButton, googleEnabled } from '@/components/social-auth';
 import { useSignup } from '@/hooks/use-auth';
 import { useAuthStore } from '@/stores/auth.store';
+import { sanitizeRedirect } from '@/lib/safe-redirect';
 
 type Intent = 'college' | 'jobs';
 
-export default function SignupPage() {
+function SignupInner() {
+  const redirect = useSearchParams().get('redirect') ?? undefined;
+  const loginHref = redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login';
   const signup = useSignup();
   const setSession = useAuthStore((s) => s.setSession);
   const router = useRouter();
@@ -50,12 +53,14 @@ export default function SignupPage() {
         gender: gender || undefined,
         googleIdToken: googleToken ?? undefined,
         intent: intent === 'college' ? 'COLLEGE_ADMISSIONS' : 'INTERNSHIPS_JOBS',
+        redirect,
       },
       {
         onSuccess: (res) => {
-          const destination = intent === 'college' ? '/profile' : '/onboarding/jobs';
+          const destination = sanitizeRedirect(redirect, intent === 'college' ? '/profile' : '/onboarding/jobs');
           // Google-verified signup returns tokens — sign the user straight in and
-          // drop them right into the flow matching why they signed up.
+          // drop them right into the flow matching why they signed up (or back on
+          // the page that prompted the signup, if that's where they came from).
           if (res.tokens) {
             setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
             toast.success('Account created 🎉');
@@ -64,6 +69,7 @@ export default function SignupPage() {
           }
           // Fallback (no Google configured): email-verification flow. Carry the
           // intent through the query string so it survives the emailed-link round-trip.
+          // `redirect` is embedded straight into that link server-side instead.
           if (res.devLink) sessionStorage.setItem('ebd_verify_devlink', res.devLink);
           toast.success('Account created — verify your email to continue.');
           router.push(`/verify-email?email=${encodeURIComponent(email.trim())}&intent=${intent}`);
@@ -121,7 +127,7 @@ export default function SignupPage() {
               </div>
               <p className="text-center text-base text-muted-foreground">
                 Already have an account?{' '}
-                <Link href="/login" className="font-bold text-primary hover:underline">
+                <Link href={loginHref} className="font-bold text-primary hover:underline">
                   Log in
                 </Link>
               </p>
@@ -144,7 +150,7 @@ export default function SignupPage() {
               <GoogleVerifyButton onVerified={onVerified} />
               <p className="text-sm text-muted-foreground">
                 Already have an account?{' '}
-                <Link href="/login" className="text-primary hover:underline">
+                <Link href={loginHref} className="text-primary hover:underline">
                   Log in
                 </Link>
               </p>
@@ -232,7 +238,7 @@ export default function SignupPage() {
 
               <p className="text-center text-sm text-muted-foreground">
                 Already have an account?{' '}
-                <Link href="/login" className="text-primary hover:underline">
+                <Link href={loginHref} className="text-primary hover:underline">
                   Log in
                 </Link>
               </p>
@@ -241,5 +247,13 @@ export default function SignupPage() {
         </MotionProvider>
       </CardContent>
     </Card>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupInner />
+    </Suspense>
   );
 }

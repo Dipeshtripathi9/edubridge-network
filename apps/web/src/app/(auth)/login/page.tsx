@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,15 +10,18 @@ import { Button } from '@/components/ui/button';
 import { GoogleAuthButton } from '@/components/social-auth';
 import { useLogin } from '@/hooks/use-auth';
 
-export default function LoginPage() {
+function LoginInner() {
+  const redirect = useSearchParams().get('redirect') ?? undefined;
   const login = useLogin();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    login.mutate({ email, password }, { onError: (err) => toast.error((err as Error).message) });
+    login.mutate({ email, password, redirectTo: redirect }, { onError: (err) => toast.error((err as Error).message) });
   };
+
+  const signupHref = redirect ? `/signup?redirect=${encodeURIComponent(redirect)}` : '/signup';
 
   return (
     <Card>
@@ -45,12 +49,20 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <GoogleAuthButton mode="login" />
+        <GoogleAuthButton mode="login" redirectTo={redirect} />
 
         <Button asChild variant="outline" className="w-full">
-          <Link href="/signup">Create New Account</Link>
+          <Link href={signupHref}>Create New Account</Link>
         </Button>
       </CardContent>
     </Card>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginInner />
+    </Suspense>
   );
 }
