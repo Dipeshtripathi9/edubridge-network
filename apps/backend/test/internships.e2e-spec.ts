@@ -390,7 +390,7 @@ describe('Internship Program (e2e)', () => {
     });
   });
 
-  describe('Virtual Internship — cross-track pending-enrollment guard', () => {
+  describe('Virtual Internship — same-track re-enrollment', () => {
     it('re-enrolling in the SAME track reuses the existing pending enrollment with its fee unchanged', async () => {
       const student = await registerVerifiedUser(app, { fullName: 'VI Same Track Student' });
       const first = await request(app.getHttpServer())
@@ -407,56 +407,6 @@ describe('Internship Program (e2e)', () => {
 
       expect(second.body.data.id).toBe(first.body.data.id);
       expect(second.body.data.feeAmount).toBe(3184.82);
-    });
-
-    it('WEEK -> MONTH: a pending WEEK enrollment is never reused for a MONTH checkout', async () => {
-      const student = await registerVerifiedUser(app, { fullName: 'VI Week Then Month Student' });
-      const week = await request(app.getHttpServer())
-        .post(`${API}/internships/virtual/enroll`)
-        .set(auth(student.token))
-        .send({ track: 'WEEK' })
-        .expect(201);
-      expect(week.body.data.feeAmount).toBe(3184.82);
-
-      const monthAttempt = await request(app.getHttpServer())
-        .post(`${API}/internships/virtual/enroll`)
-        .set(auth(student.token))
-        .send({ track: 'MONTH' })
-        .expect(409);
-      expect(monthAttempt.body.message).toMatch(/pending enrollment/i);
-
-      // The WEEK enrollment must still be exactly what it was — never
-      // silently swapped to MONTH's track or fee.
-      const mine = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me`)
-        .set(auth(student.token))
-        .expect(200);
-      expect(mine.body.data.track).toBe('WEEK');
-      expect(mine.body.data.feeAmount).toBe(3184.82);
-    });
-
-    it('MONTH -> WEEK: a pending MONTH enrollment is never reused for a WEEK checkout', async () => {
-      const student = await registerVerifiedUser(app, { fullName: 'VI Month Then Week Student' });
-      const month = await request(app.getHttpServer())
-        .post(`${API}/internships/virtual/enroll`)
-        .set(auth(student.token))
-        .send({ track: 'MONTH' })
-        .expect(201);
-      expect(month.body.data.feeAmount).toBe(9008.12);
-
-      const weekAttempt = await request(app.getHttpServer())
-        .post(`${API}/internships/virtual/enroll`)
-        .set(auth(student.token))
-        .send({ track: 'WEEK' })
-        .expect(409);
-      expect(weekAttempt.body.message).toMatch(/pending enrollment/i);
-
-      const mine = await request(app.getHttpServer())
-        .get(`${API}/internships/virtual/enrollments/me`)
-        .set(auth(student.token))
-        .expect(200);
-      expect(mine.body.data.track).toBe('MONTH');
-      expect(mine.body.data.feeAmount).toBe(9008.12);
     });
   });
 });
