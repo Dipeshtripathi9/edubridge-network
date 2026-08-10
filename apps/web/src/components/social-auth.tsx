@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+import { useEffect, useState } from 'react';
+import { GoogleLogin, GoogleOAuthProvider, useGoogleOAuth, type GoogleLoginProps } from '@react-oauth/google';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,53 @@ const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 /** Whether Google auth is configured (a client id is present). */
 export const googleEnabled = !!GOOGLE_CLIENT_ID;
+
+// The accounts.google.com script this button depends on can take several
+// seconds to load (or fail entirely behind an ad blocker). Without a loading
+// state the button area is just blank until then, which reads as broken.
+function GoogleButtonInner(props: GoogleLoginProps) {
+  const { scriptLoadedSuccessfully } = useGoogleOAuth();
+  const [slow, setSlow] = useState(false);
+
+  useEffect(() => {
+    if (scriptLoadedSuccessfully) return;
+    const timer = setTimeout(() => setSlow(true), 4000);
+    return () => clearTimeout(timer);
+  }, [scriptLoadedSuccessfully]);
+
+  return (
+    <div className="relative flex h-10 w-[320px] items-center justify-center">
+      {!scriptLoadedSuccessfully && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-full border border-input bg-muted/40 text-xs text-muted-foreground">
+          {slow ? 'Still loading — check your connection or ad blocker' : 'Loading Google sign-in…'}
+        </div>
+      )}
+      <div className={scriptLoadedSuccessfully ? undefined : 'invisible'}>
+        <GoogleLogin {...props} />
+      </div>
+    </div>
+  );
+}
+
+/** Shared Google button shell: loading skeleton while the script loads, inline error if it never does. */
+function GoogleButtonSlot(props: GoogleLoginProps) {
+  const [scriptError, setScriptError] = useState(false);
+  if (!GOOGLE_CLIENT_ID) return null;
+  return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID} onScriptLoadError={() => setScriptError(true)}>
+      <div className="flex justify-center">
+        {scriptError ? (
+          <p className="max-w-xs text-center text-sm text-muted-foreground">
+            Couldn&apos;t load Google sign-in — disable any ad blocker or check your connection, then reload the
+            page.
+          </p>
+        ) : (
+          <GoogleButtonInner {...props} />
+        )}
+      </div>
+    </GoogleOAuthProvider>
+  );
+}
 
 /**
  * Google button used to VERIFY (not log in) during signup. It returns the raw ID
@@ -22,54 +69,44 @@ export function GoogleVerifyButton({
 }: {
   onVerified: (credential: string, profile: { email?: string; name?: string }) => void;
 }) {
-  if (!GOOGLE_CLIENT_ID) return null;
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <div className="flex justify-center">
-        <GoogleLogin
-          onSuccess={(cred) => {
-            if (!cred.credential) return toast.error('Google verification failed');
-            let profile: { email?: string; name?: string } = {};
-            try {
-              // Google ID tokens are base64url — normalize before decoding.
-              const part = cred.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-              const payload = JSON.parse(atob(part.padEnd(part.length + ((4 - (part.length % 4)) % 4), '=')));
-              profile = { email: payload.email, name: payload.name };
-            } catch {
-              /* server re-verifies the token regardless */
-            }
-            onVerified(cred.credential, profile);
-          }}
-          onError={() => toast.error('Google verification failed')}
-          text="signup_with"
-          shape="pill"
-          width="320"
-        />
-      </div>
-    </GoogleOAuthProvider>
+    <GoogleButtonSlot
+      onSuccess={(cred) => {
+        if (!cred.credential) return toast.error('Google verification failed');
+        let profile: { email?: string; name?: string } = {};
+        try {
+          // Google ID tokens are base64url — normalize before decoding.
+          const part = cred.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+          const payload = JSON.parse(atob(part.padEnd(part.length + ((4 - (part.length % 4)) % 4), '=')));
+          profile = { email: payload.email, name: payload.name };
+        } catch {
+          /* server re-verifies the token regardless */
+        }
+        onVerified(cred.credential, profile);
+      }}
+      onError={() => toast.error('Google verification failed')}
+      text="signup_with"
+      shape="pill"
+      width="320"
+    />
   );
 }
 
 /** Standalone "Continue with Google" button (shown only when a client id is set). */
 export function GoogleAuthButton({ mode, redirectTo }: { mode: 'login' | 'signup'; redirectTo?: string }) {
   const google = useGoogleAuth();
-  if (!GOOGLE_CLIENT_ID) return null;
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <div className="flex justify-center">
-        <GoogleLogin
-          onSuccess={(cred) =>
-            cred.credential
-              ? google.mutate({ idToken: cred.credential, redirectTo })
-              : toast.error('Google sign-in failed')
-          }
-          onError={() => toast.error('Google sign-in failed')}
-          text={mode === 'signup' ? 'signup_with' : 'signin_with'}
-          shape="pill"
-          width="320"
-        />
-      </div>
-    </GoogleOAuthProvider>
+    <GoogleButtonSlot
+      onSuccess={(cred) =>
+        cred.credential
+          ? google.mutate({ idToken: cred.credential, redirectTo })
+          : toast.error('Google sign-in failed')
+      }
+      onError={() => toast.error('Google sign-in failed')}
+      text={mode === 'signup' ? 'signup_with' : 'signin_with'}
+      shape="pill"
+      width="320"
+    />
   );
 }
 
@@ -112,23 +149,17 @@ export function SocialAuth({
         </div>
       )}
 
-      {GOOGLE_CLIENT_ID ? (
-        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={(cred) =>
-                cred.credential
-                  ? google.mutate({ idToken: cred.credential, redirectTo })
-                  : toast.error('Google sign-in failed')
-              }
-              onError={() => toast.error('Google sign-in failed')}
-              text={mode === 'signup' ? 'signup_with' : 'signin_with'}
-              shape="pill"
-              width="320"
-            />
-          </div>
-        </GoogleOAuthProvider>
-      ) : null}
+      <GoogleButtonSlot
+        onSuccess={(cred) =>
+          cred.credential
+            ? google.mutate({ idToken: cred.credential, redirectTo })
+            : toast.error('Google sign-in failed')
+        }
+        onError={() => toast.error('Google sign-in failed')}
+        text={mode === 'signup' ? 'signup_with' : 'signin_with'}
+        shape="pill"
+        width="320"
+      />
 
       {/* Passwordless email link */}
       {sent ? (
