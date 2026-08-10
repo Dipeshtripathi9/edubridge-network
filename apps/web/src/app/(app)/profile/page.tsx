@@ -20,9 +20,9 @@ export default function ProfilePage() {
   const loggedIn = useAuthStore((s) => !!s.accessToken);
   const pct = useProfileProgress((s) => s.pct);
   const { data: me } = useMe();
-  // Already partway through the College Admissions wizard — skip straight
-  // back into it instead of re-asking which track they're on.
-  const [track, setTrack] = useState<'picker' | 'college'>(pct > 0 ? 'college' : 'picker');
+  // Always ask which track brought them here — even mid-wizard users see the
+  // two options first, every time they land on this page.
+  const [track, setTrack] = useState<'picker' | 'college'>('picker');
 
   // Close the page: go back if there's history, otherwise fall back to Home.
   const close = () => {
