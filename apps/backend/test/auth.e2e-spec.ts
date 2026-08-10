@@ -60,6 +60,42 @@ describe('Auth (e2e)', () => {
     expect(login.body.data.tokens.refreshToken).toBeDefined();
   });
 
+  it('saves phone and state at signup for future use', async () => {
+    const email = uniqueEmail();
+    const phone = `+9198${Math.floor(10000000 + Math.random() * 89999999)}`;
+
+    const signup = await request(app.getHttpServer())
+      .post(`${API}/auth/signup`)
+      .send({ email, password: 'Str0ngPass', fullName: 'Full Profile User', phone, gender: 'Male', state: 'Delhi' })
+      .expect(201);
+    expect(signup.body.data.user.phone).toBe(phone);
+
+    const stored = await prisma.user.findUnique({ where: { email }, include: { profile: true } });
+    expect(stored?.phone).toBe(phone);
+    expect(stored?.profile?.state).toBe('Delhi');
+    expect(stored?.profile?.gender).toBe('Male');
+  });
+
+  it('rejects a malformed phone number on signup (400)', async () => {
+    await request(app.getHttpServer())
+      .post(`${API}/auth/signup`)
+      .send({ email: uniqueEmail(), password: 'Str0ngPass', fullName: 'Bad Phone User', phone: '12345' })
+      .expect(400);
+  });
+
+  it('rejects signing up with a phone number already registered to another account', async () => {
+    const phone = `+9199${Math.floor(10000000 + Math.random() * 89999999)}`;
+    await request(app.getHttpServer())
+      .post(`${API}/auth/signup`)
+      .send({ email: uniqueEmail(), password: 'Str0ngPass', fullName: 'First Owner', phone })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`${API}/auth/signup`)
+      .send({ email: uniqueEmail(), password: 'Str0ngPass', fullName: 'Second Owner', phone })
+      .expect(400);
+  });
+
   it('embeds a safe redirect path in the verification link', async () => {
     const signup = await request(app.getHttpServer())
       .post(`${API}/auth/signup`)

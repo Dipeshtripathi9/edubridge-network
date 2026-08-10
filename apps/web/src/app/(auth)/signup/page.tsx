@@ -16,6 +16,14 @@ import { sanitizeRedirect } from '@/lib/safe-redirect';
 
 type Intent = 'college' | 'jobs';
 
+const STATES = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana',
+  'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+  'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana',
+  'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Andaman and Nicobar Islands', 'Chandigarh',
+  'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
+];
+
 function SignupInner() {
   const redirect = useSearchParams().get('redirect') ?? undefined;
   const loginHref = redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login';
@@ -27,7 +35,9 @@ function SignupInner() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [mobile, setMobile] = useState('');
   const [gender, setGender] = useState('');
+  const [homeState, setHomeState] = useState('');
 
   // When Google is configured, verification is required before the form opens.
   const verified = !googleEnabled || !!googleToken;
@@ -50,7 +60,9 @@ function SignupInner() {
         email: email.trim(),
         password,
         fullName: fullName.trim(),
+        phone: mobile ? `+91${mobile}` : undefined,
         gender: gender || undefined,
+        state: homeState || undefined,
         googleIdToken: googleToken ?? undefined,
         intent: intent === 'college' ? 'COLLEGE_ADMISSIONS' : 'INTERNSHIPS_JOBS',
         redirect,
@@ -212,6 +224,24 @@ function SignupInner() {
               </div>
 
               <div>
+                <label className="text-sm font-medium">Mobile Number</label>
+                <div className="flex gap-2">
+                  <div className="flex h-10 w-14 flex-shrink-0 items-center justify-center rounded-md border border-input bg-muted text-sm font-medium text-muted-foreground">
+                    +91
+                  </div>
+                  <Input
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    placeholder="10-digit mobile number"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
                 <label className="text-sm font-medium">Gender</label>
                 <select
                   value={gender}
@@ -224,6 +254,21 @@ function SignupInner() {
                   <option>Female</option>
                   <option>Other</option>
                   <option>Prefer not to say</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">State</label>
+                <select
+                  value={homeState}
+                  onChange={(e) => setHomeState(e.target.value)}
+                  required
+                  className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
+                >
+                  <option value="">Select state</option>
+                  {STATES.map((s) => (
+                    <option key={s}>{s}</option>
+                  ))}
                 </select>
               </div>
 

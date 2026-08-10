@@ -43,11 +43,22 @@ export class SignupDto {
   @IsNotEmpty()
   fullName!: string;
 
+  @ApiPropertyOptional({ example: '+919876543210' })
+  @IsOptional()
+  @IsPhoneNumber('IN')
+  phone?: string;
+
   @ApiPropertyOptional({ example: 'Male' })
   @IsOptional()
   @IsString()
   @MaxLength(30)
   gender?: string;
+
+  @ApiPropertyOptional({ example: 'Delhi' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  state?: string;
 
   @ApiPropertyOptional({
     description:

@@ -48,6 +48,10 @@ export class AuthService {
   async signup(dto: SignupDto, meta?: RequestMeta) {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) throw new BadRequestException('Email already registered');
+    if (dto.phone) {
+      const phoneTaken = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
+      if (phoneTaken) throw new BadRequestException('Phone number already registered');
+    }
 
     // A Google ID token proves the email — verify it server-side. When valid (and
     // it matches the email being registered), the account is created verified and
@@ -72,6 +76,7 @@ export class AuthService {
       data: {
         email: dto.email,
         passwordHash,
+        phone: dto.phone || null,
         authProvider: AuthProvider.EMAIL,
         status: autoVerify ? 'ACTIVE' : 'PENDING_VERIFICATION',
         emailVerifiedAt: autoVerify ? new Date() : null,
@@ -79,6 +84,7 @@ export class AuthService {
           create: {
             fullName: stripLeadingHonorific(dto.fullName),
             gender: dto.gender?.trim() || null,
+            state: dto.state?.trim() || null,
             signupIntent: dto.intent,
           },
         },
