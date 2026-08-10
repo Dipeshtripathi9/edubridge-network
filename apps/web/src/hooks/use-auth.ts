@@ -33,7 +33,9 @@ export function useSignup() {
       email: string;
       password: string;
       fullName: string;
+      phone?: string;
       gender?: string;
+      state?: string;
       googleIdToken?: string;
       intent?: 'COLLEGE_ADMISSIONS' | 'INTERNSHIPS_JOBS';
       redirect?: string;
