@@ -18,7 +18,7 @@ export default function ScholarshipsPage() {
   const [category, setCategory] = useState<string | undefined>(undefined);
 
   const { data: categories } = useScholarshipCategories();
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useScholarships({ q, category, sort: 'deadline' });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useScholarships({ q, category, sort: 'deadline' });
   const { isShortlisted, toggle } = useScholarshipShortlist();
 
   const scholarships = data?.pages.flatMap((p) => p.data) ?? [];
@@ -58,7 +58,10 @@ export default function ScholarshipsPage() {
         ))}
       </div>
 
-      {isLoading && (
+      {/* Check `data` rather than `isLoading` — see home-college-ranking.tsx
+          for why `isLoading` drifts from the server during the client's
+          PersistQueryClientProvider cache-restore phase. */}
+      {!data && (
         <div className="flex flex-col gap-3">
           <Skeleton className="h-28 w-full rounded-[18px]" />
           <Skeleton className="h-28 w-full rounded-[18px]" />
@@ -66,7 +69,7 @@ export default function ScholarshipsPage() {
         </div>
       )}
 
-      {!isLoading && scholarships.length === 0 && (
+      {data && scholarships.length === 0 && (
         <EmptyState icon={Award} title="No scholarships found" description={q ? `Nothing matched "${q}".` : 'Check back soon — we\'re adding more scholarships.'} />
       )}
 

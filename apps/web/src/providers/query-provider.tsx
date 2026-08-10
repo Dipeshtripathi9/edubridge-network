@@ -1,6 +1,6 @@
 'use client';
 
-import { keepPreviousData, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { keepPreviousData, QueryClient, QueryClientProvider, type Query } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { useState, type ReactNode } from 'react';
@@ -54,7 +54,22 @@ export function QueryProvider({ children }: { children: ReactNode }) {
   return (
     <PersistQueryClientProvider
       client={client}
-      persistOptions={{ persister, maxAge: 24 * 60 * 60_000, buster: 'v3' }}
+      persistOptions={{
+        persister,
+        maxAge: 24 * 60 * 60_000,
+        buster: 'v3',
+        dehydrateOptions: {
+          // Virtual-internship enrollment/task state decides which whole
+          // sections of the page render (My Courses vs hero, which tracks
+          // still show in "Choose your track", task progress) — showing a
+          // persisted-but-stale snapshot on reload before the real fetch
+          // resolves makes the page visibly flash from an old layout to the
+          // current one. Exclude it from persistence so a reload always
+          // starts from a loading state and settles once, instead of
+          // rendering last session's answer first.
+          shouldDehydrateQuery: (query: Query) => query.queryKey[0] !== 'virtual-internship',
+        },
+      }}
     >
       {children}
     </PersistQueryClientProvider>

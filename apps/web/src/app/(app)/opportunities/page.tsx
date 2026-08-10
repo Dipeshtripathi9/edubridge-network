@@ -78,9 +78,12 @@ const CATEGORIES = [
 ];
 
 function OpportunityBySlug({ slug }: { slug: string }) {
-  const { data: listing, isLoading } = useInternshipListing(slug);
-  if (isLoading) return <Skeleton className="h-28 w-full rounded-[20px]" />;
-  if (!listing) return null;
+  // Check `isError`/`listing` rather than `isLoading` — see
+  // home-college-ranking.tsx for why `isLoading` drifts from the server
+  // during the client's PersistQueryClientProvider cache-restore phase.
+  const { data: listing, isError } = useInternshipListing(slug);
+  if (isError) return null;
+  if (!listing) return <Skeleton className="h-28 w-full rounded-[20px]" />;
   return <OpportunityRecommendationCard listing={listing} />;
 }
 
@@ -134,7 +137,7 @@ function AllTab({
   initialQuery?: string;
 }) {
   const [q, setQ] = useState(initialQuery ?? '');
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInternshipListings({ category, q: q || undefined });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInternshipListings({ category, q: q || undefined });
   const listings: InternshipListing[] = data?.pages.flatMap((p) => p.data) ?? [];
   const sliderRef = useRef<HTMLDivElement>(null);
   const scrollByStep = (dir: 1 | -1) => sliderRef.current?.scrollBy({ left: dir * 340, behavior: 'smooth' });
@@ -217,14 +220,17 @@ function AllTab({
 
       <div className="mb-3.5 flex flex-wrap items-baseline justify-between gap-1.5">
         <h2 className="m-0 font-fraunces text-[20px] font-bold">{category ? `${category} opportunities` : 'All opportunities'}</h2>
-        {!isLoading && (
+        {data && (
           <span className="text-[13px] text-muted-foreground">
             {listings.length} {listings.length === 1 ? 'match' : 'matches'}
           </span>
         )}
       </div>
 
-      {isLoading && (
+      {/* Check `data` rather than `isLoading` — see home-college-ranking.tsx
+          for why `isLoading` drifts from the server during the client's
+          PersistQueryClientProvider cache-restore phase. */}
+      {!data && (
         <div className="flex flex-col gap-3">
           <Skeleton className="h-28 w-full rounded-[20px]" />
           <Skeleton className="h-28 w-full rounded-[20px]" />
@@ -232,7 +238,7 @@ function AllTab({
         </div>
       )}
 
-      {!isLoading && listings.length === 0 && (
+      {data && listings.length === 0 && (
         <EmptyState
           icon={Briefcase}
           title="No opportunities found"

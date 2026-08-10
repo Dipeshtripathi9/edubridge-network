@@ -18,9 +18,12 @@ import { cn } from '@/lib/utils';
 type Tab = 'all' | 'shortlist' | 'applied';
 
 function CollegeBySlug({ slug, onQuiz }: { slug: string; onQuiz: () => void }) {
-  const { data: college, isLoading } = useCollege(slug);
-  if (isLoading) return <Skeleton className="h-28 w-full rounded-[20px]" />;
-  if (!college) return null;
+  // Check `isError`/`college` rather than `isLoading` — see
+  // home-college-ranking.tsx for why `isLoading` drifts from the server
+  // during the client's PersistQueryClientProvider cache-restore phase.
+  const { data: college, isError } = useCollege(slug);
+  if (isError) return null;
+  if (!college) return <Skeleton className="h-28 w-full rounded-[20px]" />;
   return <CollegeRecommendationCard college={college} onQuiz={onQuiz} />;
 }
 
@@ -70,7 +73,7 @@ function AppliedTab({ onQuiz }: { onQuiz: () => void }) {
 
 function AllCollegesTab({ onQuiz }: { onQuiz: () => void }) {
   const [q, setQ] = useState('');
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useColleges({ q, sort: 'rating' });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useColleges({ q, sort: 'rating' });
   const colleges = data?.pages.flatMap((p) => p.data) ?? [];
 
   return (
@@ -80,7 +83,10 @@ function AllCollegesTab({ onQuiz }: { onQuiz: () => void }) {
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search colleges by name…" className="pl-9" />
       </div>
 
-      {isLoading && (
+      {/* Check `data` rather than `isLoading` — see home-college-ranking.tsx
+          for why `isLoading` drifts from the server during the client's
+          PersistQueryClientProvider cache-restore phase. */}
+      {!data && (
         <div className="flex flex-col gap-3">
           <Skeleton className="h-28 w-full rounded-[20px]" />
           <Skeleton className="h-28 w-full rounded-[20px]" />
@@ -88,7 +94,7 @@ function AllCollegesTab({ onQuiz }: { onQuiz: () => void }) {
         </div>
       )}
 
-      {!isLoading && colleges.length === 0 && (
+      {data && colleges.length === 0 && (
         <EmptyState icon={GraduationCap} title="No colleges found" description={q ? `Nothing matched "${q}".` : "Check back soon — we're adding more colleges."} />
       )}
 

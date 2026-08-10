@@ -13,14 +13,20 @@ import { isSafeHttpUrl } from '@/lib/utils';
 // static internship teaser in HomeTools. Mirrors HomeCollegeRanking's
 // mobile-capped / desktop-infinite-scroll split.
 export function HomeInternshipRecommendations() {
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInternshipListings();
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInternshipListings();
   const { isShortlisted, toggle } = useInternshipListingShortlist();
 
   const listings = data?.pages.flatMap((p) => p.data) ?? [];
 
   // No catalog data yet — skip the section entirely rather than showing an
-  // empty-state placeholder on the home page.
-  if (!isLoading && listings.length === 0) return null;
+  // empty-state placeholder on the home page. Check `data` rather than
+  // `isLoading`: with PersistQueryClientProvider, `isLoading` is briefly false
+  // during the client's cache-restore phase (before the persisted cache or a
+  // fresh fetch has resolved) — a phase SSR never has — so branching on it
+  // made this section disappear on the client right at hydration when the
+  // server had rendered it loading. `data` stays undefined in both the SSR
+  // pass and the client's pre-restore paint, so it doesn't drift.
+  if (data && listings.length === 0) return null;
 
   const cardActions = (l: InternshipListing) => {
     const shortlisted = isShortlisted(l.slug);
@@ -45,7 +51,7 @@ export function HomeInternshipRecommendations() {
     <section>
       <h2 className="mb-6 font-display text-[clamp(22px,3vw,28px)] font-semibold">Internships matched to you</h2>
 
-      {isLoading && (
+      {!data && (
         <div className="flex flex-col gap-3">
           <Skeleton className="h-28 w-full rounded-[18px]" />
           <Skeleton className="h-28 w-full rounded-[18px]" />
