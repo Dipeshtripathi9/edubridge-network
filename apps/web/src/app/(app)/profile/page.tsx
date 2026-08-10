@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { X } from 'lucide-react';
+import { Briefcase, GraduationCap, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProfileForm } from '@/components/profile-form';
 import { useProfileProgress } from '@/stores/profile-progress.store';
@@ -19,6 +20,9 @@ export default function ProfilePage() {
   const loggedIn = useAuthStore((s) => !!s.accessToken);
   const pct = useProfileProgress((s) => s.pct);
   const { data: me } = useMe();
+  // Already partway through the College Admissions wizard — skip straight
+  // back into it instead of re-asking which track they're on.
+  const [track, setTrack] = useState<'picker' | 'college'>(pct > 0 ? 'college' : 'picker');
 
   // Close the page: go back if there's history, otherwise fall back to Home.
   const close = () => {
@@ -43,20 +47,64 @@ export default function ProfilePage() {
 
   const done = pct >= 100;
 
+  const closeButton = (
+    <button
+      type="button"
+      aria-label="Close profile"
+      onClick={close}
+      className="grid h-8 w-8 flex-none place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+    >
+      <X className="h-5 w-5" strokeWidth={2.4} />
+    </button>
+  );
+
+  if (track === 'picker') {
+    return (
+      <div className="mx-auto max-w-xl">
+        <h1 className="mb-6 flex items-center gap-1.5 font-display text-2xl font-extrabold tracking-tight">
+          {closeButton}
+          <span className="truncate">Welcome to EduBridge</span>
+        </h1>
+        <div className="space-y-5 py-2">
+          <p className="text-center text-lg font-bold">What brings you to EduBridge Network today?</p>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setTrack('college')}
+              className="flex flex-col items-center gap-3.5 rounded-2xl border-[1.5px] border-border bg-card p-7 text-center transition-all hover:border-primary/60 hover:bg-primary/5"
+            >
+              <GraduationCap className="h-8 w-8 text-primary" />
+              <span className="text-[17px] font-bold leading-tight">
+                College
+                <br />
+                Admissions
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/verify')}
+              className="flex flex-col items-center gap-3.5 rounded-2xl border-[1.5px] border-border bg-card p-7 text-center transition-all hover:border-primary/60 hover:bg-primary/5"
+            >
+              <Briefcase className="h-7 w-7 text-primary" />
+              <span className="text-[17px] font-bold leading-tight">
+                Internships &amp;
+                <br />
+                Jobs
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-xl">
       {/* Completion header + animated progress line */}
       <div className="mb-6">
         <div className="mb-2 flex items-center justify-between gap-2">
           <h1 className="flex min-w-0 items-center gap-1.5 font-display text-2xl font-extrabold tracking-tight">
-            <button
-              type="button"
-              aria-label="Close profile"
-              onClick={close}
-              className="grid h-8 w-8 flex-none place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <X className="h-5 w-5" strokeWidth={2.4} />
-            </button>
+            {closeButton}
             <span className="truncate">Your EduBridge Profile</span>
           </h1>
           <span className="font-display text-lg font-extrabold tabular-nums text-primary">{pct}%</span>
