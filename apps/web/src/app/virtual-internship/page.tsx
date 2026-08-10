@@ -822,7 +822,7 @@ export default function VirtualInternshipPage() {
 
       {view === 'dashboard' && dashboardEnrollment && (
         <div>
-          <button type="button" className={styles.backBtn} style={{ margin: '20px 56px 0' }} onClick={showLanding}>
+          <button type="button" className={styles.dashBackBtn} onClick={showLanding}>
             <ChevronLeft className="h-4 w-4" /> Back to my courses
           </button>
           <EnrolledDashboard enrollment={dashboardEnrollment} />
