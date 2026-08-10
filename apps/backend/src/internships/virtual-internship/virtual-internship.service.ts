@@ -262,7 +262,8 @@ export class VirtualInternshipService {
     const existing = await this.prisma.virtualInternshipEnrollment.findFirst({
       where: { userId, track, status: { in: ACTIVE_STATUSES } },
     });
-    if (existing) {
+    // Already truly enrolled (paid or previously granted a seat) — nothing to do.
+    if (existing?.status === EnrollmentStatus.ACTIVE) {
       return this.serialize(existing);
     }
 
@@ -278,6 +279,19 @@ export class VirtualInternshipService {
       });
       if (used >= capacity) {
         throw new BadRequestException('All scholarship seats for this track have been claimed');
+      }
+
+      // A stray PENDING_PAYMENT row from an earlier, non-scholarship checkout
+      // attempt (started the priced flow, never paid) must be upgraded in
+      // place rather than left dangling unpaid — returning it unchanged, as
+      // the plain `enroll()` dedupe does, would show the student a "You're
+      // in!" success message for an enrollment that's still gated on a
+      // payment that was never made.
+      if (existing) {
+        return tx.virtualInternshipEnrollment.update({
+          where: { id: existing.id },
+          data: { feeAmount: 0, scholarshipApplied: true, status: EnrollmentStatus.ACTIVE, paidAt: new Date() },
+        });
       }
 
       return tx.virtualInternshipEnrollment.create({

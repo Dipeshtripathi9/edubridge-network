@@ -701,9 +701,7 @@ export default function VirtualInternshipPage() {
                       <div>
                         <div className={styles.offerTitle}>100% Scholarship</div>
                         <div className={cn(styles.offerSub, !scholarshipOpen && styles.offerSubLocked)}>
-                          {scholarshipOpen
-                            ? `Open for the first ${scholarship!.capacity} students — ${scholarship!.remaining} seat${scholarship!.remaining === 1 ? '' : 's'} left`
-                            : 'Applications closed for this cohort'}
+                          {scholarshipOpen ? 'Very few seats available' : 'Applications closed for this cohort'}
                         </div>
                       </div>
                     </div>
