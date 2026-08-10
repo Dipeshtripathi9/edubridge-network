@@ -1817,15 +1817,23 @@
   background: var(--ink-faint);
   color: #fff;
 }
+/* Grid 0fr→1fr trick instead of a fixed max-height: animates to the body's
+   real content height regardless of how long a given task's text runs
+   (objective/deliverables/steps text wraps to far more lines on a narrow
+   phone than on desktop) — a hardcoded max-height clipped the submit form
+   off the bottom of any task whose mobile-wrapped content grew past it. */
 .taskBody {
-  max-height: 0;
+  display: grid;
+  grid-template-rows: 0fr;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: grid-template-rows 0.3s ease;
 }
 .taskBodyOpen {
-  max-height: 900px;
+  grid-template-rows: 1fr;
 }
 .taskBodyInner {
+  min-height: 0;
+  overflow: hidden;
   padding: 16px 18px 18px;
   border-top: 1px solid var(--line);
 }
