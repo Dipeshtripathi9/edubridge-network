@@ -67,8 +67,18 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
         // Share rate-limit counters across replicas via Redis in production, so the
         // limit is global (not per-instance). Dev/test use the default in-memory
         // store (the guard is skipped in tests anyway).
+        // Bounded retries + a short command timeout: if Redis is unreachable
+        // (e.g. a quota-exhausted provider), rate-limit checks fail fast
+        // instead of hanging every request forever. AppThrottlerGuard fails
+        // open on top of this, so a Redis outage degrades rate limiting
+        // rather than taking the whole API down with it.
         ...(config.get<string>('env') === 'production'
-          ? { storage: new ThrottlerStorageRedisService(config.get<string>('redis.url')!) }
+          ? {
+              storage: new ThrottlerStorageRedisService(config.get<string>('redis.url')!, {
+                maxRetriesPerRequest: 3,
+                commandTimeout: 5000,
+              }),
+            }
           : {}),
       }),
     }),
