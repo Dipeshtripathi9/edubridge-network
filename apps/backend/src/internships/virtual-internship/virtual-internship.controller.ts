@@ -18,8 +18,10 @@ import { VirtualInternshipService } from './virtual-internship.service';
 import { buildInvoicePdf, buildRewardDocumentPdf } from './virtual-internship.pdf';
 import {
   AssignVirtualInternshipTaskDto,
+  EnrollScholarshipDto,
   EnrollVirtualInternshipDto,
   ReviewVirtualInternshipTaskDto,
+  SetScholarshipCapacityDto,
   SubmitVirtualInternshipTaskDto,
   VerifyVirtualInternshipPaymentDto,
   VirtualInternshipAdminQueryDto,
@@ -45,6 +47,19 @@ export class VirtualInternshipController {
   @ApiOperation({ summary: 'Enroll in a Virtual Internship track' })
   enroll(@CurrentUser('sub') userId: string, @Body() dto: EnrollVirtualInternshipDto) {
     return this.virtualInternship.enroll(userId, dto);
+  }
+
+  @Public()
+  @Get('scholarship/status')
+  @ApiOperation({ summary: 'Remaining 100% scholarship seats per track (public)' })
+  scholarshipStatus() {
+    return this.virtualInternship.scholarshipStatus();
+  }
+
+  @Post('enroll-scholarship')
+  @ApiOperation({ summary: 'Claim a free 100% scholarship seat for a track, if seats remain' })
+  enrollScholarship(@CurrentUser('sub') userId: string, @Body() dto: EnrollScholarshipDto) {
+    return this.virtualInternship.enrollWithScholarship(userId, dto.track);
   }
 
   @Get('enrollments/me')
@@ -162,6 +177,13 @@ export class VirtualInternshipController {
   @ApiOperation({ summary: 'Task submissions awaiting review (admin)' })
   adminListSubmissions() {
     return this.virtualInternship.adminListSubmissions();
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Post('admin/scholarship/capacity')
+  @ApiOperation({ summary: 'Set the 100% scholarship seat cap for a track (admin)' })
+  adminSetScholarshipCapacity(@CurrentUser('sub') adminId: string, @Body() dto: SetScholarshipCapacityDto) {
+    return this.virtualInternship.adminSetScholarshipCapacity(adminId, dto.track, dto.capacity);
   }
 
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)

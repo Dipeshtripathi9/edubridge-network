@@ -914,4 +914,127 @@ describe('Internship Program (e2e)', () => {
       expect(invoice.body.slice(0, 4).toString('utf8')).toBe('%PDF');
     });
   });
+
+  describe('Virtual Internship — 100% scholarship (admin-capped, claimed automatically)', () => {
+    // The scholarship cap/used-count is global (not scoped to a fresh test
+    // user like everything else in this file), and this test DB persists
+    // across separate e2e runs — so, unlike the rest of the file, these
+    // assertions must be relative to a captured baseline instead of assuming
+    // a pristine "capacity 0 / used 0" starting point.
+
+    it('403s a non-admin setting the scholarship cap', async () => {
+      const student = await registerVerifiedUser(app, { fullName: 'VI Scholarship RBAC Student' });
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/scholarship/capacity`)
+        .set(auth(student.token))
+        .send({ track: 'WEEK', capacity: 5 })
+        .expect(403);
+    });
+
+    it('setting capacity to 0 closes a track — claiming is rejected', async () => {
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/scholarship/capacity`)
+        .set(auth(admin.token))
+        .send({ track: 'WEEK', capacity: 0 })
+        .expect(201);
+
+      const status = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/scholarship/status`)
+        .expect(200);
+      expect(status.body.data.WEEK.capacity).toBe(0);
+      expect(status.body.data.WEEK.remaining).toBe(0);
+
+      const student = await registerVerifiedUser(app, { fullName: 'VI Scholarship Closed Student' });
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll-scholarship`)
+        .set(auth(student.token))
+        .send({ track: 'WEEK' })
+        .expect(400);
+    });
+
+    it('opening exactly 2 more seats than are currently used lets exactly two students claim a free, instantly-active seat; a third is rejected once full', async () => {
+      const before = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/scholarship/status`)
+        .expect(200);
+      const baselineUsed = before.body.data.WEEK.used;
+
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/scholarship/capacity`)
+        .set(auth(admin.token))
+        .send({ track: 'WEEK', capacity: baselineUsed + 2 })
+        .expect(201);
+
+      const opened = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/scholarship/status`)
+        .expect(200);
+      expect(opened.body.data.WEEK.remaining).toBe(2);
+
+      const first = await registerVerifiedUser(app, { fullName: 'VI Scholarship First Student' });
+      const firstClaim = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll-scholarship`)
+        .set(auth(first.token))
+        .send({ track: 'WEEK' })
+        .expect(201);
+      expect(firstClaim.body.data.status).toBe('ACTIVE');
+      expect(firstClaim.body.data.feeAmount).toBe(0);
+      expect(firstClaim.body.data.scholarshipApplied).toBe(true);
+
+      // No payment/verification step — curriculum tasks are seeded immediately.
+      const tasks = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/${firstClaim.body.data.id}/tasks`)
+        .set(auth(first.token))
+        .expect(200);
+      expect(tasks.body.data.tasks).toHaveLength(4);
+
+      const second = await registerVerifiedUser(app, { fullName: 'VI Scholarship Second Student' });
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll-scholarship`)
+        .set(auth(second.token))
+        .send({ track: 'WEEK' })
+        .expect(201);
+
+      const full = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/scholarship/status`)
+        .expect(200);
+      expect(full.body.data.WEEK.used).toBe(baselineUsed + 2);
+      expect(full.body.data.WEEK.remaining).toBe(0);
+
+      const third = await registerVerifiedUser(app, { fullName: 'VI Scholarship Third Student' });
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll-scholarship`)
+        .set(auth(third.token))
+        .send({ track: 'WEEK' })
+        .expect(400);
+    });
+
+    it('re-claiming while already enrolled in the track returns the existing enrollment instead of consuming another seat', async () => {
+      const before = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/scholarship/status`)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/scholarship/capacity`)
+        .set(auth(admin.token))
+        .send({ track: 'MONTH', capacity: before.body.data.MONTH.used + 5 })
+        .expect(201);
+
+      const student = await registerVerifiedUser(app, { fullName: 'VI Scholarship Dedupe Student' });
+      const first = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll-scholarship`)
+        .set(auth(student.token))
+        .send({ track: 'MONTH' })
+        .expect(201);
+      const second = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll-scholarship`)
+        .set(auth(student.token))
+        .send({ track: 'MONTH' })
+        .expect(201);
+      expect(second.body.data.id).toBe(first.body.data.id);
+
+      const status = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/scholarship/status`)
+        .expect(200);
+      expect(status.body.data.MONTH.used).toBe(before.body.data.MONTH.used + 1);
+    });
+  });
 });

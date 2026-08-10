@@ -15,6 +15,7 @@ export interface VirtualInternshipEnrollment {
   track: VirtualInternshipTrack;
   referralApplied: boolean;
   donateApplied: boolean;
+  scholarshipApplied: boolean;
   feeAmount: number;
   status: VirtualInternshipEnrollmentStatus;
   razorpayOrderId?: string | null;
@@ -22,6 +23,11 @@ export interface VirtualInternshipEnrollment {
   paidAt?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface VirtualInternshipScholarshipStatus {
+  WEEK: { capacity: number; used: number; remaining: number };
+  MONTH: { capacity: number; used: number; remaining: number };
 }
 
 export interface VirtualInternshipTaskView {
@@ -93,6 +99,25 @@ export function useMyVirtualInternshipTasks(enrollmentId: string) {
     queryKey: ['virtual-internship', enrollmentId, 'tasks'],
     queryFn: () => api.get<VirtualInternshipTasksResponse>(`/internships/virtual/enrollments/${enrollmentId}/tasks`),
     enabled: !!token && !!enrollmentId,
+  });
+}
+
+/** Remaining 100%-scholarship seats per track — public, no auth required. */
+export function useVirtualInternshipScholarshipStatus() {
+  return useQuery({
+    queryKey: ['virtual-internship', 'scholarship', 'status'],
+    queryFn: () => api.get<VirtualInternshipScholarshipStatus>('/internships/virtual/scholarship/status'),
+    staleTime: 30_000,
+  });
+}
+
+/** Claim a free 100% scholarship seat for a track, if any remain — activates immediately, no payment. */
+export function useEnrollVirtualInternshipScholarship() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (track: VirtualInternshipTrack) =>
+      api.post<VirtualInternshipEnrollment>('/internships/virtual/enroll-scholarship', { track }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['virtual-internship', 'scholarship'] }),
   });
 }
 
@@ -194,6 +219,18 @@ export function useAdminReviewVirtualInternshipTask() {
     mutationFn: ({ taskId, approve, reviewNote }: { taskId: string; approve: boolean; reviewNote?: string }) =>
       api.post(`/internships/virtual/admin/submissions/${taskId}/review`, { approve, reviewNote }),
     onSuccess: () => invalidateAdminVirtualInternship(qc),
+  });
+}
+
+export function useAdminSetScholarshipCapacity() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ track, capacity }: { track: VirtualInternshipTrack; capacity: number }) =>
+      api.post<VirtualInternshipScholarshipStatus>('/internships/virtual/admin/scholarship/capacity', {
+        track,
+        capacity,
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['virtual-internship', 'scholarship'] }),
   });
 }
 
