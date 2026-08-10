@@ -684,6 +684,32 @@
 .backBtn:hover {
   color: #fff;
 }
+/* Dashboard's own back button — .backBtn's pale mint text is tuned for the
+   dark-green checkout/detail-hero contexts it was built for; reused as-is on
+   the dashboard's light parchment background it was nearly unreadable. Also
+   swap the old fixed 56px margin (never shrank on mobile) for a padding that
+   tracks .dashWrap's own breakpoint. */
+.dashBackBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 24px 56px 0;
+  color: var(--forest-deep);
+  font-size: 13.5px;
+  font-weight: 700;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.dashBackBtn:hover {
+  text-decoration: underline;
+}
+@media (max-width: 760px) {
+  .dashBackBtn {
+    margin: 16px 20px 0;
+  }
+}
 .detailHeroTitle {
   text-align: right;
 }
