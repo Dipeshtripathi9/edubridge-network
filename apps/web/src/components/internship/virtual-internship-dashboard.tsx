@@ -2,25 +2,47 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { CheckCircle2, ChevronDown, ClipboardCheck, Download, Lock } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ClipboardCheck } from 'lucide-react';
 import { cn, isSafeHttpUrl } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 import {
   downloadVirtualInvoice,
-  downloadVirtualRewardDocument,
   useMyVirtualInternshipTasks,
   useSubmitVirtualInternshipTask,
   type VirtualInternshipEnrollment,
   type VirtualInternshipTaskView,
 } from '@/hooks/use-virtual-internship';
-import { useMyCertificates } from '@/hooks/use-certificates';
-import { downloadCertificate } from './certificate-card';
+import { TrackHeaderCard } from './track-header-card';
 import styles from '@/app/virtual-internship/page.module.css';
 
-const TRACK_LABEL: Record<'WEEK' | 'MONTH', string> = {
-  WEEK: 'Web development (4 week)',
-  MONTH: 'Web development + DevOps (4 month)',
-};
+const RING_RADIUS = 28;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+/** Binary 0%/100% circular progress ring, replacing the old numbered circle. */
+function ProgressRing({ done, current, weekLabel }: { done: boolean; current: boolean; weekLabel: string }) {
+  const percent = done ? 100 : 0;
+  const offset = RING_CIRCUMFERENCE - (percent / 100) * RING_CIRCUMFERENCE;
+  return (
+    <div className={styles.ringWrap}>
+      <div className={styles.ringSvgBox}>
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <circle className={styles.ringTrack} cx={32} cy={32} r={RING_RADIUS} strokeWidth={4} />
+          <circle
+            className={cn(styles.ringBar, current && !done && styles.ringBarCurrent)}
+            cx={32}
+            cy={32}
+            r={RING_RADIUS}
+            strokeWidth={4}
+            strokeDasharray={RING_CIRCUMFERENCE}
+            strokeDashoffset={offset}
+          />
+        </svg>
+        <span className={styles.ringPercent}>{done ? <CheckCircle2 className="h-4 w-4" /> : `${percent}%`}</span>
+      </div>
+      <span className={styles.ringWeekLabel}>{weekLabel}</span>
+    </div>
+  );
+}
 
 function TaskItem({
   enrollmentId,
@@ -56,19 +78,19 @@ function TaskItem({
   };
 
   return (
-    <div className={cn(styles.taskItem, isOpen && styles.taskItemOpen)}>
+    <div id={`task-${task.taskIndex}`} className={cn(styles.taskItem, isOpen && styles.taskItemOpen)}>
       <button type="button" className={styles.taskQ} onClick={onToggle}>
-        <span
-          className={cn(styles.taskNum, done && styles.taskNumDone, !done && task.unlocked && styles.taskNumCurrent)}
-        >
-          {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : task.taskIndex}
+        <ProgressRing done={done} current={!done && task.unlocked} weekLabel={`Week ${task.taskIndex}`} />
+        <span className={styles.taskTitleWrap}>
+          <span className={styles.taskTitle}>{task.title}</span>
+          <span className={styles.taskTagRow}>
+            {underReview && <span className={cn(styles.taskTag, styles.taskTagReview)}>Under review</span>}
+            {!done && !underReview && task.unlocked && (
+              <span className={cn(styles.taskTag, styles.taskTagCurrent)}>Up next</span>
+            )}
+            {done && <span className={cn(styles.taskTag, styles.taskTagDone)}>Done</span>}
+          </span>
         </span>
-        <span className={styles.taskTitle}>{task.title}</span>
-        {underReview && <span className={cn(styles.taskTag, styles.taskTagReview)}>Under review</span>}
-        {!done && !underReview && task.unlocked && (
-          <span className={cn(styles.taskTag, styles.taskTagCurrent)}>Up next</span>
-        )}
-        {done && <span className={cn(styles.taskTag, styles.taskTagDone)}>Done</span>}
         <ChevronDown className={cn(styles.taskChev, isOpen && styles.taskChevOpen)} width={18} height={18} />
       </button>
       <div className={cn(styles.taskBody, isOpen && styles.taskBodyOpen)}>
@@ -166,81 +188,20 @@ function groupTasksByMonth(tasks: VirtualInternshipTaskView[]): TaskGroup[] {
   return groups;
 }
 
-const REWARD_ICON: Record<'certificate' | 'letter' | 'report' | 'community', string> = {
-  certificate: '/rewards/certificate.png',
-  letter: '/rewards/recommendation-letter.png',
-  report: '/rewards/report-card.png',
-  community: '/rewards/community.png',
-};
-
-function RewardButton({
-  icon,
-  title,
-  sub,
-  locked,
-  disabled,
-  onClick,
-}: {
-  icon: keyof typeof REWARD_ICON;
-  title: string;
-  sub: string;
-  locked: boolean;
-  disabled: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button type="button" className={styles.rewardItem} disabled={locked || disabled} onClick={onClick}>
-      <span
-        className={cn(styles.rewardIcon, locked && styles.rewardIconLocked)}
-        style={{ backgroundImage: `url(${REWARD_ICON[icon]})` }}
-      >
-        {locked && (
-          <span className={styles.rewardLockBadge}>
-            <Lock className="h-2.5 w-2.5" />
-          </span>
-        )}
-      </span>
-      <span>
-        <span className={cn(styles.rewardTitle, locked && styles.rewardTitleLocked)}>{title}</span>
-        <span className={styles.rewardSub}>
-          {locked ? (
-            <>
-              <Lock className="h-3 w-3" /> Unlocks at 100%
-            </>
-          ) : (
-            sub
-          )}
-        </span>
-      </span>
-    </button>
-  );
-}
-
 export function EnrolledDashboard({ enrollment }: { enrollment: VirtualInternshipEnrollment }) {
   const token = useAuthStore((s) => s.accessToken);
-  const user = useAuthStore((s) => s.user);
   const { data, isLoading } = useMyVirtualInternshipTasks(enrollment.id);
-  const { data: certificates } = useMyCertificates();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
 
-  const fullName = user?.profile?.fullName ?? 'there';
-  const firstName = fullName.split(' ')[0];
-  const initials =
-    fullName
-      .split(' ')
-      .map((p) => p[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase() || 'ED';
-
-  const progress = data?.progress ?? 0;
   const tasks = data?.tasks ?? [];
-  const unlocked = progress >= 1;
   const currentTaskIndex =
     tasks.find((t) => t.unlocked && t.status !== 'APPROVED')?.taskIndex ?? tasks[0]?.taskIndex ?? 1;
 
-  const certificate = certificates?.find((c) => c.sourceType === 'VIRTUAL_INTERNSHIP' && c.sourceId === enrollment.id);
+  const goToCurrentTask = () => {
+    setOpenIndex(currentTaskIndex);
+    document.getElementById(`task-${currentTaskIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   const withDownloading = async (key: string, fn: () => Promise<void>) => {
     setDownloading(key);
@@ -254,117 +215,54 @@ export function EnrolledDashboard({ enrollment }: { enrollment: VirtualInternshi
   };
 
   if (isLoading) {
-    return (
-      <div className={styles.dashWrap}>
-        <div className={styles.dashCard}>Loading your track…</div>
-      </div>
-    );
+    return <div className={styles.dashWrap}>Loading your track…</div>;
   }
 
   return (
     <div className={styles.dashWrap}>
-      <div className={styles.dashCard}>
-        <div className={styles.dashWelcome}>
-          <div className={styles.dashAvatar}>{initials}</div>
-          <div>
-            <h2>Welcome, {firstName}!</h2>
-            <div className={styles.dashTrackLabel}>{TRACK_LABEL[enrollment.track]}</div>
-            <div className={styles.dashProgressRow}>
-              <div className={styles.dashProgressBar}>
-                <div className={styles.dashProgressFill} style={{ width: `${Math.round(progress * 100)}%` }} />
-              </div>
-              <span className={styles.dashProgressTxt}>
-                Your track is <b>{Math.round(progress * 100)}%</b> complete
-              </span>
-            </div>
-          </div>
-        </div>
+      <TrackHeaderCard enrollment={enrollment} onFinishClick={goToCurrentTask} />
 
-        <section className={styles.dashSched}>
-          <h3 className={styles.dashSectionTitle}>
-            <ClipboardCheck className="mr-2 inline h-5 w-5" style={{ color: 'var(--forest-deep)' }} /> Tasks and duties
-          </h3>
-          {data?.trackNote && <p className={styles.dashTrackNote}>{data.trackNote}</p>}
-          {groupTasksByMonth(tasks).map((group, i) => (
-            <div key={group.monthNumber ?? `ungrouped-${i}`} className={group.monthNumber ? styles.dashMonthGroup : undefined}>
-              {group.monthNumber && (
-                <div className={styles.dashMonthHead}>
-                  <span className={styles.dashMonthChip}>Month {group.monthNumber}</span>
-                  <div>
-                    <h4>{group.monthTitle}</h4>
-                    <p>{group.monthDescription}</p>
-                  </div>
-                  <span className={cn(styles.dashMonthTag, group.status === 'done' && styles.dashMonthTagDone, group.status === 'now' && styles.dashMonthTagNow)}>
-                    {group.status === 'done' ? 'Done' : group.status === 'now' ? 'In progress' : 'Locked'}
-                  </span>
+      <section className={styles.dashSched}>
+        <h3 className={styles.dashSectionTitle}>
+          <ClipboardCheck className="mr-2 inline h-5 w-5" style={{ color: 'var(--forest-deep)' }} /> Tasks and duties
+        </h3>
+        {data?.trackNote && <p className={styles.dashTrackNote}>{data.trackNote}</p>}
+        {groupTasksByMonth(tasks).map((group, i) => (
+          <div key={group.monthNumber ?? `ungrouped-${i}`} className={group.monthNumber ? styles.dashMonthGroup : undefined}>
+            {group.monthNumber && (
+              <div className={styles.dashMonthHead}>
+                <span className={styles.dashMonthChip}>Month {group.monthNumber}</span>
+                <div>
+                  <h4>{group.monthTitle}</h4>
+                  <p>{group.monthDescription}</p>
                 </div>
-              )}
-              {group.tasks.map((task) => (
-                <TaskItem
-                  key={task.id}
-                  enrollmentId={enrollment.id}
-                  task={task}
-                  isOpen={openIndex === task.taskIndex || (openIndex === null && task.taskIndex === currentTaskIndex)}
-                  onToggle={() => setOpenIndex(openIndex === task.taskIndex ? null : task.taskIndex)}
-                />
-              ))}
-            </div>
-          ))}
-        </section>
-
-        <section className={styles.dashRewards}>
-          <h3 className={styles.dashSectionTitle}>Your rewards</h3>
-          <div className={styles.rewardsList}>
-            <a href="https://chat.whatsapp.com/" target="_blank" rel="noreferrer" className={styles.rewardItem}>
-              <span className={styles.rewardIcon} style={{ backgroundImage: `url(${REWARD_ICON.community})` }} />
-              <span>
-                <span className={styles.rewardTitle}>Join community</span>
-                <span className={styles.rewardSub}>Connect with mentors and peers</span>
-              </span>
-            </a>
-
-            <RewardButton
-              icon="certificate"
-              title="Virtual internship certificate"
-              sub="Download your certificate"
-              locked={!unlocked || !certificate}
-              disabled={downloading === 'certificate'}
-              onClick={() =>
-                certificate &&
-                withDownloading('certificate', () => downloadCertificate(certificate.id, certificate.code, token))
-              }
-            />
-
-            <RewardButton
-              icon="letter"
-              title="Recommendation letter"
-              sub="Download your letter"
-              locked={!unlocked}
-              disabled={downloading === 'letter'}
-              onClick={() => withDownloading('letter', () => downloadVirtualRewardDocument('letter', enrollment.id, token))}
-            />
-
-            <RewardButton
-              icon="report"
-              title="Report card"
-              sub="Download your report card"
-              locked={!unlocked}
-              disabled={downloading === 'report'}
-              onClick={() => withDownloading('report', () => downloadVirtualRewardDocument('report', enrollment.id, token))}
-            />
+                <span className={cn(styles.dashMonthTag, group.status === 'done' && styles.dashMonthTagDone, group.status === 'now' && styles.dashMonthTagNow)}>
+                  {group.status === 'done' ? 'Done' : group.status === 'now' ? 'In progress' : 'Locked'}
+                </span>
+              </div>
+            )}
+            {group.tasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                enrollmentId={enrollment.id}
+                task={task}
+                isOpen={openIndex === task.taskIndex || (openIndex === null && task.taskIndex === currentTaskIndex)}
+                onToggle={() => setOpenIndex(openIndex === task.taskIndex ? null : task.taskIndex)}
+              />
+            ))}
           </div>
-        </section>
+        ))}
+      </section>
 
-        <div className={styles.dashFooter}>
-          <button
-            type="button"
-            className={styles.btnInvoice}
-            disabled={downloading === 'invoice'}
-            onClick={() => withDownloading('invoice', () => downloadVirtualInvoice(enrollment.id, token))}
-          >
-            <Download className="h-3.5 w-3.5" /> Invoice
-          </button>
-        </div>
+      <div className={styles.dashFooter}>
+        <button
+          type="button"
+          className={styles.btnInvoice}
+          disabled={downloading === 'invoice'}
+          onClick={() => withDownloading('invoice', () => downloadVirtualInvoice(enrollment.id, token))}
+        >
+          View invoice
+        </button>
       </div>
     </div>
   );

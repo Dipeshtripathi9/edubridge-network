@@ -35,7 +35,14 @@ import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
 import { loadRazorpayScript, type RazorpayFailureResponse } from '@/lib/razorpay';
 import { cn } from '@/lib/utils';
-import { TRACKS, money, moneyPrecise, formatInternshipDate, type TrackKey } from '@/lib/virtual-internship-tracks';
+import {
+  TRACKS,
+  money,
+  moneyPrecise,
+  formatInternshipDate,
+  trackKeyFor,
+  type TrackKey,
+} from '@/lib/virtual-internship-tracks';
 import styles from './page.module.css';
 
 const fraunces = Fraunces({
@@ -106,10 +113,18 @@ function PersonRow({ people }: { people: { initials: string; name: string; info:
 }
 
 function GigsSection() {
-  const { data, isLoading } = useInternshipListings({ category: 'Virtual Internship Gigs' });
+  const { data } = useInternshipListings({ category: 'Virtual Internship Gigs' });
   const listings = data?.pages.flatMap((p) => p.data) ?? [];
 
-  if (!isLoading && listings.length === 0) return null;
+  // Check `data` presence rather than `isLoading` — with PersistQueryClientProvider,
+  // `isLoading` is momentarily false during the client's cache-restore phase (before
+  // any fetch has actually resolved), while SSR has no such phase and is always
+  // "loading" until data exists. Branching on `isLoading` made this section disappear
+  // on the client between hydration and restore, which server never did, causing a
+  // hydration mismatch. `data` is undefined in both the SSR pass and the client's
+  // pre-restore paint, so this stays in sync until real data (fetched or restored)
+  // actually arrives.
+  if (data && listings.length === 0) return null;
 
   return (
     <section className={styles.gigsSection}>
@@ -138,6 +153,10 @@ export default function VirtualInternshipPage() {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const { data: activeEnrollments } = useMyVirtualInternshipEnrollments();
+  const ownedTrackKeys = useMemo(
+    () => new Set((activeEnrollments ?? []).map((e) => trackKeyFor(e.track))),
+    [activeEnrollments],
+  );
   const [view, setView] = useState<'landing' | 'detail' | 'checkout' | 'dashboard'>('landing');
   const [dashboardEnrollment, setDashboardEnrollment] = useState<ActiveVirtualInternshipEnrollment | null>(null);
   const [currentTrackKey, setCurrentTrackKey] = useState<TrackKey>('month');
@@ -413,13 +432,15 @@ export default function VirtualInternshipPage() {
             </div>
           </section>
 
-          <section className={styles.section} id="tracks">
-            <h2 className={styles.sectionTitle}>Choose your track</h2>
-            <div className={styles.tracksGrid}>
-              {trackCard('week', false)}
-              {trackCard('month', true)}
-            </div>
-          </section>
+          {ownedTrackKeys.size < 2 && (
+            <section className={styles.section} id="tracks">
+              <h2 className={styles.sectionTitle}>Choose your track</h2>
+              <div className={styles.tracksGrid}>
+                {!ownedTrackKeys.has('week') && trackCard('week', false)}
+                {!ownedTrackKeys.has('month') && trackCard('month', true)}
+              </div>
+            </section>
+          )}
 
           <div className={styles.ctaStrip}>
             <a

@@ -15,7 +15,7 @@ import { useColleges } from '@/hooks/use-colleges';
 // Mobile (<lg) caps the preview to 3 cards, desktop (lg+) to 5 — both send
 // "See more recommendations" to the full /colleges/recommended browse page.
 export function HomeCollegeRanking({ onQuiz }: { onQuiz: () => void }) {
-  const { data, isLoading } = useColleges({ sort: 'rating' });
+  const { data } = useColleges({ sort: 'rating' });
   const colleges = data?.pages.flatMap((p) => p.data) ?? [];
 
   return (
@@ -36,7 +36,14 @@ export function HomeCollegeRanking({ onQuiz }: { onQuiz: () => void }) {
 
       <h3 className="mb-6 font-fraunces text-[clamp(20px,3vw,24px)] font-semibold">Colleges looking for you</h3>
 
-      {isLoading && (
+      {/* Check `data` rather than `isLoading` here and below — with
+          PersistQueryClientProvider, `isLoading` is briefly false during the
+          client's cache-restore phase (before the persisted cache or a fresh
+          fetch has resolved), a phase SSR never has, so branching on it made
+          this flicker between skeleton/empty-state/list right at hydration.
+          `data` stays undefined in both the SSR pass and the client's
+          pre-restore paint, so it doesn't drift. */}
+      {!data && (
         <div className="flex flex-col gap-3">
           <Skeleton className="h-28 w-full rounded-[20px]" />
           <Skeleton className="h-28 w-full rounded-[20px]" />
@@ -44,7 +51,7 @@ export function HomeCollegeRanking({ onQuiz }: { onQuiz: () => void }) {
         </div>
       )}
 
-      {!isLoading && colleges.length === 0 && (
+      {data && colleges.length === 0 && (
         <EmptyState icon={GraduationCap} title="No colleges yet" description="Check back soon — we're adding more colleges." />
       )}
 
