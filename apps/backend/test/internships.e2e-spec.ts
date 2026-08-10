@@ -1036,5 +1036,48 @@ describe('Internship Program (e2e)', () => {
         .expect(200);
       expect(status.body.data.MONTH.used).toBe(before.body.data.MONTH.used + 1);
     });
+
+    it('claiming a seat upgrades a stray PENDING_PAYMENT row from an earlier non-scholarship checkout attempt, instead of leaving it unpaid', async () => {
+      const before = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/scholarship/status`)
+        .expect(200);
+      await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/admin/scholarship/capacity`)
+        .set(auth(admin.token))
+        .send({ track: 'WEEK', capacity: before.body.data.WEEK.used + 1 })
+        .expect(201);
+
+      const student = await registerVerifiedUser(app, { fullName: 'VI Scholarship Upgrade Student' });
+
+      // Starts the normal, priced checkout flow first — same as clicking
+      // "Join track" before the scholarship existed or before deciding to
+      // use it — leaving a real, unpaid PENDING_PAYMENT row behind.
+      const started = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll`)
+        .set(auth(student.token))
+        .send({ track: 'WEEK' })
+        .expect(201);
+      expect(started.body.data.status).toBe('PENDING_PAYMENT');
+      expect(started.body.data.feeAmount).toBeGreaterThan(0);
+
+      // Then claims the scholarship instead of paying.
+      const claimed = await request(app.getHttpServer())
+        .post(`${API}/internships/virtual/enroll-scholarship`)
+        .set(auth(student.token))
+        .send({ track: 'WEEK' })
+        .expect(201);
+
+      // Same row, upgraded — not a second row left dangling unpaid.
+      expect(claimed.body.data.id).toBe(started.body.data.id);
+      expect(claimed.body.data.status).toBe('ACTIVE');
+      expect(claimed.body.data.feeAmount).toBe(0);
+      expect(claimed.body.data.scholarshipApplied).toBe(true);
+
+      const tasks = await request(app.getHttpServer())
+        .get(`${API}/internships/virtual/enrollments/${claimed.body.data.id}/tasks`)
+        .set(auth(student.token))
+        .expect(200);
+      expect(tasks.body.data.tasks).toHaveLength(4);
+    });
   });
 });
