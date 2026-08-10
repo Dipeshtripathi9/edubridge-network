@@ -1824,12 +1824,18 @@
    off the bottom of any task whose mobile-wrapped content grew past it. */
 .taskBody {
   display: grid;
-  grid-template-rows: 0fr;
+  /* minmax(0, 0fr), not bare 0fr: a grid row's automatic minimum size is
+     "auto" (the min-content height of whatever it contains), which for
+     ordinary block content — text can't shrink shorter than one line — is
+     never 0. minmax(0, ...) is what actually overrides that and lets the
+     row collapse all the way, instead of settling at ~35px (just tall
+     enough to peek the first heading through). */
+  grid-template-rows: minmax(0, 0fr);
   overflow: hidden;
   transition: grid-template-rows 0.3s ease;
 }
 .taskBodyOpen {
-  grid-template-rows: 1fr;
+  grid-template-rows: minmax(0, 1fr);
 }
 .taskBodyInner {
   min-height: 0;
