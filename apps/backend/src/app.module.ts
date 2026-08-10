@@ -7,6 +7,7 @@ import { LoggerModule } from 'nestjs-pino';
 import configuration from './config/configuration';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
+import { RedisService } from './redis/redis.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TransferModule } from './transfer/transfer.module';
@@ -56,8 +57,8 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
       },
     }),
     ThrottlerModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      inject: [ConfigService, RedisService],
+      useFactory: (config: ConfigService, redis: RedisService) => ({
         throttlers: [
           {
             ttl: config.get<number>('rateLimit.ttl')! * 1000,
@@ -67,19 +68,14 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
         // Share rate-limit counters across replicas via Redis in production, so the
         // limit is global (not per-instance). Dev/test use the default in-memory
         // store (the guard is skipped in tests anyway).
-        // Bounded retries + a short command timeout: if Redis is unreachable
-        // (e.g. a quota-exhausted provider), rate-limit checks fail fast
-        // instead of hanging every request forever. AppThrottlerGuard fails
-        // open on top of this, so a Redis outage degrades rate limiting
-        // rather than taking the whole API down with it.
-        ...(config.get<string>('env') === 'production'
-          ? {
-              storage: new ThrottlerStorageRedisService(config.get<string>('redis.url')!, {
-                maxRetriesPerRequest: 3,
-                commandTimeout: 5000,
-              }),
-            }
-          : {}),
+        //
+        // Reuses RedisService's own client (bounded retries, a command timeout,
+        // and an 'error' listener already attached) instead of letting this
+        // library open a second, unguarded connection — an ioredis client with
+        // no 'error' listener crashes the whole process on any Redis error.
+        // AppThrottlerGuard also fails open on top of this, so a Redis outage
+        // degrades rate limiting rather than taking the whole API down with it.
+        ...(config.get<string>('env') === 'production' ? { storage: new ThrottlerStorageRedisService(redis.client) } : {}),
       }),
     }),
     PrismaModule,
