@@ -292,8 +292,8 @@ export default function VirtualInternshipPage() {
 
   const startPayment = async () => {
     if (!useAuthStore.getState().accessToken) {
-      toast.error('Sign in to enroll');
-      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      toast.error('Sign up to enroll');
+      router.push(`/signup?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
 
@@ -364,8 +364,8 @@ export default function VirtualInternshipPage() {
    */
   const onJoinWithScholarship = async () => {
     if (!useAuthStore.getState().accessToken) {
-      toast.error('Sign in to enroll');
-      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      toast.error('Sign up to enroll');
+      router.push(`/signup?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
     try {
