@@ -23,6 +23,7 @@ import {
   X,
 } from 'lucide-react';
 import { AccountMenu } from '@/components/account-menu';
+import { Skeleton } from '@/components/ui/skeleton';
 import { OpportunityRecommendationCard } from '@/components/opportunity-recommendation-card';
 import { EnrolledDashboard } from '@/components/internship/virtual-internship-dashboard';
 import { MyCourses } from '@/components/internship/my-courses';
@@ -152,7 +153,17 @@ export default function VirtualInternshipPage() {
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
+  const authHydrated = useAuthStore((s) => s.hydrated);
+  const token = useAuthStore((s) => s.accessToken);
   const { data: activeEnrollments } = useMyVirtualInternshipEnrollments();
+  // True only for the brief window where we know the visitor is logged in but
+  // haven't heard back yet on which tracks (if any) they own. Guests never hit
+  // this (the query is disabled with no token, so there's nothing to wait on —
+  // they've never owned anything). Without this, the ownership-dependent UI
+  // below defaults to "owns nothing" while the real fetch is in flight, which
+  // means a logged-in owner sees the guest hero and both unlock-track cards
+  // for a moment on every load before flipping to their real state.
+  const ownershipPending = authHydrated && !!token && activeEnrollments === undefined;
   const ownedTrackKeys = useMemo(
     () => new Set((activeEnrollments ?? []).map((e) => trackKeyFor(e.track))),
     [activeEnrollments],
@@ -398,7 +409,13 @@ export default function VirtualInternshipPage() {
 
       {view === 'landing' && (
         <>
-          {activeEnrollments && activeEnrollments.length > 0 ? (
+          {ownershipPending ? (
+            <div className={styles.hero}>
+              <Skeleton className="h-8 w-40 rounded-full" />
+              <Skeleton className="mt-6 h-12 w-2/3" />
+              <Skeleton className="mt-4 h-20 w-full max-w-xl" />
+            </div>
+          ) : activeEnrollments && activeEnrollments.length > 0 ? (
             <MyCourses enrollments={activeEnrollments} onContinue={showDashboard} />
           ) : (
             <div className={styles.hero}>
@@ -432,7 +449,7 @@ export default function VirtualInternshipPage() {
             </div>
           </section>
 
-          {ownedTrackKeys.size < 2 && (
+          {!ownershipPending && ownedTrackKeys.size < 2 && (
             <section className={styles.section} id="tracks">
               <h2 className={styles.sectionTitle}>Choose your track</h2>
               <div className={styles.tracksGrid}>
