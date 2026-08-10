@@ -17,7 +17,7 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
   const loggedIn = useAuthStore((s) => !!s.accessToken);
   const { data: quiz, isLoading } = useQuizForTaking(id);
   const submit = useSubmitQuizAttempt();
-  const { loginHref } = useAuthLinks();
+  const { loginHref, signupHref } = useAuthLinks();
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<QuizAttempt | null>(null);
@@ -77,11 +77,16 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
         <>
           {!loggedIn && (
             <Card className="border-dashed">
-              <CardContent className="p-4 text-sm text-muted-foreground">
-                <Link href={loginHref} className="font-semibold text-primary hover:underline">
-                  Sign in
-                </Link>{' '}
-                to submit your answers and see your score.
+              <CardContent className="flex flex-col items-start gap-3 p-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                <span>Sign up to submit your answers and see your score.</span>
+                <div className="flex shrink-0 gap-2">
+                  <Button asChild size="sm" variant="outline">
+                    <Link href={loginHref}>Sign in</Link>
+                  </Button>
+                  <Button asChild size="sm">
+                    <Link href={signupHref}>Sign up</Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}

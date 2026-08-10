@@ -13,6 +13,7 @@ import { CollegePicker, type CollegeSelection } from '@/components/college-picke
 import { useAuthStore } from '@/stores/auth.store';
 import { useMe } from '@/hooks/use-profile';
 import { GoogleVerifyButton } from '@/components/social-auth';
+import { useAuthLinks } from '@/hooks/use-auth-links';
 import {
   useMyVerification,
   useSubmitVerification,
@@ -35,6 +36,7 @@ const FEEDBACK_FIELDS: { key: string; label: string }[] = [
 
 export default function VerifyPage() {
   const loggedIn = useAuthStore((s) => !!s.accessToken);
+  const { loginHref, signupHref } = useAuthLinks();
   const { data: me, refetch: refetchMe } = useMe();
   const { data: current, refetch: refetchCurrent } = useMyVerification();
 
@@ -137,16 +139,21 @@ export default function VerifyPage() {
         <Card>
           <CardContent className="flex flex-col items-start gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="font-semibold">Log in to get verified</p>
+              <p className="font-semibold">Sign in to get verified</p>
               <p className="text-sm text-muted-foreground">
                 You need an account to verify — sign in with Google or an email link, then come back here.
               </p>
             </div>
-            <Button asChild className="shrink-0">
-              <Link href="/login">
-                <LogIn className="h-4 w-4" /> Log in / Sign up
-              </Link>
-            </Button>
+            <div className="flex shrink-0 gap-2">
+              <Button asChild variant="outline">
+                <Link href={loginHref}>Sign in</Link>
+              </Button>
+              <Button asChild>
+                <Link href={signupHref}>
+                  <LogIn className="h-4 w-4" /> Sign up
+                </Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : verified ? (
