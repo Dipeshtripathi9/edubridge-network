@@ -186,6 +186,7 @@ export default function VirtualInternshipPage() {
 
   const { data: scholarshipStatus } = useVirtualInternshipScholarshipStatus();
   const enrollScholarship = useEnrollVirtualInternshipScholarship();
+  const [scholarshipSelected, setScholarshipSelected] = useState(false);
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -209,12 +210,25 @@ export default function VirtualInternshipPage() {
     const gst = roundToPaisa(track.priceNow * 0.18);
     const referralValue = 1999;
     const donateAmt = donateChecked ? 19 : 0;
-    const toPay = roundToPaisa(track.priceNow + gst + donateAmt);
+    const baseToPay = roundToPaisa(track.priceNow + gst + donateAmt);
+    const toPay = scholarshipSelected ? 0 : baseToPay;
     const mrpSavings = track.priceOld - track.priceNow;
     const referralSavings = referralApplied ? referralValue : 0;
-    const totalSavings = mrpSavings + platformFeeOld + referralSavings;
-    return { platformFeeOld, gst, referralValue, donateAmt, toPay, mrpSavings, referralSavings, totalSavings };
-  }, [track, referralApplied, donateChecked]);
+    const scholarshipSavings = scholarshipSelected ? baseToPay : 0;
+    const totalSavings = mrpSavings + platformFeeOld + referralSavings + scholarshipSavings;
+    return {
+      platformFeeOld,
+      gst,
+      referralValue,
+      donateAmt,
+      baseToPay,
+      toPay,
+      mrpSavings,
+      referralSavings,
+      scholarshipSavings,
+      totalSavings,
+    };
+  }, [track, referralApplied, donateChecked, scholarshipSelected]);
 
   const showDetail = (key: TrackKey) => {
     setCurrentTrackKey(key);
@@ -238,6 +252,7 @@ export default function VirtualInternshipPage() {
     setCurrentTrackKey(key);
     setReferralApplied(false);
     setDonateChecked(false);
+    setScholarshipSelected(false);
     setView('checkout');
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -341,8 +356,13 @@ export default function VirtualInternshipPage() {
     }
   };
 
-  /** Claims a free scholarship seat — bypasses Razorpay entirely, unlike startPayment. */
-  const onClaimScholarship = async () => {
+  /**
+   * Claims a free scholarship seat — bypasses Razorpay entirely, unlike
+   * startPayment. Fired by the "Join track" button once the student has
+   * selected the scholarship (mirroring the referral toggle: "Apply" only
+   * selects it and zeroes the price on screen; this is the actual join).
+   */
+  const onJoinWithScholarship = async () => {
     if (!useAuthStore.getState().accessToken) {
       toast.error('Sign in to enroll');
       router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
@@ -355,6 +375,10 @@ export default function VirtualInternshipPage() {
       showConfirmation();
     } catch (e) {
       toast.error((e as Error).message);
+      // Most likely the seats filled up between selecting it and clicking
+      // Join track — fall back to the normal priced flow instead of leaving
+      // them stuck on a "Join track" button that will never succeed.
+      setScholarshipSelected(false);
     }
   };
 
@@ -686,11 +710,10 @@ export default function VirtualInternshipPage() {
                     {scholarshipOpen ? (
                       <button
                         type="button"
-                        className={styles.btnApply}
-                        disabled={enrollScholarship.isPending}
-                        onClick={onClaimScholarship}
+                        className={cn(styles.btnApply, scholarshipSelected && styles.btnApplyApplied)}
+                        onClick={() => setScholarshipSelected(true)}
                       >
-                        {enrollScholarship.isPending ? 'Applying…' : 'Apply'}
+                        {scholarshipSelected ? 'Applied' : 'Apply'}
                       </button>
                     ) : (
                       <button type="button" className={styles.btnLocked} disabled>
@@ -776,6 +799,15 @@ export default function VirtualInternshipPage() {
                   <span>+ {money(bill.donateAmt)}</span>
                 </div>
               )}
+              {scholarshipSelected && (
+                <div className={cn(styles.billRow, styles.referralRow)}>
+                  <span>100% Scholarship</span>
+                  <span>
+                    <span className={styles.vOld}>{moneyPrecise(bill.baseToPay)}</span>
+                    <span className={styles.vFree}>FREE</span>
+                  </span>
+                </div>
+              )}
               <div className={cn(styles.billRow, styles.billTotal)}>
                 <span>Total Payable</span>
                 <span>{moneyPrecise(bill.toPay)}</span>
@@ -808,6 +840,12 @@ export default function VirtualInternshipPage() {
                 </span>
                 <span className={styles.amt}>{money(bill.referralSavings)}</span>
               </div>
+              <div className={cn(styles.saveRow, !scholarshipSelected && styles.dim)}>
+                <span className={styles.labelRow}>
+                  <span className={styles.saveRowIc}>%</span>100% Scholarship
+                </span>
+                <span className={styles.amt}>{money(bill.scholarshipSavings)}</span>
+              </div>
             </div>
           </div>
 
@@ -816,8 +854,22 @@ export default function VirtualInternshipPage() {
               <div className={styles.coTopayK}>To Pay</div>
               <div className={styles.coTopayV}>{moneyPrecise(bill.toPay)}</div>
             </div>
-            <button type="button" className={styles.btnPay} onClick={startPayment} disabled={isProcessingPayment}>
-              {isProcessingPayment ? (
+            <button
+              type="button"
+              className={styles.btnPay}
+              onClick={scholarshipSelected ? onJoinWithScholarship : startPayment}
+              disabled={scholarshipSelected ? enrollScholarship.isPending : isProcessingPayment}
+            >
+              {scholarshipSelected ? (
+                enrollScholarship.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" style={{ marginRight: 8 }} />
+                    Joining…
+                  </>
+                ) : (
+                  'Join track'
+                )
+              ) : isProcessingPayment ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" style={{ marginRight: 8 }} />
                   Opening checkout…
