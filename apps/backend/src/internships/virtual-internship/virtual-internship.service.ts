@@ -26,6 +26,8 @@ import {
   VirtualInternshipAdminQueryDto,
 } from './dto/virtual-internship.dto';
 
+const SCHOLARSHIP_TRACKS: VirtualInternshipTrack[] = [VirtualInternshipTrack.WEEK, VirtualInternshipTrack.MONTH];
+
 const ACTIVE_STATUSES: EnrollmentStatus[] = [EnrollmentStatus.PENDING_PAYMENT, EnrollmentStatus.ACTIVE];
 
 @Injectable()
@@ -194,6 +196,15 @@ export class VirtualInternshipService {
     return { received: true };
   }
 
+  /** Shared by activatePaidEnrollment, enrollWithScholarship, and adminBackfillMissingTasks. */
+  private async seedCurriculumTasks(enrollmentId: string, track: VirtualInternshipTrack) {
+    const curriculumSize = VIRTUAL_INTERNSHIP_TASKS[track].length;
+    await this.prisma.virtualInternshipTask.createMany({
+      data: Array.from({ length: curriculumSize }, (_, i) => ({ enrollmentId, taskIndex: i + 1 })),
+      skipDuplicates: true,
+    });
+  }
+
   private async activatePaidEnrollment(enrollment: { id: string; userId: string }, paymentId: string) {
     const updated = await this.prisma.virtualInternshipEnrollment.update({
       where: { id: enrollment.id },
@@ -204,11 +215,7 @@ export class VirtualInternshipService {
       },
     });
 
-    const curriculumSize = VIRTUAL_INTERNSHIP_TASKS[updated.track].length;
-    await this.prisma.virtualInternshipTask.createMany({
-      data: Array.from({ length: curriculumSize }, (_, i) => ({ enrollmentId: enrollment.id, taskIndex: i + 1 })),
-      skipDuplicates: true,
-    });
+    await this.seedCurriculumTasks(enrollment.id, updated.track);
 
     await this.notifications.create({
       recipientId: enrollment.userId,
@@ -218,6 +225,104 @@ export class VirtualInternshipService {
     });
 
     return { id: updated.id, status: updated.status, track: updated.track, paidAt: updated.paidAt };
+  }
+
+  // ---------------- Scholarship (100% fee waiver, capped per track) ----------------
+
+  /** Remaining 100%-scholarship seats per track — public, shown on the checkout page and the admin panel. */
+  async scholarshipStatus() {
+    const configs = await this.prisma.virtualInternshipScholarship.findMany();
+    const configByTrack = new Map(configs.map((c) => [c.track, c]));
+
+    const result: Record<VirtualInternshipTrack, { capacity: number; used: number; remaining: number }> = {
+      WEEK: { capacity: 0, used: 0, remaining: 0 },
+      MONTH: { capacity: 0, used: 0, remaining: 0 },
+    };
+    for (const track of SCHOLARSHIP_TRACKS) {
+      const capacity = configByTrack.get(track)?.capacity ?? 0;
+      const used = await this.prisma.virtualInternshipEnrollment.count({
+        where: { track, scholarshipApplied: true, status: { in: ACTIVE_STATUSES } },
+      });
+      result[track] = { capacity, used, remaining: Math.max(0, capacity - used) };
+    }
+    return result;
+  }
+
+  /**
+   * Claims a free scholarship seat for `track`, if any remain, activating the
+   * enrollment immediately — no Razorpay order, no payment to verify. The
+   * capacity re-check happens inside the same transaction as the seat-count
+   * used to decide eligibility, which narrows but doesn't eliminate the race
+   * window between two concurrent requests for the last seat (Prisma has no
+   * simple row-lock primitive here); acceptable at this feature's expected
+   * scale — a handful of enrollments over a short window, not e-commerce
+   * checkout volume.
+   */
+  async enrollWithScholarship(userId: string, track: VirtualInternshipTrack) {
+    const existing = await this.prisma.virtualInternshipEnrollment.findFirst({
+      where: { userId, track, status: { in: ACTIVE_STATUSES } },
+    });
+    if (existing) {
+      return this.serialize(existing);
+    }
+
+    const enrollment = await this.prisma.$transaction(async (tx) => {
+      const config = await tx.virtualInternshipScholarship.findUnique({ where: { track } });
+      const capacity = config?.capacity ?? 0;
+      if (capacity <= 0) {
+        throw new BadRequestException('The scholarship is not open for this track');
+      }
+
+      const used = await tx.virtualInternshipEnrollment.count({
+        where: { track, scholarshipApplied: true, status: { in: ACTIVE_STATUSES } },
+      });
+      if (used >= capacity) {
+        throw new BadRequestException('All scholarship seats for this track have been claimed');
+      }
+
+      return tx.virtualInternshipEnrollment.create({
+        data: {
+          userId,
+          track,
+          feeAmount: 0,
+          scholarshipApplied: true,
+          status: EnrollmentStatus.ACTIVE,
+          paidAt: new Date(),
+        },
+      });
+    });
+
+    await this.seedCurriculumTasks(enrollment.id, enrollment.track);
+
+    await this.notifications.create({
+      recipientId: userId,
+      type: 'INTERNSHIP_PAYMENT_CONFIRMED',
+      title: "You're in — 100% scholarship applied! 🎉",
+      body: "No payment needed. You'll get access within a few hours.",
+    });
+
+    return this.serialize(enrollment);
+  }
+
+  /** Admin sets the "first N students free" cap for a track (0 = closed). */
+  async adminSetScholarshipCapacity(adminId: string, track: VirtualInternshipTrack, capacity: number) {
+    await this.prisma.$transaction([
+      this.prisma.virtualInternshipScholarship.upsert({
+        where: { track },
+        create: { track, capacity, updatedById: adminId },
+        update: { capacity, updatedById: adminId },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: adminId,
+          action: 'internship.virtual.set_scholarship_capacity',
+          entity: 'virtual_internship_scholarship',
+          entityId: track,
+          metadata: { capacity },
+        },
+      }),
+    ]);
+    return this.scholarshipStatus();
   }
 
   // ---------------- Tasks (student) ----------------
@@ -400,11 +505,7 @@ export class VirtualInternshipService {
       where: { status: EnrollmentStatus.ACTIVE, tasks: { none: {} } },
     });
     for (const enrollment of enrollments) {
-      const curriculumSize = VIRTUAL_INTERNSHIP_TASKS[enrollment.track].length;
-      await this.prisma.virtualInternshipTask.createMany({
-        data: Array.from({ length: curriculumSize }, (_, i) => ({ enrollmentId: enrollment.id, taskIndex: i + 1 })),
-        skipDuplicates: true,
-      });
+      await this.seedCurriculumTasks(enrollment.id, enrollment.track);
     }
     return { backfilledEnrollmentIds: enrollments.map((e) => e.id) };
   }

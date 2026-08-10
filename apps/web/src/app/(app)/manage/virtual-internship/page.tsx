@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { ArrowUpRight, Check, ChevronDown, ChevronUp, ClipboardList, GraduationCap, Inbox, X } from 'lucide-react';
+import { ArrowUpRight, Award, Check, ChevronDown, ChevronUp, ClipboardList, GraduationCap, Inbox, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,9 +18,11 @@ import { useAuthStore } from '@/stores/auth.store';
 import {
   useAdminAssignVirtualInternshipTask,
   useAdminReviewVirtualInternshipTask,
+  useAdminSetScholarshipCapacity,
   useAdminVirtualInternshipEnrollments,
   useAdminVirtualInternshipStats,
   useAdminVirtualInternshipSubmissions,
+  useVirtualInternshipScholarshipStatus,
   type VirtualInternshipAdminSubmission,
   type VirtualInternshipEnrollmentStatus,
   type VirtualInternshipTrack,
@@ -233,6 +235,82 @@ function ReviewQueuePanel() {
   );
 }
 
+const SCHOLARSHIP_TRACKS: { key: VirtualInternshipTrack; label: string }[] = [
+  { key: 'WEEK', label: '4-week' },
+  { key: 'MONTH', label: '4-month' },
+];
+
+function ScholarshipTrackRow({
+  track,
+  label,
+  capacity,
+  used,
+}: {
+  track: VirtualInternshipTrack;
+  label: string;
+  capacity: number;
+  used: number;
+}) {
+  const [value, setValue] = useState(String(capacity));
+  const setCapacity = useAdminSetScholarshipCapacity();
+  const dirty = value !== String(capacity);
+
+  return (
+    <Card>
+      <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <div>
+          <p className="font-semibold">{label}</p>
+          <p className="text-xs text-muted-foreground">
+            {used} of {capacity} seat{capacity === 1 ? '' : 's'} claimed
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            min={0}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            className="h-8 w-24 text-sm"
+          />
+          <Button
+            size="sm"
+            disabled={!dirty || setCapacity.isPending || Number(value) < 0 || Number.isNaN(Number(value))}
+            onClick={() =>
+              setCapacity.mutate(
+                { track, capacity: Number(value) },
+                {
+                  onSuccess: () => toast.success(`${label} scholarship cap set to ${value}`),
+                  onError: (e) => toast.error((e as Error).message),
+                },
+              )
+            }
+          >
+            Save
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ScholarshipPanel() {
+  const { data, isLoading } = useVirtualInternshipScholarshipStatus();
+
+  if (isLoading || !data) return <Skeleton className="h-32 w-full" />;
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">
+        Set how many students can join each track with a 100% fee waiver. Seats are claimed automatically,
+        first-come-first-served, until the cap is reached — set to 0 to close a track.
+      </p>
+      {SCHOLARSHIP_TRACKS.map(({ key, label }) => (
+        <ScholarshipTrackRow key={key} track={key} label={label} capacity={data[key].capacity} used={data[key].used} />
+      ))}
+    </div>
+  );
+}
+
 export default function ManageVirtualInternshipPage() {
   const router = useRouter();
   const hydrated = useAuthStore((s) => s.hydrated);
@@ -269,6 +347,9 @@ export default function ManageVirtualInternshipPage() {
           <TabsTrigger value="review">
             <Inbox className="mr-1 h-4 w-4" /> Review queue
           </TabsTrigger>
+          <TabsTrigger value="scholarship">
+            <Award className="mr-1 h-4 w-4" /> Scholarship
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="enrollments" className="mt-4">
@@ -277,6 +358,10 @@ export default function ManageVirtualInternshipPage() {
 
         <TabsContent value="review" className="mt-4">
           <ReviewQueuePanel />
+        </TabsContent>
+
+        <TabsContent value="scholarship" className="mt-4">
+          <ScholarshipPanel />
         </TabsContent>
       </Tabs>
     </div>

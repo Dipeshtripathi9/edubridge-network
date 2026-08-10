@@ -303,10 +303,10 @@ model Profile {
   avatarUrl String?
   bio       String?
 
-  collegeId    String?
-  college      College?    @relation(fields: [collegeId], references: [id])
-  universityId String?
-  university   University? @relation(fields: [universityId], references: [id])
+  collegeId       String?
+  college         College?    @relation(fields: [collegeId], references: [id])
+  universityId    String?
+  university      University? @relation(fields: [universityId], references: [id])
   // Free-text college name from the simplified Internships & Jobs onboarding
   // flow — not tied to the College catalog like collegeId/college above.
   collegeNameText String?
@@ -320,7 +320,7 @@ model Profile {
   city   String?
 
   collegeVerification CollegeVerificationStatus @default(UNVERIFIED)
-  signupIntent         SignupIntent? // why they signed up — set once at signup, never re-asked
+  signupIntent        SignupIntent? // why they signed up — set once at signup, never re-asked
 
   interests String[] // tags: Placement, DSA, AI, Startups...
 
@@ -606,14 +606,14 @@ model CollegeCourse {
   educationLoanAvailable Boolean @default(false)
 
   // 3. Placements
-  placementPct       Float?
-  avgPackage         Float?
-  medianPackage      Float?
-  highestPackage     Float?
+  placementPct        Float?
+  avgPackage          Float?
+  medianPackage       Float?
+  highestPackage      Float?
   branchWisePlacement String?
-  internshipPct      Float?
-  ppoPct             Float?
-  topRecruiters      String?
+  internshipPct       Float?
+  ppoPct              Float?
+  topRecruiters       String?
 
   // 4. ROI
   totalInvestment Int?
@@ -1314,24 +1314,39 @@ model TrackAEnrollment {
 }
 
 model VirtualInternshipEnrollment {
-  id                String                 @id @default(cuid())
-  userId            String
-  user              User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  track             VirtualInternshipTrack
-  referralApplied   Boolean                @default(false) // free entitlement flag; doesn't affect feeAmount
-  donateApplied     Boolean                @default(false) // adds the flat scholarship-donation amount to feeAmount
-  feeAmount         Decimal                @db.Decimal(10, 2) // INR, snapshot at enroll time (track price + exact GST + optional donation) — decimal so GST isn't rounded to a whole rupee
-  status            EnrollmentStatus       @default(PENDING_PAYMENT)
-  razorpayOrderId   String?                @unique
-  razorpayPaymentId String?                @unique
-  paidAt            DateTime?
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
+  id                 String                 @id @default(cuid())
+  userId             String
+  user               User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track              VirtualInternshipTrack
+  referralApplied    Boolean                @default(false) // free entitlement flag; doesn't affect feeAmount
+  donateApplied      Boolean                @default(false) // adds the flat scholarship-donation amount to feeAmount
+  scholarshipApplied Boolean                @default(false) // claimed a 100%-off admin-capped scholarship seat — feeAmount is 0, activated without a Razorpay payment
+  feeAmount          Decimal                @db.Decimal(10, 2) // INR, snapshot at enroll time (track price + exact GST + optional donation) — decimal so GST isn't rounded to a whole rupee
+  status             EnrollmentStatus       @default(PENDING_PAYMENT)
+  razorpayOrderId    String?                @unique
+  razorpayPaymentId  String?                @unique
+  paidAt             DateTime?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
 
   tasks VirtualInternshipTask[]
 
   @@index([userId, status])
   @@map("virtual_internship_enrollments")
+}
+
+// Admin-configured "first N students free" cap per track. Not named
+// `Scholarship` — that model already exists for the unrelated external
+// scholarships directory (apps/backend/src/scholarships).
+model VirtualInternshipScholarship {
+  id          String                 @id @default(cuid())
+  track       VirtualInternshipTrack @unique
+  capacity    Int                    @default(0) // 0 = closed; admin sets "first N students free"
+  updatedById String?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@map("virtual_internship_scholarships")
 }
 
 model VirtualInternshipTask {

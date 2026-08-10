@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EnrollmentStatus, VirtualInternshipTrack } from '@prisma/client';
-import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Min } from 'class-validator';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
 
 export class EnrollVirtualInternshipDto {
@@ -68,6 +68,23 @@ export class AssignVirtualInternshipTaskDto {
   @IsOptional()
   @IsString()
   description?: string;
+}
+
+export class EnrollScholarshipDto {
+  @ApiProperty({ enum: VirtualInternshipTrack })
+  @IsEnum(VirtualInternshipTrack)
+  track!: VirtualInternshipTrack;
+}
+
+export class SetScholarshipCapacityDto {
+  @ApiProperty({ enum: VirtualInternshipTrack })
+  @IsEnum(VirtualInternshipTrack)
+  track!: VirtualInternshipTrack;
+
+  @ApiProperty({ description: 'Max number of free 100%-scholarship seats for this track (0 = closed)' })
+  @IsInt()
+  @Min(0)
+  capacity!: number;
 }
 
 export class VirtualInternshipAdminQueryDto extends PaginationDto {

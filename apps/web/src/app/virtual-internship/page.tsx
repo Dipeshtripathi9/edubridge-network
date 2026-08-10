@@ -29,7 +29,9 @@ import { EnrolledDashboard } from '@/components/internship/virtual-internship-da
 import { MyCourses } from '@/components/internship/my-courses';
 import { useInternshipListings } from '@/hooks/use-internship-listings';
 import {
+  useEnrollVirtualInternshipScholarship,
   useMyVirtualInternshipEnrollments,
+  useVirtualInternshipScholarshipStatus,
   type VirtualInternshipEnrollment as ActiveVirtualInternshipEnrollment,
 } from '@/hooks/use-virtual-internship';
 import { api } from '@/lib/api';
@@ -182,6 +184,9 @@ export default function VirtualInternshipPage() {
   const [confirmDates, setConfirmDates] = useState<{ start: string; end: string } | null>(null);
   const [justJoinedEnrollment, setJustJoinedEnrollment] = useState<ActiveVirtualInternshipEnrollment | null>(null);
 
+  const { data: scholarshipStatus } = useVirtualInternshipScholarshipStatus();
+  const enrollScholarship = useEnrollVirtualInternshipScholarship();
+
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const track = TRACKS[currentTrackKey];
@@ -333,6 +338,23 @@ export default function VirtualInternshipPage() {
       toast.error((e as Error).message);
     } finally {
       setIsProcessingPayment(false);
+    }
+  };
+
+  /** Claims a free scholarship seat — bypasses Razorpay entirely, unlike startPayment. */
+  const onClaimScholarship = async () => {
+    if (!useAuthStore.getState().accessToken) {
+      toast.error('Sign in to enroll');
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      return;
+    }
+    try {
+      const enrollment = await enrollScholarship.mutateAsync(currentTrackKey.toUpperCase() as 'WEEK' | 'MONTH');
+      queryClient.invalidateQueries({ queryKey: ['virtual-internship', 'me'] });
+      setJustJoinedEnrollment(enrollment);
+      showConfirmation();
+    } catch (e) {
+      toast.error((e as Error).message);
     }
   };
 
@@ -642,22 +664,42 @@ export default function VirtualInternshipPage() {
                 Coupons &amp; offers
               </div>
 
-              <div className={styles.offerRow}>
-                <div className={styles.offerLeft}>
-                  <div className={cn(styles.offerIcon, styles.scholarshipIcon)}>
-                    <GraduationCap className="h-[18px] w-[18px] text-white" strokeWidth={1.8} />
-                  </div>
-                  <div>
-                    <div className={styles.offerTitle}>100% Scholarship</div>
-                    <div className={cn(styles.offerSub, styles.offerSubLocked)}>
-                      Open for the first 150 students only — applications closed for this cohort
+              {(() => {
+                const trackUpper = currentTrackKey.toUpperCase() as 'WEEK' | 'MONTH';
+                const scholarship = scholarshipStatus?.[trackUpper];
+                const scholarshipOpen = (scholarship?.remaining ?? 0) > 0;
+                return (
+                  <div className={styles.offerRow}>
+                    <div className={styles.offerLeft}>
+                      <div className={cn(styles.offerIcon, styles.scholarshipIcon)}>
+                        <GraduationCap className="h-[18px] w-[18px] text-white" strokeWidth={1.8} />
+                      </div>
+                      <div>
+                        <div className={styles.offerTitle}>100% Scholarship</div>
+                        <div className={cn(styles.offerSub, !scholarshipOpen && styles.offerSubLocked)}>
+                          {scholarshipOpen
+                            ? `Open for the first ${scholarship!.capacity} students — ${scholarship!.remaining} seat${scholarship!.remaining === 1 ? '' : 's'} left`
+                            : 'Applications closed for this cohort'}
+                        </div>
+                      </div>
                     </div>
+                    {scholarshipOpen ? (
+                      <button
+                        type="button"
+                        className={styles.btnApply}
+                        disabled={enrollScholarship.isPending}
+                        onClick={onClaimScholarship}
+                      >
+                        {enrollScholarship.isPending ? 'Applying…' : 'Apply'}
+                      </button>
+                    ) : (
+                      <button type="button" className={styles.btnLocked} disabled>
+                        Locked
+                      </button>
+                    )}
                   </div>
-                </div>
-                <button type="button" className={styles.btnLocked} disabled>
-                  Locked
-                </button>
-              </div>
+                );
+              })()}
 
               <div className={styles.offerRow}>
                 <div className={styles.offerLeft}>
@@ -805,7 +847,9 @@ export default function VirtualInternshipPage() {
                 {confirmDates.start} <span className={styles.pmDatesArrow}>→</span> {confirmDates.end}
               </div>
               <p className={styles.pmHint} style={{ marginTop: 14 }}>
-                It&apos;ll go live within 4 hours, once your payment is verified.
+                {justJoinedEnrollment?.scholarshipApplied
+                  ? "No payment needed — your dashboard is ready now."
+                  : "It'll go live within 4 hours, once your payment is verified."}
               </p>
               <button type="button" className={styles.btnPmDone} onClick={closePaymentModal}>
                 Done
