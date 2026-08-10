@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { SignupIntent } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { stripLeadingHonorific } from '../common/utils/sanitize-name';
@@ -79,7 +80,24 @@ export class UsersService {
 
   /** Mark onboarding interests + profile complete. */
   async completeOnboarding(userId: string, dto: UpdateProfileDto) {
-    return this.updateProfile(userId, dto);
+    const profile = await this.updateProfile(userId, dto);
+    return this.backfillSignupIntent(userId, profile, 'COLLEGE_ADMISSIONS');
+  }
+
+  /**
+   * Signup no longer asks why someone's here — it's inferred the first time
+   * they complete one of the onboarding flows. Never overwrites an intent
+   * already on file (still "set once, never re-asked" from the user's POV).
+   */
+  private async backfillSignupIntent<T extends { signupIntent: SignupIntent | null }>(
+    userId: string,
+    profile: T,
+    intent: SignupIntent,
+  ) {
+    if (profile.signupIntent) return profile;
+    const updated = await this.prisma.profile.update({ where: { userId }, data: { signupIntent: intent } });
+    await this.redis.del(this.profileCacheKey(userId));
+    return { ...profile, signupIntent: updated.signupIntent };
   }
 
   /**
@@ -106,7 +124,7 @@ export class UsersService {
     ]);
 
     await this.redis.del(this.profileCacheKey(userId));
-    return profile;
+    return this.backfillSignupIntent(userId, profile, 'INTERNSHIPS_JOBS');
   }
 
   /**

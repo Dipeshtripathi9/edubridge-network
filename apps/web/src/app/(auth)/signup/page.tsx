@@ -4,7 +4,7 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { BadgeCheck, Briefcase, GraduationCap, Lock } from 'lucide-react';
+import { BadgeCheck, Lock } from 'lucide-react';
 import { MotionProvider, m } from '@/components/motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,8 +13,6 @@ import { GoogleVerifyButton, googleEnabled } from '@/components/social-auth';
 import { useSignup } from '@/hooks/use-auth';
 import { useAuthStore } from '@/stores/auth.store';
 import { sanitizeRedirect } from '@/lib/safe-redirect';
-
-type Intent = 'college' | 'jobs';
 
 const STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana',
@@ -30,7 +28,6 @@ function SignupInner() {
   const signup = useSignup();
   const setSession = useAuthStore((s) => s.setSession);
   const router = useRouter();
-  const [intent, setIntent] = useState<Intent | null>(null);
   const [googleToken, setGoogleToken] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -64,27 +61,26 @@ function SignupInner() {
         gender: gender || undefined,
         state: homeState || undefined,
         googleIdToken: googleToken ?? undefined,
-        intent: intent === 'college' ? 'COLLEGE_ADMISSIONS' : 'INTERNSHIPS_JOBS',
         redirect,
       },
       {
         onSuccess: (res) => {
-          const destination = sanitizeRedirect(redirect, intent === 'college' ? '/profile' : '/onboarding/jobs');
+          const destination = sanitizeRedirect(redirect, '/home');
           // Google-verified signup returns tokens — sign the user straight in and
-          // drop them right into the flow matching why they signed up (or back on
-          // the page that prompted the signup, if that's where they came from).
+          // drop them right into the app (or back on the page that prompted the
+          // signup, if that's where they came from). What they're here for gets
+          // asked later, from the home page's "finish your profile" prompt.
           if (res.tokens) {
             setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
             toast.success('Account created 🎉');
             router.push(destination);
             return;
           }
-          // Fallback (no Google configured): email-verification flow. Carry the
-          // intent through the query string so it survives the emailed-link round-trip.
+          // Fallback (no Google configured): email-verification flow.
           // `redirect` is embedded straight into that link server-side instead.
           if (res.devLink) sessionStorage.setItem('ebd_verify_devlink', res.devLink);
           toast.success('Account created — verify your email to continue.');
-          router.push(`/verify-email?email=${encodeURIComponent(email.trim())}&intent=${intent}`);
+          router.push(`/verify-email?email=${encodeURIComponent(email.trim())}`);
         },
         onError: (err) => toast.error((err as Error).message),
       },
@@ -101,51 +97,8 @@ function SignupInner() {
       </CardHeader>
       <CardContent>
         <MotionProvider>
-          {!intent ? (
-            // Step 0 — what brought them here, before any account details.
-            <m.div
-              key="intent"
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-5 py-2"
-            >
-              <p className="text-center text-lg font-bold">What brings you to EduBridge Network today?</p>
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={() => setIntent('college')}
-                  className="flex flex-col items-center gap-3.5 rounded-2xl border-[1.5px] border-border bg-card p-7 text-center transition-all hover:border-primary/60 hover:bg-primary/5"
-                >
-                  <GraduationCap className="h-8 w-8 text-primary" />
-                  <span className="text-[17px] font-bold leading-tight">
-                    College
-                    <br />
-                    Admissions
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIntent('jobs')}
-                  className="flex flex-col items-center gap-3.5 rounded-2xl border-[1.5px] border-border bg-card p-7 text-center transition-all hover:border-primary/60 hover:bg-primary/5"
-                >
-                  <Briefcase className="h-7 w-7 text-primary" />
-                  <span className="text-[17px] font-bold leading-tight">
-                    Internships &amp;
-                    <br />
-                    Jobs
-                  </span>
-                </button>
-              </div>
-              <p className="text-center text-base text-muted-foreground">
-                Already have an account?{' '}
-                <Link href={loginHref} className="font-bold text-primary hover:underline">
-                  Log in
-                </Link>
-              </p>
-            </m.div>
-          ) : googleEnabled && !verified ? (
-            // Step 1 — mandatory Google verification.
+          {googleEnabled && !verified ? (
+            // Step 1 — a single, mandatory Google verification.
             <m.div
               key="google-verify"
               initial={{ opacity: 0, x: 12 }}
@@ -153,9 +106,6 @@ function SignupInner() {
               transition={{ duration: 0.2 }}
               className="space-y-4 py-2 text-center"
             >
-              <button type="button" onClick={() => setIntent(null)} className="text-xs text-muted-foreground hover:underline">
-                ‹ Change
-              </button>
               <p className="text-sm text-muted-foreground">
                 Verify with your Google account to continue.
               </p>
@@ -177,9 +127,6 @@ function SignupInner() {
               transition={{ duration: 0.2 }}
               className="space-y-3"
             >
-              <button type="button" onClick={() => setIntent(null)} className="text-xs text-muted-foreground hover:underline">
-                ‹ Change
-              </button>
               {googleToken && (
                 <div className="flex items-center gap-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 text-sm text-green-700 dark:text-green-300">
                   <BadgeCheck className="h-4 w-4" /> Verified with Google
