@@ -9,7 +9,6 @@ import { CollegeQuiz } from '@/components/college-quiz';
 import { CollegeMatchQuiz } from '@/components/college-match-quiz';
 import { HomeCareerBridge } from '@/components/home-career-bridge';
 import { HomeCollegeRanking } from '@/components/home-college-ranking';
-import { HomeInternshipRecommendations } from '@/components/home-internship-recommendations';
 import { HomeTools } from '@/components/home-tools';
 import { HomeWelcomePanel } from '@/components/home-welcome-panel';
 import { useAuthStore } from '@/stores/auth.store';
@@ -168,9 +167,6 @@ export function HomeIllustrated() {
 
         {/* TOOLS + SCHOLARSHIPS */}
         <HomeTools onQuiz={openQuiz} onCollegeMatchQuiz={() => setCollegeMatchQuizOpen(true)} loggedIn={loggedIn} />
-
-        {/* INTERNSHIP RECOMMENDATIONS */}
-        <HomeInternshipRecommendations />
 
         {/* CAREER BRIDGE / COMMUNITY — negative margin cancels the outer
             space-y gap above, since the iframe already reserves its own top
