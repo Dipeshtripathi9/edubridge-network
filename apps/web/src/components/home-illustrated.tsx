@@ -12,6 +12,12 @@ import { HomeCollegeRanking } from '@/components/home-college-ranking';
 import { HomeTools } from '@/components/home-tools';
 import { HomeWelcomePanel } from '@/components/home-welcome-panel';
 import { useAuthStore } from '@/stores/auth.store';
+import { useMyProfileLead } from '@/hooks/use-profile-leads';
+
+// A signed-in student only sees the personalized welcome + recommendations
+// once their College Admissions profile is at least this complete — below
+// it, they see exactly the same plain hero a guest does.
+const PROFILE_UNLOCK_PCT = 75;
 
 const TESTIMONIALS = [
   { q: "The brochures confused me. My counselor compared real placement data across 3 colleges. Today I'm at Bennett — zero regrets.", by: 'Aarav S.', ok: 'Verified student, Bennett University' },
@@ -144,13 +150,18 @@ export function HomeIllustrated() {
   const openQuiz = () => setQuizOpen(true);
   const [collegeMatchQuizOpen, setCollegeMatchQuizOpen] = useState(false);
   const loggedIn = useAuthStore((s) => !!s.accessToken);
+  // Server truth for THIS logged-in user's own saved profile — not the
+  // client-only progress store, which is per-device. Disabled while logged
+  // out so this never fires an unauthenticated request.
+  const { data: myLead } = useMyProfileLead(loggedIn);
+  const unlocked = loggedIn && (myLead?.completionPct ?? 0) >= PROFILE_UNLOCK_PCT;
 
   return (
     <>
       <CollegeQuiz open={quizOpen} onClose={() => setQuizOpen(false)} />
       <CollegeMatchQuiz open={collegeMatchQuizOpen} onClose={() => setCollegeMatchQuizOpen(false)} />
       <div className="space-y-12 sm:space-y-16">
-        {loggedIn ? (
+        {unlocked ? (
           <>
             <HomeWelcomePanel onQuiz={openQuiz} onCollegeMatchQuiz={() => setCollegeMatchQuizOpen(true)} />
             <HomeCollegeRanking onQuiz={openQuiz} />
