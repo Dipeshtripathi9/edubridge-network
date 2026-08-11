@@ -121,7 +121,7 @@ export default function ProfilePage() {
           />
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
-          {done ? 'Profile complete — a counselor will reach out with your matches.' : 'Each step you finish fills your profile by 25%.'}
+          {done ? 'Profile complete — a counselor will reach out with your matches.' : 'Each step you finish fills your profile by 50%.'}
         </p>
       </div>
 

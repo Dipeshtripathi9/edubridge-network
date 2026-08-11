@@ -17,7 +17,7 @@ import { useMyProfileLead } from '@/hooks/use-profile-leads';
 // A signed-in student only sees the personalized welcome + recommendations
 // once their College Admissions profile is at least this complete — below
 // it, they see exactly the same plain hero a guest does.
-const PROFILE_UNLOCK_PCT = 75;
+const PROFILE_UNLOCK_PCT = 50;
 
 const TESTIMONIALS = [
   { q: "The brochures confused me. My counselor compared real placement data across 3 colleges. Today I'm at Bennett — zero regrets.", by: 'Aarav S.', ok: 'Verified student, Bennett University' },
