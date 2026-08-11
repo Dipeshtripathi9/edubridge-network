@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useProfileProgress } from '@/stores/profile-progress.store';
 import { useMyProfileLead, useUpsertProfileStep } from '@/hooks/use-profile-leads';
 import { useVerifyGoogle } from '@/hooks/use-profile';
 import { GoogleVerifyButton } from '@/components/social-auth';
+import { Skeleton } from '@/components/ui/skeleton';
 import { COURSE_TAXONOMY } from '@/lib/course-taxonomy';
 
 // The 4-step EduBridge Profile form, embedded in an isolated iframe (its own
@@ -275,8 +276,52 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
   var COURSE_FIELDS=Object.keys(COURSE_TAXONOMY);
   var CITIES=['Greater Noida','Noida','Ghaziabad','Gurugram','Faridabad','Delhi','Sonipat','Meerut'];
   var MB2=2*1024*1024;
+  var PREFILL=__PREFILL_JSON__;
+  var prefillHadMarksheet=!!(PREFILL&&PREFILL.step4&&PREFILL.step4.marksheet);
   var P={purpose:null,studying:null,courses:[],cities:[]};
   var files={};
+  function applyPrefill(){
+    if(!PREFILL)return;
+    if(PREFILL.step1){
+      document.getElementById('fn').value=PREFILL.step1.firstName||'';
+      document.getElementById('ln').value=PREFILL.step1.lastName||'';
+      document.getElementById('dob').value=PREFILL.step1.dob||'';
+      P.purpose=PREFILL.step1.purpose||null;
+      P.studying=PREFILL.step1.studying||null;
+    }
+    if(PREFILL.step2){
+      document.getElementById('em').value=PREFILL.step2.email||'';
+      document.getElementById('city').value=PREFILL.step2.city||'';
+      document.getElementById('state').value=PREFILL.step2.state||'';
+      document.getElementById('pin').value=PREFILL.step2.pin||'';
+      document.getElementById('ph').value=PREFILL.step2.phone||'';
+    }
+    if(PREFILL.step3){
+      if(PREFILL.step3.mode)document.getElementById('mode').value=PREFILL.step3.mode;
+      if(PREFILL.step3.degree)document.getElementById('degree').value=PREFILL.step3.degree;
+      if(PREFILL.step3.hostel)document.getElementById('hostel').value=PREFILL.step3.hostel;
+      if(PREFILL.step3.budget)document.getElementById('budget').value=PREFILL.step3.budget;
+    }
+    if(PREFILL.step4){
+      document.getElementById('board').value=PREFILL.step4.board||'';
+      document.getElementById('stream').value=PREFILL.step4.stream||'';
+      document.getElementById('passYear').value=PREFILL.step4.passYear||'';
+      document.getElementById('p12').value=PREFILL.step4.p12||'';
+      document.getElementById('p10').value=PREFILL.step4.p10||'';
+      if(prefillHadMarksheet){
+        document.getElementById('upMark').classList.add('done');
+        document.getElementById('upMarkTxt').textContent=PREFILL.step4.marksheet;
+        document.getElementById('upMarkSub').textContent='Previously uploaded · tap to replace';
+      }
+      if(Array.isArray(PREFILL.step4.exams)){
+        PREFILL.step4.exams.forEach(function(x){
+          if(x.name==='JEE Main')document.getElementById('sc_jee').value=x.score||'';
+          else if(x.name==='NEET')document.getElementById('sc_neet').value=x.score||'';
+          else if(x.name==='CUET')document.getElementById('sc_cuet').value=x.score||'';
+        });
+      }
+    }
+  }
   var customCount=0;
   function postPct(p){try{parent.postMessage({eduPct:p},'*');}catch(e){}}
   function postStep(step,pct,data,contact){try{parent.postMessage(Object.assign({eduStep:step,eduPct:pct,eduData:data},contact||{}),'*');}catch(e){}}
@@ -300,7 +345,7 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     err(1);P.firstName=fn;P.lastName=ln;P.dob=dob;P.studying=b.getAttribute('data-v');
     postStep(1,25,{firstName:fn,lastName:ln,dob:dob,purpose:P.purpose,studying:P.studying},{eduName:(fn+' '+ln).trim()});go(2);
   });});
-  function makeTABox(container,list,labelTxt,arr){
+  function makeTABox(container,list,labelTxt,arr,initialValue){
     var wrap=document.createElement('div');wrap.className='fbox ta';
     wrap.innerHTML='<label>'+labelTxt+'</label><input type="text" autocomplete="off"><button class="clear" aria-label="Clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="ta-drop"></div>';
     var inp=wrap.querySelector('input');var drop=wrap.querySelector('.ta-drop');
@@ -309,13 +354,14 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     inp.addEventListener('input',render);inp.addEventListener('focus',render);inp.addEventListener('blur',function(){setTimeout(function(){drop.classList.remove('open');},120);});
     wrap.querySelector('.clear').addEventListener('click',function(){var idx=arr.indexOf(inp.value);if(idx>-1)arr.splice(idx,1);inp.readOnly=false;inp.value='';wrap.classList.remove('filled');inp.focus();});
     container.appendChild(wrap);
+    if(initialValue)set(initialValue);
   }
   function renderOpts(container2,items,onPick){
     container2.innerHTML='';
     if(items.length===0){container2.innerHTML='<div class="crs-empty">No matches</div>';return;}
     items.forEach(function(item){var d=document.createElement('div');d.className='crs-opt';d.textContent=item;d.addEventListener('mousedown',function(e){e.preventDefault();onPick(item);});container2.appendChild(d);});
   }
-  function makeCourseCard(container,courseObj){
+  function makeCourseCard(container,courseObj,initial){
     var card=document.createElement('div');card.className='crs-card';
     card.innerHTML='<button class="rm" type="button">Remove</button><div class="crs-row">'+
       '<div class="crs-field"><button class="crs-trig" type="button"><span class="ph">Select field</span><span class="crs-chev">▾</span></button>'+
@@ -373,6 +419,15 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
       var idx=P.courses.indexOf(courseObj);if(idx>-1)P.courses.splice(idx,1);
       card.remove();postH();
     });
+    if(initial&&initial.field&&COURSE_TAXONOMY[initial.field]){
+      pickField(initial.field);
+      if(initial.degree&&COURSE_TAXONOMY[initial.field][initial.degree]){
+        pickDegree(initial.degree);
+        if(initial.specialization&&COURSE_TAXONOMY[initial.field][initial.degree].indexOf(initial.specialization)>-1){
+          pickSpec(initial.specialization);
+        }
+      }
+    }
   }
   function closeAllPanelsGlobal(){
     document.querySelectorAll('.crs-panel.show').forEach(function(p){p.classList.remove('show');});
@@ -380,16 +435,20 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
   }
   document.addEventListener('click',function(e){if(!e.target.closest('.crs-field'))closeAllPanelsGlobal();});
   var crsCards=document.getElementById('crsCards');
-  function addCourseCard(){
+  function addCourseCard(pre){
     if(P.courses.length>=5)return;
     var obj={field:null,degree:null,specialization:null};
     P.courses.push(obj);
-    makeCourseCard(crsCards,obj);
+    makeCourseCard(crsCards,obj,pre);
   }
-  addCourseCard();addCourseCard();
+  var preCourses=(PREFILL&&PREFILL.step3&&Array.isArray(PREFILL.step3.courses)&&PREFILL.step3.courses.length)?PREFILL.step3.courses:null;
+  if(preCourses){preCourses.slice(0,5).forEach(function(c){addCourseCard(c);});}
+  else{addCourseCard();addCourseCard();}
   document.getElementById('addCrs').addEventListener('click',function(){if(crsCards.children.length<5){addCourseCard();postH();}});
   var ctyBoxes=document.getElementById('ctyBoxes');
-  makeTABox(ctyBoxes,CITIES,'Enter a city',P.cities);makeTABox(ctyBoxes,CITIES,'Enter a city',P.cities);
+  var preCities=(PREFILL&&PREFILL.step3&&Array.isArray(PREFILL.step3.cities))?PREFILL.step3.cities:[];
+  makeTABox(ctyBoxes,CITIES,'Enter a city',P.cities,preCities[0]);
+  makeTABox(ctyBoxes,CITIES,'Enter a city',P.cities,preCities[1]);
   function wireUpload(inpId,boxId,txtId,subId,clrId,key){
     var inp=document.getElementById(inpId);var box=document.getElementById(boxId);var txt=document.getElementById(txtId);var sub=document.getElementById(subId);var clr=document.getElementById(clrId);var defTxt=txt.textContent,defSub=sub.textContent;
     inp.addEventListener('change',function(){var f=inp.files[0];if(!f)return;if(f.type!=='application/pdf'){err(4,'PDF only, please.');inp.value='';return;}if(f.size>MB2){err(4,'That PDF is '+(f.size/1048576).toFixed(1)+' MB — limit is 2 MB.');inp.value='';return;}err(4);files[key]=f;box.classList.add('done');txt.textContent=f.name;sub.textContent=(f.size/1048576).toFixed(1)+' MB · tap ✕ to change';});
@@ -399,6 +458,7 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
   wireUpload('f_jee','up_jee','up_jeeTxt','up_jeeSub','up_jeeClr','jee');
   wireUpload('f_neet','up_neet','up_neetTxt','up_neetSub','up_neetClr','neet');
   wireUpload('f_cuet','up_cuet','up_cuetTxt','up_cuetSub','up_cuetClr','cuet');
+  applyPrefill();
   document.getElementById('addExam').addEventListener('click',function(){
     if(customCount>=4)return;customCount++;var k='cx'+customCount;var d=document.createElement('div');d.className='exblk';
     d.innerHTML='<div class="exhead"><b>Other exam</b><button class="rmex" type="button">Remove</button></div><div class="fbox"><label>Exam name</label><input type="text" id="en_'+k+'" placeholder="e.g. VITEEE, IPU CET, Bennett SAT"></div><div class="fbox"><label>Score / percentile</label><input type="text" id="sc_'+k+'"></div><label class="up" id="up_'+k+'"><span class="uic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></svg></span><div><b id="up_'+k+'Txt">Upload scorecard</b><small id="up_'+k+'Sub">PDF · max 2 MB · optional</small></div><span class="clr" id="up_'+k+'Clr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></span><input type="file" id="f_'+k+'" accept="application/pdf"></label>';
@@ -426,8 +486,8 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     if(!stream)return void err(4,'Please select your stream.');
     if(!/^\d{4}$/.test(py))return void err(4,'Passing year looks off — e.g. 2026.');
     if(!p12||!p10)return void err(4,'Please add your Class 12 and Class 10 percentages.');
-    if(!files.mark)return void err(4,'Please upload your marksheet PDF (max 2 MB) — it\'s required.');
-    err(4);P.board=board;P.stream=stream;P.passYear=py;P.p12=p12;P.p10=p10;P.marksheet=files.mark.name;P.exams=[];
+    if(!files.mark&&!prefillHadMarksheet)return void err(4,'Please upload your marksheet PDF (max 2 MB) — it\'s required.');
+    err(4);P.board=board;P.stream=stream;P.passYear=py;P.p12=p12;P.p10=p10;P.marksheet=files.mark?files.mark.name:(PREFILL&&PREFILL.step4&&PREFILL.step4.marksheet)||null;P.exams=[];
     [['jee','JEE Main'],['neet','NEET'],['cuet','CUET']].forEach(function(x){var sc=document.getElementById('sc_'+x[0]).value.trim();if(sc||files[x[0]])P.exams.push({name:x[1],score:sc||null,file:files[x[0]]?files[x[0]].name:null});});
     for(var i=1;i<=customCount;i++){var k='cx'+i;var enEl=document.getElementById('en_'+k);if(!enEl)continue;var en=enEl.value.trim();var sc2=document.getElementById('sc_'+k).value.trim();if(en||sc2||files[k])P.exams.push({name:en||'Other exam',score:sc2||null,file:files[k]?files[k].name:null});}
     P.submittedAt=new Date().toISOString();
@@ -474,13 +534,26 @@ export function ProfileForm() {
   const setPct = useProfileProgress((s) => s.setPct);
   const upsert = useUpsertProfileStep();
   const verifyGoogle = useVerifyGoogle();
-  const { data: myLead } = useMyProfileLead();
+  const { data: myLead, isLoading: leadLoading } = useMyProfileLead();
 
   // Server is the source of truth for progress — sync the store from it (e.g.
   // after a counselor deletes the lead, this drops back to a fresh 0%).
   useEffect(() => {
     if (typeof myLead?.completionPct === 'number') setPct(myLead.completionPct);
   }, [myLead?.completionPct, setPct]);
+
+  // Editing an already-started profile: bake the saved step data into the
+  // iframe's initial script as PREFILL, so re-opening this form shows what
+  // was entered before instead of starting blank every time. Computed once
+  // the lead has loaded — the iframe isn't mounted until then (below), so
+  // there's no race between this and the srcDoc that's actually rendered.
+  const srcDoc = useMemo(() => {
+    const hasAny = myLead && (myLead.step1 || myLead.step2 || myLead.step3 || myLead.step4);
+    const prefill = hasAny
+      ? { step1: myLead!.step1, step2: myLead!.step2, step3: myLead!.step3, step4: myLead!.step4 }
+      : null;
+    return SRC.replace('__PREFILL_JSON__', prefill ? JSON.stringify(prefill) : 'null');
+  }, [myLead]);
 
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
@@ -514,12 +587,16 @@ export function ProfileForm() {
     });
   };
 
+  if (leadLoading) {
+    return <Skeleton className="h-96 w-full rounded-2xl" />;
+  }
+
   return (
     <div className="relative">
       <iframe
         ref={ref}
         title="Complete your EduBridge Profile"
-        srcDoc={SRC}
+        srcDoc={srcDoc}
         scrolling="no"
         className="block w-full border-0 bg-transparent"
         style={{ height }}
