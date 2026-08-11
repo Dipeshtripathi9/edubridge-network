@@ -13,6 +13,23 @@ export class ApiError extends Error {
   }
 }
 
+// A stalled connection can leave a bare `fetch()` pending forever — no
+// response, no thrown error — which leaves react-query's `data` stuck
+// `undefined` indefinitely. Any UI keyed off "still undefined" (a loading
+// skeleton, an ownership check) then never resolves either. Bound every
+// request so it always eventually settles, one way or another.
+const REQUEST_TIMEOUT_MS = 15_000;
+
+async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // Single-flight refresh: concurrent 401s share one refresh request.
 let refreshPromise: Promise<string | null> | null = null;
 
@@ -20,7 +37,7 @@ async function doRefresh(): Promise<string | null> {
   const { refreshToken, setTokens, logout } = useAuthStore.getState();
   if (!refreshToken) return null;
   try {
-    const res = await fetch(`${API_URL}/auth/refresh`, {
+    const res = await fetchWithTimeout(`${API_URL}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
@@ -48,7 +65,7 @@ async function request<T>(path: string, options: RequestOptions = {}, retry = tr
   const { body, auth = true, headers, ...rest } = options;
   const token = useAuthStore.getState().accessToken;
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetchWithTimeout(`${API_URL}${path}`, {
     ...rest,
     headers: {
       'Content-Type': 'application/json',
@@ -81,7 +98,7 @@ async function requestPaginated<T>(
 ): Promise<{ data: T[]; meta: { hasMore: boolean; nextCursor?: string | null; page: number } }> {
   const token = useAuthStore.getState().accessToken;
   const { auth = true, headers } = options;
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetchWithTimeout(`${API_URL}${path}`, {
     headers: {
       ...(auth && token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
