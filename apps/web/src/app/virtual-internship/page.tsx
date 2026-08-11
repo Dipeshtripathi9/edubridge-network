@@ -23,6 +23,7 @@ import {
   X,
 } from 'lucide-react';
 import { AccountMenu } from '@/components/account-menu';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { OpportunityRecommendationCard } from '@/components/opportunity-recommendation-card';
 import { EnrolledDashboard } from '@/components/internship/virtual-internship-dashboard';
@@ -157,7 +158,7 @@ export default function VirtualInternshipPage() {
   const queryClient = useQueryClient();
   const authHydrated = useAuthStore((s) => s.hydrated);
   const token = useAuthStore((s) => s.accessToken);
-  const { data: activeEnrollments } = useMyVirtualInternshipEnrollments();
+  const { data: activeEnrollments, isError: ownershipErrored, refetch: refetchOwnership } = useMyVirtualInternshipEnrollments();
   // True only for the brief window where we know the visitor is logged in but
   // haven't heard back yet on which tracks (if any) they own. Guests never hit
   // this (the query is disabled with no token, so there's nothing to wait on —
@@ -165,7 +166,12 @@ export default function VirtualInternshipPage() {
   // below defaults to "owns nothing" while the real fetch is in flight, which
   // means a logged-in owner sees the guest hero and both unlock-track cards
   // for a moment on every load before flipping to their real state.
-  const ownershipPending = authHydrated && !!token && activeEnrollments === undefined;
+  //
+  // Also bails out on `isError` (not just "still waiting on data") — a request
+  // that times out or fails settles react-query into an error state without
+  // ever populating `data`, and without this check that looked identical to
+  // "still loading" forever, leaving an owner stuck on the skeleton.
+  const ownershipPending = authHydrated && !!token && activeEnrollments === undefined && !ownershipErrored;
   const ownedTrackKeys = useMemo(
     () => new Set((activeEnrollments ?? []).map((e) => trackKeyFor(e.track))),
     [activeEnrollments],
@@ -460,6 +466,19 @@ export default function VirtualInternshipPage() {
               <Skeleton className="h-8 w-40 rounded-full" />
               <Skeleton className="mt-6 h-12 w-2/3" />
               <Skeleton className="mt-4 h-20 w-full max-w-xl" />
+            </div>
+          ) : ownershipErrored ? (
+            // Couldn't confirm ownership (timed out or failed) — don't guess
+            // and silently show the "browse tracks" hero to someone who may
+            // already own one; let them retry the specific check instead.
+            <div className={styles.hero}>
+              <p className="text-lg font-semibold">Couldn&apos;t load your enrollment</p>
+              <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                Check your connection and try again — this won&apos;t affect anything you&apos;ve already enrolled in.
+              </p>
+              <Button className="mt-4" onClick={() => refetchOwnership()}>
+                Retry
+              </Button>
             </div>
           ) : activeEnrollments && activeEnrollments.length > 0 ? (
             <MyCourses enrollments={activeEnrollments} onContinue={showDashboard} />
