@@ -8,7 +8,7 @@ import { firstNameOf } from '@/lib/format-name';
 
 const QUICK_ACTIONS = [
   { label: 'College Quiz', icon: '/poster-quiz.jpg' },
-  { label: 'Compare Colleges', icon: '/poster-compare.jpg', href: '/colleges/recommended' },
+  { label: 'Compare Colleges', icon: '/poster-compare.jpg', href: '/colleges/compare' },
   { label: 'All Colleges', icon: '/poster-all-colleges.jpg', href: '/colleges/recommended?tab=all' },
   { label: 'My Shortlist', icon: '/poster-my-shortlist.jpg', href: '/colleges/recommended?tab=shortlist' },
   { label: 'Applied', icon: '/poster-applied.jpg', href: '/colleges/recommended?tab=applied' },

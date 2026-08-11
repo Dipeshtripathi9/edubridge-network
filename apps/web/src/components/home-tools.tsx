@@ -214,7 +214,7 @@ const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/
 // counselor-callback flow the hero's "College" button starts.
 const POSTERS = [
   { svg: POSTER_QUIZ, action: { type: 'collegeMatchQuiz' as const } },
-  { svg: POSTER_COMPARE, action: { type: 'href' as const, href: '/reviews' } },
+  { svg: POSTER_COMPARE, action: { type: 'href' as const, href: '/colleges/compare' } },
   { svg: POSTER_INTERNSHIP, action: { type: 'href' as const, href: '/internship' } },
   { svg: POSTER_SCHOLARSHIP, action: { type: 'href' as const, href: '/scholarships' } },
   { svg: POSTER_EXPERT, action: { type: 'quiz' as const } },

@@ -13,7 +13,7 @@ import { ADMIN_NAV } from '@/components/sidebar';
 // Primary navigation. Opened from the ☰ in the header, on every screen size.
 const MENU = [
   { href: '/home', label: 'Home' },
-  { href: '/reviews', label: 'Compare Colleges' },
+  { href: '/colleges/compare', label: 'Compare Colleges' },
   { href: '/home#direct-admission', label: 'Direct Admission Desk' },
   { href: '/startups/ez-rentbuddy', label: 'Places to Live' },
   { href: '/internship', label: 'Internship Opportunities' },

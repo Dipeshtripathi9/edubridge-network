@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Bookmark, BookmarkCheck, ChevronRight, ShieldCheck } from 'lucide-react';
+import { Bookmark, BookmarkCheck, ChevronRight, Scale, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { isSafeHttpUrl, cn } from '@/lib/utils';
 import type { College } from '@/hooks/use-colleges';
@@ -194,6 +194,11 @@ export function CollegeRecommendationCard({
         </Button>
         <Button size="sm" variant="outline" className="flex-none min-[900px]:flex-none" onClick={onQuiz}>
           Ask Expert Guide
+        </Button>
+        <Button size="sm" variant="ghost" className="flex-none gap-1.5 min-[900px]:flex-none" asChild>
+          <Link href={`/colleges/compare?slugs=${college.slug}`}>
+            <Scale className="h-4 w-4" /> Compare
+          </Link>
         </Button>
       </div>
 
