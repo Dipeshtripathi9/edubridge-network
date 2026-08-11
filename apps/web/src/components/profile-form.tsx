@@ -5,15 +5,20 @@ import { CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useProfileProgress } from '@/stores/profile-progress.store';
 import { useMyProfileLead, useUpsertProfileStep } from '@/hooks/use-profile-leads';
-import { useVerifyGoogle } from '@/hooks/use-profile';
+import { useMe, useVerifyGoogle } from '@/hooks/use-profile';
 import { GoogleVerifyButton } from '@/components/social-auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { COURSE_TAXONOMY } from '@/lib/course-taxonomy';
 
-// The 4-step EduBridge Profile form, embedded in an isolated iframe (its own
-// fonts/CSS/JS). Each completed step posts its % to the parent so the progress
-// bar + drawer line advance (25 · 50 · 75 · 100). String.raw keeps the regex
-// backslashes in the script intact.
+// The 2-step EduBridge Profile form, embedded in an isolated iframe (its own
+// fonts/CSS/JS). Name/mobile/gender/state are already collected at signup —
+// this only covers what signup doesn't: course/city preferences and academic
+// details for college + scholarship matching. Each completed step posts its
+// % to the parent so the progress bar + drawer line advance (50 · 90 · 100).
+// Internally still tagged eduStep 3/4 (matching the ProfileLead.step3/step4
+// database columns) even though only two steps are shown — renumbering the
+// columns themselves isn't worth a migration for a cosmetic step count.
+// String.raw keeps the regex backslashes in the script intact.
 const SRC = String.raw`<!doctype html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,6 +128,8 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
 .consent b{font-weight:700}
 .cta{display:block;width:100%;text-align:center;background:var(--violet);color:#fff;border-radius:999px;font-size:19px;font-weight:800;padding:17px;margin-top:22px;transition:background .15s ease}
 .cta:hover{background:var(--violet-dark)}
+.skip{display:block;width:100%;text-align:center;background:none;color:var(--ink-2);font-size:14.5px;font-weight:700;text-decoration:underline;padding:14px;margin-top:8px}
+.skip:hover{color:var(--ink)}
 .err{display:none;margin-top:12px;text-align:center;font-size:13.5px;font-weight:700;color:#B4470B}
 .err.show{display:block}
 .sentbox{text-align:center;padding:44px 0}
@@ -135,47 +142,8 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
 </style></head>
 <body>
 <div class="wrap">
-  <section class="scr on" id="s1">
-    <div class="step-k">Step 1 of 4</div>
-    <h1>Welcome to EduBridge</h1>
-    <p class="sub">Complete your <i>EduBridge Profile</i> to connect with colleges and match with scholarships.</p>
-    <div class="flab">Name</div>
-    <div class="fbox"><label>First</label><input type="text" id="fn" autocomplete="given-name"></div>
-    <div class="fbox"><label>Last</label><input type="text" id="ln" autocomplete="family-name"></div>
-    <div class="flab">Birthdate</div>
-    <div class="fbox"><input type="text" id="dob" placeholder="DD/MM/YYYY" inputmode="numeric"><div class="hint">DD/MM/YYYY</div></div>
-    <div class="qcard" id="q1a">
-      <div class="qhead"><b>What brings you here?</b></div>
-      <button class="qopt" data-v="college">I'm looking for a college</button>
-      <button class="qopt" data-v="parent">I'm researching for my child</button>
-      <button class="qopt" data-v="other">Other</button>
-    </div>
-    <div class="qcard" id="q1b" style="display:none">
-      <div class="qhead"><b>Where are you currently studying?</b><button class="back" id="q1back">Back</button></div>
-      <button class="qopt" data-v="class12">I'm in Class 11–12</button>
-      <button class="qopt" data-v="passed">I've passed Class 12</button>
-      <button class="qopt" data-v="incollege">I'm in college</button>
-      <button class="qopt" data-v="other">Other</button>
-    </div>
-    <p class="err" id="err1"></p>
-  </section>
-  <section class="scr" id="s2">
-    <div class="step-k">Step 2 of 4</div>
-    <h1>Where can we reach you?</h1>
-    <p class="sub">Your counselor call and scholarship matches land here.</p>
-    <div class="fbox"><label>Email</label><input type="email" id="em" autocomplete="email"></div>
-    <div class="fbox"><label>City</label><input type="text" id="city" autocomplete="address-level2"></div>
-    <div class="fbox sel"><label>State</label>
-      <select id="state"><option value="">Select</option><option>Uttar Pradesh</option><option>Delhi</option><option>Haryana</option><option>Rajasthan</option><option>Uttarakhand</option><option>Bihar</option><option>Madhya Pradesh</option><option>Punjab</option><option>Other</option></select>
-    </div>
-    <div class="fbox"><label>PIN code</label><input type="text" id="pin" inputmode="numeric" maxlength="6"></div>
-    <div class="fbox"><label>Phone</label><input type="tel" id="ph" inputmode="numeric" maxlength="10"><div class="hint">10-digit WhatsApp number</div></div>
-    <label class="consent"><input type="checkbox" id="c2"><span>By checking this box, I verify the number above is my WhatsApp number. I consent to receive my matches and <b>one counselor call</b> from EduBridge Network. No marketing spam — reply STOP anytime.</span></label>
-    <button class="cta" data-next="3">Continue</button>
-    <p class="err" id="err2"></p>
-  </section>
-  <section class="scr" id="s3">
-    <div class="step-k">Step 3 of 4</div>
+  <section class="scr on" id="s3">
+    <div class="step-k">Step 1 of 2</div>
     <h1>Personalize your recommendations</h1>
     <p class="sub">We use your <i>EduBridge Profile</i> to match you with best-fit colleges and scholarships.</p>
     <div class="flab">Add courses you're interested in</div>
@@ -195,7 +163,7 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     <p class="err" id="err3"></p>
   </section>
   <section class="scr" id="s4">
-    <div class="step-k">Step 4 of 4</div>
+    <div class="step-k">Step 2 of 2</div>
     <h1>Get matched with participating colleges</h1>
     <p class="sub">Colleges offer seats and scholarships based on your academic info.</p>
     <div class="flab">School board (Class 12)</div>
@@ -233,15 +201,17 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     </div>
     <div id="customExams"></div>
     <button class="addmore" id="addExam">+ Add exam</button>
+    <label class="consent"><input type="checkbox" id="c2"><span>By checking this box, I consent to receive my matches and <b>one counselor call</b> from EduBridge Network on my registered number. No marketing spam — reply STOP anytime.</span></label>
     <button class="cta" id="finish">Create my profile</button>
+    <button type="button" class="skip" id="skipStep2">Skip — I don't need a scholarship match right now</button>
     <p class="err" id="err4"></p>
   </section>
   <section class="scr" id="s5">
     <div class="sentbox">
       <span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></span>
-      <h2>Profile created!</h2>
+      <h2 id="sentH2">Profile created!</h2>
       <p id="sentTxt"></p>
-      <span class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>All matches verified by a human counselor</span>
+      <span class="seal" id="sentSeal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>All matches verified by a human counselor</span>
     </div>
     <div class="qcard" id="nsMenu">
       <div class="qhead"><b>While you wait — a few quick things</b></div>
@@ -277,25 +247,13 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
   var CITIES=['Greater Noida','Noida','Ghaziabad','Gurugram','Faridabad','Delhi','Sonipat','Meerut'];
   var MB2=2*1024*1024;
   var PREFILL=__PREFILL_JSON__;
+  var SELF=__SELF_JSON__;
   var prefillHadMarksheet=!!(PREFILL&&PREFILL.step4&&PREFILL.step4.marksheet);
-  var P={purpose:null,studying:null,courses:[],cities:[]};
+  var P={courses:[],cities:[]};
   var files={};
+  function selfContact(){return {eduName:(SELF&&SELF.name)||'',eduPhone:(SELF&&SELF.phone)||'',eduEmail:(SELF&&SELF.email)||''};}
   function applyPrefill(){
     if(!PREFILL)return;
-    if(PREFILL.step1){
-      document.getElementById('fn').value=PREFILL.step1.firstName||'';
-      document.getElementById('ln').value=PREFILL.step1.lastName||'';
-      document.getElementById('dob').value=PREFILL.step1.dob||'';
-      P.purpose=PREFILL.step1.purpose||null;
-      P.studying=PREFILL.step1.studying||null;
-    }
-    if(PREFILL.step2){
-      document.getElementById('em').value=PREFILL.step2.email||'';
-      document.getElementById('city').value=PREFILL.step2.city||'';
-      document.getElementById('state').value=PREFILL.step2.state||'';
-      document.getElementById('pin').value=PREFILL.step2.pin||'';
-      document.getElementById('ph').value=PREFILL.step2.phone||'';
-    }
     if(PREFILL.step3){
       if(PREFILL.step3.mode)document.getElementById('mode').value=PREFILL.step3.mode;
       if(PREFILL.step3.degree)document.getElementById('degree').value=PREFILL.step3.degree;
@@ -334,17 +292,6 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     postH();
   }
   function err(n,m){var e=document.getElementById('err'+n);if(!m){e.classList.remove('show');return false;}e.textContent=m;e.classList.add('show');postH();return true;}
-  document.querySelectorAll('#q1a .qopt').forEach(function(b){b.addEventListener('click',function(){P.purpose=b.getAttribute('data-v');document.getElementById('q1a').style.display='none';document.getElementById('q1b').style.display='';postH();});});
-  document.getElementById('q1back').addEventListener('click',function(){document.getElementById('q1b').style.display='none';document.getElementById('q1a').style.display='';postH();});
-  var dobEl=document.getElementById('dob');
-  dobEl.addEventListener('input',function(){var v=dobEl.value.replace(/\D/g,'').slice(0,8);if(v.length>4)dobEl.value=v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4);else if(v.length>2)dobEl.value=v.slice(0,2)+'/'+v.slice(2);else dobEl.value=v;});
-  document.querySelectorAll('#q1b .qopt').forEach(function(b){b.addEventListener('click',function(){
-    var fn=document.getElementById('fn').value.trim();var ln=document.getElementById('ln').value.trim();var dob=document.getElementById('dob').value.trim();
-    if(!fn||!ln){err(1,'Please add your first and last name above.');return;}
-    if(!/^\d{2}\/\d{2}\/\d{4}$/.test(dob)){err(1,'Birthdate format: DD/MM/YYYY');return;}
-    err(1);P.firstName=fn;P.lastName=ln;P.dob=dob;P.studying=b.getAttribute('data-v');
-    postStep(1,25,{firstName:fn,lastName:ln,dob:dob,purpose:P.purpose,studying:P.studying},{eduName:(fn+' '+ln).trim()});go(2);
-  });});
   function makeTABox(container,list,labelTxt,arr,initialValue){
     var wrap=document.createElement('div');wrap.className='fbox ta';
     wrap.innerHTML='<label>'+labelTxt+'</label><input type="text" autocomplete="off"><button class="clear" aria-label="Clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="ta-drop"></div>';
@@ -469,15 +416,7 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
   });
   document.querySelectorAll('.cta[data-next]').forEach(function(b){b.addEventListener('click',function(){
     var n=parseInt(b.getAttribute('data-next'),10);
-    if(n===3){var em=document.getElementById('em').value.trim();var city=document.getElementById('city').value.trim();var st=document.getElementById('state').value;var pin=document.getElementById('pin').value.trim();var ph=document.getElementById('ph').value.trim();
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return void err(2,'Please enter a valid email.');
-      if(!city)return void err(2,'Please add your city.');
-      if(!st)return void err(2,'Please select your state.');
-      if(!/^\d{6}$/.test(pin))return void err(2,'PIN code is 6 digits.');
-      if(!/^[6-9]\d{9}$/.test(ph))return void err(2,'Enter a valid 10-digit number.');
-      if(!document.getElementById('c2').checked)return void err(2,'Please tick the consent box.');
-      err(2);P.email=em;P.city=city;P.state=st;P.pin=pin;P.phone=ph;postStep(2,50,{email:em,city:city,state:st,pin:pin,phone:ph},{eduName:((P.firstName||'')+' '+(P.lastName||'')).trim(),eduPhone:ph,eduEmail:em});}
-    if(n===4){var validCourses=P.courses.filter(function(c){return c.field&&c.degree;});if(!validCourses.length)return void err(3,'Add at least one course you\'re interested in.');if(!document.getElementById('budget').value)return void err(3,'Please select your budget.');err(3);P.mode=document.getElementById('mode').value;P.degree=document.getElementById('degree').value;P.hostel=document.getElementById('hostel').value;P.budget=document.getElementById('budget').value;postStep(3,75,{courses:validCourses,cities:P.cities,mode:P.mode,degree:P.degree,hostel:P.hostel,budget:P.budget},{});}
+    if(n===4){var validCourses=P.courses.filter(function(c){return c.field&&c.degree;});if(!validCourses.length)return void err(3,'Add at least one course you\'re interested in.');if(!document.getElementById('budget').value)return void err(3,'Please select your budget.');err(3);P.mode=document.getElementById('mode').value;P.degree=document.getElementById('degree').value;P.hostel=document.getElementById('hostel').value;P.budget=document.getElementById('budget').value;postStep(3,50,{courses:validCourses,cities:P.cities,mode:P.mode,degree:P.degree,hostel:P.hostel,budget:P.budget},selfContact());}
     go(n);
   });});
   document.getElementById('finish').addEventListener('click',function(){
@@ -487,13 +426,21 @@ h1{font-family:var(--font-display);font-weight:800;font-size:clamp(27px,6.2vw,34
     if(!/^\d{4}$/.test(py))return void err(4,'Passing year looks off — e.g. 2026.');
     if(!p12||!p10)return void err(4,'Please add your Class 12 and Class 10 percentages.');
     if(!files.mark&&!prefillHadMarksheet)return void err(4,'Please upload your marksheet PDF (max 2 MB) — it\'s required.');
-    err(4);P.board=board;P.stream=stream;P.passYear=py;P.p12=p12;P.p10=p10;P.marksheet=files.mark?files.mark.name:(PREFILL&&PREFILL.step4&&PREFILL.step4.marksheet)||null;P.exams=[];
-    [['jee','JEE Main'],['neet','NEET'],['cuet','CUET']].forEach(function(x){var sc=document.getElementById('sc_'+x[0]).value.trim();if(sc||files[x[0]])P.exams.push({name:x[1],score:sc||null,file:files[x[0]]?files[x[0]].name:null});});
-    for(var i=1;i<=customCount;i++){var k='cx'+i;var enEl=document.getElementById('en_'+k);if(!enEl)continue;var en=enEl.value.trim();var sc2=document.getElementById('sc_'+k).value.trim();if(en||sc2||files[k])P.exams.push({name:en||'Other exam',score:sc2||null,file:files[k]?files[k].name:null});}
-    P.submittedAt=new Date().toISOString();
-    document.getElementById('sentTxt').textContent='Welcome aboard, '+P.firstName+'! Your EduBridge Profile is ready. A counselor will review it and call '+P.phone.replace(/(\d{2})\d{6}(\d{2})/,'$1******$2')+' with your matches — then everything lands on WhatsApp & email. Free, always.';
-    postStep(4,90,{board:board,stream:stream,passYear:py,p12:p12,p10:p10,marksheet:P.marksheet,exams:P.exams},{eduName:((P.firstName||'')+' '+(P.lastName||'')).trim(),eduPhone:P.phone,eduEmail:P.email});
+    if(!document.getElementById('c2').checked)return void err(4,'Please tick the consent box.');
+    err(4);var marksheet=files.mark?files.mark.name:(PREFILL&&PREFILL.step4&&PREFILL.step4.marksheet)||null;var exams=[];
+    [['jee','JEE Main'],['neet','NEET'],['cuet','CUET']].forEach(function(x){var sc=document.getElementById('sc_'+x[0]).value.trim();if(sc||files[x[0]])exams.push({name:x[1],score:sc||null,file:files[x[0]]?files[x[0]].name:null});});
+    for(var i=1;i<=customCount;i++){var k='cx'+i;var enEl=document.getElementById('en_'+k);if(!enEl)continue;var en=enEl.value.trim();var sc2=document.getElementById('sc_'+k).value.trim();if(en||sc2||files[k])exams.push({name:en||'Other exam',score:sc2||null,file:files[k]?files[k].name:null});}
+    document.getElementById('sentH2').textContent='Profile created!';
+    document.getElementById('sentSeal').style.display='';
+    document.getElementById('sentTxt').textContent='Welcome aboard'+(SELF&&SELF.name?(', '+SELF.name.split(' ')[0]):'')+'! Your EduBridge Profile is ready. A counselor will review it and reach out on your registered number with your matches — everything also lands on WhatsApp & email. Free, always.';
+    postStep(4,90,{board:board,stream:stream,passYear:py,p12:p12,p10:p10,marksheet:marksheet,exams:exams},selfContact());
     try{parent.postMessage({eduAwaitingVerification:true},'*');}catch(e){}
+  });
+  document.getElementById('skipStep2').addEventListener('click',function(){
+    document.getElementById('sentH2').textContent="No problem!";
+    document.getElementById('sentSeal').style.display='none';
+    document.getElementById('sentTxt').textContent='You can add your academic details anytime from your profile to unlock scholarship matches. In the meantime, take a look at what you can do next.';
+    go(5);
   });
   window.addEventListener('message',function(e){if(e.data&&e.data.eduProceed)go(e.data.eduProceed);});
   var NS={};
@@ -535,6 +482,7 @@ export function ProfileForm() {
   const upsert = useUpsertProfileStep();
   const verifyGoogle = useVerifyGoogle();
   const { data: myLead, isLoading: leadLoading } = useMyProfileLead();
+  const { data: me } = useMe();
 
   // Server is the source of truth for progress — sync the store from it (e.g.
   // after a counselor deletes the lead, this drops back to a fresh 0%).
@@ -547,13 +495,20 @@ export function ProfileForm() {
   // was entered before instead of starting blank every time. Computed once
   // the lead has loaded — the iframe isn't mounted until then (below), so
   // there's no race between this and the srcDoc that's actually rendered.
+  //
+  // SELF carries name/phone/email already collected at signup — this wizard
+  // no longer asks for them (steps 1-2 of the old 4-step version were
+  // removed as redundant with signup), but the counselor-facing lead record
+  // still needs contact info, and the success message still wants a name.
   const srcDoc = useMemo(() => {
-    const hasAny = myLead && (myLead.step1 || myLead.step2 || myLead.step3 || myLead.step4);
-    const prefill = hasAny
-      ? { step1: myLead!.step1, step2: myLead!.step2, step3: myLead!.step3, step4: myLead!.step4 }
-      : null;
-    return SRC.replace('__PREFILL_JSON__', prefill ? JSON.stringify(prefill) : 'null');
-  }, [myLead]);
+    const hasAny = myLead && (myLead.step3 || myLead.step4);
+    const prefill = hasAny ? { step3: myLead!.step3, step4: myLead!.step4 } : null;
+    const self = { name: me?.profile?.fullName ?? null, phone: me?.phone ?? null, email: me?.email ?? null };
+    return SRC.replace('__PREFILL_JSON__', prefill ? JSON.stringify(prefill) : 'null').replace(
+      '__SELF_JSON__',
+      JSON.stringify(self),
+    );
+  }, [myLead, me]);
 
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {

@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth.store';
 export interface Me {
   id: string;
   email: string | null;
+  phone?: string | null;
   role: string;
   reputationPoints: number;
   profile?: {
