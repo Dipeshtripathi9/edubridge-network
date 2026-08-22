@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google';
+import { JetBrains_Mono } from 'next/font/google';
 import {
   Award,
   Check,
@@ -26,14 +27,13 @@ import { AccountMenu } from '@/components/account-menu';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { OpportunityRecommendationCard } from '@/components/opportunity-recommendation-card';
-import { EnrolledDashboard } from '@/components/internship/virtual-internship-dashboard';
-import { MyCourses } from '@/components/internship/my-courses';
 import { useInternshipListings } from '@/hooks/use-internship-listings';
 import {
   useEnrollVirtualInternshipScholarship,
   useMyVirtualInternshipEnrollments,
   useVirtualInternshipScholarshipStatus,
   type VirtualInternshipEnrollment as ActiveVirtualInternshipEnrollment,
+  type VirtualInternshipScholarshipStatus,
 } from '@/hooks/use-virtual-internship';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
@@ -49,16 +49,24 @@ import {
 } from '@/lib/virtual-internship-tracks';
 import styles from './page.module.css';
 
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
-  variable: '--font-fraunces',
-});
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-inter',
-});
+// The dashboard and "my courses" views only render for students who already
+// own a track — most first-time visitors never touch them. Code-splitting
+// them out keeps that (heavier) code out of the bundle everyone else has to
+// download to see the landing page.
+const EnrolledDashboard = dynamic(
+  () => import('@/components/internship/virtual-internship-dashboard').then((m) => m.EnrolledDashboard),
+  { ssr: false, loading: () => <Skeleton className="mx-auto mt-10 h-64 w-full max-w-3xl" /> },
+);
+const MyCourses = dynamic(
+  () => import('@/components/internship/my-courses').then((m) => m.MyCourses),
+  { ssr: false, loading: () => <Skeleton className="mx-auto mt-10 h-40 w-full max-w-3xl" /> },
+);
+
+// Root layout already loads Inter (--font-sans) and Fraunces (--font-fraunces,
+// weights 500/600/700 — the only weights this page's CSS actually uses); this
+// page only needs its own font for the mono price/label accents, so it's the
+// one loaded here. Redeclaring Inter/Fraunces on top would just double-fetch
+// fonts the page already has for free from the root layout.
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['600'],
@@ -99,6 +107,41 @@ const FAQS = [
     a: "They're open exclusively to early enrollees who complete the track — not guaranteed to every graduate, but you get the same shot at them everyone else in your cohort does.",
   },
 ];
+
+type Track = (typeof TRACKS)[TrackKey];
+
+// Paisa-precise GST — matches the backend's computeVirtualInternshipFee exactly,
+// rather than each rounding to a whole rupee independently and drifting apart.
+function computeBill(
+  track: Track,
+  opts: { referralApplied: boolean; donateChecked: boolean; scholarshipSelected: boolean },
+) {
+  const { referralApplied, donateChecked, scholarshipSelected } = opts;
+  const roundToPaisa = (n: number) => Math.round(n * 100) / 100;
+  const platformFeeOld = 49;
+  const gst = roundToPaisa(track.priceNow * 0.18);
+  const referralValue = 1999;
+  const donateAmt = donateChecked ? 19 : 0;
+  const baseToPay = roundToPaisa(track.priceNow + gst + donateAmt);
+  const toPay = scholarshipSelected ? 0 : baseToPay;
+  const mrpSavings = track.priceOld - track.priceNow;
+  const referralSavings = referralApplied ? referralValue : 0;
+  const scholarshipSavings = scholarshipSelected ? baseToPay : 0;
+  const totalSavings = mrpSavings + platformFeeOld + referralSavings + scholarshipSavings;
+  return {
+    platformFeeOld,
+    gst,
+    referralValue,
+    donateAmt,
+    baseToPay,
+    toPay,
+    mrpSavings,
+    referralSavings,
+    scholarshipSavings,
+    totalSavings,
+  };
+}
+type Bill = ReturnType<typeof computeBill>;
 
 function PersonRow({ people }: { people: { initials: string; name: string; info: string }[] }) {
   return (
@@ -149,6 +192,602 @@ function GigsSection() {
         </div>
       )}
     </section>
+  );
+}
+
+function HowItWorksSection() {
+  return (
+    <section className={styles.howSection}>
+      <h2>How it works</h2>
+      <div className={styles.howGrid}>
+        {HOW_STEPS.map((s) => (
+          <div key={s.title} className={styles.howCard}>
+            <div className={styles.howImgWrap}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={s.img} alt={s.title} width={160} height={160} loading="lazy" decoding="async" />
+            </div>
+            <h3>{s.title}</h3>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function TrackCard({
+  trackKey,
+  alt,
+  onExplore,
+  onJoin,
+}: {
+  trackKey: TrackKey;
+  alt: boolean;
+  onExplore: (key: TrackKey) => void;
+  onJoin: (key: TrackKey) => void;
+}) {
+  const t = TRACKS[trackKey];
+  return (
+    <div className={cn(styles.trackCard, alt && styles.trackCardAlt)}>
+      <div>
+        <div className={styles.trackTop}>
+          <span className={styles.onlinePill}>{t.online}</span>
+          <span className={styles.typePill}>{t.badge}</span>
+        </div>
+        <div className={styles.trackName}>{t.name}</div>
+        <div className={styles.trackDesc}>{t.tagline}</div>
+        <ul className={styles.trackFeatures}>
+          {t.features.map((f) => (
+            <li key={f} className={styles.tf}>
+              <Check className="h-[15px] w-[15px]" strokeWidth={2.6} />
+              <span>{f}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <div className={styles.trackPriceRow}>
+          <span className={styles.priceNow}>{money(t.priceNow)}</span>
+          <span className={styles.priceOld}>{money(t.priceOld)}</span>
+        </div>
+        <p className={styles.priceSave}>Save {money(t.priceOld - t.priceNow)} · one-time payment</p>
+        <div className={styles.trackActions}>
+          <button type="button" className={cn(styles.btnTrack, styles.explore)} onClick={() => onExplore(trackKey)}>
+            Explore
+          </button>
+          <button type="button" className={cn(styles.btnTrack, styles.join)} onClick={() => onJoin(trackKey)}>
+            Join track
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FaqSection({ openFaq, onToggle }: { openFaq: number | null; onToggle: (index: number) => void }) {
+  return (
+    <section className={styles.faqSection}>
+      <h2>Common questions</h2>
+      {FAQS.map((f, i) => (
+        <div key={f.q} className={styles.faqItem}>
+          <button type="button" className={styles.faqQ} onClick={() => onToggle(i)}>
+            {f.q}
+            <ChevronDown className={cn(styles.faqChev, openFaq === i && styles.faqChevOpen)} width={16} height={16} />
+          </button>
+          <div className={cn(styles.faqA, openFaq === i && styles.faqAOpen)}>
+            <p>{f.a}</p>
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function LandingView({
+  ownershipPending,
+  ownershipErrored,
+  onRetryOwnership,
+  activeEnrollments,
+  onContinue,
+  ownedTrackKeys,
+  onExploreTrack,
+  onJoinTrack,
+  openFaq,
+  onToggleFaq,
+}: {
+  ownershipPending: boolean;
+  ownershipErrored: boolean;
+  onRetryOwnership: () => void;
+  activeEnrollments: ActiveVirtualInternshipEnrollment[] | undefined;
+  onContinue: (enrollment: ActiveVirtualInternshipEnrollment) => void;
+  ownedTrackKeys: Set<TrackKey>;
+  onExploreTrack: (key: TrackKey) => void;
+  onJoinTrack: (key: TrackKey) => void;
+  openFaq: number | null;
+  onToggleFaq: (index: number) => void;
+}) {
+  return (
+    <>
+      {ownershipPending ? (
+        <div className={styles.hero}>
+          <Skeleton className="h-8 w-40 rounded-full" />
+          <Skeleton className="mt-6 h-12 w-2/3" />
+          <Skeleton className="mt-4 h-20 w-full max-w-xl" />
+        </div>
+      ) : ownershipErrored ? (
+        // Couldn't confirm ownership (timed out or failed) — don't guess
+        // and silently show the "browse tracks" hero to someone who may
+        // already own one; let them retry the specific check instead.
+        <div className={styles.hero}>
+          <p className="text-lg font-semibold">Couldn&apos;t load your enrollment</p>
+          <p className="mt-1 max-w-md text-sm text-muted-foreground">
+            Check your connection and try again — this won&apos;t affect anything you&apos;ve already enrolled in.
+          </p>
+          <Button className="mt-4" onClick={onRetryOwnership}>
+            Retry
+          </Button>
+        </div>
+      ) : activeEnrollments && activeEnrollments.length > 0 ? (
+        <MyCourses enrollments={activeEnrollments} onContinue={onContinue} />
+      ) : (
+        <div className={styles.hero}>
+          <div className={styles.badgePill}>
+            <span className={styles.dot} /> Virtual Internship
+          </div>
+          <h1>
+            Don&apos;t just apply.
+            <br />
+            Earn the internship instead.
+          </h1>
+          <p>
+            Skip the idea-hunting. Get matched to a real, running project, ship it with mentor review, and walk away
+            with a certificate and a signed letter of recommendation.
+          </p>
+        </div>
+      )}
+
+      <HowItWorksSection />
+
+      {!ownershipPending && ownedTrackKeys.size < 2 && (
+        <section className={styles.section} id="tracks">
+          <h2 className={styles.sectionTitle}>Choose your track</h2>
+          <div className={styles.tracksGrid}>
+            {!ownedTrackKeys.has('week') && (
+              <TrackCard trackKey="week" alt={false} onExplore={onExploreTrack} onJoin={onJoinTrack} />
+            )}
+            {!ownedTrackKeys.has('month') && (
+              <TrackCard trackKey="month" alt onExplore={onExploreTrack} onJoin={onJoinTrack} />
+            )}
+          </div>
+        </section>
+      )}
+
+      <div className={styles.ctaStrip}>
+        <a
+          href="#tracks"
+          className={styles.btnPillNav}
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById('tracks')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+        >
+          Explore Virtual Internships
+          <ChevronRight className="h-[17px] w-[17px]" />
+        </a>
+      </div>
+
+      <GigsSection />
+
+      <FaqSection openFaq={openFaq} onToggle={onToggleFaq} />
+
+      <footer className={styles.footer}>
+        <div>EduBridge Open Career Program</div>
+        <div>Virtual Internship — real projects, real mentors</div>
+      </footer>
+    </>
+  );
+}
+
+function DetailView({ track, onBack, onJoin }: { track: Track; onBack: () => void; onJoin: () => void }) {
+  return (
+    <div>
+      <div className={styles.detailHero}>
+        <button type="button" className={styles.backBtn} onClick={onBack}>
+          <ChevronLeft className="h-4 w-4" /> Back to tracks
+        </button>
+        <div className={styles.detailHeroTitle}>
+          <span className={styles.eyebrow}>{track.detailEyebrow}</span>
+          <h2>{track.name}</h2>
+        </div>
+      </div>
+
+      <div className={styles.detailBody}>
+        <div className={styles.dBlock}>
+          <span className={styles.dEyebrow}>What you build</span>
+          <div className={cn(styles.dItem, styles.dItemFirst)}>
+            <div className={styles.dIcon}>
+              <ClipboardCheck className="h-[18px] w-[18px]" strokeWidth={1.8} />
+            </div>
+            <div>
+              <h3>{track.buildTitle}</h3>
+              <p>{track.buildCopy}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.dBlock}>
+          <span className={styles.dEyebrow}>{track.scheduleLabel}</span>
+          <div className={styles.scheduleList}>
+            {track.schedule.map((s, i) => (
+              <div key={s.t} className={styles.schItem}>
+                <div className={styles.schNum}>{i + 1}</div>
+                <div>
+                  <h4>{s.t}</h4>
+                  <p>{s.d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.dBlock}>
+          <span className={styles.dEyebrow}>Who supports you</span>
+          <div className={cn(styles.dItem, styles.dItemFirst)}>
+            <div className={styles.dIcon}>
+              <Target className="h-[18px] w-[18px]" strokeWidth={1.8} />
+            </div>
+            <div>
+              <h3>Track designed by IITians</h3>
+              <p>The curriculum is built by:</p>
+              <PersonRow people={MENTORS} />
+            </div>
+          </div>
+          <div className={styles.dItem}>
+            <div className={styles.dIcon}>
+              <MessageCircle className="h-[18px] w-[18px]" strokeWidth={1.8} />
+            </div>
+            <div>
+              <h3>Doubts solved on WhatsApp</h3>
+              <p>
+                Stuck on something? You&apos;re in direct touch with your doubt-support team, plus regular check-ins
+                with industry experts:
+              </p>
+              <PersonRow people={SUPPORT_TEAM} />
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.dBlock}>
+          <span className={styles.dEyebrow}>What you get</span>
+          <div className={cn(styles.dItem, styles.dItemFirst)}>
+            <div className={styles.dIcon}>
+              <Award className="h-[18px] w-[18px]" strokeWidth={1.8} />
+            </div>
+            <div>
+              <h3>Certificate + Letter of Recommendation</h3>
+              <p>{track.certCopy}</p>
+            </div>
+          </div>
+          {track.hasReferral && (
+            <div className={styles.dItem}>
+              <div className={styles.dIcon}>
+                <Share2 className="h-[18px] w-[18px]" strokeWidth={1.8} />
+              </div>
+              <div>
+                <h3>Referral program included</h3>
+                <p>
+                  Finish the track and get access to our referral program — a real head start when you&apos;re
+                  applying for your next role.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.detailCta}>
+          <div>
+            <div className={styles.trackPriceRow}>
+              <span className={styles.priceNow}>{money(track.priceNow)}</span>
+              <span className={styles.priceOld}>{money(track.priceOld)}</span>
+            </div>
+            <div style={{ fontSize: '12.5px', color: 'var(--ink-soft)' }}>
+              Save {money(track.priceOld - track.priceNow)} · one-time, GST included
+            </div>
+          </div>
+          <button type="button" className={cn(styles.btnTrack, styles.join)} onClick={onJoin}>
+            Join track — {money(track.priceNow)}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CheckoutView({
+  track,
+  trackKey,
+  bill,
+  scholarshipStatus,
+  scholarshipSelected,
+  onApplyScholarship,
+  referralApplied,
+  onApplyReferral,
+  donateChecked,
+  isProcessingPayment,
+  isScholarshipPending,
+  onBack,
+  onPay,
+}: {
+  track: Track;
+  trackKey: TrackKey;
+  bill: Bill;
+  scholarshipStatus: VirtualInternshipScholarshipStatus | undefined;
+  scholarshipSelected: boolean;
+  onApplyScholarship: () => void;
+  referralApplied: boolean;
+  onApplyReferral: () => void;
+  donateChecked: boolean;
+  isProcessingPayment: boolean;
+  isScholarshipPending: boolean;
+  onBack: () => void;
+  onPay: () => void;
+}) {
+  const trackUpper = trackKey.toUpperCase() as 'WEEK' | 'MONTH';
+  const scholarship = scholarshipStatus?.[trackUpper];
+  const scholarshipOpen = (scholarship?.remaining ?? 0) > 0;
+
+  return (
+    <div>
+      <div className={styles.coHeader}>
+        <button type="button" className={styles.backBtn} onClick={onBack}>
+          <ChevronLeft className="h-4 w-4" /> Back
+        </button>
+        <div style={{ textAlign: 'right' }}>
+          <div className={styles.coSub}>Checkout</div>
+          <div className={styles.coTitle}>{track.name}</div>
+        </div>
+      </div>
+
+      <div className={styles.coBody}>
+        <div className={styles.coSavingsBanner}>
+          <CheckCircle2 className="h-4 w-4" />
+          <span>You&apos;re saving {money(bill.totalSavings)} on this plan</span>
+        </div>
+
+        <div className={styles.coCard}>
+          <div className={styles.coCardTitle}>
+            <span className={styles.ic}>🎟️</span>
+            Coupons &amp; offers
+          </div>
+
+          <div className={styles.offerRow}>
+            <div className={styles.offerLeft}>
+              <div className={cn(styles.offerIcon, styles.scholarshipIcon)}>
+                <GraduationCap className="h-[18px] w-[18px] text-white" strokeWidth={1.8} />
+              </div>
+              <div>
+                <div className={styles.offerTitle}>100% Scholarship</div>
+                <div className={cn(styles.offerSub, !scholarshipOpen && styles.offerSubLocked)}>
+                  {scholarshipOpen ? 'Very few seats available' : 'Applications closed for this cohort'}
+                </div>
+              </div>
+            </div>
+            {scholarshipOpen ? (
+              <button
+                type="button"
+                className={cn(styles.btnApply, scholarshipSelected && styles.btnApplyApplied)}
+                onClick={onApplyScholarship}
+              >
+                {scholarshipSelected ? 'Applied' : 'Apply'}
+              </button>
+            ) : (
+              <button type="button" className={styles.btnLocked} disabled>
+                Locked
+              </button>
+            )}
+          </div>
+
+          <div className={styles.offerRow}>
+            <div className={styles.offerLeft}>
+              <div className={styles.offerIcon}>₹</div>
+              <div>
+                <div className={styles.offerTitle}>Get ₹1,999 job referral support (5 years) at ₹0</div>
+                <div className={styles.offerSub}>Apply once to unlock long-term placement support at no extra cost</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              className={cn(styles.btnApply, referralApplied && styles.btnApplyApplied)}
+              onClick={onApplyReferral}
+            >
+              {referralApplied ? 'Applied' : 'Apply'}
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.coCard}>
+          <div className={styles.coCardTitle}>
+            <span className={styles.ic}>💼</span>
+            What you&apos;re getting
+          </div>
+          <ul className={styles.planList}>
+            {track.features.map((f) => (
+              <li key={f} className={styles.planItem}>
+                <span className={styles.planTick}>•</span>
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className={styles.coCard}>
+          <div className={styles.coCardTitle}>
+            <span className={styles.ic}>
+              <FileText className="h-[15px] w-[15px]" strokeWidth={1.8} />
+            </span>
+            Price Summary
+          </div>
+          <div className={styles.billRow}>
+            <span>Course Price</span>
+            <span>
+              <span className={styles.vOld}>{money(track.priceOld)}</span>
+              <span>{moneyPrecise(track.priceNow)}</span>
+            </span>
+          </div>
+          <div className={styles.billRow}>
+            <span>Platform Fee</span>
+            <span>
+              <span className={styles.vOld}>{money(bill.platformFeeOld)}</span>
+              <span className={styles.vFree}>FREE</span>
+            </span>
+          </div>
+          {referralApplied && (
+            <div className={cn(styles.billRow, styles.referralRow)}>
+              <span>Job Referral Support (5 years)</span>
+              <span>
+                <span className={styles.vOld}>{money(bill.referralValue)}</span>
+                <span className={styles.vFree}>FREE</span>
+              </span>
+            </div>
+          )}
+          <div className={styles.billRow}>
+            <span>GST (18%)</span>
+            <span>+ {moneyPrecise(bill.gst)}</span>
+          </div>
+          {donateChecked && (
+            <div className={styles.billRow}>
+              <span>Donation for a student</span>
+              <span>+ {money(bill.donateAmt)}</span>
+            </div>
+          )}
+          {scholarshipSelected && (
+            <div className={cn(styles.billRow, styles.referralRow)}>
+              <span>100% Scholarship</span>
+              <span>
+                <span className={styles.vOld}>{moneyPrecise(bill.baseToPay)}</span>
+                <span className={styles.vFree}>FREE</span>
+              </span>
+            </div>
+          )}
+          <div className={cn(styles.billRow, styles.billTotal)}>
+            <span>Total Payable</span>
+            <span>{moneyPrecise(bill.toPay)}</span>
+          </div>
+        </div>
+
+        <div className={styles.coCard}>
+          <div className={styles.savingsHead}>
+            <div className={styles.coCardTitle} style={{ marginBottom: 0 }}>
+              <span className={styles.ic}>₹</span>
+              Savings on this plan
+            </div>
+            <span className={styles.savingsPill}>{money(bill.totalSavings)}</span>
+          </div>
+          <div className={styles.saveRow}>
+            <span className={styles.labelRow}>
+              <span className={styles.saveRowIc}>%</span>Discount on MRP
+            </span>
+            <span className={styles.amt}>{money(bill.mrpSavings)}</span>
+          </div>
+          <div className={styles.saveRow}>
+            <span className={styles.labelRow}>
+              <span className={styles.saveRowIc}>₹</span>Platform fee waived
+            </span>
+            <span className={styles.amt}>{money(bill.platformFeeOld)}</span>
+          </div>
+          <div className={cn(styles.saveRow, !referralApplied && styles.dim)}>
+            <span className={styles.labelRow}>
+              <span className={styles.saveRowIc}>5y</span>5-Year Job Referral
+            </span>
+            <span className={styles.amt}>{money(bill.referralSavings)}</span>
+          </div>
+          <div className={cn(styles.saveRow, !scholarshipSelected && styles.dim)}>
+            <span className={styles.labelRow}>
+              <span className={styles.saveRowIc}>%</span>100% Scholarship
+            </span>
+            <span className={styles.amt}>{money(bill.scholarshipSavings)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.coBottombar}>
+        <div>
+          <div className={styles.coTopayK}>To Pay</div>
+          <div className={styles.coTopayV}>{moneyPrecise(bill.toPay)}</div>
+        </div>
+        <button
+          type="button"
+          className={styles.btnPay}
+          onClick={onPay}
+          disabled={scholarshipSelected ? isScholarshipPending : isProcessingPayment}
+        >
+          {scholarshipSelected ? (
+            isScholarshipPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" style={{ marginRight: 8 }} />
+                Joining…
+              </>
+            ) : (
+              'Join track'
+            )
+          ) : isProcessingPayment ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" style={{ marginRight: 8 }} />
+              Opening checkout…
+            </>
+          ) : (
+            'Proceed to Payment'
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PaymentModal({
+  open,
+  confirmDates,
+  isFree,
+  onClose,
+}: {
+  open: boolean;
+  confirmDates: { start: string; end: string } | null;
+  isFree: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <div className={cn(styles.paymentModalOverlay, open && styles.paymentModalOverlayOpen)}>
+      <div className={styles.paymentModal}>
+        <button type="button" className={styles.pmClose} aria-label="Close" onClick={onClose}>
+          <X className="h-4 w-4" />
+        </button>
+
+        {confirmDates && (
+          <div>
+            <div className={styles.pmConfirmIcon}>
+              <Check className="h-[26px] w-[26px] text-white" strokeWidth={2.6} />
+            </div>
+            <h3 className={styles.pmTitle}>You&apos;re in!</h3>
+            <p className={styles.pmHint}>Your virtual internship runs from</p>
+            <div className={styles.pmDates}>
+              {confirmDates.start} <span className={styles.pmDatesArrow}>→</span> {confirmDates.end}
+            </div>
+            <p className={styles.pmHint} style={{ marginTop: 14 }}>
+              {isFree
+                ? 'No payment needed — your dashboard is ready now.'
+                : "It'll go live within 4 hours, once your payment is verified."}
+            </p>
+            <button type="button" className={styles.btnPmDone} onClick={onClose}>
+              Done
+            </button>
+            <div className={styles.pmHelpRow}>
+              <a href="mailto:support@edubridge.com" className={styles.pmHelpLink}>
+                Need help?
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -208,33 +847,10 @@ export default function VirtualInternshipPage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [view]);
 
-  const bill = useMemo(() => {
-    // Paisa-precise GST — matches the backend's computeVirtualInternshipFee exactly,
-    // rather than each rounding to a whole rupee independently and drifting apart.
-    const roundToPaisa = (n: number) => Math.round(n * 100) / 100;
-    const platformFeeOld = 49;
-    const gst = roundToPaisa(track.priceNow * 0.18);
-    const referralValue = 1999;
-    const donateAmt = donateChecked ? 19 : 0;
-    const baseToPay = roundToPaisa(track.priceNow + gst + donateAmt);
-    const toPay = scholarshipSelected ? 0 : baseToPay;
-    const mrpSavings = track.priceOld - track.priceNow;
-    const referralSavings = referralApplied ? referralValue : 0;
-    const scholarshipSavings = scholarshipSelected ? baseToPay : 0;
-    const totalSavings = mrpSavings + platformFeeOld + referralSavings + scholarshipSavings;
-    return {
-      platformFeeOld,
-      gst,
-      referralValue,
-      donateAmt,
-      baseToPay,
-      toPay,
-      mrpSavings,
-      referralSavings,
-      scholarshipSavings,
-      totalSavings,
-    };
-  }, [track, referralApplied, donateChecked, scholarshipSelected]);
+  const bill = useMemo(
+    () => computeBill(track, { referralApplied, donateChecked, scholarshipSelected }),
+    [track, referralApplied, donateChecked, scholarshipSelected],
+  );
 
   const showDetail = (key: TrackKey) => {
     setCurrentTrackKey(key);
@@ -388,49 +1004,8 @@ export default function VirtualInternshipPage() {
     }
   };
 
-  const trackCard = (key: TrackKey, alt: boolean) => {
-    const t = TRACKS[key];
-    return (
-      <div key={key} className={cn(styles.trackCard, alt && styles.trackCardAlt)}>
-        <div>
-          <div className={styles.trackTop}>
-            <span className={styles.onlinePill}>{t.online}</span>
-            <span className={styles.typePill}>{t.badge}</span>
-          </div>
-          <div className={styles.trackName}>{t.name}</div>
-          <div className={styles.trackDesc}>{t.tagline}</div>
-          <ul className={styles.trackFeatures}>
-            {t.features.map((f) => (
-              <li key={f} className={styles.tf}>
-                <Check className="h-[15px] w-[15px]" strokeWidth={2.6} />
-                <span>{f}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <div className={styles.trackPriceRow}>
-            <span className={styles.priceNow}>{money(t.priceNow)}</span>
-            <span className={styles.priceOld}>{money(t.priceOld)}</span>
-          </div>
-          <p className={styles.priceSave}>
-            Save {money(t.priceOld - t.priceNow)} · one-time payment
-          </p>
-          <div className={styles.trackActions}>
-            <button type="button" className={cn(styles.btnTrack, styles.explore)} onClick={() => showDetail(key)}>
-              Explore
-            </button>
-            <button type="button" className={cn(styles.btnTrack, styles.join)} onClick={() => showCheckout(key)}>
-              Join track
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className={`${styles.page} ${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
+    <div className={`${styles.page} ${jetbrainsMono.variable}`}>
       <nav className={styles.nav}>
         <Link href="/" className="flex items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -444,10 +1019,7 @@ export default function VirtualInternshipPage() {
         <AccountMenu />
       </nav>
 
-      <div
-        className={cn(styles.stickyBar, stickyVisible && styles.stickyBarVisible)}
-        aria-hidden={!stickyVisible}
-      >
+      <div className={cn(styles.stickyBar, stickyVisible && styles.stickyBarVisible)} aria-hidden={!stickyVisible}>
         <div>
           <h3>Virtual Internship</h3>
           <p>
@@ -460,478 +1032,48 @@ export default function VirtualInternshipPage() {
       </div>
 
       {view === 'landing' && (
-        <>
-          {ownershipPending ? (
-            <div className={styles.hero}>
-              <Skeleton className="h-8 w-40 rounded-full" />
-              <Skeleton className="mt-6 h-12 w-2/3" />
-              <Skeleton className="mt-4 h-20 w-full max-w-xl" />
-            </div>
-          ) : ownershipErrored ? (
-            // Couldn't confirm ownership (timed out or failed) — don't guess
-            // and silently show the "browse tracks" hero to someone who may
-            // already own one; let them retry the specific check instead.
-            <div className={styles.hero}>
-              <p className="text-lg font-semibold">Couldn&apos;t load your enrollment</p>
-              <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                Check your connection and try again — this won&apos;t affect anything you&apos;ve already enrolled in.
-              </p>
-              <Button className="mt-4" onClick={() => refetchOwnership()}>
-                Retry
-              </Button>
-            </div>
-          ) : activeEnrollments && activeEnrollments.length > 0 ? (
-            <MyCourses enrollments={activeEnrollments} onContinue={showDashboard} />
-          ) : (
-            <div className={styles.hero}>
-              <div className={styles.badgePill}>
-                <span className={styles.dot} /> Virtual Internship
-              </div>
-              <h1>
-                Don&apos;t just apply.
-                <br />
-                Earn the internship instead.
-              </h1>
-              <p>
-                Skip the idea-hunting. Get matched to a real, running project, ship it with mentor review, and walk
-                away with a certificate and a signed letter of recommendation.
-              </p>
-            </div>
-          )}
-
-          <section className={styles.howSection}>
-            <h2>How it works</h2>
-            <div className={styles.howGrid}>
-              {HOW_STEPS.map((s) => (
-                <div key={s.title} className={styles.howCard}>
-                  <div className={styles.howImgWrap}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={s.img} alt={s.title} />
-                  </div>
-                  <h3>{s.title}</h3>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {!ownershipPending && ownedTrackKeys.size < 2 && (
-            <section className={styles.section} id="tracks">
-              <h2 className={styles.sectionTitle}>Choose your track</h2>
-              <div className={styles.tracksGrid}>
-                {!ownedTrackKeys.has('week') && trackCard('week', false)}
-                {!ownedTrackKeys.has('month') && trackCard('month', true)}
-              </div>
-            </section>
-          )}
-
-          <div className={styles.ctaStrip}>
-            <a
-              href="#tracks"
-              className={styles.btnPillNav}
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('tracks')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Explore Virtual Internships
-              <ChevronRight className="h-[17px] w-[17px]" />
-            </a>
-          </div>
-
-          <GigsSection />
-
-          <section className={styles.faqSection}>
-            <h2>Common questions</h2>
-            {FAQS.map((f, i) => (
-              <div key={f.q} className={styles.faqItem}>
-                <button type="button" className={styles.faqQ} onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                  {f.q}
-                  <ChevronDown
-                    className={cn(styles.faqChev, openFaq === i && styles.faqChevOpen)}
-                    width={16}
-                    height={16}
-                  />
-                </button>
-                <div className={cn(styles.faqA, openFaq === i && styles.faqAOpen)}>
-                  <p>{f.a}</p>
-                </div>
-              </div>
-            ))}
-          </section>
-
-          <footer className={styles.footer}>
-            <div>EduBridge Open Career Program</div>
-            <div>Virtual Internship — real projects, real mentors</div>
-          </footer>
-        </>
+        <LandingView
+          ownershipPending={ownershipPending}
+          ownershipErrored={ownershipErrored}
+          onRetryOwnership={() => refetchOwnership()}
+          activeEnrollments={activeEnrollments}
+          onContinue={showDashboard}
+          ownedTrackKeys={ownedTrackKeys}
+          onExploreTrack={showDetail}
+          onJoinTrack={showCheckout}
+          openFaq={openFaq}
+          onToggleFaq={(i) => setOpenFaq(openFaq === i ? null : i)}
+        />
       )}
 
       {view === 'detail' && (
-        <div>
-          <div className={styles.detailHero}>
-            <button type="button" className={styles.backBtn} onClick={showLanding}>
-              <ChevronLeft className="h-4 w-4" /> Back to tracks
-            </button>
-            <div className={styles.detailHeroTitle}>
-              <span className={styles.eyebrow}>{track.detailEyebrow}</span>
-              <h2>{track.name}</h2>
-            </div>
-          </div>
-
-          <div className={styles.detailBody}>
-            <div className={styles.dBlock}>
-              <span className={styles.dEyebrow}>What you build</span>
-              <div className={cn(styles.dItem, styles.dItemFirst)}>
-                <div className={styles.dIcon}>
-                  <ClipboardCheck className="h-[18px] w-[18px]" strokeWidth={1.8} />
-                </div>
-                <div>
-                  <h3>{track.buildTitle}</h3>
-                  <p>{track.buildCopy}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.dBlock}>
-              <span className={styles.dEyebrow}>{track.scheduleLabel}</span>
-              <div className={styles.scheduleList}>
-                {track.schedule.map((s, i) => (
-                  <div key={s.t} className={styles.schItem}>
-                    <div className={styles.schNum}>{i + 1}</div>
-                    <div>
-                      <h4>{s.t}</h4>
-                      <p>{s.d}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.dBlock}>
-              <span className={styles.dEyebrow}>Who supports you</span>
-              <div className={cn(styles.dItem, styles.dItemFirst)}>
-                <div className={styles.dIcon}>
-                  <Target className="h-[18px] w-[18px]" strokeWidth={1.8} />
-                </div>
-                <div>
-                  <h3>Track designed by IITians</h3>
-                  <p>The curriculum is built by:</p>
-                  <PersonRow people={MENTORS} />
-                </div>
-              </div>
-              <div className={styles.dItem}>
-                <div className={styles.dIcon}>
-                  <MessageCircle className="h-[18px] w-[18px]" strokeWidth={1.8} />
-                </div>
-                <div>
-                  <h3>Doubts solved on WhatsApp</h3>
-                  <p>
-                    Stuck on something? You&apos;re in direct touch with your doubt-support team, plus regular
-                    check-ins with industry experts:
-                  </p>
-                  <PersonRow people={SUPPORT_TEAM} />
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.dBlock}>
-              <span className={styles.dEyebrow}>What you get</span>
-              <div className={cn(styles.dItem, styles.dItemFirst)}>
-                <div className={styles.dIcon}>
-                  <Award className="h-[18px] w-[18px]" strokeWidth={1.8} />
-                </div>
-                <div>
-                  <h3>Certificate + Letter of Recommendation</h3>
-                  <p>{track.certCopy}</p>
-                </div>
-              </div>
-              {track.hasReferral && (
-                <div className={styles.dItem}>
-                  <div className={styles.dIcon}>
-                    <Share2 className="h-[18px] w-[18px]" strokeWidth={1.8} />
-                  </div>
-                  <div>
-                    <h3>Referral program included</h3>
-                    <p>
-                      Finish the track and get access to our referral program — a real head start when you&apos;re
-                      applying for your next role.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.detailCta}>
-              <div>
-                <div className={styles.trackPriceRow}>
-                  <span className={styles.priceNow}>{money(track.priceNow)}</span>
-                  <span className={styles.priceOld}>{money(track.priceOld)}</span>
-                </div>
-                <div style={{ fontSize: '12.5px', color: 'var(--ink-soft)' }}>
-                  Save {money(track.priceOld - track.priceNow)} · one-time, GST included
-                </div>
-              </div>
-              <button
-                type="button"
-                className={cn(styles.btnTrack, styles.join)}
-                onClick={() => showCheckout(currentTrackKey)}
-              >
-                Join track — {money(track.priceNow)}
-              </button>
-            </div>
-          </div>
-        </div>
+        <DetailView track={track} onBack={showLanding} onJoin={() => showCheckout(currentTrackKey)} />
       )}
 
       {view === 'checkout' && (
-        <div>
-          <div className={styles.coHeader}>
-            <button type="button" className={styles.backBtn} onClick={backFromCheckout}>
-              <ChevronLeft className="h-4 w-4" /> Back
-            </button>
-            <div style={{ textAlign: 'right' }}>
-              <div className={styles.coSub}>Checkout</div>
-              <div className={styles.coTitle}>{track.name}</div>
-            </div>
-          </div>
-
-          <div className={styles.coBody}>
-            <div className={styles.coSavingsBanner}>
-              <CheckCircle2 className="h-4 w-4" />
-              <span>You&apos;re saving {money(bill.totalSavings)} on this plan</span>
-            </div>
-
-            <div className={styles.coCard}>
-              <div className={styles.coCardTitle}>
-                <span className={styles.ic}>🎟️</span>
-                Coupons &amp; offers
-              </div>
-
-              {(() => {
-                const trackUpper = currentTrackKey.toUpperCase() as 'WEEK' | 'MONTH';
-                const scholarship = scholarshipStatus?.[trackUpper];
-                const scholarshipOpen = (scholarship?.remaining ?? 0) > 0;
-                return (
-                  <div className={styles.offerRow}>
-                    <div className={styles.offerLeft}>
-                      <div className={cn(styles.offerIcon, styles.scholarshipIcon)}>
-                        <GraduationCap className="h-[18px] w-[18px] text-white" strokeWidth={1.8} />
-                      </div>
-                      <div>
-                        <div className={styles.offerTitle}>100% Scholarship</div>
-                        <div className={cn(styles.offerSub, !scholarshipOpen && styles.offerSubLocked)}>
-                          {scholarshipOpen ? 'Very few seats available' : 'Applications closed for this cohort'}
-                        </div>
-                      </div>
-                    </div>
-                    {scholarshipOpen ? (
-                      <button
-                        type="button"
-                        className={cn(styles.btnApply, scholarshipSelected && styles.btnApplyApplied)}
-                        onClick={() => setScholarshipSelected(true)}
-                      >
-                        {scholarshipSelected ? 'Applied' : 'Apply'}
-                      </button>
-                    ) : (
-                      <button type="button" className={styles.btnLocked} disabled>
-                        Locked
-                      </button>
-                    )}
-                  </div>
-                );
-              })()}
-
-              <div className={styles.offerRow}>
-                <div className={styles.offerLeft}>
-                  <div className={styles.offerIcon}>₹</div>
-                  <div>
-                    <div className={styles.offerTitle}>Get ₹1,999 job referral support (5 years) at ₹0</div>
-                    <div className={styles.offerSub}>
-                      Apply once to unlock long-term placement support at no extra cost
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className={cn(styles.btnApply, referralApplied && styles.btnApplyApplied)}
-                  onClick={() => setReferralApplied(true)}
-                >
-                  {referralApplied ? 'Applied' : 'Apply'}
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.coCard}>
-              <div className={styles.coCardTitle}>
-                <span className={styles.ic}>💼</span>
-                What you&apos;re getting
-              </div>
-              <ul className={styles.planList}>
-                {track.features.map((f) => (
-                  <li key={f} className={styles.planItem}>
-                    <span className={styles.planTick}>•</span>
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className={styles.coCard}>
-              <div className={styles.coCardTitle}>
-                <span className={styles.ic}>
-                  <FileText className="h-[15px] w-[15px]" strokeWidth={1.8} />
-                </span>
-                Price Summary
-              </div>
-              <div className={styles.billRow}>
-                <span>Course Price</span>
-                <span>
-                  <span className={styles.vOld}>{money(track.priceOld)}</span>
-                  <span>{moneyPrecise(track.priceNow)}</span>
-                </span>
-              </div>
-              <div className={styles.billRow}>
-                <span>Platform Fee</span>
-                <span>
-                  <span className={styles.vOld}>{money(bill.platformFeeOld)}</span>
-                  <span className={styles.vFree}>FREE</span>
-                </span>
-              </div>
-              {referralApplied && (
-                <div className={cn(styles.billRow, styles.referralRow)}>
-                  <span>Job Referral Support (5 years)</span>
-                  <span>
-                    <span className={styles.vOld}>{money(bill.referralValue)}</span>
-                    <span className={styles.vFree}>FREE</span>
-                  </span>
-                </div>
-              )}
-              <div className={styles.billRow}>
-                <span>GST (18%)</span>
-                <span>+ {moneyPrecise(bill.gst)}</span>
-              </div>
-              {donateChecked && (
-                <div className={styles.billRow}>
-                  <span>Donation for a student</span>
-                  <span>+ {money(bill.donateAmt)}</span>
-                </div>
-              )}
-              {scholarshipSelected && (
-                <div className={cn(styles.billRow, styles.referralRow)}>
-                  <span>100% Scholarship</span>
-                  <span>
-                    <span className={styles.vOld}>{moneyPrecise(bill.baseToPay)}</span>
-                    <span className={styles.vFree}>FREE</span>
-                  </span>
-                </div>
-              )}
-              <div className={cn(styles.billRow, styles.billTotal)}>
-                <span>Total Payable</span>
-                <span>{moneyPrecise(bill.toPay)}</span>
-              </div>
-            </div>
-
-            <div className={styles.coCard}>
-              <div className={styles.savingsHead}>
-                <div className={styles.coCardTitle} style={{ marginBottom: 0 }}>
-                  <span className={styles.ic}>₹</span>
-                  Savings on this plan
-                </div>
-                <span className={styles.savingsPill}>{money(bill.totalSavings)}</span>
-              </div>
-              <div className={styles.saveRow}>
-                <span className={styles.labelRow}>
-                  <span className={styles.saveRowIc}>%</span>Discount on MRP
-                </span>
-                <span className={styles.amt}>{money(bill.mrpSavings)}</span>
-              </div>
-              <div className={styles.saveRow}>
-                <span className={styles.labelRow}>
-                  <span className={styles.saveRowIc}>₹</span>Platform fee waived
-                </span>
-                <span className={styles.amt}>{money(bill.platformFeeOld)}</span>
-              </div>
-              <div className={cn(styles.saveRow, !referralApplied && styles.dim)}>
-                <span className={styles.labelRow}>
-                  <span className={styles.saveRowIc}>5y</span>5-Year Job Referral
-                </span>
-                <span className={styles.amt}>{money(bill.referralSavings)}</span>
-              </div>
-              <div className={cn(styles.saveRow, !scholarshipSelected && styles.dim)}>
-                <span className={styles.labelRow}>
-                  <span className={styles.saveRowIc}>%</span>100% Scholarship
-                </span>
-                <span className={styles.amt}>{money(bill.scholarshipSavings)}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.coBottombar}>
-            <div>
-              <div className={styles.coTopayK}>To Pay</div>
-              <div className={styles.coTopayV}>{moneyPrecise(bill.toPay)}</div>
-            </div>
-            <button
-              type="button"
-              className={styles.btnPay}
-              onClick={scholarshipSelected ? onJoinWithScholarship : startPayment}
-              disabled={scholarshipSelected ? enrollScholarship.isPending : isProcessingPayment}
-            >
-              {scholarshipSelected ? (
-                enrollScholarship.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" style={{ marginRight: 8 }} />
-                    Joining…
-                  </>
-                ) : (
-                  'Join track'
-                )
-              ) : isProcessingPayment ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" style={{ marginRight: 8 }} />
-                  Opening checkout…
-                </>
-              ) : (
-                'Proceed to Payment'
-              )}
-            </button>
-          </div>
-        </div>
+        <CheckoutView
+          track={track}
+          trackKey={currentTrackKey}
+          bill={bill}
+          scholarshipStatus={scholarshipStatus}
+          scholarshipSelected={scholarshipSelected}
+          onApplyScholarship={() => setScholarshipSelected(true)}
+          referralApplied={referralApplied}
+          onApplyReferral={() => setReferralApplied(true)}
+          donateChecked={donateChecked}
+          isProcessingPayment={isProcessingPayment}
+          isScholarshipPending={enrollScholarship.isPending}
+          onBack={backFromCheckout}
+          onPay={scholarshipSelected ? onJoinWithScholarship : startPayment}
+        />
       )}
 
-      <div className={cn(styles.paymentModalOverlay, paymentOpen && styles.paymentModalOverlayOpen)}>
-        <div className={styles.paymentModal}>
-          <button type="button" className={styles.pmClose} aria-label="Close" onClick={closePaymentModal}>
-            <X className="h-4 w-4" />
-          </button>
-
-          {confirmDates && (
-            <div>
-              <div className={styles.pmConfirmIcon}>
-                <Check className="h-[26px] w-[26px] text-white" strokeWidth={2.6} />
-              </div>
-              <h3 className={styles.pmTitle}>You&apos;re in!</h3>
-              <p className={styles.pmHint}>Your virtual internship runs from</p>
-              <div className={styles.pmDates}>
-                {confirmDates.start} <span className={styles.pmDatesArrow}>→</span> {confirmDates.end}
-              </div>
-              <p className={styles.pmHint} style={{ marginTop: 14 }}>
-                {justJoinedEnrollment?.scholarshipApplied
-                  ? "No payment needed — your dashboard is ready now."
-                  : "It'll go live within 4 hours, once your payment is verified."}
-              </p>
-              <button type="button" className={styles.btnPmDone} onClick={closePaymentModal}>
-                Done
-              </button>
-              <div className={styles.pmHelpRow}>
-                <a href="mailto:support@edubridge.com" className={styles.pmHelpLink}>
-                  Need help?
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      <PaymentModal
+        open={paymentOpen}
+        confirmDates={confirmDates}
+        isFree={!!justJoinedEnrollment?.scholarshipApplied}
+        onClose={closePaymentModal}
+      />
 
       {view === 'dashboard' && dashboardEnrollment && (
         <div>

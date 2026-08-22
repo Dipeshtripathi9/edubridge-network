@@ -6,7 +6,7 @@ import { VirtualInternshipTrack } from '@prisma/client';
  */
 export const VIRTUAL_INTERNSHIP_PRICES: Record<VirtualInternshipTrack, { priceNow: number; priceOld: number }> = {
   [VirtualInternshipTrack.WEEK]: { priceNow: 2699, priceOld: 4999 },
-  [VirtualInternshipTrack.MONTH]: { priceNow: 7634, priceOld: 12999 },
+  [VirtualInternshipTrack.MONTH]: { priceNow: 7635, priceOld: 12999 },
 };
 
 const GST_RATE = 0.18;

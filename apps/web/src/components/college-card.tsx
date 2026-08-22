@@ -34,7 +34,13 @@ export function CollegeCard({ college, actions }: { college: College; actions: R
       <div className="relative w-[34%] min-w-[96px] shrink-0 sm:w-[220px]">
         {college.coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={college.coverUrl} alt="" className="h-full w-full object-cover" />
+          <img
+            src={college.coverUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-accent">
             <GraduationCap className="h-8 w-8 text-primary/30 sm:h-10 sm:w-10" />
