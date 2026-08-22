@@ -41,7 +41,7 @@ export const TRACKS: Record<TrackKey, TrackData> = {
       'Virtual internship certificate',
       '1:1 resume review',
     ],
-    priceNow: 7634,
+    priceNow: 7635,
     priceOld: 12999,
     hasReferral: true,
     detailEyebrow: 'Online · 4 months',
