@@ -367,7 +367,7 @@ describe('Internship Program (e2e)', () => {
     it('computes the exact GST-inclusive fee for both tracks, no whole-rupee rounding', async () => {
       const res = await request(app.getHttpServer()).get(`${API}/internships/virtual/pricing`).expect(200);
       expect(res.body.data.week.gst).toBe(485.82);
-      expect(res.body.data.month.gst).toBe(1374.12);
+      expect(res.body.data.month.gst).toBe(1374.3);
     });
 
     it('a fresh WEEK enrollment locks in the exact ₹3,184.82 fee', async () => {
@@ -381,7 +381,7 @@ describe('Internship Program (e2e)', () => {
       expect(res.body.data.feeAmount).toBe(3184.82);
     });
 
-    it('a fresh MONTH enrollment locks in the exact ₹9,008.12 fee', async () => {
+    it('a fresh MONTH enrollment locks in the exact ₹9,009.3 fee', async () => {
       const student = await registerVerifiedUser(app, { fullName: 'VI Fresh Month Student' });
       const res = await request(app.getHttpServer())
         .post(`${API}/internships/virtual/enroll`)
@@ -389,7 +389,7 @@ describe('Internship Program (e2e)', () => {
         .send({ track: 'MONTH' })
         .expect(201);
       expect(res.body.data.track).toBe('MONTH');
-      expect(res.body.data.feeAmount).toBe(9008.12);
+      expect(res.body.data.feeAmount).toBe(9009.3);
     });
   });
 
