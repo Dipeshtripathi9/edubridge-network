@@ -68,10 +68,13 @@ function ProofCollage() {
                 <b className="font-mono text-xs text-foreground">{b.value}</b>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-secondary">
+                {/* Animates scaleX (GPU-composited transform), not width — width
+                    changes trigger layout on every frame and are visibly janky. */}
                 <m.span
-                  initial={{ width: 0 }}
-                  animate={{ width: b.w }}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
                   transition={{ duration: 1.1, delay: 0.2 + i * 0.12, ease: [0.2, 0.7, 0.2, 1] }}
+                  style={{ width: b.w, transformOrigin: 'left' }}
                   className={cn(
                     'block h-full rounded-full',
                     b.gold
