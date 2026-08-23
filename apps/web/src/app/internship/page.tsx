@@ -130,7 +130,7 @@ export default function InternshipLandingPage() {
                 shortlist and rank the most relevant opportunities based on your interests, career goals, and
                 skills, helping you build your future faster.
               </p>
-              <a className={styles.exploreLink} href="/opportunities?tab=all&category=Technology">
+              <a className={styles.exploreLink} href="#opportunities">
                 &gt; Explore Opportunities
               </a>
             </div>

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Award, GraduationCap, Rocket, Search, Share2 } from 'lucide-react';
+import { Award, GraduationCap, Rocket, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -26,14 +26,6 @@ const SERVICES = [
     body: 'Discover scholarships matched to your profile — government, private, and global — free to browse and apply.',
     href: '/scholarships',
     cta: 'Find scholarships',
-  },
-  {
-    icon: Search,
-    tone: 'bg-green-soft text-green',
-    title: 'Opportunities catalog',
-    body: 'Internships, part-time and freelance gigs from companies and startups — shortlist, apply, and track everything in one place.',
-    href: '/opportunities',
-    cta: 'Browse opportunities',
   },
   {
     icon: Rocket,
