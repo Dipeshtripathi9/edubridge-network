@@ -16,7 +16,7 @@ const SRC = `
   * { margin:0; padding:0; box-sizing:border-box; }
   html,body { width:100%; height:100%; background:transparent; font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
   #outer { width:100%; height:100%; display:flex; align-items:center; justify-content:center; padding:20px; }
-  #frame { position:relative; width:100%; max-width:1200px; aspect-ratio:1200/800; border-radius:18px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.4); }
+  #frame { position:relative; width:100%; max-width:1200px; aspect-ratio:1200/800; overflow:hidden; }
   #stage-inner { position:absolute; top:0; left:0; width:1200px; height:800px; transform-origin:top left; background:#2e4f30; opacity:1; transition:opacity .25s ease; }
   #stage-inner.fading { opacity:0; }
   .stage { position:relative; width:1200px; height:800px; background:#2e4f30; overflow:hidden; }
