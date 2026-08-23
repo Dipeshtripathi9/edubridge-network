@@ -117,19 +117,7 @@ export default function CareerPathTestPage() {
 
   const pct = onResult ? 100 : Math.round(((current - 1) / TOTAL_STEPS) * 100);
 
-  const resultUrl = (() => {
-    if (!selections.category) return '/opportunities';
-    const params = new URLSearchParams();
-    params.set('tab', 'all');
-    params.set('category', selections.category);
-    if (selections.subfield) params.set('search', selections.subfield);
-    if (selections.experience) params.set('experience', selections.experience);
-    if (selections.internshipType) params.set('type', selections.internshipType);
-    if (selections.location) params.set('location', selections.location);
-    if (selections.stipend) params.set('stipend', selections.stipend);
-    if (selections.employment) params.set('employment', selections.employment);
-    return `/opportunities?${params.toString()}`;
-  })();
+  const resultUrl = '/internship';
 
   return (
     <div className={styles.page}>

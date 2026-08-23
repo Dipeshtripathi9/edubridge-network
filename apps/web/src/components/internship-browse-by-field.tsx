@@ -61,7 +61,6 @@ const SRC = `<!DOCTYPE html>
     border-radius:16px; padding:1.5rem; width:min(86vw,340px); flex-shrink:0;
     scroll-snap-align:start;
     overflow:hidden;
-    text-decoration:none; color:inherit; cursor:pointer;
     transition:transform .18s ease, box-shadow .18s ease;
   }
   .cat-card:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(0,0,0,0.1); }
@@ -201,13 +200,12 @@ const SRC = `<!DOCTYPE html>
   ];
 
   function cardHTML(c){
-    var href = '/opportunities?tab=all&category=' + encodeURIComponent(c.name);
-    return '<a class="cat-card" href="' + href + '" target="_parent" aria-label="Browse ' + c.name + ' opportunities">' +
+    return '<div class="cat-card" role="group" aria-label="' + c.name + '">' +
       '<div class="cat-icon" style="background:' + (c.bg || 'var(--icon-bg)') + '">' +
         '<svg viewBox="0 0 32 30" xmlns="http://www.w3.org/2000/svg">' + c.icon + '</svg>' +
       '</div>' +
       '<div class="cat-body"><h4>' + c.name + '</h4><p>' + c.desc + '</p></div>' +
-    '</a>';
+    '</div>';
   }
 
   var track = document.getElementById('track');
