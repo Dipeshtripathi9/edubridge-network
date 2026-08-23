@@ -295,7 +295,7 @@ const scenes = [
   <div class="accent orange" style="width:12px;height:12px; left:220px; top:660px; animation-delay:2s;"></div>
   <div class="card" style="width:560px;">
     <div class="mentor-head">
-      <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:30px;height:30px;"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"/></svg><div class="live-dot"></div></div>
+      <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div class="live-dot"></div></div>
       <div>
         <div class="mentor-name">Rohan Mehta</div>
         <div class="mentor-role">Senior Product Engineer &middot; Mentor</div>
