@@ -150,11 +150,11 @@
   position: relative;
   background: var(--cream);
   overflow: hidden;
-  padding-bottom: 64px;
+  padding-bottom: 32px;
 }
 @media (max-width: 900px) {
   .hero {
-    padding-bottom: 24px;
+    padding-bottom: 14px;
   }
 }
 .blob {
@@ -657,11 +657,11 @@
 /* ---------- FIND SECTION ---------- */
 .findSection {
   background: var(--cream);
-  padding: 70px 0 90px;
+  padding: 32px 0 90px;
 }
 @media (max-width: 900px) {
   .findSection {
-    padding: 26px 0 56px;
+    padding: 14px 0 56px;
   }
 }
 
