@@ -20,7 +20,7 @@
   font-family: var(--font-fraunces), serif;
 }
 
-.page a {
+.page :where(a) {
   color: inherit;
 }
 
@@ -283,6 +283,11 @@
   text-decoration: none;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
+.btnCta svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 3;
+}
 @media (hover: hover) and (pointer: fine) {
   .btnCta:hover {
     transform: translateY(-3px);
@@ -419,7 +424,7 @@
 .imgWrap {
   position: relative;
   overflow: hidden;
-  flex: 1;
+  flex: none;
 }
 .imgWrap img {
   object-fit: cover;
