@@ -392,7 +392,7 @@ export default function InternshipLandingPage() {
                 >
                   <span className={styles.trackGoLabel}>Know More</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 5l7 7-7 7" />
+                    <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
                 </button>
               </div>
@@ -416,7 +416,7 @@ export default function InternshipLandingPage() {
               onClick={() => scrollTracks(1)}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 5l7 7-7 7" />
+                <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </button>
           </div>
@@ -434,9 +434,14 @@ export default function InternshipLandingPage() {
               Join the largest student ambassador community across colleges and universities. Gain
               real-world experience, leadership skills, and perks that&rsquo;ll make your resume shine.
             </p>
-            <Link href="/signup" className={styles.campBtn}>
-              Sign Me Up
-            </Link>
+            <div className={styles.campBtnRow}>
+              <button type="button" className={styles.campBtnOutline}>
+                Know More
+              </button>
+              <Link href="/signup" className={styles.campBtn}>
+                Sign Me Up
+              </Link>
+            </div>
           </div>
           <div className={styles.campPhotoWrap}>
             <Image
@@ -455,8 +460,8 @@ export default function InternshipLandingPage() {
           <Image src="/internship-campus-ambassador.jpg" alt="EduBridge Network Campus Ambassador" fill sizes="84px" />
         </div>
         <h2 className={styles.campMobileHeading}>
-          <span className={styles.campHeadingGoldMobile}>Become an EduBridge Network</span>
-          Campus Ambassador
+          <span className={styles.campHeadingLineMobile}>Become an EduBridge Network</span>
+          <span className={styles.campHeadingGoldMobile}>Campus Ambassador</span>
         </h2>
         <p className={styles.campMobileDesc}>
           Join the largest student ambassador community across colleges and universities. Gain

@@ -1080,6 +1080,11 @@
   margin-bottom: 30px;
   font-weight: 500;
 }
+.campBtnRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 .campBtn {
   background: var(--forest);
   color: var(--cream);
@@ -1089,6 +1094,25 @@
   font-family: var(--font-poppins), sans-serif;
   font-weight: 700;
   font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  width: fit-content;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+.campBtnOutline {
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  padding: 13px 24px;
+  border-radius: 999px;
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   cursor: pointer;
   width: fit-content;
   text-decoration: none;
@@ -1128,12 +1152,18 @@
     object-fit: cover;
   }
   .campMobileHeading {
+    font-family: var(--font-poppins), sans-serif;
     font-weight: 800;
     font-style: italic;
-    font-size: 24px;
+    font-size: 22px;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
     color: var(--cream);
     margin-bottom: 14px;
-    line-height: 1.2;
+    line-height: 1.3;
+  }
+  .campHeadingLineMobile {
+    display: block;
   }
   .campHeadingGoldMobile {
     color: var(--gold-soft);
@@ -1147,7 +1177,7 @@
     font-weight: 500;
   }
   .campMobileBtn {
-    background: var(--gold);
+    background: var(--cream);
     color: var(--forest-deep);
     border: none;
     padding: 15px 0;
@@ -1155,6 +1185,8 @@
     font-family: var(--font-poppins), sans-serif;
     font-weight: 700;
     font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
     width: 100%;
     cursor: pointer;
     text-decoration: none;
