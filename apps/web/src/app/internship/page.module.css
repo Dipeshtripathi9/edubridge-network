@@ -84,24 +84,9 @@
   align-items: center;
   gap: 2px;
 }
-.brandMark {
-  background: var(--forest);
-  color: var(--gold-soft);
-  font-family: var(--font-fraunces), serif;
-  font-weight: 900;
-  font-style: italic;
-  font-size: 22px;
-  padding: 6px 14px 8px;
-  border-radius: 6px;
-  letter-spacing: -0.01em;
-}
 @media (max-width: 900px) {
   .brand {
     justify-content: center;
-  }
-  .brandMark {
-    font-size: 17px;
-    padding: 5px 11px 6px;
   }
 }
 
@@ -111,12 +96,19 @@
   gap: 34px;
 }
 .navLinks a {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   color: var(--ink);
   text-decoration: none;
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.01em;
   text-transform: uppercase;
+}
+.navLinks a svg {
+  width: 12px;
+  height: 12px;
 }
 @media (max-width: 900px) {
   .navLinks {

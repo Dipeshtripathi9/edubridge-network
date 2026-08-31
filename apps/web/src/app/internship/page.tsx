@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Fraunces, Poppins } from 'next/font/google';
 import { AccountMenu } from '@/components/account-menu';
+import { BrandLockup } from '@/components/brand-lockup';
 import styles from './page.module.css';
 
 const fraunces = Fraunces({
@@ -62,16 +63,19 @@ export default function InternshipLandingPage() {
           </button>
 
           <div className={styles.brand}>
-            <Link href="/" className={styles.brandMark}>
-              EB
-            </Link>
+            <BrandLockup />
           </div>
 
           <nav className={styles.navLinks}>
             <a href="#fields">Tracks</a>
             <a href="#">Mentors</a>
             <a href="#">Stories</a>
-            <Link href="/colleges">For Colleges</Link>
+            <Link href="/colleges">
+              For Colleges
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </Link>
           </nav>
 
           <div className={styles.headerActions}>
@@ -88,7 +92,11 @@ export default function InternshipLandingPage() {
         <div className={`${styles.blob} ${styles.blobB}`} />
         <div className={`${styles.wrap} ${styles.heroInner}`}>
           <div>
-            <div className={styles.eyebrow}>Virtual Internship &middot; Open Career Program</div>
+            <div className={styles.eyebrow}>
+              Virtual Internship
+              <br />
+              Open Career Program
+            </div>
             <h1 className={styles.headline}>
               They Built Their
               <br />
@@ -152,8 +160,7 @@ export default function InternshipLandingPage() {
                 </div>
               </div>
               <div className={styles.trackPills}>
-                <span className={styles.trackPill}>Product</span>
-                <span className={`${styles.trackPill} ${styles.trackPillAlt}`}>Tech</span>
+                <span className={styles.trackPill}>Web Developer</span>
               </div>
             </div>
 
