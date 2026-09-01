@@ -933,8 +933,7 @@
   background: #fff;
   border-radius: 18px;
   padding: 24px;
-  width: 172px;
-  min-width: 172px;
+  min-width: 200px;
   flex: 0 0 auto;
   position: relative;
   overflow: hidden;
@@ -942,15 +941,20 @@
 }
 .trackPattern {
   position: absolute;
-  inset: 0;
+  right: 0;
+  bottom: 0;
+  width: 114px;
+  height: 114px;
   background-image: repeating-linear-gradient(-45deg, var(--gold) 0 2px, transparent 2px 8px);
   opacity: 0.5;
-  clip-path: polygon(65% 0, 100% 0, 100% 100%, 30% 100%);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  -webkit-mask-image: linear-gradient(-45deg, transparent 0, black 24px);
+  mask-image: linear-gradient(-45deg, transparent 0, black 24px);
 }
 .trackIcon {
   width: 34px;
   height: 34px;
-  margin-bottom: 16px;
+  margin-bottom: 26px;
   position: relative;
   color: var(--forest);
 }
@@ -964,7 +968,7 @@
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--ink);
-  margin-bottom: 24px;
+  margin-bottom: 34px;
   position: relative;
   line-height: 1.3;
 }
