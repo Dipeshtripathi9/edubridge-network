@@ -1202,9 +1202,14 @@
 /* ---------- GUIDES ---------- */
 .guidesSection {
   background: var(--cream);
-  padding: 70px 0 90px;
+  padding: 70px 0 50px;
   position: relative;
   overflow: hidden;
+}
+@media (max-width: 900px) {
+  .guidesSection {
+    padding: 44px 0 32px;
+  }
 }
 .guidesBg {
   position: absolute;
@@ -1329,7 +1334,7 @@
 /* ---------- FAQ ---------- */
 .faqSection {
   background: var(--cream);
-  padding: 70px 0 100px;
+  padding: 40px 0 100px;
 }
 .faqHeader {
   max-width: 640px;
@@ -1425,7 +1430,7 @@
 }
 @media (max-width: 900px) {
   .faqSection {
-    padding: 50px 0 70px;
+    padding: 28px 0 70px;
   }
   .faqTitle {
     font-size: 26px;
