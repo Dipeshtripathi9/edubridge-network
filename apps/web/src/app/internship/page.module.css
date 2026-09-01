@@ -1198,3 +1198,130 @@
     justify-content: center;
   }
 }
+
+/* ---------- GUIDES ---------- */
+.guidesSection {
+  background: var(--cream);
+  padding: 70px 0 90px;
+  position: relative;
+  overflow: hidden;
+}
+.guidesBg {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(-45deg, rgba(31, 61, 46, 0.05) 0 1px, transparent 1px 26px);
+  pointer-events: none;
+}
+.guidesTitle {
+  font-weight: 800;
+  font-style: italic;
+  font-size: 34px;
+  color: var(--ink);
+  margin-bottom: 32px;
+  position: relative;
+}
+@media (max-width: 900px) {
+  .guidesTitle {
+    font-size: 24px;
+  }
+}
+.guidesTrack {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 6px;
+  position: relative;
+  scrollbar-width: none;
+}
+.guidesTrack::-webkit-scrollbar {
+  display: none;
+}
+.guideCard {
+  position: relative;
+  flex: 0 0 auto;
+  width: 340px;
+  height: 260px;
+  border-radius: 18px;
+  overflow: hidden;
+  display: block;
+  text-decoration: none;
+  box-shadow: 0 14px 30px -16px rgba(19, 40, 25, 0.3);
+}
+@media (max-width: 900px) {
+  .guideCard {
+    width: 270px;
+    height: 220px;
+  }
+}
+.guidePhoto {
+  object-fit: cover;
+}
+.guideOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10, 18, 13, 0.92) 0%, rgba(10, 18, 13, 0.5) 45%, rgba(10, 18, 13, 0.05) 75%);
+}
+.guideContent {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20px;
+}
+.guideHeadline {
+  color: #fff;
+  font-weight: 800;
+  font-size: 17px;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+.guideDesc {
+  color: rgba(246, 241, 227, 0.8);
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+.guideReadMore {
+  color: var(--gold-soft);
+  font-weight: 700;
+  font-size: 12.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.guideReadMore svg {
+  width: 12px;
+  height: 12px;
+  stroke: var(--gold-soft);
+  stroke-width: 2.6;
+}
+.guidesNav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+  position: relative;
+}
+.guideArrow {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: var(--ink);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.guideArrow svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--cream);
+}
+@media (hover: hover) and (pointer: fine) {
+  .guideArrow:hover {
+    background: var(--forest);
+  }
+}
