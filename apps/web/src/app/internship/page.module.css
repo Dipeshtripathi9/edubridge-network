@@ -1050,7 +1050,7 @@
   min-height: 420px;
 }
 .campCopy {
-  padding: 80px 60px;
+  padding: 80px 60px 80px max(40px, calc((100vw - 1240px) / 2 + 40px));
   position: relative;
   z-index: 2;
   display: flex;
