@@ -657,11 +657,11 @@
 /* ---------- FIND SECTION ---------- */
 .findSection {
   background: var(--cream);
-  padding: 32px 0 90px;
+  padding: 32px 0 50px;
 }
 @media (max-width: 900px) {
   .findSection {
-    padding: 14px 0 56px;
+    padding: 14px 0 32px;
   }
 }
 
@@ -881,13 +881,13 @@
 /* ---------- TRACKS ---------- */
 .tracksSection {
   background: var(--cream);
-  padding: 70px 0 90px;
+  padding: 40px 0 90px;
   position: relative;
   overflow: hidden;
 }
 @media (max-width: 900px) {
   .tracksSection {
-    padding: 44px 0 60px;
+    padding: 26px 0 60px;
   }
 }
 .tracksBg {
