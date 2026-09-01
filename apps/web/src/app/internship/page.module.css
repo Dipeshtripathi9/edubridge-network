@@ -1332,9 +1332,8 @@
   padding: 70px 0 100px;
 }
 .faqHeader {
-  text-align: center;
   max-width: 640px;
-  margin: 0 auto 48px;
+  margin-bottom: 48px;
 }
 .faqKicker {
   font-size: 12.5px;
@@ -1360,7 +1359,6 @@
 }
 .faqList {
   max-width: 800px;
-  margin: 0 auto;
 }
 .faqItem {
   border-bottom: 1.5px solid rgba(20, 36, 27, 0.12);
