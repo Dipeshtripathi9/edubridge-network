@@ -128,13 +128,68 @@ const TRACK_CARDS = [
   },
 ];
 
+const GUIDES = [
+  {
+    image: '/internship-guide-first-internship.jpg',
+    title: 'How to Get Your First Internship',
+    desc: 'A beginner-friendly guide to finding and applying for your first internship.',
+  },
+  {
+    image: '/internship-guide-portfolio.jpg',
+    title: 'How to Build a Strong Student Portfolio',
+    desc: 'Learn what projects, skills and achievements to showcase.',
+  },
+  {
+    image: '/internship-guide-resume.jpg',
+    title: 'How to Make a Resume With No Experience',
+    desc: "Create a professional resume even when you're a fresher.",
+  },
+  {
+    image: '/internship-guide-interview.jpg',
+    title: 'How to Prepare for Your First Interview',
+    desc: 'Practical tips for answering common internship and job interview questions.',
+  },
+  {
+    image: '/internship-guide-projects.jpg',
+    title: 'How to Work on Real-World Projects',
+    desc: 'Understand how company projects work and how to contribute effectively.',
+  },
+  {
+    image: '/internship-guide-skills.jpg',
+    title: 'Skills Every Student Should Build Before Graduation',
+    desc: 'Discover the technical and professional skills that can improve your career readiness.',
+  },
+  {
+    image: '/internship-guide-linkedin.jpg',
+    title: 'How to Build Your LinkedIn Profile',
+    desc: 'Make your LinkedIn profile more professional and attractive to recruiters.',
+  },
+  {
+    image: '/internship-guide-standout.jpg',
+    title: 'How to Stand Out as an Intern',
+    desc: 'Learn how to turn an internship into a strong portfolio and career opportunity.',
+  },
+  {
+    image: '/internship-guide-career-path.jpg',
+    title: 'How to Choose the Right Career Path',
+    desc: 'Explore different career fields and identify what fits your interests and skills.',
+  },
+];
+
 export default function InternshipLandingPage() {
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [openTrackIndex, setOpenTrackIndex] = useState<number | null>(null);
   const tracksTrackRef = useRef<HTMLDivElement>(null);
+  const guidesTrackRef = useRef<HTMLDivElement>(null);
 
   const scrollTracks = (direction: 1 | -1) => {
     const el = tracksTrackRef.current;
+    if (!el) return;
+    el.scrollBy({ left: direction * el.clientWidth * 0.8, behavior: 'smooth' });
+  };
+
+  const scrollGuides = (direction: 1 | -1) => {
+    const el = guidesTrackRef.current;
     if (!el) return;
     el.scrollBy({ left: direction * el.clientWidth * 0.8, behavior: 'smooth' });
   };
@@ -470,6 +525,59 @@ export default function InternshipLandingPage() {
         <Link href="/signup" className={styles.campMobileBtn}>
           Sign Me Up
         </Link>
+      </section>
+
+      <section className={styles.guidesSection}>
+        <div className={styles.guidesBg} />
+        <div className={styles.wrap}>
+          <h2 className={styles.guidesTitle}>Guides to help you grow</h2>
+          <div className={styles.guidesTrack} ref={guidesTrackRef}>
+            {GUIDES.map((guide) => (
+              <Link key={guide.title} href="#" className={styles.guideCard}>
+                <Image
+                  src={guide.image}
+                  alt={guide.title}
+                  fill
+                  sizes="340px"
+                  className={styles.guidePhoto}
+                />
+                <div className={styles.guideOverlay} />
+                <div className={styles.guideContent}>
+                  <div className={styles.guideHeadline}>{guide.title}</div>
+                  <p className={styles.guideDesc}>{guide.desc}</p>
+                  <span className={styles.guideReadMore}>
+                    Read More
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className={styles.guidesNav}>
+            <button
+              type="button"
+              className={styles.guideArrow}
+              aria-label="Previous guides"
+              onClick={() => scrollGuides(-1)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M11 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className={styles.guideArrow}
+              aria-label="Next guides"
+              onClick={() => scrollGuides(1)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </section>
 
       <footer className={styles.siteFooter}>
