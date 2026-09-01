@@ -176,9 +176,53 @@ const GUIDES = [
   },
 ];
 
+const FAQS = [
+  {
+    q: 'What is an EduBridge Virtual Internship?',
+    a: 'EduBridge Virtual Internship is a project-based learning experience where students work on real-world projects in a professional team environment, gaining practical skills and industry exposure.',
+  },
+  {
+    q: 'Will I work on a real-world project?',
+    a: 'Yes. You will work on practical projects designed around real-world requirements, collaborate with a team, and contribute to defined tasks and deliverables.',
+  },
+  {
+    q: 'What will I receive after completing the internship?',
+    a: 'After successfully completing the internship requirements, you will receive an internship completion certificate and practical project experience that you can showcase in your professional portfolio.',
+  },
+  {
+    q: 'How will this help my resume and LinkedIn profile?',
+    a: 'You can add your internship role, project, responsibilities, skills, and achievements to your resume and LinkedIn profile. This helps demonstrate practical experience beyond academic qualifications.',
+  },
+  {
+    q: 'Is the internship paid?',
+    a: 'Yes. EduBridge offers paid virtual internship programs. The fee depends on the specific project and program selected.',
+  },
+  {
+    q: 'Do I get a certificate after paying?',
+    a: 'No. A certificate is provided after successful completion of the internship requirements. Simply paying the fee does not guarantee a certificate.',
+  },
+  {
+    q: 'Do I need prior experience?',
+    a: 'No. Prior professional experience is generally not required. Students can choose projects according to their interests, skills, and eligibility requirements.',
+  },
+  {
+    q: 'Does EduBridge guarantee placement?',
+    a: 'No. Placement is not guaranteed. EduBridge focuses on providing real project experience, mentorship, and recommendation support to strengthen your profile and improve your chances.',
+  },
+  {
+    q: 'How do I become a Campus Ambassador?',
+    a: 'Select "Campus Ambassador" from the career tracks above and submit your application — no internship completion required to get started as an ambassador.',
+  },
+  {
+    q: 'Can I apply from anywhere in India?',
+    a: 'Yes. Every track is fully virtual and open pan-India, so you can take part from any city or college, as long as you have an internet connection.',
+  },
+];
+
 export default function InternshipLandingPage() {
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [openTrackIndex, setOpenTrackIndex] = useState<number | null>(null);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const tracksTrackRef = useRef<HTMLDivElement>(null);
   const guidesTrackRef = useRef<HTMLDivElement>(null);
 
@@ -576,6 +620,44 @@ export default function InternshipLandingPage() {
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </button>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.faqSection}>
+        <div className={styles.wrap}>
+          <div className={styles.faqHeader}>
+            <div className={styles.faqKicker}>FAQs</div>
+            <h2 className={styles.faqTitle}>Got Questions?</h2>
+            <p className={styles.faqSub}>
+              Everything you need to know about the EduBridge Open Career Program before you get
+              started.
+            </p>
+          </div>
+          <div className={styles.faqList}>
+            {FAQS.map((faq, index) => {
+              const isOpen = openFaqIndex === index;
+              return (
+                <div key={faq.q} className={`${styles.faqItem} ${isOpen ? styles.faqItemOpen : ''}`}>
+                  <button
+                    type="button"
+                    className={styles.faqQuestion}
+                    aria-expanded={isOpen}
+                    onClick={() => setOpenFaqIndex((prev) => (prev === index ? null : index))}
+                  >
+                    {faq.q}
+                    <span className={styles.faqIcon}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                    </span>
+                  </button>
+                  <div className={styles.faqAnswer}>
+                    <div className={styles.faqAnswerInner}>{faq.a}</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
