@@ -333,12 +333,6 @@ export default function InternshipLandingPage() {
             <div className={`${styles.card} ${styles.cardLeft}`}>
               <div className={styles.cardMedia}>
                 <div className={styles.cardHeader}>
-                  <span className={styles.tagPill}>
-                    <svg viewBox="0 0 24 24">
-                      <path d="M4 4h16v11H8l-4 4V4z" />
-                    </svg>
-                    Placed
-                  </span>
                   <div className={styles.cardName}>Rohan</div>
                 </div>
                 <div className={styles.imgWrap}>
@@ -358,12 +352,6 @@ export default function InternshipLandingPage() {
             <div className={`${styles.card} ${styles.cardRight}`}>
               <div className={styles.cardMedia}>
                 <div className={styles.cardHeader}>
-                  <span className={styles.tagPill}>
-                    <svg viewBox="0 0 24 24">
-                      <path d="M4 4h16v11H8l-4 4V4z" />
-                    </svg>
-                    Placed
-                  </span>
                   <div className={styles.cardName}>Amara</div>
                 </div>
                 <div className={styles.imgWrap}>
@@ -390,11 +378,6 @@ export default function InternshipLandingPage() {
                     sizes="220px"
                     priority
                   />
-                </div>
-                <div className={styles.playChip}>
-                  <svg viewBox="0 0 24 24">
-                    <path d="M6 4l14 8-14 8V4z" />
-                  </svg>
                 </div>
                 <div className={styles.captionPill}>Campus Ambassador</div>
               </div>
