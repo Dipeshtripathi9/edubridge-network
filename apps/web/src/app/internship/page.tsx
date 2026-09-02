@@ -385,7 +385,7 @@ export default function InternshipLandingPage() {
                 <div className={styles.imgWrap}>
                   <Image
                     src="/internship-hero-center.jpg"
-                    alt="A student who found career opportunities through EduBridge Network"
+                    alt="A student serving as an EduBridge Network Campus Ambassador"
                     fill
                     sizes="220px"
                     priority
@@ -396,7 +396,7 @@ export default function InternshipLandingPage() {
                     <path d="M6 4l14 8-14 8V4z" />
                   </svg>
                 </div>
-                <div className={styles.captionPill}>EduBridge helped</div>
+                <div className={styles.captionPill}>Campus Ambassador</div>
               </div>
             </div>
           </div>
