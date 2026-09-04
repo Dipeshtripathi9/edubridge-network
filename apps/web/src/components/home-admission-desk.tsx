@@ -11,10 +11,12 @@ import { useEffect, useRef, useState } from 'react';
 // Fit Quiz in the parent.
 const SRC = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+@font-face { font-family:'Inter'; font-style:normal; font-weight:400; font-display:swap; src:url(/fonts/inter-variable.woff2) format('woff2'); }
+@font-face { font-family:'Inter'; font-style:normal; font-weight:500; font-display:swap; src:url(/fonts/inter-variable.woff2) format('woff2'); }
+@font-face { font-family:'Inter'; font-style:normal; font-weight:600; font-display:swap; src:url(/fonts/inter-variable.woff2) format('woff2'); }
+@font-face { font-family:'Inter'; font-style:normal; font-weight:700; font-display:swap; src:url(/fonts/inter-variable.woff2) format('woff2'); }
+@font-face { font-family:'Inter'; font-style:normal; font-weight:800; font-display:swap; src:url(/fonts/inter-variable.woff2) format('woff2'); }
 :root{--paper:#F6F4EE;--white:#FFFFFF;--hill:#EDE8DA;--ink:#1A1433;--ink-2:#575170;--ink-3:#8B86A0;--line:#E6E1D3;--violet:#5A31F4;--violet-soft:#EFEAFF;--marigold:#F2A31B;--marigold-soft:#FDF1DA;--green:#0E8A5C;--font-display:"Inter",system-ui,sans-serif;--font-body:"Inter",system-ui,sans-serif;--font-mono:"Inter",system-ui,sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{background:transparent}
