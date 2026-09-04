@@ -21,10 +21,13 @@ import { COURSE_TAXONOMY } from '@/lib/course-taxonomy';
 // String.raw keeps the regex backslashes in the script intact.
 const SRC = String.raw`<!doctype html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+@font-face { font-family:'Bricolage Grotesque'; font-style:normal; font-weight:700; font-display:swap; src:url(/fonts/bricolage-grotesque-variable.woff2) format('woff2'); }
+@font-face { font-family:'Bricolage Grotesque'; font-style:normal; font-weight:800; font-display:swap; src:url(/fonts/bricolage-grotesque-variable.woff2) format('woff2'); }
+@font-face { font-family:'Hanken Grotesk'; font-style:normal; font-weight:400; font-display:swap; src:url(/fonts/hanken-grotesk-variable.woff2) format('woff2'); }
+@font-face { font-family:'Hanken Grotesk'; font-style:normal; font-weight:500; font-display:swap; src:url(/fonts/hanken-grotesk-variable.woff2) format('woff2'); }
+@font-face { font-family:'Hanken Grotesk'; font-style:normal; font-weight:600; font-display:swap; src:url(/fonts/hanken-grotesk-variable.woff2) format('woff2'); }
+@font-face { font-family:'Hanken Grotesk'; font-style:normal; font-weight:700; font-display:swap; src:url(/fonts/hanken-grotesk-variable.woff2) format('woff2'); }
 :root{--paper:#F1EDE4;--white:#FFFFFF;--hill:#E6E1D5;--ink:#1A1433;--ink-2:#575170;--ink-3:#8B86A0;--bord:#C9C2B4;--line:#E6E1D3;--violet:#5A31F4;--violet-dark:#4A26D6;--violet-soft:#EFEAFF;--marigold:#F2A31B;--green:#0E8A5C;--green-soft:#E4F4EC;--font-display:"Bricolage Grotesque",system-ui,sans-serif;--font-body:"Hanken Grotesk",system-ui,sans-serif;--font-mono:ui-monospace,"SF Mono",Menlo,monospace}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{background:transparent}
