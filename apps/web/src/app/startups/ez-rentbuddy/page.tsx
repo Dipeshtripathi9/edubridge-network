@@ -165,7 +165,7 @@ export default function EzRentbuddyPage() {
         <div className="flex flex-wrap items-center gap-5 rounded-[24px] border border-border bg-white p-7 shadow-sm">
           <span className="grid h-[52px] w-[52px] flex-none place-items-center rounded-[15px] bg-primary text-primary-foreground"><ShieldCheck className="h-6 w-6" /></span>
           <p className="min-w-[260px] flex-1 text-[15px] text-muted-foreground">
-            <b className="text-foreground">Born inside EduBridge Network.</b> Pitched by students in Founders Hub, built by 99x Developers — because “college sorted” should include the room too. Same rule here as there: <b className="text-foreground">if it isn’t verified, it isn’t listed.</b>
+            <b className="text-foreground">Born inside EduBridge Network.</b> Pitched by students in Founders Hub — because “college sorted” should include the room too. Same rule here as there: <b className="text-foreground">if it isn’t verified, it isn’t listed.</b>
           </p>
           <Link href="/home" className="inline-flex items-center gap-2 whitespace-nowrap text-[14.5px] font-extrabold text-primary">
             The EduBridge story <ArrowRight className="h-4 w-4" />

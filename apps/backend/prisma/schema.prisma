@@ -1058,25 +1058,6 @@ model Referral {
   @@map("referrals")
 }
 
-// Lead/application captured by the 99x Developers startup landing page.
-model AgencyLead {
-  id         String   @id @default(cuid())
-  kind       String // PROPOSAL | CAREER | INFLUENCER
-  name       String
-  email      String
-  phone      String?
-  services   String[] // selected services (PROPOSAL)
-  message    String? // requirements / cover note
-  role       String? // role applied for (CAREER)
-  projectUrl String? // older project / portfolio (CAREER)
-  videoUrls  String[] // 2 sample videos (INFLUENCER)
-  status     String   @default("NEW") // NEW | CONTACTED | DONE
-  createdAt  DateTime @default(now())
-
-  @@index([kind, createdAt])
-  @@map("agency_leads")
-}
-
 // Lead captured by the EZ-Rentbuddy startup landing (accommodation seeker or a
 // property owner/broker sharing a listing for cashback).
 model RentalLead {

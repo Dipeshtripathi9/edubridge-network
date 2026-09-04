@@ -2,12 +2,8 @@
 
 import Link from 'next/link';
 import {
-  ArrowRight,
-  Award,
   BarChart3,
-  Code2,
   Headphones,
-  Home,
   Info,
   Phone,
   ShieldCheck,
@@ -225,49 +221,6 @@ function DataSection() {
   );
 }
 
-/* 6 — Builders (dark) ----------------------------------------------------- */
-
-const BUILDERS = [
-  { icon: Code2, flag: 'Step 1 · Build', mint: false, title: '99x Developers', body: (<>EduBridge Network&apos;s in-house studio — web design, development &amp; digital marketing. A guaranteed <b className="text-white">30%+ discount</b> for genuine student ideas.</>), meta: 'For shortlisted ideas only', link: 'Visit 99x Developers', href: '/startups/99x-developers' },
-  { icon: Home, flag: 'Backed by EduBridge', mint: true, title: 'EZ-Rentbuddy', body: (<>Our first backed startup — a student housing platform. Find <b className="text-white">PGs, hostels, flats &amp; rooms</b>, or earn cashback by sharing properties.</>), meta: 'Live & serving students', link: 'Visit EZ-Rentbuddy', href: '/startups/ez-rentbuddy' },
-];
-
-function Builders() {
-  return (
-    <section className="relative overflow-hidden rounded-3xl bg-violet-deep p-6 sm:p-10">
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundImage: 'radial-gradient(52% 60% at 82% 8%, rgba(90,49,244,.55), transparent 62%), radial-gradient(40% 46% at 6% 92%, rgba(242,163,27,.16), transparent 60%)' }} />
-      <div className="relative">
-        <Eyebrow>EduBridge for builders</Eyebrow>
-        <h2 className="mt-4 font-display text-[clamp(24px,4.2vw,38px)] font-extrabold leading-[1.08] tracking-[-.024em] text-white">
-          Got a genuine idea?<br /><span className="text-marigold">We&apos;ll get it built.</span>
-        </h2>
-        <p className="mt-3 max-w-[560px] text-[#C9C1EE]">
-          Got a genuine business idea? Our in-house studio builds your website or app — at student pricing.
-        </p>
-        <span className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[.07] px-4 py-2.5 text-[13.5px] font-semibold text-[#DCD5F7]">
-          Just like Zomato built <b className="text-marigold">District</b> — we built <b className="text-marigold">EZ-Rentbuddy</b>.
-        </span>
-        <div className="mt-12 grid gap-4 md:grid-cols-2">
-          {BUILDERS.map((b) => (
-            <article key={b.title} className="flex flex-col gap-3.5 rounded-3xl border border-white/[.13] bg-white/[.055] p-6 backdrop-blur transition-all hover:-translate-y-1 hover:border-white/25 hover:bg-white/[.09]">
-              <div className="flex items-center justify-between gap-2.5">
-                <span className="grid h-[50px] w-[50px] flex-none place-items-center rounded-2xl border border-white/[.16] bg-white/10 text-marigold"><b.icon className="h-6 w-6" /></span>
-                <span className={cn('rounded-full border px-2.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[1.2px]', b.mint ? 'border-[#5eeaa64d] bg-[#5eeaa61f] text-[#7BEDB4]' : 'border-marigold/30 bg-marigold/[.16] text-marigold')}>{b.flag}</span>
-              </div>
-              <h3 className="font-display text-xl font-bold tracking-tight text-white">{b.title}</h3>
-              <p className="flex-1 text-[14.5px] leading-relaxed text-[#C9C1EE]">{b.body}</p>
-              <span className="flex items-center gap-2 text-[12.5px] font-semibold text-[#A99EDE]"><Award className="h-[15px] w-[15px]" /> {b.meta}</span>
-              <Link href={b.href} className="group inline-flex items-center gap-2 text-[14.5px] font-bold text-marigold">
-                {b.link} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* 7 — Review -------------------------------------------------------------- */
 
 function Review() {
@@ -325,7 +278,6 @@ export function HomeShowcase() {
       <StatsStrip />
       <HowItWorks />
       <DataSection />
-      <Builders />
       <Review />
       <FinalCTA />
     </div>
