@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Avatar } from '@/components/ui/avatar';
 import { useMe } from '@/hooks/use-profile';
 import { useProfileProgress } from '@/stores/profile-progress.store';
@@ -57,8 +58,7 @@ export function HomeWelcomePanel({
           const content = (
             <>
               <div className="icon-circle">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={icon} alt="" />
+                <Image src={icon} alt="" width={124} height={124} sizes="62px" className="quickActionIcon" />
               </div>
               <span>{label}</span>
             </>
@@ -203,7 +203,7 @@ export function HomeWelcomePanel({
         :global(.action-item:hover) .icon-circle {
           transform: translateY(-3px);
         }
-        .icon-circle img {
+        :global(.quickActionIcon) {
           width: 100%;
           height: 100%;
           object-fit: cover;

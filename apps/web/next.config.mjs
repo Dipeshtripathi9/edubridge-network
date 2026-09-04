@@ -17,22 +17,20 @@ try {
 //   (nonce-based CSP conflicts with static generation). External scripts are still
 //   locked to self + Google, which is the meaningful XSS win.
 // - Google OAuth (@react-oauth/google) loads/iframes/connects to accounts.google.com.
-// - Several homepage sections (Direct Admission Desk, career-bridge community
-//   section) are rendered in isolated srcDoc iframes that load Google Fonts
-//   directly — those iframes inherit this CSP, so fonts.googleapis.com/
-//   fonts.gstatic.com need to be allow-listed too, or the fonts silently fail
-//   to load in production (dev doesn't send this header, so the gap is easy
-//   to miss locally).
 // - Razorpay Standard Checkout loads checkout.razorpay.com as a script, which
 //   opens the actual payment form in an iframe served from api.razorpay.com —
 //   both need allow-listing, plus connect-src for its status-polling requests.
 // - Dev needs 'unsafe-eval' (React Refresh / HMR); prod does not.
+// (Homepage sections rendered in isolated srcDoc iframes — Direct Admission
+// Desk, career-bridge — used to load Google Fonts live and needed
+// fonts.googleapis.com/fonts.gstatic.com allow-listed here; they're now
+// self-hosted from /fonts, so font-src/style-src stay locked to 'self'.)
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ''} https://accounts.google.com https://apis.google.com https://checkout.razorpay.com https://cdn.razorpay.com`,
-  "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com",
+  "style-src 'self' 'unsafe-inline' https://accounts.google.com",
   "img-src 'self' data: blob: https:",
-  "font-src 'self' data: https://fonts.gstatic.com",
+  "font-src 'self' data:",
   `connect-src 'self' https://accounts.google.com https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com ${apiOrigin} ${apiWsOrigin}`.trim(),
   "frame-src 'self' https://accounts.google.com https://api.razorpay.com https://checkout.razorpay.com",
   "worker-src 'self' blob:",
@@ -72,7 +70,11 @@ const nextConfig = {
     ],
     // Serve modern, smaller formats and cache aggressively.
     formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 86400,
+    // 7 days: safe floor for both static bundled assets and remote images
+    // (remotePatterns allows any host, e.g. user avatars) — long enough to cut
+    // repeat re-optimization on revisits, short enough that an updated avatar
+    // doesn't stay stale for too long.
+    minimumCacheTTL: 604800,
   },
   // The dashboard is the front page — redirect at the framework level so the root
   // route never renders a component (avoids the NEXT_REDIRECT dev-overlay noise).
