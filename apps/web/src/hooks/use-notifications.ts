@@ -64,8 +64,8 @@ export function useNotificationStream() {
   // would get no live notifications until a full page reload.
   const token = useAuthStore((s) => s.accessToken);
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket) return;
+    let cancelled = false;
+    let activeSocket: Awaited<ReturnType<typeof getSocket>> = null;
 
     const onNew = (n: Notification) => {
       toast(n.title, { description: n.body ?? undefined });
@@ -73,11 +73,17 @@ export function useNotificationStream() {
     };
     const onRefresh = () => qc.invalidateQueries({ queryKey: ['notifications'] });
 
-    socket.on('notification:new', onNew);
-    socket.on('notifications:refresh', onRefresh);
+    getSocket().then((socket) => {
+      if (cancelled || !socket) return;
+      activeSocket = socket;
+      socket.on('notification:new', onNew);
+      socket.on('notifications:refresh', onRefresh);
+    });
+
     return () => {
-      socket.off('notification:new', onNew);
-      socket.off('notifications:refresh', onRefresh);
+      cancelled = true;
+      activeSocket?.off('notification:new', onNew);
+      activeSocket?.off('notifications:refresh', onRefresh);
     };
   }, [qc, token]);
 }

@@ -52,15 +52,11 @@ export function useMessages(chatId: string | null) {
 export function useChatSocket(chatId: string | null) {
   const qc = useQueryClient();
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
-  const socketRef = useRef(getSocket());
+  const socketRef = useRef<Awaited<ReturnType<typeof getSocket>>>(null);
 
   useEffect(() => {
-    const socket = getSocket();
-    socketRef.current = socket;
-    if (!socket || !chatId) return;
-
-    socket.emit('chat:join', { chatId });
-    socket.emit('message:read', { chatId });
+    if (!chatId) return;
+    let cancelled = false;
 
     const onNew = (msg: ChatMessage) => {
       if (msg.chatId !== chatId) return;
@@ -76,15 +72,25 @@ export function useChatSocket(chatId: string | null) {
     };
     const onChatUpdated = () => qc.invalidateQueries({ queryKey: ['chats'] });
 
-    socket.on('message:new', onNew);
-    socket.on('typing', onTyping);
-    socket.on('chat:updated', onChatUpdated);
+    getSocket().then((socket) => {
+      if (cancelled || !socket) return;
+      socketRef.current = socket;
+      socket.emit('chat:join', { chatId });
+      socket.emit('message:read', { chatId });
+      socket.on('message:new', onNew);
+      socket.on('typing', onTyping);
+      socket.on('chat:updated', onChatUpdated);
+    });
 
     return () => {
-      socket.emit('chat:leave', { chatId });
-      socket.off('message:new', onNew);
-      socket.off('typing', onTyping);
-      socket.off('chat:updated', onChatUpdated);
+      cancelled = true;
+      const socket = socketRef.current;
+      if (socket) {
+        socket.emit('chat:leave', { chatId });
+        socket.off('message:new', onNew);
+        socket.off('typing', onTyping);
+        socket.off('chat:updated', onChatUpdated);
+      }
     };
   }, [chatId, qc]);
 
@@ -126,13 +132,20 @@ export function usePresence() {
   // (not only after a full reload).
   const token = useAuthStore((s) => s.accessToken);
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket) return;
+    let cancelled = false;
+    let activeSocket: Awaited<ReturnType<typeof getSocket>> = null;
     const handler = (d: { userId: string; online: boolean }) =>
       setOnline((prev) => ({ ...prev, [d.userId]: d.online }));
-    socket.on('presence:update', handler);
+
+    getSocket().then((socket) => {
+      if (cancelled || !socket) return;
+      activeSocket = socket;
+      socket.on('presence:update', handler);
+    });
+
     return () => {
-      socket.off('presence:update', handler);
+      cancelled = true;
+      activeSocket?.off('presence:update', handler);
     };
   }, [token]);
   return online;
