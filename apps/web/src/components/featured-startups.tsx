@@ -1,19 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Code2, Home as HomeIcon, Share2 } from 'lucide-react';
+import { ArrowRight, Home as HomeIcon, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 // EduBridge's featured student startups with their own standalone landing pages.
 const FEATURED = [
-  {
-    href: '/startups/99x-developers',
-    icon: Code2,
-    name: '99x Developers',
-    desc: 'Web design, development & digital marketing — EduBridge Network’s in-house studio.',
-  },
   {
     href: '/startups/ez-rentbuddy',
     icon: HomeIcon,
