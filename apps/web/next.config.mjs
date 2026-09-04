@@ -72,7 +72,11 @@ const nextConfig = {
     ],
     // Serve modern, smaller formats and cache aggressively.
     formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 86400,
+    // 7 days: safe floor for both static bundled assets and remote images
+    // (remotePatterns allows any host, e.g. user avatars) — long enough to cut
+    // repeat re-optimization on revisits, short enough that an updated avatar
+    // doesn't stay stale for too long.
+    minimumCacheTTL: 604800,
   },
   // The dashboard is the front page — redirect at the framework level so the root
   // route never renders a component (avoids the NEXT_REDIRECT dev-overlay noise).

@@ -11,13 +11,19 @@
    - Cross-origin (the API) and everything else → passthrough (the app's persisted
      React Query cache handles API data offline). */
 
-const VERSION = 'v4';
+const VERSION = 'v5';
 const STATIC_CACHE = `ebd-static-${VERSION}`;
 const PAGE_CACHE = `ebd-pages-${VERSION}`;
 const IMG_CACHE = `ebd-img-${VERSION}`;
 const CURRENT = [STATIC_CACHE, PAGE_CACHE, IMG_CACHE];
+const OFFLINE_URL = '/offline.html';
 
-self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(PAGE_CACHE).then((cache) => cache.add(OFFLINE_URL)).catch(() => {}),
+  );
+  self.skipWaiting();
+});
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
@@ -96,6 +102,10 @@ async function networkFirst(req, cacheName) {
     // different page (e.g. /home) — that made nav links look like they redirected home.
     const hit = await cache.match(req);
     if (hit) return hit;
+    // Never-visited page with no cache: show the branded offline page instead
+    // of the browser's generic error screen.
+    const offline = await cache.match(OFFLINE_URL);
+    if (offline) return offline;
     throw new Error('offline: no cached page');
   }
 }
