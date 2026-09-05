@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
 import { Topbar } from '@/components/topbar';
 import { VerifyBanner } from '@/components/verify-banner';
-import { FloatingConnections } from '@/components/floating-connections';
 import { AdminCatalogPanel } from '@/components/admin/admin-catalog-panel';
 
 // Code-split: pulls in socket.io-client, which most page views never need
@@ -29,10 +28,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <NotificationStream />
       <Topbar />
       <VerifyBanner />
-      <main key={pathname} className="animate-page flex-1 p-4 pb-24 md:p-6">
+      <main key={pathname} className="animate-page flex-1 p-4 md:p-6">
         {children}
       </main>
-      <FloatingConnections />
       <AdminCatalogPanel />
     </div>
   );
