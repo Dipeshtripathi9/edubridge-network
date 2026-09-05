@@ -32,7 +32,6 @@ export const ADMIN_NAV = [
   { href: '/admin', label: 'Admin', icon: ShieldCheck },
   { href: '/manage/mentors', label: 'Mentors', icon: Headset },
   { href: '/analysis', label: 'Analysis', icon: BarChart3 },
-  { href: '/manage/ez-rentbuddy', label: 'EZ-Rentbuddy', icon: Home },
   { href: '/manage/internship', label: 'Internship', icon: Award },
   { href: '/manage/quizzes', label: 'Quizzes', icon: HelpCircle },
 ];

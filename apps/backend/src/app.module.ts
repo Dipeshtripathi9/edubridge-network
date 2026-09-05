@@ -21,7 +21,6 @@ import { PaymentsModule } from './payments/payments.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { ReferralsModule } from './referrals/referrals.module';
-import { RentalsModule } from './rentals/rentals.module';
 import { MentorsModule } from './mentors/mentors.module';
 import { ProfileLeadsModule } from './profile-leads/profile-leads.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -91,7 +90,6 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     ResourcesModule,
     MessagingModule,
     ReferralsModule,
-    RentalsModule,
     MentorsModule,
     ProfileLeadsModule,
     ComplaintsModule,

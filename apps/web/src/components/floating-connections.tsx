@@ -3,19 +3,16 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, GraduationCap, Home } from 'lucide-react';
+import { GraduationCap, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
  * Bottom floating row (Zomato-style), mobile/tablet-portrait only — desktop
  * already has the sidebar nav via the hamburger menu, and the bar would
- * otherwise overlap page content at wider viewports. Split ~66% / ~34% on one line:
- *  - Connection 1: a stadium segmented control (icon-over-label). The active
- *    segment gets a full-height inner capsule end-cap; its icon/label emphasise.
- *  - Connection 2: a standalone emerald "EZ RentBuddy ↗" launcher capsule of the
- *    same height/radius that bleeds off the right edge (a deliberate peek).
- * On scroll-down the bar slides down and the launcher slides right at the same
- * speed; both return on scroll-up.
+ * otherwise overlap page content at wider viewports. A stadium segmented
+ * control (icon-over-label); the active segment gets a full-height inner
+ * capsule end-cap and its icon/label emphasise. On scroll-down the bar
+ * slides down; it returns on scroll-up.
  */
 // grow weights (their original relative ratio) give Compare ~57% of the row
 // and Home ~43%, rather than an even 50/50 split.
@@ -61,12 +58,11 @@ export function FloatingConnections() {
   if (pathname.startsWith('/messages') || pathname.startsWith('/pools')) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex items-stretch gap-2 overflow-x-clip pl-2.5 md:hidden">
-      {/* Connection 1 — segmented control (takes the remaining width) */}
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex items-stretch gap-2 px-2.5 md:hidden">
       <nav
         aria-label="Quick links"
         className={cn(
-          'pointer-events-auto flex h-[60px] min-w-0 basis-0 grow-[72] items-stretch gap-1.5 rounded-full bg-card p-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.10)] transition-transform duration-[600ms] ease-out motion-reduce:transition-none',
+          'pointer-events-auto flex h-[60px] w-full items-stretch gap-1.5 rounded-full bg-card p-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.10)] transition-transform duration-[600ms] ease-out motion-reduce:transition-none',
           collapsed ? 'translate-y-[220%]' : 'translate-y-0',
         )}
       >
@@ -91,23 +87,6 @@ export function FloatingConnections() {
           );
         })}
       </nav>
-
-      {/* Connection 2 — standalone launcher, full wordmark always visible */}
-      <Link
-        href="/startups/ez-rentbuddy"
-        aria-label="EZ RentBuddy"
-        style={{
-          backgroundColor: '#CF55A3',
-          backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.16), rgba(0,0,0,0.05))',
-        }}
-        className={cn(
-          'pointer-events-auto flex h-[46px] min-w-0 basis-0 grow-[28] items-center justify-center gap-1 self-center overflow-hidden rounded-l-full px-2 text-white shadow-[0_6px_18px_rgba(207,85,163,0.42)] transition-transform duration-700 ease-out motion-reduce:transition-none hover:brightness-95',
-          collapsed ? 'translate-x-[130%]' : 'translate-x-0',
-        )}
-      >
-        <span className="whitespace-nowrap font-display text-[9.5px] font-extrabold tracking-tight">EZ RentBuddy</span>
-        <ArrowUpRight className="h-3 w-3 flex-none" strokeWidth={2.6} />
-      </Link>
     </div>
   );
 }
