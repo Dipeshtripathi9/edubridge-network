@@ -15,7 +15,6 @@ const MENU = [
   { href: '/home', label: 'Home' },
   { href: '/colleges/compare', label: 'Compare Colleges' },
   { href: '/home#direct-admission', label: 'Direct Admission Desk' },
-  { href: '/startups/ez-rentbuddy', label: 'Places to Live' },
   { href: '/internship', label: 'Internship Opportunities' },
 ];
 
