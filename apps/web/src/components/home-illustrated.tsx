@@ -131,7 +131,7 @@ export function HeroContent({ onQuiz }: { onQuiz: () => void }) {
           </Button>
           <Button asChild variant="outline" className="gap-1.5 border-primary/30 px-4 text-[13.5px] font-semibold hover:border-primary/50">
             <Link href="/internship">
-              <Briefcase className="h-4 w-4" strokeWidth={1.75} /> Find Internship
+              <Briefcase className="h-4 w-4" strokeWidth={1.75} /> Explore Internships
             </Link>
           </Button>
         </div>
