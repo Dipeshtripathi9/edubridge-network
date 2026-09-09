@@ -656,38 +656,6 @@ model CollegeCourse {
   @@map("college_courses")
 }
 
-model Scholarship {
-  id       String @id @default(cuid())
-  title    String
-  slug     String @unique
-  provider String
-
-  amountPerYear Int
-  renewalYears  Int?
-
-  // Free-form admin-entered tag (e.g. "Merit", "Need-based", "Women in STEM") —
-  // used for the list page's filter chips.
-  category        String
-  eligibilityText String
-
-  // Structured eligibility criteria — each is optional; the frontend only
-  // scores a scholarship against whichever of these AND the student's real
-  // profile fields are both present, never fabricating a check it can't make.
-  minCgpa         Float?
-  eligibleCourses String[]
-  eligibleStates  String[]
-
-  applyUrl String
-  deadline DateTime
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([category])
-  @@index([deadline])
-  @@map("scholarships")
-}
-
 // Covers internships plus the other opportunity kinds the "Open Career
 // Program" surfaces (part-time work, freelance gigs, blogging, startup
 // projects) — one broad catalog rather than a separate model per kind.
@@ -1287,9 +1255,7 @@ model VirtualInternshipEnrollment {
   @@map("virtual_internship_enrollments")
 }
 
-// Admin-configured "first N students free" cap per track. Not named
-// `Scholarship` — that model already exists for the unrelated external
-// scholarships directory (apps/backend/src/scholarships).
+// Admin-configured "first N students free" cap per track.
 model VirtualInternshipScholarship {
   id          String                 @id @default(cuid())
   track       VirtualInternshipTrack @unique

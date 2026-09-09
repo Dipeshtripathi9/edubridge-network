@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Bookmark, Briefcase, ChevronLeft, ChevronRight, Compass, IndianRupee } from 'lucide-react';
+import { ArrowRight, Bookmark, Briefcase, ChevronLeft, ChevronRight, Compass } from 'lucide-react';
 import { HomeAdmissionDesk } from '@/components/home-admission-desk';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,35 +13,13 @@ import { useCollegeShortlist } from '@/hooks/use-college-shortlist';
 
 // Static line-art illustrations (brand hexes baked in). Rendered as raw SVG so
 // we don't hand-convert every attribute to JSX.
-const ILL_SCH1 = `<svg viewBox="0 0 120 100" fill="none" aria-hidden="true" style="width:120px;height:100px">
-  <rect x="24" y="38" width="72" height="42" rx="3" stroke="#1A1433" stroke-width="2.6"/>
-  <path d="M24 38 L60 20 L96 38" stroke="#1A1433" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="60" cy="33" r="5" stroke="#1A1433" stroke-width="2.2"/>
-  <path d="M60 30.5 v2.5 l1.8 1.5" stroke="#1A1433" stroke-width="1.8" stroke-linecap="round"/>
-  <rect x="33" y="48" width="9" height="9" fill="#EFEAFF" stroke="#1A1433" stroke-width="1.8"/>
-  <rect x="55" y="48" width="9" height="9" fill="#EFEAFF" stroke="#1A1433" stroke-width="1.8"/>
-  <rect x="77" y="48" width="9" height="9" fill="#EFEAFF" stroke="#1A1433" stroke-width="1.8"/>
-  <path d="M55 80 v-12 a5 5 0 0 1 10 0 v12" stroke="#1A1433" stroke-width="2.2"/>
-  <line x1="96" y1="38" x2="96" y2="24" stroke="#1A1433" stroke-width="2.2" stroke-linecap="round"/>
-  <path d="M96 24 l10 3 -10 3 Z" fill="#F2A31B"/>
-  <path d="M16 30 v6 M13 33 h6 M104 66 v6 M101 69 h6" stroke="#1A1433" stroke-width="1.8" stroke-linecap="round"/>
-</svg>`;
-
-const ILL_SCH2 = `<svg viewBox="0 0 120 100" fill="none" aria-hidden="true" style="width:120px;height:100px">
-  <path d="M30 80 v-30 a30 30 0 0 1 60 0 v30" stroke="#1A1433" stroke-width="2.6"/>
-  <path d="M42 80 v-24 a18 18 0 0 1 36 0 v24" fill="#FDF1DA" stroke="#1A1433" stroke-width="2.2"/>
-  <path d="M48 80 v-18 a12 12 0 0 1 24 0 v18" fill="#F2A31B" fill-opacity=".55" stroke="#1A1433" stroke-width="2"/>
-  <line x1="22" y1="80" x2="98" y2="80" stroke="#1A1433" stroke-width="2.6" stroke-linecap="round"/>
-  <path d="M60 14 v-4 M52 17 l-3-3 M68 17 l3-3" stroke="#5A31F4" stroke-width="2.2" stroke-linecap="round"/>
-</svg>`;
-
 function Ill({ svg, className }: { svg: string; className?: string }) {
   return <span className={className} aria-hidden dangerouslySetInnerHTML={{ __html: svg }} />;
 }
 
 // "College Guidance & Resources" — a horizontal strip of real published blog
 // posts (falls back to a couple of generic entries before any posts exist),
-// mirroring the Scholarships/Internships teaser strips above it.
+// mirroring the Internships teaser strip above it.
 const RESOURCE_CATEGORY_STYLE: Record<BlogCategory, { label: string; bg: string; text: string }> = {
   CAREER: { label: 'Career', bg: 'bg-[#FBEAD9]', text: 'text-[#A85F35]' },
   COLLEGE: { label: 'College', bg: 'bg-[#E3EBF5]', text: 'text-[#3A5A8C]' },
@@ -140,11 +118,6 @@ function MyShortlist({ onQuiz, loggedIn }: { onQuiz: () => void; loggedIn: boole
   );
 }
 
-const SCHOLARSHIPS = [
-  { svg: ILL_SCH1, amount: '₹2,00,000', name: 'Reliance Foundation UG Scholarship' },
-  { svg: ILL_SCH2, amount: '₹12,000', name: 'Central Sector Scholarship: Govt of India' },
-];
-
 const ILL_INTERN1 = `<svg viewBox="0 0 120 100" fill="none" aria-hidden="true" style="width:120px;height:100px">
   <rect x="30" y="42" width="60" height="38" rx="4" stroke="#1A1433" stroke-width="2.6"/>
   <rect x="38" y="50" width="44" height="22" fill="#EFEAFF"/>
@@ -194,13 +167,6 @@ const POSTER_INTERNSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2
   <text x="240" y="524" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#1B1633" class="poster-title">Internship</text>
 </svg>`;
 
-const POSTER_SCHOLARSHIP = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
-  <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
-  <defs><clipPath id="clip-scholarship"><circle cx="240" cy="230" r="168"/></clipPath></defs>
-  <image href="/poster-scholarship.jpg" x="72" y="62" width="336" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-scholarship)"/>
-  <text x="240" y="524" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#1B1633" class="poster-title">Scholarship</text>
-</svg>`;
-
 const POSTER_EXPERT = `<svg viewBox="0 0 480 600" xmlns="http://www.w3.org/2000/svg">
   <rect x="20" y="20" width="440" height="440" rx="48" fill="#F4F1EA"/>
   <defs><clipPath id="clip-expert"><circle cx="240" cy="230" r="168"/></clipPath></defs>
@@ -216,11 +182,10 @@ const POSTERS = [
   { svg: POSTER_QUIZ, action: { type: 'collegeMatchQuiz' as const } },
   { svg: POSTER_COMPARE, action: { type: 'href' as const, href: '/colleges/compare' } },
   { svg: POSTER_INTERNSHIP, action: { type: 'href' as const, href: '/internship' } },
-  { svg: POSTER_SCHOLARSHIP, action: { type: 'href' as const, href: '/scholarships' } },
   { svg: POSTER_EXPERT, action: { type: 'quiz' as const } },
 ];
 const POSTER_TRACK = POSTERS;
-const POSTER_TITLES = ['College Quiz', 'Compare Colleges', 'Internship', 'Scholarship', 'Reviews'];
+const POSTER_TITLES = ['College Quiz', 'Compare Colleges', 'Internship', 'Reviews'];
 
 // Swipeable stacked-card deck: one poster up front, the next two fanned
 // behind it (peek + rotate), matching a card-deck interaction rather than a
@@ -464,53 +429,6 @@ export function HomeTools({
       </div>
 
       <MyShortlist onQuiz={onQuiz} loggedIn={loggedIn} />
-
-      {/* Scholarships */}
-      <div className="mt-6 border-t border-border pt-8">
-        <div className="mb-2 flex items-center gap-2.5">
-          <IndianRupee className="h-6 w-6" />
-          <h2 className="font-display text-[25px] font-extrabold tracking-[-.02em]">Scholarships</h2>
-        </div>
-        <p className="mb-5 max-w-[520px] text-[15.5px] font-medium text-muted-foreground">
-          Search verified scholarships, or get matched to the ones you&apos;re actually eligible for.
-        </p>
-
-        <div className="flex snap-x gap-4 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {SCHOLARSHIPS.map((s) => (
-            <Link key={s.name} href="/scholarships" className="group flex w-[240px] flex-none snap-start flex-col">
-              <span className="relative mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border bg-card">
-                <span className="absolute right-3 top-3 rounded-full bg-marigold-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
-                  Example
-                </span>
-                <Ill svg={s.svg} />
-              </span>
-              <p className="text-[16px] font-semibold leading-snug">
-                <b className="font-extrabold">{s.amount}</b> {s.name}
-              </p>
-              <span className="mt-2.5 inline-flex w-fit items-center gap-1.5 rounded-full border border-foreground/15 bg-secondary px-3 py-1 text-[13px] font-bold transition-colors group-hover:bg-secondary/70">
-                Apply Now <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-              </span>
-            </Link>
-          ))}
-
-          <Link
-            href="/scholarships"
-            className="flex w-[240px] flex-none snap-start items-center gap-3 rounded-xl border-[1.6px] border-foreground bg-card px-5 py-5"
-          >
-            <b className="flex-1 font-display text-[19px] font-extrabold leading-snug tracking-tight">See All Your Scholarship Matches</b>
-            <ChevronRight className="h-[18px] w-[18px] flex-none" />
-          </Link>
-        </div>
-
-        <div className="flex justify-center pt-6">
-          <Link
-            href="/scholarships"
-            className="inline-flex items-center gap-2.5 rounded-full border-[1.6px] border-foreground bg-card px-7 py-3.5 text-[16px] font-extrabold transition-colors hover:bg-secondary"
-          >
-            Browse All Scholarships <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
 
       {/* College Guidance & Resources */}
       <div className="mt-6 border-t border-border pt-8">

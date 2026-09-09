@@ -5,22 +5,6 @@ import { api } from '@/lib/api';
 import type { College, CollegeCourse } from '@/hooks/use-colleges';
 import type { OpportunityType } from '@/hooks/use-internship-listings';
 
-export interface Scholarship {
-  id: string;
-  title: string;
-  slug: string;
-  provider: string;
-  amountPerYear: number;
-  renewalYears?: number | null;
-  category: string;
-  eligibilityText: string;
-  minCgpa?: number | null;
-  eligibleCourses: string[];
-  eligibleStates: string[];
-  applyUrl: string;
-  deadline: string;
-}
-
 export interface InternshipListingAdmin {
   id: string;
   title: string;
@@ -104,48 +88,6 @@ export function useDeleteCollegeCourse(collegeId: string) {
   return useMutation({
     mutationFn: (courseId: string) => api.delete(`/colleges/${collegeId}/courses/${courseId}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['college'] }),
-  });
-}
-
-// ---------- Scholarships ----------
-
-export function useAdminScholarships(q: string) {
-  return useQuery({
-    queryKey: ['admin', 'scholarships', q],
-    queryFn: () => api.paginated<Scholarship>(`/scholarships?limit=50${q ? `&q=${encodeURIComponent(q)}` : ''}`),
-  });
-}
-
-export function useCreateScholarship() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: Omit<Scholarship, 'id' | 'slug'>) => api.post('/scholarships', input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'scholarships'] });
-      qc.invalidateQueries({ queryKey: ['scholarships'] });
-    },
-  });
-}
-
-export function useUpdateScholarship() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, ...input }: Partial<Scholarship> & { id: string }) => api.patch(`/scholarships/${id}`, input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'scholarships'] });
-      qc.invalidateQueries({ queryKey: ['scholarships'] });
-    },
-  });
-}
-
-export function useDeleteScholarship() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => api.delete(`/scholarships/${id}`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'scholarships'] });
-      qc.invalidateQueries({ queryKey: ['scholarships'] });
-    },
   });
 }
 

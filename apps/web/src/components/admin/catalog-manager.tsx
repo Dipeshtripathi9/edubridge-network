@@ -9,7 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { College, CollegeCourse } from '@/hooks/use-colleges';
 import { useCollege } from '@/hooks/use-colleges';
-import { useScholarshipCategories } from '@/hooks/use-scholarships';
 import { useInternshipCategories, OPPORTUNITY_TYPE_LABEL, type OpportunityType } from '@/hooks/use-internship-listings';
 import { CoursePathSelector } from '@/components/ui/course-path-selector';
 import { SearchableSelect } from '@/components/ui/searchable-select';
@@ -21,15 +20,10 @@ import {
   useCreateCollegeCourse,
   useUpdateCollegeCourse,
   useDeleteCollegeCourse,
-  useAdminScholarships,
-  useCreateScholarship,
-  useUpdateScholarship,
-  useDeleteScholarship,
   useAdminInternshipListings,
   useCreateInternshipListing,
   useUpdateInternshipListing,
   useDeleteInternshipListing,
-  type Scholarship,
   type InternshipListingAdmin,
 } from '@/hooks/use-catalog-admin';
 
@@ -996,164 +990,6 @@ function CollegesSection() {
   );
 }
 
-// ---------- Scholarships ----------
-
-function ScholarshipForm({ initial, onDone }: { initial?: Scholarship; onDone: () => void }) {
-  const [form, setForm] = useState({
-    title: initial?.title ?? '',
-    provider: initial?.provider ?? '',
-    amountPerYear: initial?.amountPerYear?.toString() ?? '',
-    category: initial?.category ?? '',
-    eligibilityText: initial?.eligibilityText ?? '',
-    applyUrl: initial?.applyUrl ?? '',
-    deadline: initial?.deadline ? initial.deadline.slice(0, 10) : '',
-  });
-  const create = useCreateScholarship();
-  const update = useUpdateScholarship();
-  const pending = create.isPending || update.isPending;
-  const { data: categories } = useScholarshipCategories();
-
-  const submit = () => {
-    if (!form.title.trim() || !form.provider.trim() || !form.deadline) {
-      return toast.error('Title, provider, and deadline are required');
-    }
-    const payload = {
-      title: form.title.trim(),
-      provider: form.provider.trim(),
-      amountPerYear: Number(form.amountPerYear) || 0,
-      category: form.category.trim() || 'General',
-      eligibilityText: form.eligibilityText.trim() || 'See apply link for details',
-      applyUrl: form.applyUrl.trim(),
-      deadline: form.deadline,
-      eligibleCourses: initial?.eligibleCourses ?? [],
-      eligibleStates: initial?.eligibleStates ?? [],
-    };
-    const onSettled = {
-      onSuccess: () => {
-        toast.success(initial ? 'Scholarship updated' : 'Scholarship created');
-        onDone();
-      },
-      onError: (e: unknown) => toast.error((e as Error).message),
-    };
-    if (initial) update.mutate({ id: initial.id, ...payload }, onSettled);
-    else create.mutate(payload, onSettled);
-  };
-
-  return (
-    <div className="grid gap-3 rounded-lg border border-dashed border-border p-4 sm:grid-cols-2">
-      <Field label="Title">
-        <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-      </Field>
-      <Field label="Provider">
-        <Input value={form.provider} onChange={(e) => setForm({ ...form, provider: e.target.value })} />
-      </Field>
-      <Field label="Amount / year (₹)">
-        <Input
-          type="number"
-          value={form.amountPerYear}
-          onChange={(e) => setForm({ ...form, amountPerYear: e.target.value })}
-        />
-      </Field>
-      <Field label="Category">
-        <SearchableSelect
-          label="Category"
-          value={form.category}
-          onChange={(v) => setForm({ ...form, category: v })}
-          options={categories ?? []}
-          placeholder="Select or type a category"
-          searchPlaceholder="Search or type: Merit, Need-based…"
-        />
-      </Field>
-      <Field label="Apply URL">
-        <Input value={form.applyUrl} onChange={(e) => setForm({ ...form, applyUrl: e.target.value })} />
-      </Field>
-      <Field label="Deadline">
-        <Input type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} />
-      </Field>
-      <div className="sm:col-span-2">
-        <Field label="Eligibility">
-          <Textarea
-            value={form.eligibilityText}
-            onChange={(e) => setForm({ ...form, eligibilityText: e.target.value })}
-            rows={2}
-          />
-        </Field>
-      </div>
-      <div className="flex gap-2 sm:col-span-2">
-        <Button size="sm" onClick={submit} disabled={pending}>
-          {initial ? 'Save' : 'Add scholarship'}
-        </Button>
-        <Button size="sm" variant="outline" onClick={onDone}>
-          Cancel
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function ScholarshipsSection() {
-  const [q, setQ] = useState('');
-  const [editing, setEditing] = useState<Scholarship | 'new' | null>(null);
-  const { data, isLoading } = useAdminScholarships(q);
-  const del = useDeleteScholarship();
-  const scholarships = data?.data ?? [];
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Scholarships</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <Input placeholder="Search scholarships…" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" />
-          <Button size="sm" onClick={() => setEditing('new')}>
-            + Add scholarship
-          </Button>
-        </div>
-
-        {editing === 'new' && <ScholarshipForm onDone={() => setEditing(null)} />}
-
-        {isLoading ? (
-          <Skeleton className="h-24 w-full" />
-        ) : (
-          <div className="divide-y divide-border rounded-lg border border-border">
-            {scholarships.length === 0 && <p className="p-4 text-sm text-muted-foreground">No scholarships yet.</p>}
-            {scholarships.map((s) =>
-              editing !== 'new' && editing?.id === s.id ? (
-                <div key={s.id} className="p-2">
-                  <ScholarshipForm initial={s} onDone={() => setEditing(null)} />
-                </div>
-              ) : (
-                <div key={s.id} className="flex items-center justify-between gap-3 p-3 text-sm">
-                  <div className="min-w-0">
-                    <p className="font-semibold">{s.title}</p>
-                    <p className="text-muted-foreground">
-                      {s.provider} · ₹{s.amountPerYear.toLocaleString()}/yr · {s.category}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setEditing(s)}>
-                      Edit
-                    </Button>
-                    <ConfirmDeleteButton
-                      onConfirm={() =>
-                        del.mutate(s.id, {
-                          onSuccess: () => toast.success('Scholarship deleted'),
-                          onError: (e) => toast.error((e as Error).message),
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-              ),
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 // ---------- Internship listings ----------
 
 function InternshipListingForm({ initial, onDone }: { initial?: InternshipListingAdmin; onDone: () => void }) {
@@ -1341,7 +1177,6 @@ export function CatalogManager() {
   return (
     <div className="space-y-6">
       <CollegesSection />
-      <ScholarshipsSection />
       <InternshipListingsSection />
     </div>
   );
