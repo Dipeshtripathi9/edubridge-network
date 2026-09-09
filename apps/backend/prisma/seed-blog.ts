@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 // Standalone, idempotent seed for demo BlogPost rows ONLY — safe to run against
-// a live database, unlike the full seed.ts. Unlike seed-scholarships.ts, blog
+// a live database, unlike the full seed.ts. Unlike other standalone seeds, blog
 // posts need a real author (authorId is a required FK), so this NEVER creates
 // a user — it attributes demo posts to existing verified-student accounts
 // (created by `npm run db:seed`) and is a no-op if none exist yet.

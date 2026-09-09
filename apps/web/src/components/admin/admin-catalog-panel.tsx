@@ -6,8 +6,8 @@ import { X } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
 import { CatalogManager } from '@/components/admin/catalog-manager';
 
-// Admin-only left-edge sliding panel for managing the College/Scholarship/
-// Internship catalog. Lives outside the /admin dashboard tabs so it's reachable
+// Admin-only left-edge sliding panel for managing the College/Internship
+// catalog. Lives outside the /admin dashboard tabs so it's reachable
 // from anywhere in the app, mirroring the full-screen overlay pattern in
 // nav-menu.tsx but anchored as a slide-in tab on the left edge instead.
 export function AdminCatalogPanel() {

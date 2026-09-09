@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Briefcase, Building2, CheckCircle2, GraduationCap, ShieldCheck } from 'lucide-react';
+import { Briefcase, Building2, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CollegeQuiz } from '@/components/college-quiz';
 import { CollegeMatchQuiz } from '@/components/college-match-quiz';
@@ -128,11 +128,6 @@ export function HeroContent({ onQuiz }: { onQuiz: () => void }) {
         <div className="mt-3 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3 lg:justify-start xl:justify-center [@media(max-height:700px)]:mt-1 [@media(max-height:700px)]:gap-1">
           <Button className="w-[70vw] max-w-[220px] gap-2 sm:w-auto" onClick={onQuiz}>
             <Building2 className="h-4 w-4" strokeWidth={1.75} /> Find College
-          </Button>
-          <Button asChild variant="outline" className="gap-1.5 border-primary/30 px-4 text-[13.5px] font-semibold hover:border-primary/50">
-            <Link href="/scholarships">
-              <GraduationCap className="h-4 w-4" strokeWidth={1.75} /> Explore Scholarship
-            </Link>
           </Button>
           <Button asChild variant="outline" className="gap-1.5 border-primary/30 px-4 text-[13.5px] font-semibold hover:border-primary/50">
             <Link href="/internship">

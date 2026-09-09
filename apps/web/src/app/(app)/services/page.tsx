@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Award, GraduationCap, Rocket, Share2 } from 'lucide-react';
+import { GraduationCap, Rocket, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -18,14 +18,6 @@ const SERVICES = [
     body: 'Authentic student reviews, placement data, and personalised college recommendations to help you choose confidently.',
     href: '/reviews',
     cta: 'Explore colleges',
-  },
-  {
-    icon: Award,
-    tone: 'bg-marigold-soft text-amber-600',
-    title: 'Scholarships',
-    body: 'Discover scholarships matched to your profile — government, private, and global — free to browse and apply.',
-    href: '/scholarships',
-    cta: 'Find scholarships',
   },
   {
     icon: Rocket,

@@ -16,7 +16,6 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "ts-node prisma/seed.ts",
-    "db:seed:scholarships": "ts-node prisma/seed-scholarships.ts",
     "db:seed:blog": "ts-node prisma/seed-blog.ts",
     "db:studio": "prisma studio"
   },
