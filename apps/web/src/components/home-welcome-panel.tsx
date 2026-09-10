@@ -91,6 +91,7 @@ export function HomeWelcomePanel({
           --ink: #182333;
           --ink-soft: #6b7280;
           background: hsl(var(--card));
+          border: 1px solid var(--line);
           border-radius: 24px;
           box-shadow: 0 1px 2px rgba(24, 35, 51, 0.04), 0 10px 28px rgba(24, 35, 51, 0.06);
           display: flex;
