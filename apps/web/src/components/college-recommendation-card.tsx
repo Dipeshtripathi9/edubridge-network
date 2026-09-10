@@ -181,18 +181,18 @@ export function CollegeRecommendationCard({
       <div className="col-span-2 flex flex-wrap gap-2 min-[900px]:col-span-1 min-[900px]:flex-col min-[900px]:gap-2">
         <ReviewLink
           slug={college.slug}
-          className="hidden items-center justify-center gap-1.5 rounded-md border border-input bg-background px-2.5 py-2 text-[12.5px] font-semibold transition-colors hover:bg-accent min-[900px]:flex"
+          className="hidden items-center justify-center gap-1.5 rounded-md px-2.5 py-2 text-[12.5px] font-semibold text-foreground transition-colors hover:bg-accent min-[900px]:flex"
         />
         <Button
           size="sm"
-          variant={shortlisted ? 'default' : 'outline'}
+          variant={shortlisted ? 'default' : 'ghost'}
           className="flex-none gap-1.5 min-[900px]:flex-none"
           onClick={() => toggle(college.slug)}
         >
           {shortlisted ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
           {shortlisted ? 'Shortlisted' : 'Shortlist'}
         </Button>
-        <Button size="sm" variant="outline" className="flex-none min-[900px]:flex-none" onClick={onQuiz}>
+        <Button size="sm" variant="ghost" className="flex-none min-[900px]:flex-none" onClick={onQuiz}>
           Ask Expert Guide
         </Button>
         <Button size="sm" variant="ghost" className="flex-none gap-1.5 min-[900px]:flex-none" asChild>
