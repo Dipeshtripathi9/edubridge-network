@@ -73,7 +73,7 @@ export function CollegeRecommendationCard({
   const applied = isApplied(college.slug);
 
   return (
-    <article className="grid grid-cols-[72px_1fr] gap-x-4 gap-y-3 rounded-[20px] border border-[#E4DAC0] bg-[#FBFAF5] p-[18px_18px_16px] shadow-[0_1px_2px_rgba(24,35,51,0.04),0_8px_24px_rgba(24,35,51,0.06)] min-[900px]:grid-cols-[84px_220px_1fr_1fr_1fr_140px] min-[900px]:items-center min-[900px]:gap-x-5 min-[900px]:p-[22px_26px]">
+    <article className="grid grid-cols-[72px_1fr] gap-x-4 gap-y-3 rounded-[20px] bg-background p-[18px_18px_16px] shadow-[0_1px_2px_rgba(24,35,51,0.04),0_8px_24px_rgba(24,35,51,0.06)] min-[900px]:grid-cols-[84px_220px_1fr_1fr_1fr_140px] min-[900px]:items-center min-[900px]:gap-x-5 min-[900px]:p-[22px_26px]">
       <div className="row-span-3 flex flex-col items-center gap-1.5 pt-0.5 min-[900px]:row-auto">
         <FitRing rating={college.avgRating} />
       </div>
