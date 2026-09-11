@@ -182,4 +182,25 @@ export class CollegesService {
     await this.prisma.collegeCourse.delete({ where: { id: courseId } });
     return { success: true };
   }
+
+  // ---------- Applied ----------
+
+  async markApplied(userId: string, slug: string) {
+    const college = await this.prisma.college.findUnique({ where: { slug } });
+    if (!college) throw new NotFoundException('College not found');
+    await this.prisma.collegeApplication.upsert({
+      where: { userId_collegeId: { userId, collegeId: college.id } },
+      update: {},
+      create: { userId, collegeId: college.id },
+    });
+    return { success: true };
+  }
+
+  async myAppliedSlugs(userId: string) {
+    const rows = await this.prisma.collegeApplication.findMany({
+      where: { userId },
+      select: { college: { select: { slug: true } } },
+    });
+    return rows.map((r) => r.college.slug);
+  }
 }

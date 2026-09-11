@@ -246,6 +246,7 @@ model User {
   certificates                 Certificate[]
   quizAttempts                 QuizAttempt[]
   virtualInternshipEnrollments VirtualInternshipEnrollment[]
+  collegeApplications          CollegeApplication[]
 
   @@index([status])
   @@index([role])
@@ -570,12 +571,28 @@ model College {
   resources            Resource[]
   faqs                 CollegeFaq[]
   courses              CollegeCourse[]
+  applications         CollegeApplication[]
 
   @@index([state, city])
   @@index([nirfRank])
   @@index([avgRating(sort: Desc)])
   @@index([sourceSystem, externalId])
   @@map("colleges")
+}
+
+// A student marking a college as "Applied" (from /colleges/recommended). One
+// row per user+college — re-applying is a no-op via the unique constraint.
+model CollegeApplication {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collegeId String
+  college   College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, collegeId])
+  @@index([collegeId])
+  @@map("college_applications")
 }
 
 // One row per Field -> Degree -> Specialization path a college offers.

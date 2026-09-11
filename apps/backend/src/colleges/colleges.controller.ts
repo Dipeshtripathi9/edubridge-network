@@ -7,6 +7,7 @@ import { CreateCollegeDto, UpdateCollegeDto } from './dto/college.dto';
 import { CreateCollegeCourseDto, UpdateCollegeCourseDto } from './dto/college-course.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 // Public, non-personalized catalog data that changes rarely — let browsers/CDNs
 // serve it from cache for a minute and revalidate in the background, so repeat
@@ -62,6 +63,18 @@ export class CollegesController {
   @ApiOperation({ summary: 'College Community Hub overview (header + counts)' })
   hub(@Param('slug') slug: string) {
     return this.colleges.getCommunityHub(slug);
+  }
+
+  @Get('me/applied')
+  @ApiOperation({ summary: 'My applied college slugs' })
+  myApplied(@CurrentUser('sub') userId: string) {
+    return this.colleges.myAppliedSlugs(userId);
+  }
+
+  @Post(':slug/apply')
+  @ApiOperation({ summary: 'Mark a college as applied for the current user' })
+  apply(@CurrentUser('sub') userId: string, @Param('slug') slug: string) {
+    return this.colleges.markApplied(userId, slug);
   }
 
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
