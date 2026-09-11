@@ -294,11 +294,13 @@ model User {
   @@map("users")
 }
 
-// One code per unique student (every account, however it was created —
-// email/password, Google, phone OTP, or magic link). `sequence` is a real DB
-// autoincrement so concurrent signups can never collide; `code` is derived
-// from it ("EBN" + sequence zero-padded to 4 digits) and stored so the list
-// of codes is directly queryable. Not exposed via any controller/route yet.
+// One code per unique student going forward — however their account was
+// created (email/password, Google, phone OTP, or magic link). Deliberately
+// NOT backfilled onto users who registered before this existed. `sequence`
+// is a real DB autoincrement (starting at 0) so concurrent signups can never
+// collide; `code` is derived from it ("EBN" + the raw number, no padding —
+// EBN0, EBN1, EBN2, …) and stored so the list of codes is directly
+// queryable. Not exposed via any controller/route yet.
 model ReferralCode {
   id     String @id @default(cuid())
   userId String @unique
