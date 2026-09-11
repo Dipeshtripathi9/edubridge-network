@@ -46,14 +46,11 @@ export default async function BlogListPage() {
           Written only by ID-verified students — honest, first-hand takes on internships, college choices, and what
           actually shapes a career.
         </p>
-        <Link href="/blog/write" className={styles.btn}>
-          Write a blog →
-        </Link>
       </header>
 
       <div className={styles.postGrid}>
         {posts.length === 0 ? (
-          <p className={styles.empty}>No posts yet — be the first to write one.</p>
+          <p className={styles.empty}>No posts yet — check back soon.</p>
         ) : (
           posts.map((post) => {
             const meta = CATEGORY_META[post.category];
