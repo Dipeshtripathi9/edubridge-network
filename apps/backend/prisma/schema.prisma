@@ -158,18 +158,6 @@ enum VerificationPurpose {
   MAGIC_LINK
 }
 
-enum VerificationMethod {
-  COLLEGE_EMAIL
-  ID_CARD
-  ADMISSION_PROOF
-}
-
-enum VerificationRequestStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 enum EnrollmentSubtype {
   GUIDED_LEARNING
   OWN_PROJECT
@@ -276,7 +264,6 @@ model User {
   reportsAgainst Report[]   @relation("ReportedUser")
   auditLogs      AuditLog[]
 
-  verificationRequests VerificationRequest[]
   referralsPosted      Referral[]
   profileLead          ProfileLead?
   referralCode         ReferralCode?
@@ -617,7 +604,6 @@ model College {
   transferRequirements TransferRequirement[]
   resources            Resource[]
   faqs                 CollegeFaq[]
-  verificationRequests VerificationRequest[]
   blogPosts            BlogPost[]
   courses              CollegeCourse[]
 
@@ -968,31 +954,6 @@ model ResourceComment {
 
   @@index([resourceId, createdAt])
   @@map("resource_comments")
-}
-
-model VerificationRequest {
-  id                   String                    @id @default(cuid())
-  userId               String
-  user                 User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  collegeId            String?
-  college              College?                  @relation(fields: [collegeId], references: [id])
-  collegeName          String? // free-text college when not in the directory
-  method               VerificationMethod
-  collegeEmail         String?
-  collegeEmailVerified Boolean                   @default(false) // student clicked the emailed link
-  feedback             Json? // honest per-category thoughts about the college
-  evidenceKey          String? // S3 key for ID card / admission proof
-  status               VerificationRequestStatus @default(PENDING)
-  note                 String?
-  reviewedById         String?
-  reviewedAt           DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([status, createdAt])
-  @@index([userId])
-  @@map("verification_requests")
 }
 
 model CollegeFaq {

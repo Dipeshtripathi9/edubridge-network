@@ -32,7 +32,6 @@ import {
   useSetUserStatus,
   useVerifyCollege,
 } from '@/hooks/use-admin';
-import { useDecideVerification, useVerificationQueue } from '@/hooks/use-verification';
 import { useComplaints, useResolveComplaint } from '@/hooks/use-complaints';
 
 function Stat({ label, value }: { label: string; value: number | string }) {
@@ -447,113 +446,6 @@ function BroadcastTab() {
   );
 }
 
-const FB_LABELS: Record<string, string> = {
-  placements: 'Placements & career outcomes',
-  culture: 'Student culture & peer group',
-  faculty: 'Faculty & learning quality',
-  roi: 'ROI (fees vs placements)',
-  location: 'Location & industry exposure',
-};
-const FB_ORDER = ['placements', 'culture', 'faculty', 'roi', 'location'];
-
-function InfoCell({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="min-w-0">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="truncate text-sm">{children || '—'}</p>
-    </div>
-  );
-}
-
-function VerificationTab() {
-  const { data, isLoading } = useVerificationQueue();
-  const decide = useDecideVerification();
-  const rows = data?.data ?? [];
-  if (isLoading) return <Skeleton className="h-40 w-full" />;
-  if (!rows.length) return <p className="py-12 text-center text-muted-foreground">No pending verifications 🎉</p>;
-  return (
-    <div className="space-y-4">
-      {rows.map((r) => {
-        const isDoc = !!r.evidenceKey && /^https?:\/\//i.test(r.evidenceKey);
-        return (
-          <Card key={r.id} className="overflow-hidden">
-            {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/30 p-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-base font-semibold">{r.user.profile?.fullName ?? r.user.email}</span>
-                <Badge variant="secondary">{r.method.replace('_', ' ').toLowerCase()}</Badge>
-                {r.collegeEmailVerified && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-green-500/15 px-2 py-0.5 text-xs font-medium text-green-600">
-                    ✓ email authenticated
-                  </span>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => decide.mutate({ id: r.id, approve: false }, { onSuccess: () => toast.success('Rejected') })}
-                >
-                  Reject
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => decide.mutate({ id: r.id, approve: true }, { onSuccess: () => toast.success('Verified') })}
-                >
-                  Approve
-                </Button>
-              </div>
-            </div>
-
-            <CardContent className="space-y-4 p-4">
-              {/* Details grid */}
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
-                <InfoCell label="College">
-                  {r.college?.name ?? r.collegeName}
-                  {!r.college && r.collegeName ? ' (new)' : ''}
-                </InfoCell>
-                <InfoCell label="Course">{r.user.profile?.branch}</InfoCell>
-                <InfoCell label="Year">{r.user.profile?.year ? `Year ${r.user.profile.year}` : ''}</InfoCell>
-                <InfoCell label="Account email">{r.user.email}</InfoCell>
-                {r.method === 'COLLEGE_EMAIL' ? (
-                  <InfoCell label="College email">{r.collegeEmail}</InfoCell>
-                ) : (
-                  <InfoCell label="Document">
-                    {isDoc ? (
-                      <a href={r.evidenceKey!} target="_blank" rel="noreferrer" className="text-primary underline">
-                        Open document ↗
-                      </a>
-                    ) : (
-                      r.evidenceKey
-                    )}
-                  </InfoCell>
-                )}
-              </div>
-
-              {/* Honest feedback */}
-              {r.feedback && Object.values(r.feedback).some(Boolean) && (
-                <div>
-                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Student&apos;s honest feedback
-                  </p>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {FB_ORDER.filter((k) => r.feedback?.[k]).map((k) => (
-                      <div key={k} className="rounded-lg border border-border p-2.5">
-                        <p className="text-xs font-medium text-foreground">{FB_LABELS[k] ?? k}</p>
-                        <p className="mt-0.5 text-sm text-muted-foreground">{r.feedback![k]}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
-  );
-}
-
 function ComplaintsTab() {
   const { data, isLoading } = useComplaints();
   const resolve = useResolveComplaint();
@@ -595,7 +487,6 @@ const ADMIN_TAB_VALUES = [
   'users',
   'internship-signups',
   'reports',
-  'verification',
   'complaints',
   'broadcast',
 ] as const;
@@ -638,7 +529,6 @@ function AdminPageInner() {
           </TabsTrigger>
           <TabsTrigger value="internship-signups">Internship Signups</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="verification">Verification</TabsTrigger>
           <TabsTrigger value="complaints">Complaints</TabsTrigger>
           <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
         </TabsList>
@@ -653,9 +543,6 @@ function AdminPageInner() {
         </TabsContent>
         <TabsContent value="reports">
           <ReportsTab />
-        </TabsContent>
-        <TabsContent value="verification">
-          <VerificationTab />
         </TabsContent>
         <TabsContent value="complaints">
           <ComplaintsTab />

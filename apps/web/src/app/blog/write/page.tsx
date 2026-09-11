@@ -52,12 +52,12 @@ export default function WriteBlogPage() {
         <div className={styles.gateCard}>
           <b>Verify your college first</b>
           <p>
-            Only ID-verified students can publish on the EduBridge blog — verify your college in your profile to
-            unlock writing.
+            Only ID-verified students can publish on the EduBridge blog — contact support to get your college
+            verified.
           </p>
           <div className={styles.gateActions}>
-            <Link href="/verify" className={styles.btn}>
-              Verify now
+            <Link href="/contact" className={styles.btn}>
+              Contact support
             </Link>
           </div>
         </div>
