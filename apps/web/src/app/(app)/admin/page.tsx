@@ -31,7 +31,6 @@ import {
   useResolveReport,
   useSetUserStatus,
   useVerifyCollege,
-  type AdminUser,
 } from '@/hooks/use-admin';
 import { useDecideVerification, useVerificationQueue } from '@/hooks/use-verification';
 import { useComplaints, useResolveComplaint } from '@/hooks/use-complaints';
@@ -348,59 +347,6 @@ function InternshipSignupsTab() {
   );
 }
 
-// Bare-bones list — gmail, contact number, and state only, nothing else —
-// split by signup intent. Not linked from anywhere else in the app yet.
-function RawUserRow({ u }: { u: AdminUser }) {
-  return (
-    <div className="flex flex-wrap items-center gap-4 p-3 text-sm">
-      <span className="min-w-[220px] flex-1 truncate">{u.email ?? '—'}</span>
-      <span className="min-w-[160px] truncate">{u.phone ?? '—'}</span>
-      <span className="min-w-[120px] truncate">{u.profile?.state ?? '—'}</span>
-    </div>
-  );
-}
-
-function RawSegment({ title, intent }: { title: string; intent: 'COLLEGE_ADMISSIONS' | 'INTERNSHIPS_JOBS' }) {
-  const { data, isLoading } = useAdminUsers({ signupIntent: intent });
-  const users = data?.data ?? [];
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">
-          {title} ({users.length})
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        {isLoading ? (
-          <Skeleton className="m-4 h-32" />
-        ) : users.length === 0 ? (
-          <p className="p-6 text-center text-sm text-muted-foreground">No signups yet.</p>
-        ) : (
-          <div className="divide-y divide-border">
-            <div className="flex flex-wrap gap-4 bg-muted/40 p-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <span className="min-w-[220px] flex-1">Gmail</span>
-              <span className="min-w-[160px]">Contact number</span>
-              <span className="min-w-[120px]">State</span>
-            </div>
-            {users.map((u) => (
-              <RawUserRow key={u.id} u={u} />
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function RawTab() {
-  return (
-    <div className="space-y-6">
-      <RawSegment title="Find College" intent="COLLEGE_ADMISSIONS" />
-      <RawSegment title="Explore Internship" intent="INTERNSHIPS_JOBS" />
-    </div>
-  );
-}
-
 function ReportsTab() {
   const { data, isLoading } = useReports('OPEN');
   const resolve = useResolveReport();
@@ -648,7 +594,6 @@ const ADMIN_TAB_VALUES = [
   'overview',
   'users',
   'internship-signups',
-  'raw',
   'reports',
   'verification',
   'complaints',
@@ -692,7 +637,6 @@ function AdminPageInner() {
             <UsersIcon className="mr-1 h-4 w-4" /> Users
           </TabsTrigger>
           <TabsTrigger value="internship-signups">Internship Signups</TabsTrigger>
-          <TabsTrigger value="raw">Raw</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="verification">Verification</TabsTrigger>
           <TabsTrigger value="complaints">Complaints</TabsTrigger>
@@ -706,9 +650,6 @@ function AdminPageInner() {
         </TabsContent>
         <TabsContent value="internship-signups">
           <InternshipSignupsTab />
-        </TabsContent>
-        <TabsContent value="raw">
-          <RawTab />
         </TabsContent>
         <TabsContent value="reports">
           <ReportsTab />

@@ -31,7 +31,7 @@ export const NAV = [
 // Admin-only nav items, appended after the shared nav.
 export const ADMIN_NAV = [
   { href: '/admin', label: 'Admin', icon: ShieldCheck },
-  { href: '/admin?tab=raw', label: 'Raw', icon: Database },
+  { href: '/admin/raw', label: 'Raw', icon: Database },
   { href: '/manage/mentors', label: 'Mentors', icon: Headset },
   { href: '/analysis', label: 'Analysis', icon: BarChart3 },
   { href: '/manage/internship', label: 'Internship', icon: Award },
