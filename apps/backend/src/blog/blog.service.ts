@@ -1,16 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { buildPaginatedResult } from '../common/dto/pagination.dto';
-import { BlogQueryDto, CreateBlogPostDto } from './dto/blog.dto';
-
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
+import { BlogQueryDto } from './dto/blog.dto';
 
 @Injectable()
 export class BlogService {
@@ -52,42 +45,6 @@ export class BlogService {
     });
     if (!post || post.status !== 'PUBLISHED') throw new NotFoundException('Blog post not found');
     return post;
-  }
-
-  /**
-   * Create a blog post. Differentiator: only a verified student may submit,
-   * and every submission starts as PENDING_REVIEW until an admin publishes it.
-   */
-  async create(userId: string, dto: CreateBlogPostDto) {
-    const profile = await this.prisma.profile.findUnique({ where: { userId } });
-    if (profile?.collegeVerification !== 'VERIFIED') {
-      throw new ForbiddenException(
-        'Only verified students can write a blog post. Verify your college in your profile first.',
-      );
-    }
-
-    const baseSlug = slugify(dto.title) || 'post';
-    let slug = baseSlug;
-    for (let i = 2; await this.prisma.blogPost.findUnique({ where: { slug } }); i++) {
-      slug = `${baseSlug}-${i}`;
-    }
-
-    const wordCount = dto.body.trim().split(/\s+/).filter(Boolean).length;
-    const readMinutes = Math.max(1, Math.ceil(wordCount / 200));
-    const excerpt = dto.body.trim().slice(0, 160);
-
-    return this.prisma.blogPost.create({
-      data: {
-        slug,
-        title: dto.title,
-        body: dto.body,
-        excerpt,
-        category: dto.category,
-        readMinutes,
-        authorId: userId,
-        collegeId: profile.collegeId,
-      },
-    });
   }
 
   async publish(id: string) {

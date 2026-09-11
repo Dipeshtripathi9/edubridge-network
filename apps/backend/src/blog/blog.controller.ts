@@ -1,9 +1,8 @@
-import { Body, Controller, Get, Header, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, Header, Param, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { BlogService } from './blog.service';
-import { BlogQueryDto, CreateBlogPostDto } from './dto/blog.dto';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { BlogQueryDto } from './dto/blog.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 
@@ -21,12 +20,6 @@ export class BlogController {
   @ApiOperation({ summary: 'List published blog posts' })
   list(@Query() query: BlogQueryDto) {
     return this.blog.list(query);
-  }
-
-  @Post()
-  @ApiOperation({ summary: 'Submit a blog post (verified students only)' })
-  create(@CurrentUser('sub') userId: string, @Body() dto: CreateBlogPostDto) {
-    return this.blog.create(userId, dto);
   }
 
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
