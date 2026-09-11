@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
 import { Topbar } from '@/components/topbar';
-import { AdminCatalogPanel } from '@/components/admin/admin-catalog-panel';
 
 // Code-split: pulls in socket.io-client, which most page views never need
 // (only the notification bell does) — loading it off the main bundle keeps
@@ -29,7 +28,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <main key={pathname} className="animate-page flex-1 p-4 md:p-6">
         {children}
       </main>
-      <AdminCatalogPanel />
     </div>
   );
 }

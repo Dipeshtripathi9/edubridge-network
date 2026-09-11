@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Briefcase,
+  Building2,
   Database,
   GraduationCap,
   Headset,
   HelpCircle,
   Home,
   Info,
+  Laptop,
   Repeat,
   Rocket,
   ShieldCheck,
@@ -32,6 +34,9 @@ export const ADMIN_NAV = [
   { href: '/admin', label: 'Admin', icon: ShieldCheck },
   { href: '/admin/raw', label: 'Raw', icon: Database },
   { href: '/admin/campus-ambassador', label: 'Campus Ambassador', icon: Users },
+  { href: '/admin/college-manager', label: 'College Manager', icon: GraduationCap },
+  { href: '/admin/virtual-internship-manager', label: 'Virtual Internship Manager', icon: Laptop },
+  { href: '/admin/industry-internship-manager', label: 'Industry Internship Manager', icon: Building2 },
   { href: '/manage/mentors', label: 'Mentors', icon: Headset },
   { href: '/manage/quizzes', label: 'Quizzes', icon: HelpCircle },
 ];
