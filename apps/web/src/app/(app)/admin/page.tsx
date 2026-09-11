@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   Activity,
@@ -644,8 +644,20 @@ function ComplaintsTab() {
   );
 }
 
-export default function AdminPage() {
+const ADMIN_TAB_VALUES = [
+  'overview',
+  'users',
+  'internship-signups',
+  'raw',
+  'reports',
+  'verification',
+  'complaints',
+  'broadcast',
+] as const;
+
+function AdminPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const role = useAuthStore((s) => s.user?.role);
   const hydrated = useAuthStore((s) => s.hydrated);
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
@@ -655,6 +667,11 @@ export default function AdminPage() {
   }, [hydrated, isAdmin, router]);
 
   if (!hydrated || !isAdmin) return null;
+
+  const requestedTab = searchParams.get('tab');
+  const initialTab = (ADMIN_TAB_VALUES as readonly string[]).includes(requestedTab ?? '')
+    ? (requestedTab as (typeof ADMIN_TAB_VALUES)[number])
+    : 'overview';
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -666,7 +683,7 @@ export default function AdminPage() {
         <p className="text-muted-foreground">Moderation, analytics and platform management.</p>
       </div>
 
-      <Tabs defaultValue="overview">
+      <Tabs defaultValue={initialTab}>
         <TabsList className="h-auto flex-wrap justify-start">
           <TabsTrigger value="overview">
             <Activity className="mr-1 h-4 w-4" /> Overview
@@ -707,5 +724,13 @@ export default function AdminPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminPageInner />
+    </Suspense>
   );
 }
