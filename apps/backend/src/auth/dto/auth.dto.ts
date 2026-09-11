@@ -81,6 +81,12 @@ export class SignupDto {
   @IsString()
   @MaxLength(500)
   redirect?: string;
+
+  @ApiPropertyOptional({ description: 'Referral code (?ref=) from the link that brought this student here' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  ref?: string;
 }
 
 export class LoginDto {
@@ -141,6 +147,12 @@ export class GoogleAuthDto {
   @IsString()
   @IsNotEmpty()
   idToken!: string;
+
+  @ApiPropertyOptional({ description: 'Referral code (?ref=) from the link that brought this student here' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  ref?: string;
 }
 
 export class MagicLinkRequestDto {
@@ -153,6 +165,12 @@ export class MagicLinkRequestDto {
   @IsOptional()
   @IsString()
   fullName?: string;
+
+  @ApiPropertyOptional({ description: 'Referral code (?ref=) from the link that brought this student here' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  ref?: string;
 }
 
 export class MagicLinkVerifyDto {
@@ -177,4 +195,10 @@ export class VerifyOtpDto {
   @IsString()
   @IsNotEmpty()
   code!: string;
+
+  @ApiPropertyOptional({ description: 'Referral code (?ref=) from the link that brought this student here' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  ref?: string;
 }

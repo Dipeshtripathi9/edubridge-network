@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/providers/theme-provider';
 import { QueryProvider } from '@/providers/query-provider';
 import { ServiceWorkerRegister } from '@/components/sw-register';
 import { OfflineBanner } from '@/components/offline-banner';
+import { ReferralCapture } from '@/components/referral-capture';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
             <Toaster richColors position="top-center" />
             <OfflineBanner />
+            <ReferralCapture />
           </QueryProvider>
         </ThemeProvider>
         <ServiceWorkerRegister />

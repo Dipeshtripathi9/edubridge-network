@@ -281,6 +281,14 @@ model User {
   profileLead          ProfileLead?
   referralCode         ReferralCode?
 
+  // Who referred this user in (resolved from a ?ref=<code> link at signup),
+  // and the reverse: everyone this user has referred in. Set once, at
+  // account creation, never re-assigned.
+  referredById                String?
+  referredBy                  User?                        @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals                   User[]                        @relation("UserReferrals")
+  campusAmbassadorApplication CampusAmbassadorApplication?
+
   trackAEnrollments            TrackAEnrollment[]
   trackBApplications           TrackBApplication[]
   certificates                 Certificate[]
@@ -291,6 +299,7 @@ model User {
   @@index([role])
   @@index([reputationPoints(sort: Desc)])
   @@index([createdAt])
+  @@index([referredById])
   @@map("users")
 }
 
@@ -315,6 +324,31 @@ model ReferralCode {
   createdAt DateTime @default(now())
 
   @@map("referral_codes")
+}
+
+enum CampusAmbassadorStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// One application per student. Whether new applications are accepted at all
+// is a simple on/off flag in the generic `Setting` table (key
+// "campus_ambassador_applications_open"), not a column here.
+model CampusAmbassadorApplication {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Free-form: why the student wants to become a campus ambassador.
+  reason String
+
+  status    CampusAmbassadorStatus @default(PENDING)
+  createdAt DateTime               @default(now())
+  decidedAt DateTime?
+
+  @@index([status])
+  @@map("campus_ambassador_applications")
 }
 
 model Profile {
