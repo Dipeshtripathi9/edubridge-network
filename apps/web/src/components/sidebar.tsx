@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Award,
   Briefcase,
   Database,
   GraduationCap,
@@ -34,7 +33,6 @@ export const ADMIN_NAV = [
   { href: '/admin/raw', label: 'Raw', icon: Database },
   { href: '/admin/campus-ambassador', label: 'Campus Ambassador', icon: Users },
   { href: '/manage/mentors', label: 'Mentors', icon: Headset },
-  { href: '/manage/internship', label: 'Internship', icon: Award },
   { href: '/manage/quizzes', label: 'Quizzes', icon: HelpCircle },
 ];
 

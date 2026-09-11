@@ -2,12 +2,11 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Bookmark, Briefcase, ChevronLeft, ChevronRight, Compass } from 'lucide-react';
+import { ArrowRight, Bookmark, Briefcase, ChevronLeft, ChevronRight } from 'lucide-react';
 import { HomeAdmissionDesk } from '@/components/home-admission-desk';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CollegeRecommendationCard } from '@/components/college-recommendation-card';
-import { useBlogPosts, type BlogCategory, type BlogListItem } from '@/hooks/use-blog';
 import { useCollege } from '@/hooks/use-colleges';
 import { useCollegeShortlist } from '@/hooks/use-college-shortlist';
 
@@ -15,62 +14,6 @@ import { useCollegeShortlist } from '@/hooks/use-college-shortlist';
 // we don't hand-convert every attribute to JSX.
 function Ill({ svg, className }: { svg: string; className?: string }) {
   return <span className={className} aria-hidden dangerouslySetInnerHTML={{ __html: svg }} />;
-}
-
-// "College Guidance & Resources" — a horizontal strip of real published blog
-// posts (falls back to a couple of generic entries before any posts exist),
-// mirroring the Internships teaser strip above it.
-const RESOURCE_CATEGORY_STYLE: Record<BlogCategory, { label: string; bg: string; text: string }> = {
-  CAREER: { label: 'Career', bg: 'bg-[#FBEAD9]', text: 'text-[#A85F35]' },
-  COLLEGE: { label: 'College', bg: 'bg-[#E3EBF5]', text: 'text-[#3A5A8C]' },
-  JOB: { label: 'Job', bg: 'bg-[#DCEDE2]', text: 'text-[#2E6B4F]' },
-};
-
-const FALLBACK_RESOURCES: BlogListItem[] = [
-  { slug: '', title: 'The ultimate college application timeline', category: 'COLLEGE', readMinutes: 6, author: null },
-  { slug: '', title: 'What a startup internship actually looks like', category: 'JOB', readMinutes: 5, author: null },
-];
-
-function ResourceCard({ post }: { post: BlogListItem }) {
-  const tag = RESOURCE_CATEGORY_STYLE[post.category];
-  return (
-    <Link
-      href={post.slug ? `/blog/${post.slug}` : '/blog'}
-      className="group flex w-[240px] flex-none snap-start flex-col"
-    >
-      <span className={`relative mb-3 flex h-[140px] items-center justify-center rounded-[10px] border border-border ${tag.bg}`}>
-        <span className={`rounded-full bg-white/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${tag.text}`}>
-          {tag.label}
-        </span>
-      </span>
-      <p className="line-clamp-2 text-[16px] font-semibold leading-snug">{post.title}</p>
-      <span className="mt-2.5 inline-flex w-fit items-center gap-1.5 rounded-full border border-foreground/15 bg-secondary px-3 py-1 text-[13px] font-bold transition-colors group-hover:bg-secondary/70">
-        Read More <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-      </span>
-    </Link>
-  );
-}
-
-function ResourcesStrip() {
-  const { data, isLoading } = useBlogPosts(8);
-  const posts = data?.data && data.data.length > 0 ? data.data : FALLBACK_RESOURCES;
-
-  if (isLoading) {
-    return (
-      <div className="flex gap-4 overflow-hidden pb-1.5">
-        <div className="h-[192px] w-[240px] flex-none animate-pulse rounded-[10px] bg-secondary" />
-        <div className="h-[192px] w-[240px] flex-none animate-pulse rounded-[10px] bg-secondary" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex snap-x gap-4 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {posts.map((p, i) => (
-        <ResourceCard key={p.slug || i} post={p} />
-      ))}
-    </div>
-  );
 }
 
 // "My Shortlist" — colleges the student has already saved, shown between the
@@ -429,28 +372,6 @@ export function HomeTools({
       </div>
 
       <MyShortlist onQuiz={onQuiz} loggedIn={loggedIn} />
-
-      {/* College Guidance & Resources */}
-      <div className="mt-6 border-t border-border pt-8">
-        <div className="mb-2 flex items-center gap-2.5">
-          <Compass className="h-6 w-6" />
-          <h2 className="font-display text-[25px] font-extrabold tracking-[-.02em]">College Guidance &amp; Resources</h2>
-        </div>
-        <p className="mb-5 max-w-[520px] text-[15.5px] font-medium text-muted-foreground">
-          You&apos;ve got a lot to keep track of. Stay on the right path with guidance and resources from real students.
-        </p>
-
-        <ResourcesStrip />
-
-        <div className="flex justify-center pt-6">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2.5 rounded-full border-[1.6px] border-foreground bg-card px-7 py-3.5 text-[16px] font-extrabold transition-colors hover:bg-secondary"
-          >
-            Browse All Resources <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
 
       {/* Internships */}
       <div className="mt-6 border-t border-border pt-8">

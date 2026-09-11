@@ -1,13 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { customAlphabet } from 'nanoid';
-import {
-  CertificateSourceType,
-  EnrollmentSubtype,
-  Prisma,
-  TrackBAllocationType,
-  UserRole,
-  VirtualInternshipTrack,
-} from '@prisma/client';
+import { CertificateSourceType, Prisma, UserRole, VirtualInternshipTrack } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 
@@ -19,8 +12,6 @@ export interface IssueCertificateInput {
   sourceId: string;
   recipientId: string;
   recipientName: string;
-  subtype?: EnrollmentSubtype;
-  allocationType?: TrackBAllocationType;
   track?: VirtualInternshipTrack;
   metadata?: Prisma.InputJsonValue;
 }
@@ -33,29 +24,19 @@ export class CertificatesService {
   ) {}
 
   /** Server-generated title — never admin-free-typed, so it can't drift from the real facts. */
-  private buildTitle(
-    input: Pick<IssueCertificateInput, 'sourceType' | 'subtype' | 'allocationType' | 'track'>,
-  ): string {
-    if (input.sourceType === CertificateSourceType.TRACK_A_ENROLLMENT) {
-      return input.subtype === EnrollmentSubtype.OWN_PROJECT
-        ? 'EduBridge Internship — Own Project Track'
-        : 'EduBridge Internship — Guided Learning Track';
-    }
+  private buildTitle(input: Pick<IssueCertificateInput, 'sourceType' | 'track'>): string {
     if (input.sourceType === CertificateSourceType.VIRTUAL_INTERNSHIP) {
       return input.track === VirtualInternshipTrack.MONTH
         ? 'EduBridge Virtual Internship — Web Development + DevOps (4 Months)'
         : 'EduBridge Virtual Internship — Web Development (4 Weeks)';
     }
-    return input.allocationType === TrackBAllocationType.PAID_CLIENT_WORK
-      ? 'EduBridge Internship — Paid Client Work'
-      : 'EduBridge Internship — Skill Building Program';
+    return 'EduBridge Internship Certificate';
   }
 
   /**
    * Single shared trigger point for issuing a certificate + the CERTIFICATE_ISSUED
-   * notification. Called from TrackAService.complete() and TrackBService.review()
-   * (on approve) — never duplicated per track. Idempotent: if a certificate already
-   * exists for this (sourceType, sourceId) pair, it is returned as-is.
+   * notification. Idempotent: if a certificate already exists for this
+   * (sourceType, sourceId) pair, it is returned as-is.
    */
   async issue(input: IssueCertificateInput) {
     const existing = await this.prisma.certificate.findUnique({

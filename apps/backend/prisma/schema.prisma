@@ -61,18 +61,6 @@ enum ReviewCategory {
   COMMUNITY_MANAGERS
 }
 
-enum BlogCategory {
-  CAREER
-  COLLEGE
-  JOB
-}
-
-enum BlogStatus {
-  PENDING_REVIEW
-  PUBLISHED
-  REJECTED
-}
-
 enum ResourceType {
   NOTES
   PDF
@@ -158,11 +146,6 @@ enum VerificationPurpose {
   MAGIC_LINK
 }
 
-enum EnrollmentSubtype {
-  GUIDED_LEARNING
-  OWN_PROJECT
-}
-
 enum EnrollmentStatus {
   PENDING_PAYMENT
   ACTIVE
@@ -180,19 +163,6 @@ enum EnrollmentTaskStatus {
 enum VirtualInternshipTrack {
   WEEK
   MONTH
-}
-
-enum TrackBApplicationStatus {
-  PENDING
-  ALLOCATED
-  SUBMITTED
-  APPROVED
-  REJECTED
-}
-
-enum TrackBAllocationType {
-  PAID_CLIENT_WORK
-  SKILL_BUILDING_TASK
 }
 
 enum CertificateSourceType {
@@ -249,7 +219,6 @@ model User {
   transfers   Transfer[]
   reviews     Review[]
   reviewVotes ReviewVote[]
-  blogPosts   BlogPost[]
 
   reputationEvents       ReputationEvent[]
   userBadges             UserBadge[]
@@ -276,8 +245,6 @@ model User {
   referrals                   User[]                        @relation("UserReferrals")
   campusAmbassadorApplication CampusAmbassadorApplication?
 
-  trackAEnrollments            TrackAEnrollment[]
-  trackBApplications           TrackBApplication[]
   certificates                 Certificate[]
   quizAttempts                 QuizAttempt[]
   virtualInternshipEnrollments VirtualInternshipEnrollment[]
@@ -604,7 +571,6 @@ model College {
   transferRequirements TransferRequirement[]
   resources            Resource[]
   faqs                 CollegeFaq[]
-  blogPosts            BlogPost[]
   courses              CollegeCourse[]
 
   @@index([state, city])
@@ -711,9 +677,8 @@ enum OpportunityType {
   STARTUP
 }
 
-// A browsable internship catalog entry (admin-curated listing) — distinct
-// from TrackAEnrollment/TrackBApplication, which are workflow records for
-// students applying to *our own* internship program, not external postings.
+// A browsable internship catalog entry (admin-curated listing) — external
+// postings, not applications to an internal program.
 model InternshipListing {
   id       String          @id @default(cuid())
   title    String
@@ -853,35 +818,6 @@ model ReviewVote {
   @@unique([reviewId, userId])
   @@index([reviewId])
   @@map("review_votes")
-}
-
-// Student-written blog posts — SEO-indexable public content, gated to
-// verified students at write time. Moderated: PENDING_REVIEW until an admin
-// publishes/rejects it (see BlogModule).
-model BlogPost {
-  id          String       @id @default(cuid())
-  slug        String       @unique
-  title       String
-  body        String
-  excerpt     String
-  category    BlogCategory
-  status      BlogStatus   @default(PENDING_REVIEW)
-  readMinutes Int          @default(1)
-
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  collegeId String?
-  college   College? @relation(fields: [collegeId], references: [id], onDelete: SetNull)
-
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  publishedAt DateTime?
-
-  @@index([status, publishedAt])
-  @@index([category])
-  @@index([collegeId])
-  @@map("blog_posts")
 }
 
 // ============================================================
@@ -1225,33 +1161,6 @@ model Notification {
 // MODULE 9: INTERNSHIP PROGRAM
 // ============================================================
 
-model TrackAEnrollment {
-  id                   String            @id @default(cuid())
-  userId               String
-  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  subtype              EnrollmentSubtype
-  projectDescription   String
-  feeAmount            Int // snapshot at enroll time; never re-read pricing config later
-  status               EnrollmentStatus  @default(PENDING_PAYMENT)
-  paymentReferenceNote String? // fallback: manual UPI ref, used only if admin overrides Razorpay
-  razorpayOrderId      String?           @unique
-  razorpayPaymentId    String?           @unique
-  paidAt               DateTime?
-  paymentConfirmedById String?
-  mentorNote           String?
-  completedAt          DateTime?
-  completedById        String?
-  maintenanceUntil     DateTime? // OWN_PROJECT only: completedAt + 1 year
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-
-  tasks EnrollmentTask[]
-
-  @@index([userId, status])
-  @@index([status, createdAt])
-  @@map("track_a_enrollments")
-}
-
 model VirtualInternshipEnrollment {
   id                 String                 @id @default(cuid())
   userId             String
@@ -1307,26 +1216,6 @@ model VirtualInternshipTask {
   @@map("virtual_internship_tasks")
 }
 
-model EnrollmentTask {
-  id            String               @id @default(cuid())
-  enrollmentId  String
-  enrollment    TrackAEnrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  title         String
-  description   String?
-  order         Int                  @default(0)
-  status        EnrollmentTaskStatus @default(ASSIGNED)
-  submissionUrl String?
-  submittedAt   DateTime?
-  reviewNote    String?
-  reviewedById  String?
-  reviewedAt    DateTime?
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-
-  @@index([enrollmentId, order])
-  @@map("enrollment_tasks")
-}
-
 model Quiz {
   id          String         @id @default(cuid())
   title       String
@@ -1370,45 +1259,18 @@ model QuizAttempt {
   @@map("quiz_attempts")
 }
 
-model TrackBApplication {
-  id             String                  @id @default(cuid())
-  userId         String
-  user           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  skills         String[]
-  portfolioUrl   String?
-  bio            String?
-  status         TrackBApplicationStatus @default(PENDING)
-  allocationType TrackBAllocationType?
-  allocationNote String?
-  allocatedById  String?
-  allocatedAt    DateTime?
-  submissionUrl  String?
-  submittedAt    DateTime?
-  reviewNote     String?
-  reviewedById   String?
-  reviewedAt     DateTime?
-  payoutAmount   Float? // PAID_CLIENT_WORK only
-  payoutSentAt   DateTime?
-  payoutNote     String?
-  createdAt      DateTime                @default(now())
-  updatedAt      DateTime                @updatedAt
-
-  @@index([userId, status])
-  @@index([status, createdAt])
-  @@map("track_b_applications")
-}
-
 model Certificate {
   id            String                @id @default(cuid())
   code          String                @unique // e.g. EB-4F7K2QRT
   recipientId   String
   recipient     User                  @relation(fields: [recipientId], references: [id], onDelete: Cascade)
   recipientName String // snapshot — survives later profile-name edits
-  title         String // server-generated from subtype/allocationType, not admin-free-typed
+  title         String // server-generated, not admin-free-typed
   sourceType    CertificateSourceType
-  sourceId      String // TrackAEnrollment.id or TrackBApplication.id
-  issuedAt      DateTime              @default(now())
-  metadata      Json? // subtype/allocationType/maintenanceUntil, for PDF rendering
+  sourceId      String // id of the record that earned this certificate (historical: a
+  // now-removed TrackAEnrollment/TrackBApplication row, or a VirtualInternshipEnrollment)
+  issuedAt DateTime @default(now())
+  metadata Json? // rendering details, shape depends on sourceType
   revokedAt     DateTime?
 
   @@unique([sourceType, sourceId]) // one certificate per enrollment/application
