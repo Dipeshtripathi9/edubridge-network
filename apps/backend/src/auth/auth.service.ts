@@ -11,6 +11,7 @@ import { stripLeadingHonorific } from '../common/utils/sanitize-name';
 import { TokenService, TokenPair } from './services/token.service';
 import { OtpService } from './services/otp.service';
 import { GoogleService } from './services/google.service';
+import { ReferralCodeService } from '../referral-code/referral-code.service';
 import {
   ForgotPasswordDto,
   GoogleAuthDto,
@@ -37,6 +38,7 @@ export class AuthService {
     private readonly otp: OtpService,
     private readonly google: GoogleService,
     private readonly config: ConfigService,
+    private readonly referralCode: ReferralCodeService,
   ) {}
 
   private sanitize(user: User) {
@@ -90,6 +92,7 @@ export class AuthService {
         },
       },
     });
+    await this.referralCode.assignForUser(user.id);
 
     // Google-verified signup → link the Google account and sign the user in.
     if (googleVerified) {
@@ -326,6 +329,7 @@ export class AuthService {
         }
       }
       if (!user) throw new BadRequestException('Could not sign in with Google');
+      await this.referralCode.assignForUser(user.id);
       // upsert so a concurrent link of the same Google account can't 500.
       await this.prisma.oAuthAccount.upsert({
         where: {
@@ -398,6 +402,7 @@ export class AuthService {
         } else throw err;
       }
       if (!user) throw new BadRequestException('Could not sign in');
+      await this.referralCode.assignForUser(user.id);
     } else if (!user.phoneVerifiedAt) {
       user = await this.prisma.user.update({
         where: { id: user.id },
@@ -429,6 +434,7 @@ export class AuthService {
         } else throw err;
       }
       if (!user) throw new BadRequestException('Could not send a sign-in link');
+      await this.referralCode.assignForUser(user.id);
     }
     const token = this.tokens.generateOpaqueToken(32);
     await this.prisma.emailVerification.create({
