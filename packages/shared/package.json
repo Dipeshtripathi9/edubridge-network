@@ -7,5 +7,11 @@
   "scripts": {
     "lint": "echo \"no lint\"",
     "build": "echo \"consumed via tsconfig paths\""
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.5"
   }
 }
