@@ -26,7 +26,6 @@ import { ProfileLeadsModule } from './profile-leads/profile-leads.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReputationModule } from './reputation/reputation.module';
 import { AdminModule } from './admin/admin.module';
-import { VerificationModule } from './verification/verification.module';
 import { InternshipsModule } from './internships/internships.module';
 import { InternshipListingsModule } from './internship-listings/internship-listings.module';
 import { QuizzesModule } from './quizzes/quizzes.module';
@@ -96,7 +95,6 @@ import { AppThrottlerGuard } from './common/guards/throttler.guard';
     NotificationsModule,
     ReputationModule,
     AdminModule,
-    VerificationModule,
     InternshipsModule,
     InternshipListingsModule,
     QuizzesModule,

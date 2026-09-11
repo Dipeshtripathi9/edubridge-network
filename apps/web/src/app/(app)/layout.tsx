@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
 import { Topbar } from '@/components/topbar';
-import { VerifyBanner } from '@/components/verify-banner';
 import { AdminCatalogPanel } from '@/components/admin/admin-catalog-panel';
 
 // Code-split: pulls in socket.io-client, which most page views never need
@@ -27,7 +26,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen flex-col">
       <NotificationStream />
       <Topbar />
-      <VerifyBanner />
       <main key={pathname} className="animate-page flex-1 p-4 md:p-6">
         {children}
       </main>

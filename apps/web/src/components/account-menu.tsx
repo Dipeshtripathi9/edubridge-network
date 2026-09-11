@@ -6,8 +6,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { CircleUserRound } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
-import { VerifiedBadge } from '@/components/verified-badge';
-import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 import { useProfileProgress } from '@/stores/profile-progress.store';
 import { useLogout } from '@/hooks/use-auth';
@@ -25,7 +23,6 @@ export function AccountMenu() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const verified = me?.profile?.collegeVerification === 'VERIFIED';
   const count = loggedIn ? unread?.count ?? 0 : 0;
   const firstName = firstNameOf(me?.profile?.fullName);
   const profilePct = useProfileProgress((s) => s.pct);
@@ -47,13 +44,11 @@ export function AccountMenu() {
     router.push(href);
   };
 
-  // Logged-in menu: Find colleges · Notifications · Get verified (only if not
-  // yet verified) — Log out sits in its own footer group.
+  // Logged-in menu: Profile · Notifications — Log out sits in its own footer group.
   const items = [
-    { label: 'Profile', href: '/profile', badge: 0, show: true, accent: false },
-    { label: 'Notifications', href: '/notifications', badge: count, show: true, accent: false },
-    { label: 'Get verified', href: '/verify', badge: 0, show: !verified, accent: true },
-  ].filter((i) => i.show);
+    { label: 'Profile', href: '/profile', badge: 0 },
+    { label: 'Notifications', href: '/notifications', badge: count },
+  ];
 
   const drawer = (
     <div className="fixed inset-0 z-[100]">
@@ -68,10 +63,9 @@ export function AccountMenu() {
               <div className="min-w-0">
                 <p className="flex items-center gap-1 truncate font-bold leading-tight">
                   {me?.profile?.fullName ?? 'Student'}
-                  {verified && <VerifiedBadge size="xs" />}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {verified && me?.profile?.college?.name ? me.profile.college.name : 'EduBridge Network'}
+                  {me?.profile?.college?.name ?? 'EduBridge Network'}
                 </p>
               </div>
             </div>
@@ -85,10 +79,7 @@ export function AccountMenu() {
                 <div key={it.label}>
                   <button
                     onClick={() => go(it.href)}
-                    className={cn(
-                      'flex w-full items-center justify-end gap-2.5 rounded-lg px-3 py-3.5 text-[17px] font-bold transition-colors',
-                      it.accent ? 'text-primary hover:text-primary/80' : 'text-foreground hover:text-primary',
-                    )}
+                    className="flex w-full items-center justify-end gap-2.5 rounded-lg px-3 py-3.5 text-[17px] font-bold text-foreground transition-colors hover:text-primary"
                   >
                     {it.badge > 0 && (
                       <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1.5 text-[11px] font-bold text-destructive-foreground">

@@ -82,7 +82,7 @@ export default function ProfilePage() {
             </button>
             <button
               type="button"
-              onClick={() => router.push('/verify')}
+              onClick={() => router.push('/onboarding/jobs')}
               className="flex flex-col items-center gap-3.5 rounded-2xl border-[1.5px] border-border bg-card p-7 text-center transition-all hover:border-primary/60 hover:bg-primary/5"
             >
               <Briefcase className="h-7 w-7 text-primary" />
