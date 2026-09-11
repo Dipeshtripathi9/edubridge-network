@@ -58,7 +58,6 @@ enum ReviewCategory {
   FACULTY
   CAMPUS_LIFE
   ROI
-  COMMUNITY_MANAGERS
 }
 
 enum ResourceType {
@@ -130,7 +129,6 @@ enum ReportStatus {
 
 enum ChatType {
   DIRECT
-  COMMUNITY
   GROUP
 }
 
