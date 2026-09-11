@@ -3,10 +3,12 @@ import { Prisma, ReferralCode } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { formatReferralCode } from './referral-code.util';
 
-// Assigns a permanent "EBN0001"-style code to every unique student — however
-// their account was created (email/password, Google, phone OTP, magic link).
+// Assigns a permanent "EBN0"-style code to every unique student going
+// forward — however their account was created (email/password, Google,
+// phone OTP, magic link). Deliberately NOT backfilled onto users who
+// registered before this existed — those accounts stay without a code.
 // Not exposed via any controller/route; invoked directly by other services
-// and by the backfill script until this is wired into a real feature.
+// until this is wired into a real feature.
 @Injectable()
 export class ReferralCodeService {
   constructor(private readonly prisma: PrismaService) {}
@@ -41,25 +43,5 @@ export class ReferralCodeService {
   /** The full list of assigned codes, oldest first. */
   async list(): Promise<ReferralCode[]> {
     return this.prisma.referralCode.findMany({ orderBy: { sequence: 'asc' } });
-  }
-
-  /**
-   * Assigns codes to every existing user who doesn't have one yet, oldest
-   * account first, so registration order is preserved in the sequence.
-   * Safe to re-run — already-coded users are skipped.
-   */
-  async backfillAll(): Promise<{ assigned: number }> {
-    const pending = await this.prisma.user.findMany({
-      where: { referralCode: null },
-      select: { id: true },
-      orderBy: { createdAt: 'asc' },
-    });
-
-    let assigned = 0;
-    for (const { id } of pending) {
-      await this.assignForUser(id);
-      assigned += 1;
-    }
-    return { assigned };
   }
 }
