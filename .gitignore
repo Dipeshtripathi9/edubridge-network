@@ -44,3 +44,6 @@ tmp/
 
 # Local database backups (contain user data — never commit)
 backups/
+
+# Raw signup log (gmail/mobile + referral code — contains user PII, never commit)
+apps/backend/data/
