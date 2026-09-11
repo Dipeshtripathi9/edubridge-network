@@ -97,4 +97,11 @@ export class AdminController {
   emailLogs(@Query() query: AuditQueryDto) {
     return this.admin.listEmailLogs(query);
   }
+
+  // ---- College applications ----
+  @Get('college-applications')
+  @ApiOperation({ summary: 'Users and the colleges they applied to, with contact info' })
+  collegeApplications() {
+    return this.admin.listCollegeApplications();
+  }
 }

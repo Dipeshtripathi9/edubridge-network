@@ -253,4 +253,53 @@ export class AdminService {
       topContributors,
     };
   }
+
+  // ---- College applications ----
+  async listCollegeApplications() {
+    const rows = await this.prisma.collegeApplication.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 1000,
+      select: {
+        collegeId: true,
+        createdAt: true,
+        college: { select: { name: true } },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            phone: true,
+            profile: { select: { fullName: true, state: true } },
+          },
+        },
+      },
+    });
+
+    const byUser = new Map<
+      string,
+      {
+        userId: string;
+        fullName: string | null;
+        email: string | null;
+        phone: string | null;
+        state: string | null;
+        colleges: { name: string; appliedAt: Date }[];
+      }
+    >();
+    for (const row of rows) {
+      const existing = byUser.get(row.user.id);
+      if (existing) {
+        existing.colleges.push({ name: row.college.name, appliedAt: row.createdAt });
+      } else {
+        byUser.set(row.user.id, {
+          userId: row.user.id,
+          fullName: row.user.profile?.fullName ?? null,
+          email: row.user.email,
+          phone: row.user.phone,
+          state: row.user.profile?.state ?? null,
+          colleges: [{ name: row.college.name, appliedAt: row.createdAt }],
+        });
+      }
+    }
+    return Array.from(byUser.values());
+  }
 }
