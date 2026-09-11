@@ -64,14 +64,6 @@ export default () => {
     callbackUrl: process.env.GOOGLE_CALLBACK_URL ?? '',
   },
 
-  razorpay: {
-    keyId: process.env.RAZORPAY_KEY_ID ?? '',
-    keySecret: process.env.RAZORPAY_KEY_SECRET ?? '',
-    // Separate secret you set when creating the webhook in the Razorpay dashboard —
-    // not the API key secret. Optional: unset until a webhook is actually configured.
-    webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET ?? '',
-  },
-
   twilio: {
     accountSid: process.env.TWILIO_ACCOUNT_SID ?? '',
     authToken: process.env.TWILIO_AUTH_TOKEN ?? '',

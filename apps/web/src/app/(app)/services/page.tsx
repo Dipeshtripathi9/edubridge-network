@@ -22,10 +22,10 @@ const SERVICES = [
   {
     icon: Rocket,
     tone: 'bg-accent text-primary',
-    title: 'Internship Program',
-    body: 'A structured, mentor-guided internship — pick Guided Learning, build your Own Project, or apply free to Track B.',
+    title: 'Internship opportunities',
+    body: 'Browse real internships across software, marketing, design, and more.',
     href: '/internship',
-    cta: 'View the program',
+    cta: 'Explore internships',
   },
   {
     icon: Share2,
@@ -46,11 +46,7 @@ export default function ServicesPage() {
           Everything you need from choosing a college to landing your first role.
         </h1>
         <p className="mt-4 max-w-[600px] text-[16px] text-muted-foreground">
-          Free features you can use right away, and mentor-guided paid tracks with transparent, upfront pricing —{' '}
-          <Link href="/pricing" className="font-semibold text-primary hover:underline">
-            see full pricing
-          </Link>
-          .
+          Free features you can use right away — no paid tiers, no upsells.
         </p>
       </section>
 

@@ -205,7 +205,6 @@ export function HomeIllustrated() {
               <Link href="/reviews" className="hover:text-primary">Colleges</Link>
               <Link href="/internship" className="hover:text-primary">Internship</Link>
               <Link href="/services" className="hover:text-primary">Services</Link>
-              <Link href="/pricing" className="hover:text-primary">Pricing</Link>
               <Link href="/about" className="hover:text-primary">About</Link>
               <Link href="/contact" className="hover:text-primary">Contact</Link>
             </nav>
