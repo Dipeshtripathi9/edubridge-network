@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { disconnectSocket } from '@/lib/socket';
 import { sanitizeRedirect } from '@/lib/safe-redirect';
+import { getStoredReferralCode } from '@/lib/referral';
 import { useAuthStore, type AuthUser } from '@/stores/auth.store';
 
 interface AuthResult {
@@ -47,7 +48,7 @@ export function useSignup() {
         devLink?: string;
         // Present when the signup was Google-verified — the user is signed in.
         tokens?: { accessToken: string; refreshToken: string; expiresIn: number };
-      }>('/auth/signup', input, { auth: false }),
+      }>('/auth/signup', { ...input, ref: getStoredReferralCode() }, { auth: false }),
   });
 }
 
@@ -78,7 +79,7 @@ export function useGoogleAuth() {
   const router = useRouter();
   return useMutation({
     mutationFn: ({ idToken }: { idToken: string; redirectTo?: string }) =>
-      api.post<AuthResult>('/auth/google', { idToken }, { auth: false }),
+      api.post<AuthResult>('/auth/google', { idToken, ref: getStoredReferralCode() }, { auth: false }),
     onSuccess: (res, variables) => {
       setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
       router.push(sanitizeRedirect(variables.redirectTo, '/home'));
@@ -89,7 +90,11 @@ export function useGoogleAuth() {
 export function useRequestMagicLink() {
   return useMutation({
     mutationFn: (input: { email: string; fullName?: string }) =>
-      api.post<{ message: string; devLink?: string }>('/auth/magic/request', input, { auth: false }),
+      api.post<{ message: string; devLink?: string }>(
+        '/auth/magic/request',
+        { ...input, ref: getStoredReferralCode() },
+        { auth: false },
+      ),
   });
 }
 
@@ -117,7 +122,7 @@ export function useVerifyOtp() {
   const router = useRouter();
   return useMutation({
     mutationFn: (input: { phone: string; code: string }) =>
-      api.post<AuthResult>('/auth/otp/verify', input, { auth: false }),
+      api.post<AuthResult>('/auth/otp/verify', { ...input, ref: getStoredReferralCode() }, { auth: false }),
     onSuccess: (res) => {
       setSession(res.tokens.accessToken, res.tokens.refreshToken, res.user);
       router.push('/home');

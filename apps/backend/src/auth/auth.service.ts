@@ -48,6 +48,15 @@ export class AuthService {
     return safe;
   }
 
+  // Resolves a ?ref=<code> value (from the signup/login request) to the
+  // referring user's id, for `User.referredById`. Silently ignored if the
+  // code doesn't exist — a stale or mistyped ref should never block signup.
+  private async resolveReferrerId(ref?: string): Promise<string | undefined> {
+    if (!ref) return undefined;
+    const referrer = await this.prisma.referralCode.findUnique({ where: { code: ref } });
+    return referrer?.userId;
+  }
+
   // Assigns this brand-new user's referral code, then appends their gmail
   // (email) + mobile (phone) + code to the raw signup log. Call exactly
   // once, right after a user is newly created — never on a returning
@@ -90,6 +99,7 @@ export class AuthService {
     const autoVerify = googleVerified || this.config.get<boolean>('auth.autoVerifyEmail') === true;
 
     const passwordHash = await this.tokens.hashPassword(dto.password);
+    const referredById = await this.resolveReferrerId(dto.ref);
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
@@ -98,6 +108,7 @@ export class AuthService {
         authProvider: AuthProvider.EMAIL,
         status: autoVerify ? 'ACTIVE' : 'PENDING_VERIFICATION',
         emailVerifiedAt: autoVerify ? new Date() : null,
+        referredById,
         profile: {
           create: {
             fullName: stripLeadingHonorific(dto.fullName),
@@ -324,12 +335,14 @@ export class AuthService {
       user = (await this.prisma.user.findUnique({ where: { email: profile.email } })) ?? undefined;
       if (!user) {
         try {
+          const referredById = await this.resolveReferrerId(dto.ref);
           user = await this.prisma.user.create({
             data: {
               email: profile.email,
               authProvider: AuthProvider.GOOGLE,
               status: 'ACTIVE',
               emailVerifiedAt: profile.emailVerified ? new Date() : null,
+              referredById,
               profile: {
                 create: {
                   fullName: profile.name ? stripLeadingHonorific(profile.name) : 'Student',
@@ -403,12 +416,14 @@ export class AuthService {
     let user = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
     if (!user) {
       try {
+        const referredById = await this.resolveReferrerId(dto.ref);
         user = await this.prisma.user.create({
           data: {
             phone: dto.phone,
             authProvider: AuthProvider.PHONE,
             status: 'ACTIVE',
             phoneVerifiedAt: new Date(),
+            referredById,
             profile: { create: { fullName: 'Student' } },
           },
         });
@@ -436,11 +451,13 @@ export class AuthService {
     let user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) {
       try {
+        const referredById = await this.resolveReferrerId(dto.ref);
         user = await this.prisma.user.create({
           data: {
             email,
             authProvider: AuthProvider.EMAIL,
             status: 'ACTIVE',
+            referredById,
             profile: { create: { fullName: dto.fullName?.trim() ? stripLeadingHonorific(dto.fullName.trim()) : 'Student' } },
           },
         });
