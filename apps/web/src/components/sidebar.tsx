@@ -15,6 +15,7 @@ import {
   Repeat,
   Rocket,
   ShieldCheck,
+  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -32,6 +33,7 @@ export const NAV = [
 export const ADMIN_NAV = [
   { href: '/admin', label: 'Admin', icon: ShieldCheck },
   { href: '/admin/raw', label: 'Raw', icon: Database },
+  { href: '/admin/campus-ambassador', label: 'Campus Ambassador', icon: Users },
   { href: '/manage/mentors', label: 'Mentors', icon: Headset },
   { href: '/analysis', label: 'Analysis', icon: BarChart3 },
   { href: '/manage/internship', label: 'Internship', icon: Award },
